@@ -139,14 +139,24 @@
                 }
 
                 // Update Firestore verified status
-                await db.collection('users').doc(user.uid).update({
-                    emailVerified: true,
-                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                }).catch(() => {}); // Ignore if doc doesn't exist
+                // Update Firestore verified status
+if (user.emailVerified) {
+  await db.collection('users').doc(user.uid).update({
+    emailVerified: true,
+    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(() => {}); // Ignore if doc doesn't exist
 
-                showMessage('Login successful! Redirecting...', 'success');
-                setTimeout(() => window.location.href = 'dashboard.html', 1000);
-
+  showMessage('Login successful! Redirecting...', 'success');
+  setTimeout(() => window.location.href = 'dashboard.html', 1000);
+  
+} else {
+  // User is NOT verified
+  showMessage('Please verify your email first. Check your inbox and spam folder.', 'error');
+  await firebase.auth().signOut(); // Log them out immediately
+  loginBtn.disabled = false;
+  loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+  return;
+}
             } catch (error) {
                 let msg = error.message;
                 if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
