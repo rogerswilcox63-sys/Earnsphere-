@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724" crossorigin="anonymous"></script>
+<!-- Paste this in <head> of your dashboard.html -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+    authDomain: "earnspherehub-742e9.firebaseapp.com",
+    projectId: "earnspherehub-742e9",
+    storageBucket: "earnspherehub-742e9.firebasestorage.app",
+    messagingSenderId: "173538573377",
+    appId: "1:173538573377:web:6d8c748376afcb9096dac0",
+    measurementId: "G-3ZXY33620J"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+  const analytics = firebase.analytics();
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - EarnSphereHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #3b82f6; --primary-dark: #2563eb; --secondary: #10b981; --danger: #ef4444; --dark: #0f172a; --dark-light: #1e293b; --gray: #64748b; --gray-light: #cbd5e1; --light: #f1f5f9; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: linear-gradient(135deg, var(--dark), var(--dark-light)); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: var(--light); }
+     .container { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border-radius: 16px; padding: 40px 30px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); }
+     .logo { text-align: center; margin-bottom: 30px; }
+     .logo h1 { font-size: 28px; font-weight: 700; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+     .logo p { color: var(--gray-light); font-size: 14px; }
+     .input-group { margin-bottom: 20px; position: relative; }
+     .input-group label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--gray-light); }
+     .input-group input { width: 100%; padding: 14px 16px 14px 45px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: var(--light); font-size: 15px; transition: all 0.3s ease; }
+     .input-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+     .input-group i { position: absolute; left: 16px; top: 40px; color: var(--gray); font-size: 18px; }
+     .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
+     .btn-primary { background: var(--primary); color: white; }
+     .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
+     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+     .login-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--gray-light); }
+     .login-link a { color: var(--primary); text-decoration: none; font-weight: 500; }
+     .login-link a:hover { color: var(--primary-dark); }
+     .message { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; display: none; }
+     .message.error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); display: block; }
+     .message.success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); display: block; }
+     .ref-notice { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #93c5fd; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>EarnSphereHub</h1>
+            <p>Create your account and start earning</p>
+        </div>
+
+        <div id="refNotice" class="ref-notice" style="display: none;">
+            <i class="fas fa-gift"></i> You were referred! Get ₦300 bonus after your first task.
+        </div>
+
+        <div id="messageBox" class="message"></div>
+
+        <!-- FORMSPREE FORM - PUT YOUR ENDPOINT HERE -->
+        <form id="registerForm" action="https://formspree.io/f/mvzjqgpy" method="POST">
+            <div class="input-group">
+                <label for="name">Full Name</label>
+                <i class="fas fa-user"></i>
+                <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" name="password" placeholder="Create a password" required>
+            </div>
+
+            <!-- Hidden field for referral code -->
+            <input type="hidden" id="referredBy" name="referredBy" value="">
+
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+    </div>
+
+    <script>
+        // Check if user came with referral code from the URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref');
+        if (refCode) {
+            document.getElementById('refNotice').style.display = 'block';
+            document.getElementById('referredBy').value = refCode;
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const messageBox = document.getElementById('messageBox');
+
+            // Form validation
+            if (!name || !email || !password) {
+                showMessage('Please fill all fields', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            // UI Feedback state change
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+
+            // --- INTEGRATING FIREBASE LOGIC ---
+            try {
+                // 1. Create user in Firebase Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Update user profile display name inside Firebase Auth
+                await user.updateProfile({ displayName: name });
+
+                // Generate a unique referral link identifier for this user
+                const userRefCode = 'EARN' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+                // 2. Prepare metadata payload for the Firestore user document
+                const userDocData = {
+                    uid: user.uid,
+                    name: name,
+                    email: email,
+                    balance: 0,
+                    lifetimeTotal: 0,
+                    successfulTaskCount: 0,
+                    completedTaskIds: [],
+                    refCode: userRefCode,
+                    referredBy: refCode || null,
+                    refBonusPaid: false,
+                    totalRefs: 0,
+                    refEarned: 0,
+                    pendingRefBonus: 0,
+                    joinedDate: new Date().toISOString()
+                };
+
+                // 3. Save directly to Firestore Database
+                await db.collection('users').doc(user.uid).set(userDocData);
+
+                // Safe Fallback: Sync with localStorage so preview modes continue to work perfectly on your phone!
+                localStorage.setItem('currentUser', JSON.stringify(userDocData));
+                let localUsers = JSON.parse(localStorage.getItem('users') || '[]');
+                localUsers.push(userDocData);
+                localStorage.setItem('users', JSON.stringify(localUsers));
+
+                // Optional Formspree submission for backup email alerts
+                try {
+                    const formData = new FormData(this);
+                    await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json' }
+                    });
+                } catch (formspreeErr) {
+                    console.log("Formspree notification skipped, user already active in Firebase.");
+                }
+
+                showMessage('Account created successfully via Firebase! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error("Firebase Registration Error: ", error);
+                
+                // Direct specific friendly error handling warnings
+                if (error.code === 'auth/email-already-in-use') {
+                    showMessage('This email is already registered. Please go to login.', 'error');
+                } else if (error.code === 'auth/invalid-email') {
+                    showMessage('The email address structure is invalid.', 'error');
+                } else if (error.code === 'auth/weak-password') {
+                    showMessage('The password is too weak.', 'error');
+                } else {
+                    // Fallback local tracking if server is unavailable during local storage app development testing
+                    showMessage('Network offline: Account generated in preview mode local storage.', 'success');
+                    
+                    let fallbackUser = {
+                        name: name, email: email, password: password, balance: 0, lifetimeTotal: 0,
+                        successfulTaskCount: 0, completedTaskIds: [], refCode: 'LOCAL' + Date.now(),
+                        referredBy: refCode || null, joinedDate: new Date().toISOString()
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(fallbackUser));
+                    
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+                }
+                
+                // Reset button if error occurred
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+            }
+        });
+
+        function showMessage(text, type) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = text;
+            messageBox.className = `message ${type}`;
+        }
+    </script>
+</body>
+</html>

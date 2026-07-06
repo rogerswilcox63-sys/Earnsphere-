@@ -1,0 +1,4 @@
+# EarnSphere Nigeria - ads.txt
+# Last updated: 2026-06-25
+
+google.com, pub-5803688718527724, DIRECT, f08c47fec0942fa0

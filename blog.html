@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnSphere Blog - Money Tips & Guides</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Copy the same navbar + footer CSS from dashboard.html */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height: 100vh; color: #f1f5f9; }
+        .navbar { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #3b82f6, #10b981); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a { text-decoration: none; color: #cbd5e1; padding: 0.5rem 1rem; border-radius: 0.5rem; }
+        .nav-links a:hover, .nav-links a.active { color: #3b82f6; background: rgba(59, 130, 246, 0.15); }
+        .blog-container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+        .section-title { font-size: 1.8rem; font-weight: 700; margin: 2rem 0 1.5rem; }
+        .post-card { background: rgba(30, 41, 59, 0.6); border-radius: 1rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 2rem; }
+        .post-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: #3b82f6; }
+        .post-date { font-size: 0.85rem; color: #94a3b8; margin-bottom: 1rem; }
+        .post-excerpt { color: #cbd5e1; line-height: 1.7; margin-bottom: 1rem; }
+        .read-more { color: #10b981; text-decoration: none; font-weight: 600; }
+        .read-more:hover { text-decoration: underline; }
+        .footer { background: rgba(15, 23, 42, 0.8); padding: 2rem; margin-top: 4rem; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo"><i class="fas fa-coins"></i> EarnSphere</div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="blog.html" class="active">Blog</a>
+            <a href="withdraw.html">Withdraw</a>
+            <a href="privacy.html">Privacy</a>
+        </div>
+    </div>
+
+    <div class="blog-container">
+        <h1 class="section-title"><i class="fas fa-newspaper"></i> EarnSphere Blog</h1>
+        
+        <div class="post-card">
+            <h2 class="post-title">5 Legit Ways to Make Extra Money Online in Nigeria 2026</h2>
+            <div class="post-date"><i class="fas fa-calendar"></i> June 25, 2026</div>
+            <p class="post-excerpt">Looking for side hustles that actually pay? We break down 5 proven methods Nigerians are using to earn online, from freelancing to micro-tasks. No investment needed to start...</p>
+            <a href="post-1.html" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="post-card">
+            <h2 class="post-title">How EarnSphere Rewards Work: Complete Guide</h2>
+            <div class="post-date"><i class="fas fa-calendar"></i> June 20, 2026</div>
+            <p class="post-excerpt">New to EarnSphere? Learn how our reward system works, how points convert to Naira, and tips to maximize your earnings. We also explain withdrawal timelines and requirements...</p>
+            <a href="post-2.html" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="post-card">
+            <h2 class="post-title">Saving Money in Nigeria: 7 Practical Tips That Work</h2>
+            <div class="post-date"><i class="fas fa-calendar"></i> June 15, 2026</div>
+            <p class="post-excerpt">Inflation is high, but you can still save. From cutting data costs to bulk buying strategies, here are 7 money-saving tips every Nigerian should know in 2026...</p>
+            <a href="post-3.html" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p><a href="privacy-policy.html" style="color: #3b82f6;">Privacy Policy</a> | <a href="about.html" style="color: #3b82f6;">About</a> | <a href="contact.html" style="color: #3b82f6;">Contact</a></p>
+        <p style="margin-top: 1rem; font-size: 0.75rem;">© 2026 EarnSphere. All rights reserved.</p>
+    </footer>
+</body>
+</html>
