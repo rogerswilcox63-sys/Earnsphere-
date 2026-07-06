@@ -112,102 +112,109 @@
     </div>
 
     <script>
-    const registerBtn = document.getElementById('registerBtn');
-    const messageBox = document.getElementById('messageBox');
+const registerBtn = document.getElementById('registerBtn');
+const messageBox = document.getElementById('messageBox');
+const verifyScreen = document.getElementById('verifyScreen');
+const registerForm = document.getElementById('registerForm');
+const userEmailSpan = document.getElementById('userEmail');
 
-    function showMessage(text, type) {
-        messageBox.textContent = text;
-        messageBox.className = `message ${type}`;
-        messageBox.style.display = 'block';
-        if (type === 'success') {
-            setTimeout(() => messageBox.style.display = 'none', 4000);
-        }
+function showMessage(text, type) {
+    messageBox.textContent = text;
+    messageBox.className = `message ${type}`;
+    messageBox.style.display = 'block';
+    if (type === 'success') {
+        setTimeout(() => messageBox.style.display = 'none', 4000);
+    }
+}
+
+// Don't let verified users sit on register page
+auth.onAuthStateChanged(user => {
+    if (user && user.emailVerified) {
+        window.location.href = 'dashboard.html';
+    }
+});
+
+registerBtn.addEventListener('click', async () => {
+    const name = document.getElementById('displayName').value.trim(); // FIXED ID
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    
+    messageBox.style.display = 'none';
+    
+    // Basic validation - REMOVED confirmPassword check
+    if (!name || !email || !password) {
+        showMessage('Please fill all fields', 'error');
+        return;
+    }
+    if (password.length < 6) {
+        showMessage('Password must be at least 6 characters', 'error');
+        return;
     }
 
-    // Don't let verified users sit on register page
-    auth.onAuthStateChanged(user => {
-        if (user && user.emailVerified) {
+    registerBtn.disabled = true;
+    registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+
+    try {
+        // 1. Create the user
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        // 2. Update display name
+        await user.updateProfile({ displayName: name });
+
+        // 3. Send verification email - THIS WILL NOW ACTUALLY RUN
+        await user.sendEmailVerification();
+        console.log('Verification email sent to:', user.email);
+
+        // 4. Save user data to Firestore
+        await db.collection('users').doc(user.uid).set({
+            uid: user.uid,
+            name: name,
+            email: email,
+            emailVerified: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            balance: 0
+        });
+
+        // 5. Show verify screen instead of signing out
+        registerForm.style.display = 'none';
+        verifyScreen.style.display = 'block';
+        userEmailSpan.textContent = email;
+        showMessage('Account created! Check your email to verify.', 'success');
+
+    } catch (error) {
+        let msg = error.message;
+        if (error.code === 'auth/email-already-in-use') msg = 'This email is already registered. Try logging in.';
+        if (error.code === 'auth/invalid-email') msg = 'Invalid email address.';
+        if (error.code === 'auth/weak-password') msg = 'Password is too weak. Use at least 6 characters.';
+        showMessage(msg, 'error');
+    } finally {
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+    }
+});
+
+// Resend email button
+document.getElementById('resendBtn').addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if (user) {
+        await user.sendEmailVerification();
+        showMessage('Verification email resent!', 'success');
+    }
+});
+
+// Check if verified button
+document.getElementById('checkBtn').addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if (user) {
+        await user.reload(); // Refresh user data
+        if (user.emailVerified) {
             window.location.href = 'dashboard.html';
+        } else {
+            showMessage('Email not verified yet. Check your inbox and spam.', 'error');
         }
-    });
-
-    registerBtn.addEventListener('click', async () => {
-        const name = document.getElementById('name').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        
-        messageBox.style.display = 'none';
-        
-        // Basic validation
-        if (!name || !email || !password || !confirmPassword) {
-            showMessage('Please fill all fields', 'error');
-            return;
-        }
-        if (password !== confirmPassword) {
-            showMessage('Passwords do not match', 'error');
-            return;
-        }
-        if (password.length < 6) {
-            showMessage('Password must be at least 6 characters', 'error');
-            return;
-        }
-
-        registerBtn.disabled = true;
-        registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
-
-        try {
-            // 1. Create the user
-            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-            const user = userCredential.user;
-
-            // 2. Update display name
-            await user.updateProfile({ displayName: name });
-
-            // 3. Send verification email - THIS IS CRITICAL
-            await user.sendEmailVerification();
-            console.log('Verification email sent to:', user.email);
-
-            // 4. Save user data to Firestore
-            await db.collection('users').doc(user.uid).set({
-                uid: user.uid,
-                name: name,
-                email: email,
-                emailVerified: false, // Starts as false
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                balance: 0
-            });
-
-            // 5. Sign them out so they can't access dashboard yet
-            await auth.signOut();
-
-            showMessage('Account created! Check your email to verify your account before logging in.', 'success');
-            
-            // Clear form
-            document.getElementById('name').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('confirmPassword').value = '';
-            
-            // Redirect to login after 3 seconds
-            setTimeout(() => window.location.href = 'login.html', 3000);
-
-        } catch (error) {
-            let msg = error.message;
-            if (error.code === 'auth/email-already-in-use') msg = 'This email is already registered. Try logging in.';
-            if (error.code === 'auth/invalid-email') msg = 'Invalid email address.';
-            if (error.code === 'auth/weak-password') msg = 'Password is too weak. Use at least 6 characters.';
-            showMessage(msg, 'error');
-        } finally {
-            registerBtn.disabled = false;
-            registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
-        }
-    });
-
-    // Allow Enter key to submit
-    document.getElementById('confirmPassword').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') registerBtn.click();
-    });
+    }
+});
 </script>
 </body>
 </html>
