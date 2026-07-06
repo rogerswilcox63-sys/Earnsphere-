@@ -238,6 +238,16 @@ let currentUser = null;
 let userData = null;
 const COOLDOWN = 60 * 60 * 1000; // 1 hour (kept for reference, current system uses daily/hourly rotation)
 
+// === PREVIEW MODE DETECTION (forces demo data on file://, localhost, Acode etc.) ===
+const isPreviewMode = 
+  location.protocol === 'file:' || 
+  location.hostname === 'localhost' || 
+  location.hostname === '127.0.0.1' || 
+  location.pathname.includes('/storage/emulated/') ||
+  location.search.includes('preview=true');
+
+console.log("%c[Mode] " + (isPreviewMode ? "LOCAL PREVIEW (demo data)" : "LIVE FIREBASE"), "color:#3b82f6");
+
 // 3. PREVIEW / LOCAL MODE DATA (for file:// or testing)
 function loadLocalPreviewData() {
   currentUser = { uid: "preview_user", email: "preview@earnsphere.com" };
@@ -273,9 +283,9 @@ try {
 function setupAuthHandler() {
   const userNameEl = document.getElementById('userName');
 
-  if (!auth || !isFirebaseWorking) {
-    // Preview / local file mode
-    console.warn("Running in preview mode (no Firebase auth)");
+  if (isPreviewMode || !auth || !isFirebaseWorking) {
+    // Force preview on local file:// or dev — this is why surveys/social were missing before
+    console.warn("%c[Preview Mode] Forcing demo data so surveys & social tasks appear", "color:#f59e0b");
     loadLocalPreviewData();
     return;
   }
@@ -764,4 +774,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 </body>
-</html
+</html>
