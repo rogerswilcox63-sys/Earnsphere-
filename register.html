@@ -172,11 +172,6 @@
       border-color: #1a73e8;
     }
 
-    .btn-google img {
-      width: 20px;
-      height: 20px;
-    }
-
     .switch-link {
       margin-top: 1.5rem;
       font-size: 0.9rem;
@@ -214,6 +209,16 @@
       padding: 2px 10px;
       border-radius: 12px;
       margin-left: 6px;
+    }
+
+    .valid-code {
+      border-color: #10b981 !important;
+      background: #f0fdf4 !important;
+    }
+
+    .invalid-code {
+      border-color: #ef4444 !important;
+      background: #fef2f2 !important;
     }
   </style>
 </head>
@@ -285,7 +290,11 @@
       setDoc,
       getDoc,
       updateDoc,
-      increment
+      increment,
+      collection,
+      query,
+      where,
+      getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // ─── Firebase Config ──────────────────────────────────────────────────
@@ -325,16 +334,81 @@
       appliedReferralCode = urlRef;
       refCodeDisplay.textContent = urlRef;
       registerReferral.style.borderColor = '#10b981';
+      registerReferral.style.background = '#f0fdf4';
     } else {
       refCodeDisplay.textContent = 'None';
     }
 
-    // ─── 2. Generate Referral Code ──────────────────────────────────────
+    // ─── 2. Validate Referral Code (IMPROVED) ──────────────────────────
+    async function validateReferralCode(code) {
+      if (!code || code.trim() === '') return null;
+      const trimmed = code.trim().toUpperCase();
+      
+      try {
+        // Method 1: Check in referralCodes collection
+        const refDoc = await getDoc(doc(db, 'referralCodes', trimmed));
+        if (refDoc.exists()) {
+          return trimmed;
+        }
+
+        // Method 2: Check in users collection (fallback)
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('referralCode', '==', trimmed));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          // Found the code in users collection - store it in referralCodes for future
+          const userDoc = querySnapshot.docs[0];
+          const uid = userDoc.id;
+          await setDoc(doc(db, 'referralCodes', trimmed), {
+            uid: uid,
+            createdAt: new Date().toISOString()
+          });
+          return trimmed;
+        }
+
+        return null;
+      } catch (err) {
+        console.error('Validation error:', err);
+        return null;
+      }
+    }
+
+    // ─── 3. Real-time referral code validation on input ──────────────────
+    let validationTimeout = null;
+    registerReferral.addEventListener('input', async () => {
+      clearTimeout(validationTimeout);
+      const code = registerReferral.value.trim().toUpperCase();
+      
+      if (!code) {
+        registerReferral.className = '';
+        return;
+      }
+
+      validationTimeout = setTimeout(async () => {
+        const isValid = await validateReferralCode(code);
+        if (isValid) {
+          registerReferral.className = 'valid-code';
+          appliedReferralCode = code;
+          refCodeDisplay.textContent = code;
+          registerError.style.color = '#10b981';
+          registerError.textContent = '✅ Valid referral code! You\'ll both get ₦300.';
+        } else {
+          registerReferral.className = 'invalid-code';
+          appliedReferralCode = null;
+          refCodeDisplay.textContent = 'None';
+          registerError.style.color = '#ef4444';
+          registerError.textContent = '⚠️ Invalid referral code';
+        }
+      }, 500);
+    });
+
+    // ─── 4. Generate Referral Code ──────────────────────────────────────
     function generateReferralCode(uid) {
       return 'ESH-' + uid.slice(0, 6).toUpperCase() + Math.floor(Math.random() * 10000);
     }
 
-    // ─── 3. Create User Document ──────────────────────────────────────────
+    // ─── 5. Create User Document ──────────────────────────────────────────
     async function createUserDocument(uid, email, referralCode) {
       const userData = {
         email: email || '',
@@ -359,14 +433,34 @@
       return userData;
     }
 
-    // ─── 4. Reward Referrer ──────────────────────────────────────────────
+    // ─── 6. Reward Referrer ──────────────────────────────────────────────
     async function rewardReferrer(referralCode) {
       if (!referralCode) return false;
 
       try {
-        const refDoc = await getDoc(doc(db, 'referralCodes', referralCode));
+        // First check referralCodes collection
+        let refDoc = await getDoc(doc(db, 'referralCodes', referralCode));
+        let referrerUid = null;
+
         if (refDoc.exists()) {
-          const referrerUid = refDoc.data().uid;
+          referrerUid = refDoc.data().uid;
+        } else {
+          // Fallback: check users collection
+          const usersRef = collection(db, 'users');
+          const q = query(usersRef, where('referralCode', '==', referralCode));
+          const querySnapshot = await getDocs(q);
+          
+          if (!querySnapshot.empty) {
+            referrerUid = querySnapshot.docs[0].id;
+            // Store in referralCodes for future
+            await setDoc(doc(db, 'referralCodes', referralCode), {
+              uid: referrerUid,
+              createdAt: new Date().toISOString()
+            });
+          }
+        }
+
+        if (referrerUid) {
           const referrerRef = doc(db, 'users', referrerUid);
           await updateDoc(referrerRef, {
             totalReferrals: increment(1),
@@ -383,23 +477,7 @@
       }
     }
 
-    // ─── 5. Validate Referral Code ───────────────────────────────────────
-    async function validateReferralCode(code) {
-      if (!code || code.trim() === '') return null;
-      const trimmed = code.trim().toUpperCase();
-      
-      try {
-        const refDoc = await getDoc(doc(db, 'referralCodes', trimmed));
-        if (refDoc.exists()) {
-          return trimmed;
-        }
-        return null;
-      } catch {
-        return null;
-      }
-    }
-
-    // ─── 6. Handle Registration ──────────────────────────────────────────
+    // ─── 7. Handle Registration ──────────────────────────────────────────
     async function handleRegister(email, password, referralCode) {
       const btn = registerBtn;
       btn.disabled = true;
@@ -454,7 +532,7 @@
       }
     }
 
-    // ─── 7. Google Auth ──────────────────────────────────────────────────
+    // ─── 8. Google Auth ──────────────────────────────────────────────────
     async function handleGoogleSignUp() {
       try {
         const result = await signInWithPopup(auth, provider);
@@ -486,7 +564,7 @@
       }
     }
 
-    // ─── 8. Event Listeners ──────────────────────────────────────────────
+    // ─── 9. Event Listeners ──────────────────────────────────────────────
 
     // Register button
     registerBtn.addEventListener('click', () => {
@@ -516,7 +594,7 @@
     // Google button
     document.getElementById('googleRegisterBtn').addEventListener('click', handleGoogleSignUp);
 
-    // ─── 9. Auto-redirect if already logged in ──────────────────────────
+    // ─── 10. Auto-redirect if already logged in ──────────────────────────
     onAuthStateChanged(auth, (user) => {
       if (user) {
         getDoc(doc(db, 'users', user.uid)).then(snap => {
@@ -527,7 +605,7 @@
       }
     });
 
-    console.log('%c✅ Register Page with Referral System', 'color:#10b981');
+    console.log('%c✅ Register Page with Improved Referral Validation', 'color:#10b981');
   </script>
 </body>
 </html>
