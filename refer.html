@@ -1,282 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Refer & Earn - EarnSphereHub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --primary: #3b82f6;
-      --primary-dark: #2563eb;
-      --secondary: #10b981;
-      --dark: #0f172a;
-      --dark-light: #1e293b;
-      --gray-light: #cbd5e1;
-      --light: #f1f5f9;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-    body {
-      background: linear-gradient(135deg, var(--dark), var(--dark-light));
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      color: var(--light);
-    }
-    .container {
-      width: 100%;
-      max-width: 450px;
-      background: rgba(30, 41, 59, 0.8);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 40px 30px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .logo { text-align: center; margin-bottom: 30px; }
-    .logo h1 {
-      font-size: 28px;
-      font-weight: 700;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 5px;
-    }
-    .logo p { color: var(--gray-light); font-size: 14px; }
-    .amount { font-size: 48px; font-weight: 700; color: var(--secondary); text-align: center; margin: 16px 0; }
-    .amount span { font-size: 18px; color: var(--gray-light); }
-    .refer-box {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-      margin: 20px 0;
-    }
-    .refer-code {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      margin: 8px 0;
-      color: var(--primary);
-    }
-    .refer-link {
-      font-size: 12px;
-      color: var(--gray-light);
-      word-break: break-all;
-      margin-bottom: 12px;
-      background: rgba(15, 23, 42, 0.8);
-      padding: 8px;
-      border-radius: 6px;
-    }
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
-    .btn-whatsapp { background: #25D366; color: white; }
-    .btn-whatsapp:hover { background: #20ba5a; transform: translateY(-2px); }
-    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
-    .stat {
-      background: rgba(15, 23, 42, 0.6);
-      padding: 16px;
-      border-radius: 10px;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .stat-num { font-size: 24px; font-weight: 700; color: var(--light); }
-    .stat-label { font-size: 12px; color: var(--gray-light); margin-top: 4px; }
-    .steps { margin-top: 24px; }
-    .step { display: flex; gap: 12px; margin-bottom: 16px; }
-    .step-num {
-      background: var(--primary);
-      color: white;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      flex-shrink: 0;
-      font-size: 14px;
-    }
-    .step-text strong { color: var(--light); font-size: 15px; }
-    .step-text span { color: var(--gray-light); font-size: 13px; }
-    .back-link {
-      display: inline-block;
-      margin-bottom: 20px;
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 14px;
-    }
-    .note {
-      background: rgba(251, 191, 36, 0.15);
-      border: 1px solid rgba(251, 191, 36, 0.3);
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 20px;
-      font-size: 13px;
-      color: #fcd34d;
-    }
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--dark-light);
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 100;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .toast.show { opacity: 1; }
-    .loading { text-align: center; color: var(--gray-light); padding: 20px 0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refer & Earn - EarnSphereHub</title>
+<style>
+  body { background: #0f172a; color: white; font-family: Arial; text-align: center; padding: 20px; }
+  .card { background: #1e293b; padding: 20px; border-radius: 12px; margin: 15px 0; }
+  .big { font-size: 36px; color: #22c55e; font-weight: bold; }
+  .code { font-size: 22px; color: #3b82f6; font-weight: bold; letter-spacing: 2px; }
+  button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; margin: 8px 0; cursor: pointer; }
+  .blue { background: #3b82f6; color: white; }
+  .green { background: #22c55e; color: white; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
 
-    <div class="logo">
-      <h1>Refer & Earn</h1>
-      <p>Invite friends, get ₦300 per Friend</p>
-    </div>
+<a href="dashboard.html" style="color:#3b82f6; text-decoration:none;">← Back to Dashboard</a>
 
-    <div class="amount">₦300<span>/per friend</span></div>
+<h1 style="color:#3b82f6;">Refer & Earn</h1>
+<p>Invite friends, get ₦300 per Friend</p>
+<div class="big">₦300<span style="font-size:16px; color:white;">/per friend</span></div>
 
-    <div class="refer-box">
-      <p style="font-size: 13px; color: var(--gray-light); margin-bottom: 4px;">Your Referral Code</p>
-      <div class="refer-code" id="refCode">LOADING...</div>
-      <div class="refer-link" id="refLink">Loading link...</div>
-    </div>
+<div class="card">
+  <p>Your Referral Code</p>
+  <div id="refCode" class="code">LOADING...</div>
+  <p id="refLink" style="font-size:12px; opacity:0.7;">Loading link...</p>
+</div>
 
-    <button class="btn btn-primary" onclick="copyLink()"><i class="fas fa-copy"></i> Copy Referral Link</button>
-    <button class="btn btn-whatsapp" onclick="shareWhatsApp()"><i class="fab fa-whatsapp"></i> Share on WhatsApp</button>
+<button class="blue" onclick="copyLink()">📋 Copy Referral Link</button>
+<button class="green" onclick="shareWhatsApp()">💬 Share on WhatsApp</button>
 
-    <div class="stats">
-      <div class="stat"><div class="stat-num" id="totalRefs">0</div><div class="stat-label">Total Referrals</div></div>
-      <div class="stat"><div class="stat-num" id="totalEarned">₦0</div><div class="stat-label">Total Earned</div></div>
-    </div>
+<div class="grid">
+  <div class="card"><div id="totalRef">0</div><p>Total Referrals</p></div>
+  <div class="card"><div id="totalEarned">₦0</div><p>Total Earned</p></div>
+  <div class="card"><div id="wallet">₦0</div><p>Wallet Balance</p></div>
+  <div class="card"><div id="pending">₦0</div><p>Pending Bonus</p></div>
+</div>
 
-    <div class="stats">
-      <div class="stat"><div class="stat-num" id="currentBalance">₦0</div><div class="stat-label">Wallet Balance</div></div>
-      <div class="stat"><div class="stat-num" id="pendingBonus">₦0</div><div class="stat-label">Pending Bonus</div></div>
-    </div>
+<h3>1. Share your link</h3>
 
-    <div class="steps">
-      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Share your link</strong><br><span>Post on status, groups, or DM friends</span></div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Friend signs up</strong><br><span>They register using your code</span></div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>You get ₦300</strong><br><span>After they complete their first task</span></div></div>
-    </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    <div class="note"><i class="fas fa-info-circle"></i> <strong>Note:</strong> You earn ₦300 when your friend completes their first task. No fake referrals.</div>
-  </div>
+  // TODO: PASTE YOUR FIREBASE CONFIG HERE
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+      authDomain: "earnspherehub-742e9.firebaseapp.com",
+      projectId: "earnspherehub-742e9",
+  };
 
-  <div class="toast" id="toast">Link copied!</div>
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth();
+  const db = getFirestore();
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+  let userData = {};
+  let referralLink = "";
 
-    const firebaseConfig = {
-      // paste your Firebase config here
-    };
+  function generateCode(uid) {
+    return "ESH-" + uid.slice(0,6).toUpperCase() + Math.floor(Math.random()*1000);
+  }
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return window.location.href = "login.html";
+    
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
 
-    const BASE_URL = "http://earnspherehub.name.ng/";
-    const REF_PAGE = "register.html?ref=";
-
-    let fullRefLink = "";
-
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.innerText = msg;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 2000);
+    if (snap.exists()) {
+      userData = snap.data();
+      // Create code if it doesn't exist
+      if (!userData.referralCode) {
+        const newCode = generateCode(user.uid);
+        await updateDoc(userRef, { referralCode: newCode, totalReferrals: 0 });
+        userData.referralCode = newCode;
+      }
+    } else {
+      // First time user doc
+      const newCode = generateCode(user.uid);
+      await setDoc(userRef, { 
+        email: user.email, 
+        referralCode: newCode, 
+        totalReferrals: 0, 
+        wallet: 0,
+        totalEarned: 0,
+        pendingBonus: 0
+      });
+      userData = { referralCode: newCode };
     }
 
-    window.copyLink = async function () {
-      if (!fullRefLink) return showToast("Referral link not ready yet");
-      await navigator.clipboard.writeText(fullRefLink);
-      showToast("Referral link copied!");
-    };
+    referralLink = `https://earnspherehub.name.ng/register.html?ref=${userData.referralCode}`;
+    
+    document.getElementById("refCode").innerText = userData.referralCode;
+    document.getElementById("refLink").innerText = referralLink;
+    document.getElementById("totalRef").innerText = userData.totalReferrals || 0;
+    document.getElementById("totalEarned").innerText = `₦${userData.totalEarned || 0}`;
+    document.getElementById("wallet").innerText = `₦${userData.wallet || 0}`;
+    document.getElementById("pending").innerText = `₦${userData.pendingBonus || 0}`;
+  });
 
-    window.shareWhatsApp = function () {
-      if (!fullRefLink) return;
-      const text = `Guy I dey use EarnSphereHub make money daily 💰
+  window.copyLink = () => {
+    navigator.clipboard.writeText(referralLink);
+    alert("Referral link copied!");
+  }
 
-You go get ₦300 free if you join with my link:
-${fullRefLink}
+  window.shareWhatsApp = () => {
+    const msg = `Join EarnSphereHub and we both get ₦300! Use my link: ${referralLink}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  }
 
-We both go cash out after your first task. Legit!`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
-
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
-
-      let userData;
-
-      if (!snap.exists()) {
-        const refCode = "EARN" + Math.random().toString(36).substring(2, 8).toUpperCase();
-        userData = {
-          uid: user.uid,
-          email: user.email || "",
-          refCode,
-          totalRefs: 0,
-          refEarned: 0,
-          walletBalance: 0,
-          pendingRefBonus: 0
-        };
-        await setDoc(userRef, userData);
-      } else {
-        userData = snap.data();
-        if (!userData.refCode) {
-          userData.refCode = "EARN" + Math.random().toString(36).substring(2, 8).toUpperCase();
-          await updateDoc(userRef, { refCode: userData.refCode });
-        }
-      }
-
-      fullRefLink = BASE_URL + REF_PAGE + userData.refCode;
-
-      document.getElementById("refCode").innerText = userData.refCode;
-      document.getElementById("refLink").innerText = fullRefLink;
-      document.getElementById("totalRefs").innerText = userData.totalRefs || 0;
-      document.getElementById("totalEarned").innerText = "₦" + (userData.refEarned || 0).toLocaleString();
-      document.getElementById("currentBalance").innerText = "₦" + (userData.walletBalance || 0).toLocaleString();
-      document.getElementById("pendingBonus").innerText = "₦" + (userData.pendingRefBonus || 0).toLocaleString();
-    });
-  </script>
+</script>
 </body>
 </html>
