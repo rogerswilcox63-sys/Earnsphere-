@@ -79,6 +79,9 @@
       background: white;
     }
 
+    .forgot-link a:hover {
+      text-decoration: underline;
+    }
     .btn-primary {
       width: 100%;
       padding: 0.95rem;
@@ -205,7 +208,9 @@
       <div class="input-group">
         <label>Password</label>
         <input type="password" id="loginPassword" placeholder="Enter password" />
-        <a href="#" class="forgot-link">Forgot password?</a>
+      </div>
+      <div class="forgot-link">
+          <a href="reset-password.html">Forgot password?</a>
       </div>
       <div id="loginError" class="error-msg"></div>
       <button class="btn-primary" id="loginBtn">Sign In</button>
