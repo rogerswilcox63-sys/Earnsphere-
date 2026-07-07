@@ -1,170 +1,375 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724" crossorigin="anonymous"></script>
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
-
-<script>
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-    authDomain: "earnspherehub-742e9.firebaseapp.com",
-    projectId: "earnspherehub-742e9",
-    storageBucket: "earnspherehub-742e9.firebasestorage.app",
-    messagingSenderId: "173538573377",
-    appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-    measurementId: "G-3ZXY33620J"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const storage = firebase.storage();
-</script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - EarnSphereHub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --primary: #3b82f6; --primary-dark: #2563eb; --secondary: #10b981; --danger: #ef4444; --dark: #0f172a; --dark-light: #1e293b; --gray: #64748b; --gray-light: #cbd5e1; --light: #f1f5f9; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-        body { background: linear-gradient(135deg, var(--dark), var(--dark-light)); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: var(--light); }
-        .container { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border-radius: 16px; padding: 40px 30px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { font-size: 28px; font-weight: 700; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
-        .logo p { color: var(--gray-light); font-size: 14px; }
-        .input-group { margin-bottom: 20px; position: relative; }
-        .input-group label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--gray-light); }
-        .input-group input { width: 100%; padding: 14px 16px 14px 45px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: var(--light); font-size: 15px; transition: all 0.3s ease; }
-        .input-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-        .input-group i { position: absolute; left: 16px; top: 40px; color: var(--gray); font-size: 18px; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .login-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--gray-light); }
-        .login-link a { color: var(--primary); text-decoration: none; font-weight: 500; }
-        .login-link a:hover { color: var(--primary-dark); }
-        .message { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; display: none; }
-        .message.error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); display: block; }
-        .message.success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); display: block; }
-        .forgot-pass { text-align: right; margin-top: -10px; margin-bottom: 20px; }
-        .forgot-pass a { color: var(--gray-light); font-size: 13px; text-decoration: none; }
-        .forgot-pass a:hover { color: var(--primary); }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="logo">
-            <h1>EarnSphereHub</h1>
-            <p>Welcome back</p>
-        </div>
-
-        <div id="messageBox" class="message"></div>
-
-        <div id="loginForm">
-            <div class="input-group">
-                <label for="email">Email Address</label>
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="Enter your email" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Enter your password" required>
-            </div>
-            <div class="forgot-pass">
-                <a href="reset-password.html">Forgot password?</a>
-            </div>
-            <button class="btn btn-primary" id="loginBtn">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </button>
-        </div>
-
-        <div class="login-link">
-            Don't have an account? <a href="register.html">Register</a>
-        </div>
-    </div>
-
-    <script>
-    const loginBtn = document.getElementById('loginBtn');
-    const messageBox = document.getElementById('messageBox');
-
-    function showMessage(text, type) {
-        messageBox.textContent = text;
-        messageBox.className = `message ${type}`;
-        messageBox.style.display = 'block';
-        if (type === 'success') {
-            setTimeout(() => messageBox.style.display = 'none', 3000);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - EarnSphereHub</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a73e8, #25D366);
+      margin: 0;
+      padding: 2rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
 
-    // Auto-redirect if already logged in AND verified
-    auth.onAuthStateChanged(user => {
-        if (user && user.emailVerified) {
-            window.location.href = 'dashboard.html';
-        }
+    .login-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    .login-box h2 {
+      color: #1a73e8;
+      margin-bottom: 0.5rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+      background: #f1f3f4;
+      padding: 0.3rem;
+      border-radius: 10px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 0.7rem;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .tab.active {
+      background: white;
+      color: #1a73e8;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.9rem;
+      margin: 0.6rem 0;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 10px;
+      background: #1a73e8;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 0.8rem;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #1558b0;
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #recaptcha-container-login {
+      margin: 1rem 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .hidden { display: none; }
+
+    .register-link {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .register-link a {
+      color: #1a73e8;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <h2>Welcome Back</h2>
+    <p>Login to EarnSphereHub</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="email-login-tab">Email</button>
+      <button class="tab" id="phone-login-tab">Phone</button>
+    </div>
+
+    <!-- EMAIL LOGIN -->
+    <div id="email-login-form">
+      <input type="email" id="login-email" placeholder="Enter your email" required>
+      <input type="password" id="login-password" placeholder="Enter password" required>
+      <button id="email-login-btn">Login with Email</button>
+
+      <!-- Forgot Password -->
+      <div style="margin-top: 0.8rem; text-align: right;">
+        <a href="#" id="forgot-password-link" style="font-size: 0.85rem; color: #1a73e8; text-decoration: none;">Forgot Password?</a>
+      </div>
+
+      <!-- Password Reset Section (hidden by default) -->
+      <div id="reset-password-section" class="hidden" style="margin-top: 1rem; text-align: left;">
+        <input type="email" id="reset-email" placeholder="Enter your email to reset password">
+        <button id="send-reset-btn" style="margin-top: 0.5rem;">Send Password Reset Link</button>
+        <p style="font-size: 0.75rem; color: #666; margin-top: 0.4rem;">
+          Check your email (including spam) for the reset link.
+        </p>
+      </div>
+    </div>
+
+    <!-- PHONE LOGIN -->
+    <div id="phone-login-form" class="hidden">
+      <input type="tel" id="login-phone" placeholder="+2348012345678" required>
+      <div id="recaptcha-container-login"></div>
+      <button id="send-login-code">Send OTP</button>
+
+      <div id="otp-login-section" class="hidden">
+        <input type="text" id="login-otp" placeholder="Enter 6-digit code" maxlength="6">
+        <button id="verify-login-code">Login</button>
+      </div>
+    </div>
+
+    <div class="register-link">
+      Don't have an account? <a href="register.html">Register</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      RecaptchaVerifier, 
+      signInWithPhoneNumber 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // === YOUR REAL FIREBASE CONFIG (same as Dashboard & Register) ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+      authDomain: "earnspherehub-742e9.firebaseapp.com",
+      projectId: "earnspherehub-742e9",
+      storageBucket: "earnspherehub-742e9.firebasestorage.app",
+      messagingSenderId: "173538573377",
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    let loginConfirmationResult = null;
+    let recaptchaVerifierLogin = null;
+
+    // Tab switching
+    const emailTab = document.getElementById('email-login-tab');
+    const phoneTab = document.getElementById('phone-login-tab');
+    const emailForm = document.getElementById('email-login-form');
+    const phoneForm = document.getElementById('phone-login-form');
+
+    emailTab.addEventListener('click', () => {
+      emailTab.classList.add('active');
+      phoneTab.classList.remove('active');
+      emailForm.classList.remove('hidden');
+      phoneForm.classList.add('hidden');
     });
 
-    loginBtn.addEventListener('click', async () => {
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
+    phoneTab.addEventListener('click', () => {
+      phoneTab.classList.add('active');
+      emailTab.classList.remove('active');
+      phoneForm.classList.remove('hidden');
+      emailForm.classList.add('hidden');
+
+      // Initialize reCAPTCHA only when phone tab is opened
+      if (!recaptchaVerifierLogin) {
+        initLoginRecaptcha();
+      }
+    });
+
+    function initLoginRecaptcha() {
+      const container = document.getElementById('recaptcha-container-login');
+      if (!container) return;
+
+      recaptchaVerifierLogin = new RecaptchaVerifier(auth, 'recaptcha-container-login', {
+        size: 'normal',
+        callback: () => console.log('reCAPTCHA solved')
+      });
+    }
+
+    // === EMAIL LOGIN ===
+    document.getElementById('email-login-btn').addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('email-login-btn');
+
+      if (!email || !password) {
+        alert('Please enter both email and password');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Logging in...';
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        btn.textContent = 'Login successful!';
         
-        messageBox.style.display = 'none';
-        if (!email || !password) {
-            showMessage('Please fill all fields', 'error');
-            return;
-        }
+        // Dashboard will handle email verification check automatically
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 800);
 
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-
-        try {
-            const userCredential = await auth.signInWithEmailAndPassword(email, password);
-            const user = userCredential.user;
-
-            console.log('Email verified status:', user.emailVerified); // For debugging
-
-            // THIS IS THE KEY CHECK
-            if (!user.emailVerified) {
-                showMessage('Your email is not verified. Check your inbox and spam folder.', 'error');
-                await auth.signOut(); // Log them out immediately
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-                return;
-            }
-
-            // Only runs if email IS verified
-            await db.collection('users').doc(user.uid).update({
-                emailVerified: true,
-                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-            }).catch(() => {}); // Ignore if doc doesn't exist
-
-            showMessage('Login successful! Redirecting...', 'success');
-            setTimeout(() => window.location.href = 'dashboard.html', 1000);
-
-        } catch (error) {
-            let msg = error.message;
-            if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
-            if (error.code === 'auth/wrong-password') msg = 'Incorrect password.';
-            if (error.code === 'auth/invalid-email') msg = 'Invalid email address.';
-            if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Try again later.';
-            showMessage(msg, 'error');
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-        }
+      } catch (error) {
+        console.error(error);
+        alert(error.message);
+        btn.disabled = false;
+        btn.textContent = 'Login with Email';
+      }
     });
 
-    // Allow Enter key to submit
-    document.getElementById('password').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') loginBtn.click();
+    // === PHONE LOGIN ===
+    document.getElementById('send-login-code').addEventListener('click', async () => {
+      const phoneNumber = document.getElementById('login-phone').value.trim();
+      const btn = document.getElementById('send-login-code');
+
+      if (!phoneNumber.startsWith('+')) {
+        alert('Please use international format, e.g. +2348012345678');
+        return;
+      }
+
+      if (!recaptchaVerifierLogin) {
+        initLoginRecaptcha();
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending OTP...';
+
+      try {
+        loginConfirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifierLogin);
+        
+        document.getElementById('otp-login-section').classList.remove('hidden');
+        btn.style.display = 'none';
+        alert('OTP sent to ' + phoneNumber);
+
+      } catch (error) {
+        console.error(error);
+        alert('Error: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = 'Send OTP';
+
+        // Reset reCAPTCHA on failure
+        if (recaptchaVerifierLogin) {
+          recaptchaVerifierLogin.clear();
+          recaptchaVerifierLogin = null;
+        }
+      }
     });
-</script>
+
+    document.getElementById('verify-login-code').addEventListener('click', async () => {
+      const code = document.getElementById('login-otp').value.trim();
+      const btn = document.getElementById('verify-login-code');
+
+      if (!code || code.length !== 6) {
+        alert('Please enter the 6-digit code');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      try {
+        await loginConfirmationResult.confirm(code);
+        btn.textContent = 'Login successful!';
+        
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 800);
+
+      } catch (error) {
+        console.error(error);
+        alert('Invalid OTP. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Login';
+      }
+    });
+
+    // === FORGOT PASSWORD ===
+    const forgotLink = document.getElementById('forgot-password-link');
+    const resetSection = document.getElementById('reset-password-section');
+    const sendResetBtn = document.getElementById('send-reset-btn');
+
+    forgotLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      resetSection.classList.toggle('hidden');
+      
+      // Pre-fill email if user already typed one
+      const loginEmail = document.getElementById('login-email').value;
+      if (loginEmail) {
+        document.getElementById('reset-email').value = loginEmail;
+      }
+    });
+
+    sendResetBtn.addEventListener('click', async () => {
+      const resetEmail = document.getElementById('reset-email').value.trim();
+      if (!resetEmail) {
+        alert('Please enter your email address');
+        return;
+      }
+
+      sendResetBtn.disabled = true;
+      sendResetBtn.textContent = 'Sending...';
+
+      try {
+        // Import sendPasswordResetEmail dynamically or add to top import
+        const { sendPasswordResetEmail } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+        
+        await sendPasswordResetEmail(auth, resetEmail);
+        
+        sendResetBtn.textContent = 'Link Sent!';
+        alert('Password reset link has been sent to your email. Please check your inbox (and spam folder).');
+        
+        // Hide reset section after success
+        setTimeout(() => {
+          resetSection.classList.add('hidden');
+          sendResetBtn.disabled = false;
+          sendResetBtn.textContent = 'Send Password Reset Link';
+        }, 2000);
+
+      } catch (error) {
+        console.error(error);
+        alert('Error: ' + error.message);
+        sendResetBtn.disabled = false;
+        sendResetBtn.textContent = 'Send Password Reset Link';
+      }
+    });
+
+    console.log('%c[Login Page] Fixed version loaded with Forgot Password', 'color:#10b981');
+  </script>
 </body>
 </html>
