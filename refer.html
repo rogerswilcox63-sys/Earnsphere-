@@ -1,117 +1,632 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Refer & Earn - EarnSphereHub</title>
-<style>
-  body { background: #0f172a; color: white; font-family: Arial; text-align: center; padding: 20px; }
-  .card { background: #1e293b; padding: 20px; border-radius: 12px; margin: 15px 0; }
-  .big { font-size: 36px; color: #22c55e; font-weight: bold; }
-  .code { font-size: 22px; color: #3b82f6; font-weight: bold; letter-spacing: 2px; }
-  button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; margin: 8px 0; cursor: pointer; }
-  .blue { background: #3b82f6; color: white; }
-  .green { background: #22c55e; color: white; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refer & Earn – EarnSphereHub</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0f172a;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+      text-align: center;
+      padding: 20px 16px 32px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .back-link {
+      align-self: flex-start;
+      color: #60a5fa;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: #1e293b;
+      transition: background 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+    .back-link:hover {
+      background: #2d3a52;
+    }
+    .back-link:active {
+      transform: scale(0.96);
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #60a5fa;
+      margin-bottom: 2px;
+    }
+
+    .sub-head {
+      color: #94a3b8;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .earn-badge {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 16px 20px 14px;
+      margin: 6px 0 16px;
+      display: inline-block;
+      min-width: 180px;
+    }
+    .earn-badge .amount {
+      font-size: 46px;
+      font-weight: 800;
+      color: #4ade80;
+      line-height: 1;
+    }
+    .earn-badge .per {
+      font-size: 16px;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 18px 14px;
+      border-radius: 14px;
+      margin: 10px 0;
+      border: 1px solid #334155;
+      transition: border-color 0.2s;
+    }
+    .card:hover {
+      border-color: #475569;
+    }
+
+    .card-label {
+      font-size: 13px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-weight: 500;
+    }
+
+    .code {
+      font-size: 26px;
+      font-weight: 700;
+      color: #60a5fa;
+      letter-spacing: 3px;
+      background: #0f172a;
+      padding: 6px 18px;
+      border-radius: 10px;
+      display: inline-block;
+      margin: 4px 0 2px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .ref-link {
+      font-size: 13px;
+      color: #94a3b8;
+      word-break: break-all;
+      background: #0f172a;
+      padding: 6px 12px;
+      border-radius: 8px;
+      margin-top: 6px;
+      display: inline-block;
+      max-width: 100%;
+      font-family: monospace;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 6px 0;
+      cursor: pointer;
+      transition: transform 0.12s, opacity 0.2s, background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-blue {
+      background: #2563eb;
+      color: #fff;
+    }
+    .btn-blue:hover:not(:disabled) {
+      background: #3b82f6;
+    }
+
+    .btn-green {
+      background: #16a34a;
+      color: #fff;
+    }
+    .btn-green:hover:not(:disabled) {
+      background: #22c55e;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .stat-card {
+      background: #1e293b;
+      padding: 14px 8px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover {
+      border-color: #475569;
+    }
+    .stat-card .num {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f1f5f9;
+      line-height: 1.2;
+    }
+    .stat-card .stat-label {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-top: 2px;
+    }
+    .stat-card.green .num {
+      color: #4ade80;
+    }
+    .stat-card.blue .num {
+      color: #60a5fa;
+    }
+    .stat-card.yellow .num {
+      color: #facc15;
+    }
+    .stat-card.purple .num {
+      color: #a78bfa;
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0 6px;
+      text-align: left;
+    }
+    .step-item {
+      background: #1e293b;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border-left: 4px solid #2563eb;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .step-item .step-num {
+      background: #2563eb;
+      color: #fff;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .step-item .step-text {
+      font-size: 14px;
+      color: #e2e8f0;
+    }
+    .step-item .step-text small {
+      color: #94a3b8;
+      font-size: 12px;
+      display: block;
+      margin-top: 1px;
+    }
+
+    .loading-shimmer {
+      display: inline-block;
+      background: #334155;
+      border-radius: 6px;
+      min-width: 120px;
+      height: 30px;
+      animation: shimmer 1.2s ease-in-out infinite;
+      background-image: linear-gradient(90deg, #334155 0%, #475569 50%, #334155 100%);
+      background-size: 200% 100%;
+    }
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      z-index: 999;
+      max-width: 90%;
+      font-weight: 500;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+    .toast.success {
+      border-left: 4px solid #22c55e;
+    }
+    .toast.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .refresh-btn {
+      background: transparent;
+      border: none;
+      color: #60a5fa;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 4px 12px;
+      border-radius: 16px;
+      transition: background 0.2s;
+      margin-top: 4px;
+    }
+    .refresh-btn:hover {
+      background: #1e293b;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #64748b;
+      border-top: 1px solid #1e293b;
+      padding-top: 16px;
+      width: 100%;
+    }
+
+    @media (max-width: 480px) {
+      .earn-badge .amount {
+        font-size: 38px;
+      }
+      .code {
+        font-size: 22px;
+        letter-spacing: 2px;
+      }
+      .stat-card .num {
+        font-size: 24px;
+      }
+      .btn {
+        font-size: 15px;
+        padding: 13px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<a href="dashboard.html" style="color:#3b82f6; text-decoration:none;">← Back to Dashboard</a>
+  <div class="container">
+    <!-- Back link -->
+    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
 
-<h1 style="color:#3b82f6;">Refer & Earn</h1>
-<p>Invite friends, get ₦300 per Friend</p>
-<div class="big">₦300<span style="font-size:16px; color:white;">/per friend</span></div>
+    <!-- Header -->
+    <h1>Refer &amp; Earn</h1>
+    <p class="sub-head">Invite friends, get <strong>₦300</strong> per friend</p>
 
-<div class="card">
-  <p>Your Referral Code</p>
-  <div id="refCode" class="code">LOADING...</div>
-  <p id="refLink" style="font-size:12px; opacity:0.7;">Loading link...</p>
-</div>
+    <div class="earn-badge">
+      <div class="amount">₦300</div>
+      <div class="per">per friend</div>
+    </div>
 
-<button class="blue" onclick="copyLink()">📋 Copy Referral Link</button>
-<button class="green" onclick="shareWhatsApp()">💬 Share on WhatsApp</button>
+    <!-- Referral Code Card -->
+    <div class="card">
+      <div class="card-label">Your Referral Code</div>
+      <div id="refCode" class="code">—</div>
+      <div id="refLink" class="ref-link">Loading link…</div>
+    </div>
 
-<div class="grid">
-  <div class="card"><div id="totalRef">0</div><p>Total Referrals</p></div>
-  <div class="card"><div id="totalEarned">₦0</div><p>Total Earned</p></div>
-  <div class="card"><div id="wallet">₦0</div><p>Wallet Balance</p></div>
-  <div class="card"><div id="pending">₦0</div><p>Pending Bonus</p></div>
-</div>
+    <!-- Action Buttons -->
+    <button class="btn btn-blue" id="copyBtn" onclick="copyLink()">📋 Copy Referral Link</button>
+    <button class="btn btn-green" onclick="shareWhatsApp()">💬 Share on WhatsApp</button>
 
-<h3>1. Share your link</h3>
+    <!-- Stats Grid -->
+    <div class="grid-2">
+      <div class="stat-card green">
+        <div class="num" id="totalRef">0</div>
+        <div class="stat-label">Total Referrals</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="num" id="totalEarned">₦0</div>
+        <div class="stat-label">Total Earned</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="num" id="wallet">₦0</div>
+        <div class="stat-label">Wallet Balance</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="num" id="pending">₦0</div>
+        <div class="stat-label">Pending Bonus</div>
+      </div>
+    </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    <!-- How it works -->
+    <div style="margin-top: 16px; text-align: left;">
+      <div style="font-size: 16px; font-weight: 600; color: #e2e8f0; margin-bottom: 8px;">📌 How it works</div>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-text">Share your referral link <small>via WhatsApp, Twitter, or anywhere</small></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-text">Friend signs up using your link <small>they get ₦100 bonus instantly</small></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-text">You earn ₦300 when they complete KYC <small>credited to your wallet</small></div>
+        </div>
+      </div>
+    </div>
 
-  // TODO: PASTE YOUR FIREBASE CONFIG HERE
-  const firebaseConfig = {
-    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+    <!-- Refresh / debug -->
+    <button class="refresh-btn" onclick="refreshData()">↻ Refresh stats</button>
+
+    <div class="footer-note">EarnSphereHub • Referral program</div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast">Copied!</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ─── Firebase Config ───────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
       projectId: "earnspherehub-742e9",
-  };
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth();
-  const db = getFirestore();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore();
 
-  let userData = {};
-  let referralLink = "";
+    // ─── DOM refs ──────────────────────────────────────────────────────
+    const $ = (id) => document.getElementById(id);
+    const refCodeEl = $('refCode');
+    const refLinkEl = $('refLink');
+    const totalRefEl = $('totalRef');
+    const totalEarnedEl = $('totalEarned');
+    const walletEl = $('wallet');
+    const pendingEl = $('pending');
+    const copyBtn = $('copyBtn');
+    const toast = $('toast');
 
-  function generateCode(uid) {
-    return "ESH-" + uid.slice(0,6).toUpperCase() + Math.floor(Math.random()*1000);
-  }
+    let currentUid = null;
+    let referralLink = '';
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return window.location.href = "login.html";
-    
-    const userRef = doc(db, "users", user.uid);
-    const snap = await getDoc(userRef);
-
-    if (snap.exists()) {
-      userData = snap.data();
-      // Create code if it doesn't exist
-      if (!userData.referralCode) {
-        const newCode = generateCode(user.uid);
-        await updateDoc(userRef, { referralCode: newCode, totalReferrals: 0 });
-        userData.referralCode = newCode;
-      }
-    } else {
-      // First time user doc
-      const newCode = generateCode(user.uid);
-      await setDoc(userRef, { 
-        email: user.email, 
-        referralCode: newCode, 
-        totalReferrals: 0, 
-        wallet: 0,
-        totalEarned: 0,
-        pendingBonus: 0
-      });
-      userData = { referralCode: newCode };
+    // ─── Helpers ──────────────────────────────────────────────────────
+    function generateCode(uid) {
+      const prefix = uid.slice(0, 6).toUpperCase();
+      const num = Math.floor(Math.random() * 9000 + 1000);
+      return `ESH-${prefix}${num}`;
     }
 
-    referralLink = `https://earnspherehub.name.ng/register.html?ref=${userData.referralCode}`;
-    
-    document.getElementById("refCode").innerText = userData.referralCode;
-    document.getElementById("refLink").innerText = referralLink;
-    document.getElementById("totalRef").innerText = userData.totalReferrals || 0;
-    document.getElementById("totalEarned").innerText = `₦${userData.totalEarned || 0}`;
-    document.getElementById("wallet").innerText = `₦${userData.wallet || 0}`;
-    document.getElementById("pending").innerText = `₦${userData.pendingBonus || 0}`;
-  });
+    function showToast(msg, type = 'success') {
+      toast.textContent = msg;
+      toast.className = `toast ${type}`;
+      // force reflow
+      void toast.offsetWidth;
+      toast.classList.add('show');
+      clearTimeout(toast._hide);
+      toast._hide = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
 
-  window.copyLink = () => {
-    navigator.clipboard.writeText(referralLink);
-    alert("Referral link copied!");
-  }
+    function formatCurrency(amount) {
+      return `₦${Number(amount || 0).toLocaleString()}`;
+    }
 
-  window.shareWhatsApp = () => {
-    const msg = `Join EarnSphereHub and we both get ₦300! Use my link: ${referralLink}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-  }
+    // ─── Update UI ────────────────────────────────────────────────────
+    function updateUI(data) {
+      const refCode = data.referralCode || '—';
+      refCodeEl.textContent = refCode;
 
-</script>
+      referralLink = `https://earnspherehub.name.ng/register.html?ref=${encodeURIComponent(refCode)}`;
+      refLinkEl.textContent = referralLink;
+
+      totalRefEl.textContent = data.totalReferrals ?? 0;
+      totalEarnedEl.textContent = formatCurrency(data.totalEarned);
+      walletEl.textContent = formatCurrency(data.wallet);
+      pendingEl.textContent = formatCurrency(data.pendingBonus);
+    }
+
+    // ─── Load / sync user data ───────────────────────────────────────
+    async function loadUserData(user) {
+      if (!user) return;
+      currentUid = user.uid;
+      const userRef = doc(db, 'users', user.uid);
+
+      try {
+        const snap = await getDoc(userRef);
+
+        if (snap.exists()) {
+          const data = snap.data();
+          // Ensure all fields exist
+          const updates = {};
+          if (!data.referralCode) {
+            updates.referralCode = generateCode(user.uid);
+          }
+          if (data.totalReferrals === undefined) updates.totalReferrals = 0;
+          if (data.wallet === undefined) updates.wallet = 0;
+          if (data.totalEarned === undefined) updates.totalEarned = 0;
+          if (data.pendingBonus === undefined) updates.pendingBonus = 0;
+
+          if (Object.keys(updates).length > 0) {
+            await updateDoc(userRef, updates);
+            // Re-fetch to get merged data
+            const refreshed = await getDoc(userRef);
+            updateUI(refreshed.data());
+          } else {
+            updateUI(data);
+          }
+        } else {
+          // New user – create doc with all fields
+          const newCode = generateCode(user.uid);
+          const newData = {
+            email: user.email || '',
+            referralCode: newCode,
+            totalReferrals: 0,
+            wallet: 0,
+            totalEarned: 0,
+            pendingBonus: 0,
+            createdAt: new Date().toISOString(),
+          };
+          await setDoc(userRef, newData);
+          updateUI(newData);
+        }
+
+        // ── Listen for real-time updates ──
+        onSnapshot(userRef, (snap) => {
+          if (snap.exists()) {
+            updateUI(snap.data());
+          }
+        }, (err) => {
+          console.warn('Snapshot error:', err);
+        });
+
+      } catch (err) {
+        console.error('Firestore error:', err);
+        showToast('Error loading data: ' + err.message, 'error');
+        refCodeEl.textContent = '⚠️ Error';
+        refLinkEl.textContent = 'Refresh page to retry';
+      }
+    }
+
+    // ─── Auth listener ────────────────────────────────────────────────
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Not logged in – redirect to login
+        window.location.href = 'login.html';
+        return;
+      }
+      loadUserData(user);
+    });
+
+    // ─── Expose global functions ─────────────────────────────────────
+    window.copyLink = async () => {
+      if (!referralLink) {
+        showToast('Link not ready yet', 'error');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(referralLink);
+        showToast('✅ Referral link copied!', 'success');
+      } catch {
+        // fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = referralLink;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('✅ Referral link copied!', 'success');
+      }
+    };
+
+    window.shareWhatsApp = () => {
+      if (!referralLink) {
+        showToast('Link not ready yet', 'error');
+        return;
+      }
+      const msg = `🎉 Join EarnSphereHub and we both get ₦300! Use my link:\n${referralLink}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    };
+
+    window.refreshData = async () => {
+      if (!currentUid) {
+        showToast('Please wait, loading…', 'error');
+        return;
+      }
+      try {
+        const userRef = doc(db, 'users', currentUid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          updateUI(snap.data());
+          showToast('Stats refreshed ✅', 'success');
+        } else {
+          showToast('User document not found', 'error');
+        }
+      } catch (err) {
+        showToast('Refresh failed: ' + err.message, 'error');
+      }
+    };
+
+    // ─── Handle copy button state ────────────────────────────────────
+    // Disable copy button until link is ready
+    copyBtn.disabled = true;
+    // Watch for link change via MutationObserver
+    const observer = new MutationObserver(() => {
+      if (referralLink && referralLink.startsWith('http')) {
+        copyBtn.disabled = false;
+      }
+    });
+    observer.observe(refLinkEl, { childList: true, characterData: true, subtree: true });
+
+    // Also check periodically
+    const checkInterval = setInterval(() => {
+      if (referralLink && referralLink.startsWith('http')) {
+        copyBtn.disabled = false;
+        clearInterval(checkInterval);
+      }
+    }, 300);
+
+    // Clean up interval after 10s
+    setTimeout(() => clearInterval(checkInterval), 10000);
+  </script>
+
 </body>
 </html>
