@@ -1,220 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724" crossorigin="anonymous"></script>
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - EarnSphereHub</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a73e8, #25D366);
+      margin: 0;
+      padding: 2rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-<script>
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-    authDomain: "earnspherehub-742e9.firebaseapp.com",
-    projectId: "earnspherehub-742e9",
-    storageBucket: "earnspherehub-742e9.firebasestorage.app",
-    messagingSenderId: "173538573377",
-    appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-    measurementId: "G-3ZXY33620J"
-  };
+    .register-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+    }
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const storage = firebase.storage();
-</script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - EarnSphereHub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --primary: #3b82f6; --primary-dark: #2563eb; --secondary: #10b981; --danger: #ef4444; --dark: #0f172a; --dark-light: #1e293b; --gray: #64748b; --gray-light: #cbd5e1; --light: #f1f5f9; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-        body { background: linear-gradient(135deg, var(--dark), var(--dark-light)); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: var(--light); }
-        .container { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border-radius: 16px; padding: 40px 30px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { font-size: 28px; font-weight: 700; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
-        .logo p { color: var(--gray-light); font-size: 14px; }
-        .input-group { margin-bottom: 20px; position: relative; }
-        .input-group label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--gray-light); }
-        .input-group input { width: 100%; padding: 14px 16px 14px 45px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: var(--light); font-size: 15px; transition: all 0.3s ease; }
-        .input-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-        .input-group i { position: absolute; left: 16px; top: 40px; color: var(--gray); font-size: 18px; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .btn-secondary { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .btn-secondary:hover { background: rgba(16, 185, 129, 0.3); }
-        .login-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--gray-light); }
-        .login-link a { color: var(--primary); text-decoration: none; font-weight: 500; }
-        .login-link a:hover { color: var(--primary-dark); }
-        .message { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; display: none; }
-        .message.error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); display: block; }
-        .message.success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); display: block; }
-        .ref-notice { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #93c5fd; text-align: center; }
-        #verifyScreen { display: none; }
-    </style>
+    .register-box h2 {
+      color: #1a73e8;
+      margin-bottom: 0.5rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+      background: #f1f3f4;
+      padding: 0.3rem;
+      border-radius: 10px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 0.7rem;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .tab.active {
+      background: white;
+      color: #1a73e8;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.9rem;
+      margin: 0.6rem 0;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 10px;
+      background: #1a73e8;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 0.8rem;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #1558b0;
+      transform: translateY(-1px);
+    }
+
+    #recaptcha-container {
+      margin: 1rem 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .hidden { display: none; }
+
+    .login-link {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .login-link a {
+      color: #1a73e8;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <h1>EarnSphereHub</h1>
-            <p>Create your account</p>
-        </div>
 
-        <div id="messageBox" class="message"></div>
+  <div class="register-box">
+    <h2>Create Your Account</h2>
+    <p>Join EarnSphereHub and start earning</p>
 
-        <!-- Register Form -->
-        <div id="registerForm">
-            <div class="input-group">
-                <label for="displayName">Full Name</label>
-                <i class="fas fa-user"></i>
-                <input type="text" id="displayName" placeholder="Enter your full name" required>
-            </div>
-            <div class="input-group">
-                <label for="email">Email Address</label>
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="Enter your email" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Min 6 characters" required>
-            </div>
-            <button class="btn btn-primary" id="registerBtn">
-                <i class="fas fa-user-plus"></i> Create Account
-            </button>
-        </div>
-
-        <!-- Verify Email Screen -->
-        <div id="verifyScreen">
-            <div class="ref-notice">
-                <i class="fas fa-envelope-circle-check"></i>
-                <strong>Verify your email</strong><br>
-                We sent a link to <span id="userEmail"></span>. Click it to activate your account.
-            </div>
-            <button class="btn btn-secondary" id="resendBtn">
-                <i class="fas fa-paper-plane"></i> Resend Email
-            </button>
-            <button class="btn btn-primary" id="checkBtn">
-                <i class="fas fa-check-circle"></i> I've Verified - Continue
-            </button>
-        </div>
-
-        <div class="login-link">
-            Already have an account? <a href="login.html">Login</a>
-        </div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('email')">Email</button>
+      <button class="tab" onclick="showTab('phone')">Phone</button>
     </div>
 
-    <script>
-const registerBtn = document.getElementById('registerBtn');
-const messageBox = document.getElementById('messageBox');
-const verifyScreen = document.getElementById('verifyScreen');
-const registerForm = document.getElementById('registerForm');
-const userEmailSpan = document.getElementById('userEmail');
+    <!-- EMAIL FORM -->
+    <div id="email-form">
+      <input type="email" id="email" placeholder="Enter your email" required>
+      <input type="password" id="password" placeholder="Create password" required>
+      <button id="email-register">Register with Email</button>
+    </div>
 
-function showMessage(text, type) {
-    messageBox.textContent = text;
-    messageBox.className = `message ${type}`;
-    messageBox.style.display = 'block';
-    if (type === 'success') {
-        setTimeout(() => messageBox.style.display = 'none', 4000);
+    <!-- PHONE FORM -->
+    <div id="phone-form" class="hidden">
+      <input type="tel" id="phone" placeholder="+234 801 234 5678" required>
+      <div id="recaptcha-container"></div>
+      <button id="send-code">Send OTP</button>
+
+      <div id="otp-section" class="hidden">
+        <input type="text" id="otp" placeholder="Enter 6-digit code" maxlength="6">
+        <button id="verify-code">Verify & Register</button>
+      </div>
+    </div>
+
+    <div class="login-link">
+      Already have an account? <a href="login.html">Login</a>
+    </div>
+  </div>
+
+  <script type="module">
+    // 1. IMPORT FIREBASE
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // 2. PASTE YOUR FIREBASE CONFIG
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let confirmationResult;
+
+    // TAB SWITCHER
+    window.showTab = (tab) => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('email-form').classList.add('hidden');
+      document.getElementById('phone-form').classList.add('hidden');
+      
+      if(tab === 'email'){
+        document.querySelector('.tab:nth-child(1)').classList.add('active');
+        document.getElementById('email-form').classList.remove('hidden');
+      } else {
+        document.querySelector('.tab:nth-child(2)').classList.add('active');
+        document.getElementById('phone-form').classList.remove('hidden');
+      }
     }
-}
 
-// Don't let verified users sit on register page
-auth.onAuthStateChanged(user => {
-    if (user && user.emailVerified) {
-        window.location.href = 'dashboard.html';
-    }
-});
-
-registerBtn.addEventListener('click', async () => {
-    const name = document.getElementById('displayName').value.trim(); // FIXED ID
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    
-    messageBox.style.display = 'none';
-    
-    // Basic validation - REMOVED confirmPassword check
-    if (!name || !email || !password) {
-        showMessage('Please fill all fields', 'error');
-        return;
-    }
-    if (password.length < 6) {
-        showMessage('Password must be at least 6 characters', 'error');
-        return;
-    }
-
-    registerBtn.disabled = true;
-    registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
-
-    try {
-        // 1. Create the user
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    // 3. EMAIL REGISTRATION
+    document.getElementById('email-register').addEventListener('click', async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          phone: "",
+          balance: 0,
+          createdAt: new Date(),
+          status: "active"
+        });
+        
+        alert('Account created!');
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        alert(error.message);
+      }
+    });
 
-        // 2. Update display name
-        await user.updateProfile({ displayName: name });
+    // 4. SETUP RECAPTCHA FOR PHONE
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      'size': 'normal'
+    });
 
-        // 3. Send verification email - THIS WILL NOW ACTUALLY RUN
-        await user.sendEmailVerification();
-        console.log('Verification email sent to:', user.email);
+    // 5. PHONE REGISTRATION
+    document.getElementById('send-code').addEventListener('click', () => {
+      const phoneNumber = document.getElementById('phone').value;
+      if(!phoneNumber.startsWith('+')){
+        alert('Use format: +2348012345678');
+        return;
+      }
 
-        // 4. Save user data to Firestore
-        await db.collection('users').doc(user.uid).set({
-            uid: user.uid,
-            name: name,
-            email: email,
-            emailVerified: false,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            balance: 0
+      signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
+        .then((result) => {
+          confirmationResult = result;
+          document.getElementById('otp-section').classList.remove('hidden');
+          document.getElementById('send-code').style.display = 'none';
+          alert('OTP sent to ' + phoneNumber);
+        }).catch((error) => {
+          alert(error.message);
+        });
+    });
+
+    document.getElementById('verify-code').addEventListener('click', async () => {
+      const code = document.getElementById('otp').value;
+      try {
+        const result = await confirmationResult.confirm(code);
+        const user = result.user;
+        
+        await setDoc(doc(db, "users", user.uid), {
+          email: "",
+          phone: user.phoneNumber,
+          balance: 0,
+          createdAt: new Date(),
+          status: "active"
         });
 
-        // 5. Show verify screen instead of signing out
-        registerForm.style.display = 'none';
-        verifyScreen.style.display = 'block';
-        userEmailSpan.textContent = email;
-        showMessage('Account created! Check your email to verify.', 'success');
-
-    } catch (error) {
-        let msg = error.message;
-        if (error.code === 'auth/email-already-in-use') msg = 'This email is already registered. Try logging in.';
-        if (error.code === 'auth/invalid-email') msg = 'Invalid email address.';
-        if (error.code === 'auth/weak-password') msg = 'Password is too weak. Use at least 6 characters.';
-        showMessage(msg, 'error');
-    } finally {
-        registerBtn.disabled = false;
-        registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
-    }
-});
-
-// Resend email button
-document.getElementById('resendBtn').addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if (user) {
-        await user.sendEmailVerification();
-        showMessage('Verification email resent!', 'success');
-    }
-});
-
-// Check if verified button
-document.getElementById('checkBtn').addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if (user) {
-        await user.reload(); // Refresh user data
-        if (user.emailVerified) {
-            window.location.href = 'dashboard.html';
-        } else {
-            showMessage('Email not verified yet. Check your inbox and spam.', 'error');
-        }
-    }
-});
-</script>
+        alert('Phone registered!');
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        alert('Invalid OTP');
+      }
+    });
+  </script>
 </body>
 </html>
