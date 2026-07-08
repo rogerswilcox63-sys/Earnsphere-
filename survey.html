@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Survey - EarnSphere</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+    .back-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .header {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      padding: 24px;
+      border-radius: 16px;
+      border: 1px solid #334155;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      background: #8b5cf6;
+      color: #fff;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .header h1 { font-size: 1.5rem; margin-bottom: 8px; }
+    .header p { color: #94a3b8; margin-bottom: 12px; }
+    .reward {
+      color: #10b981;
+      font-weight: 700;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .form-card {
+      background: #1e293b;
+      padding: 24px;
+      border-radius: 16px;
+      border: 1px solid #334155;
+    }
+    label {
+      display: block;
+      margin: 16px 0 8px;
+      font-weight: 600;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+    select, input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #fff;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    select:focus, input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    select option { background: #1e293b; }
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: all 0.3s;
+    }
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+    }
+    .submit-btn:disabled {
+      background: #4b5563;
+      cursor: not-allowed;
+    }
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      text-align: center;
+      font-weight: 500;
+    }
+    .message.error {
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+    }
+    .message.success {
+      background: rgba(16,185,129,0.2);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: #6ee7b7;
+    }
+    .note {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+    .completed-badge {
+      background: rgba(16,185,129,0.15);
+      border: 2px solid #10b981;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 16px 0;
+    }
+    .completed-badge i { font-size: 2.5rem; display: block; margin-bottom: 12px; color: #10b981; }
+    .completed-badge h3 { margin-bottom: 8px; color: #6ee7b7; }
+    .completed-badge p { color: #94a3b8; }
+    .completed-badge a {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 10px 24px;
+      background: #3b82f6;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .header { padding: 16px; }
+      .form-card { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+    <div class="header">
+      <span class="badge" id="surveyBadge">Loading...</span>
+      <h1 id="surveyTitle">Loading Survey...</h1>
+      <p id="surveyDesc">Please wait...</p>
+      <div class="reward" id="surveyReward"><i class="fas fa-coins"></i> ₦0 Reward</div>
+    </div>
+
+    <form class="form-card" id="surveyForm">
+      <div id="statusMessage"></div>
+      <div id="completedMessage" style="display:none;"></div>
+      <div id="questionsContainer"></div>
+
+      <label><i class="fas fa-map-pin"></i> Confirm Contact Location</label>
+      <input type="text" id="userLocation" placeholder="e.g. Lagos, Nigeria" required>
+
+      <label><i class="fas fa-phone"></i> Your Phone Number</label>
+      <input type="tel" id="userPhone" placeholder="08012345678" pattern="[0-9]{11}" required>
+
+      <button type="submit" class="submit-btn" id="submitBtn" disabled>
+        <i class="fas fa-paper-plane"></i> Submit & Claim Reward
+      </button>
+      <p class="note"><i class="fas fa-shield-alt"></i> By submitting, you confirm answers are accurate.</p>
+    </form>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+      authDomain: "earnspherehub-742e9.firebaseapp.com",
+      projectId: "earnspherehub-742e9",
+      storageBucket: "earnspherehub-742e9.firebasestorage.app",
+      messagingSenderId: "173538573377",
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0",
+      measurementId: "G-3ZXY33620J"
+    };
+
+    let auth, db, isFirebaseReady = false;
+    let currentUser = null;
+
+    try {
+      firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
+      isFirebaseReady = true;
+      db.enablePersistence().catch(() => {});
+    } catch (e) {
+      console.warn('Firebase init failed:', e);
+    }
+
+    // SURVEY DATABASE
+    const surveyDatabase = {
+      "srv_01": {
+        id: "srv_01", title: "Social Media Usage", category: "Tech", reward: 150,
+        desc: "Tell us about your screen time habits",
+        questions: [
+          { id: "q1", text: "Which app do you spend the most time on?", options: ["TikTok", "Instagram", "X (Twitter)", "Facebook", "YouTube"] },
+          { id: "q2", text: "How many hours a day do you spend on social media?", options: ["Under 1 hour", "1-3 hours", "3-5 hours", "Over 5 hours"] }
+        ]
+      },
+      "srv_02": {
+        id: "srv_02", title: "Crypto Knowledge Check", category: "Finance", reward: 250,
+        desc: "Your insights on digital assets",
+        questions: [
+          { id: "q1", text: "Do you currently own any cryptocurrency?", options: ["Yes, heavily invested", "Yes, a tiny amount", "No, but planning to", "No, and not interested"] },
+          { id: "q2", text: "Which network asset do you trust most?", options: ["Bitcoin (BTC)", "Ethereum (ETH)", "USDT / Stablecoins", "Solana (SOL)", "None"] }
+        ]
+      },
+      "srv_03": {
+        id: "srv_03", title: "Fast Food Preferences", category: "Lifestyle", reward: 120,
+        desc: "Help food brands structure logistics",
+        questions: [
+          { id: "q1", text: "What is your favorite local fast food meal?", options: ["Fried Rice & Chicken", "Burgers/Shawarma", "Pizza", "Amala / Local Dishes", "Other"] },
+          { id: "q2", text: "How often do you order food delivery weekly?", options: ["Never", "Once a week", "2-4 times a week", "Every day"] }
+        ]
+      },
+      "srv_04": {
+        id: "srv_04", title: "Mobile Network Quality", category: "Telecom", reward: 200,
+        desc: "Rate data stability in Nigeria",
+        questions: [
+          { id: "q1", text: "Which network provider has the fastest data in your area?", options: ["MTN", "Airtel", "Glo", "9mobile", "Starlink/Fiber"] },
+          { id: "q2", text: "What is your biggest issue with your current network?", options: ["High cost of data", "Frequent network drops", "Poor customer care", "Slow upload speeds"] }
+        ]
+      },
+      "srv_05": {
+        id: "srv_05", title: "Streaming Services Study", category: "Entertainment", reward: 180,
+        desc: "Where do you watch movies?",
+        questions: [
+          { id: "q1", text: "What is your primary streaming account setup?", options: ["Netflix", "Prime Video", "Showmax", "YouTube Premium", "I download free files"] },
+          { id: "q2", text: "What content format do you stream most?", options: ["Nollywood Movies", "Hollywood Series", "Anime / Cartoons", "Live Sports"] }
+        ]
+      },
+      "srv_06": {
+        id: "srv_06", title: "Student Device Survey", category: "Education", reward: 160,
+        desc: "Tools used for your learning tracks",
+        questions: [
+          { id: "q1", text: "What hardware tool do you use for school tasks?", options: ["Android Phone", "iPhone", "Windows Laptop", "MacBook / Tablet"] },
+          { id: "q2", text: "Have you used AI tools (like Gemini/ChatGPT) for assignments?", options: ["Yes, constantly", "Sometimes for ideas", "Rarely", "Never"] }
+        ]
+      },
+      "srv_07": {
+        id: "srv_07", title: "Banking & Fintech Apps", category: "Finance", reward: 220,
+        desc: "Rate your digital wallet experience",
+        questions: [
+          { id: "q1", text: "Which platform do you use for fast transfers?", options: ["Opay", "PalmPay", "Kuda", "Traditional Bank App (GTB, Access)", "Moniepoint"] },
+          { id: "q2", text: "What feature matters most to you in a banking app?", options: ["Zero transfer fees", "100% network uptime", "Cashback rewards", "Loan availability"] }
+        ]
+      },
+      "srv_08": {
+        id: "srv_08", title: "Fashion & Shopping Habits", category: "E-Commerce", reward: 140,
+        desc: "Where do you buy your wear?",
+        questions: [
+          { id: "q1", text: "Where do you purchase your clothes most often?", options: ["Instagram vendors", "Physical boutique", "Open markets (Balogun, Yaba)", "Jumia / International sites"] },
+          { id: "q2", text: "What drives your purchasing decisions most?", options: ["Low prices/Discounts", "Brand name status", "Material durability", "Influencer reviews"] }
+        ]
+      },
+      "srv_09": {
+        id: "srv_09", title: "Gaming & Esports Habits", category: "Gaming", reward: 170,
+        desc: "Let's track local mobile gaming data",
+        questions: [
+          { id: "q1", text: "What platform do you play games on?", options: ["Mobile phone", "PlayStation console", "Xbox console", "Gaming PC", "Not a gamer"] },
+          { id: "q2", text: "What genre of game do you play most?", options: ["CODM / PUBG Mobile", "FIFA / EFootball", "Grand Theft Auto", "Candy Crush / Puzzles"] }
+        ]
+      },
+      "srv_10": {
+        id: "srv_10", title: "Sport Betting Insights", category: "Lifestyle", reward: 200,
+        desc: "Analyzing sports gaming data footprints",
+        questions: [
+          { id: "q1", text: "Which sport booking interface do you visit most?", options: ["SportyBet", "Bet9ja", "1xBet", "BetKing", "I do not bet"] },
+          { id: "q2", text: "What sport parameters do you wager on primarily?", options: ["Football leagues", "Virtual games", "Basketball / NBA", "Aviator / Casino games"] }
+        ]
+      },
+      "srv_11": {
+        id: "srv_11", title: "Ride Hailing Safety Check", category: "Transport", reward: 180,
+        desc: "Share your ride-hailing experience",
+        questions: [
+          { id: "q1", text: "Which ride-hailing app do you use most?", options: ["Bolt", "Uber", "InDrive", "Rida", "LagRide", "Don't use apps"] },
+          { id: "q2", text: "Biggest issue with ride-hailing apps?", options: ["High prices/surge", "Driver cancellations", "Safety concerns", "Dirty/old cars", "None"] }
+        ]
+      },
+      "srv_12": {
+        id: "srv_12", title: "Fitness & Wellness Routine", category: "Health", reward: 150,
+        desc: "Track health and supplement data metrics",
+        questions: [
+          { id: "q1", text: "How often do you exercise intentionally every week?", options: ["Every day", "3-4 times a week", "Once a week", "Rarely / Never"] },
+          { id: "q2", text: "Do you buy fitness supplements or energy drinks?", options: ["Yes, regularly", "Only energy drinks", "Occasionally", "Never"] }
+        ]
+      }
+    };
+
+    // Get survey ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSurveyId = urlParams.get('id') || "srv_01";
+    const selectedSurvey = surveyDatabase[currentSurveyId];
+
+    const surveyForm = document.getElementById('surveyForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const completedMessage = document.getElementById('completedMessage');
+
+    function renderSurvey() {
+      if (!selectedSurvey) {
+        statusMessage.innerHTML = `<div class="message error">❌ Survey not found.</div>`;
+        submitBtn.disabled = true;
+        return;
+      }
+
+      document.getElementById('surveyBadge').textContent = selectedSurvey.category;
+      document.getElementById('surveyTitle').textContent = selectedSurvey.title;
+      document.getElementById('surveyDesc').textContent = selectedSurvey.desc;
+      document.getElementById('surveyReward').innerHTML = `<i class="fas fa-coins"></i> ₦${selectedSurvey.reward}`;
+
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = '';
+
+      selectedSurvey.questions.forEach((q, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.style.marginBottom = '16px';
+
+        const label = document.createElement('label');
+        label.textContent = `${index + 1}. ${q.text}`;
+        wrapper.appendChild(label);
+
+        const select = document.createElement('select');
+        select.id = `q_${q.id}`;
+        select.required = true;
+        select.style.marginTop = '4px';
+
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = 'Select option...';
+        select.appendChild(defaultOpt);
+
+        q.options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          select.appendChild(option);
+        });
+
+        wrapper.appendChild(select);
+        container.appendChild(wrapper);
+      });
+
+      submitBtn.disabled = false;
+    }
+
+    async function checkIfCompleted(user) {
+      if (!user || !isFirebaseReady) return false;
+      try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          const data = doc.data();
+          return (data.completedTaskIds || []).includes(currentSurveyId);
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    function showCompletedUI() {
+      document.getElementById('questionsContainer').innerHTML = '';
+      document.getElementById('userLocation').style.display = 'none';
+      document.getElementById('userPhone').style.display = 'none';
+      
+      document.querySelectorAll('label').forEach(label => {
+        if (label.textContent.includes('Confirm Contact Location') || label.textContent.includes('Phone Number')) {
+          label.style.display = 'none';
+        }
+      });
+
+      completedMessage.style.display = 'block';
+      completedMessage.innerHTML = `
+        <div class="completed-badge">
+          <i class="fas fa-check-circle"></i>
+          <h3>Survey Already Completed! ✅</h3>
+          <p>You've already earned ₦${selectedSurvey.reward} from this survey.</p>
+          <a href="dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+      `;
+      submitBtn.style.display = 'none';
+    }
+
+    // Auth
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        const localUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (localUser) {
+          if ((localUser.completedTaskIds || []).includes(currentSurveyId)) {
+            showCompletedUI();
+          } else {
+            renderSurvey();
+          }
+        } else {
+          window.location.href = 'login.html';
+        }
+        return;
+      }
+
+      currentUser = user;
+      if (await checkIfCompleted(user)) {
+        showCompletedUI();
+      } else {
+        renderSurvey();
+      }
+    });
+
+    // Submit
+    surveyForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="loading-spinner"></span> Processing...`;
+
+      const answers = {};
+      let allAnswered = true;
+
+      selectedSurvey.questions.forEach(q => {
+        const select = document.getElementById(`q_${q.id}`);
+        const value = select ? select.value : '';
+        if (!value) allAnswered = false;
+        answers[q.id] = value;
+      });
+
+      if (!allAnswered) {
+        statusMessage.innerHTML = `<div class="message error">⚠️ Please answer all questions.</div>`;
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Submit & Claim Reward`;
+        return;
+      }
+
+      const location = document.getElementById('userLocation').value.trim();
+      const phone = document.getElementById('userPhone').value.trim();
+
+      if (!location) {
+        statusMessage.innerHTML = `<div class="message error">⚠️ Please enter your location.</div>`;
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Submit & Claim Reward`;
+        return;
+      }
+
+      if (!phone || phone.length !== 11 || !/^[0-9]{11}$/.test(phone)) {
+        statusMessage.innerHTML = `<div class="message error">⚠️ Please enter a valid 11-digit phone number.</div>`;
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Submit & Claim Reward`;
+        return;
+      }
+
+      answers.location = location;
+      answers.phone = phone;
+
+      if (currentUser && isFirebaseReady) {
+        try {
+          const userRef = db.collection('users').doc(currentUser.uid);
+          
+          await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(userRef);
+            if (!doc.exists) throw new Error("User not found");
+            
+            const data = doc.data();
+            if ((data.completedTaskIds || []).includes(currentSurveyId)) {
+              throw new Error("Already completed");
+            }
+
+            transaction.update(userRef, {
+              balance: (data.balance || 0) + selectedSurvey.reward,
+              lifetimeTotal: (data.lifetimeTotal || 0) + selectedSurvey.reward,
+              successfulTaskCount: (data.successfulTaskCount || 0) + 1,
+              completedTaskIds: firebase.firestore.FieldValue.arrayUnion(currentSurveyId)
+            });
+
+            await db.collection('survey_responses').add({
+              surveyId: currentSurveyId,
+              surveyName: selectedSurvey.title,
+              reward: selectedSurvey.reward,
+              answers: answers,
+              uid: currentUser.uid,
+              email: currentUser.email,
+              submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          });
+
+          window.location.href = `dashboard.html?completed=${currentSurveyId}&reward=${selectedSurvey.reward}`;
+
+        } catch (err) {
+          statusMessage.innerHTML = `<div class="message error">❌ ${err.message}</div>`;
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Submit & Claim Reward`;
+        }
+      } else {
+        // Guest mode
+        let localUser = JSON.parse(localStorage.getItem('currentUser')) || {
+          uid: 'guest', balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: []
+        };
+        
+        if ((localUser.completedTaskIds || []).includes(currentSurveyId)) {
+          statusMessage.innerHTML = `<div class="message error">⚠️ Already completed!</div>`;
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Submit & Claim Reward`;
+          return;
+        }
+
+        localUser.balance = (localUser.balance || 0) + selectedSurvey.reward;
+        localUser.lifetimeTotal = (localUser.lifetimeTotal || 0) + selectedSurvey.reward;
+        localUser.successfulTaskCount = (localUser.successfulTaskCount || 0) + 1;
+        localUser.completedTaskIds = [...(localUser.completedTaskIds || []), currentSurveyId];
+        
+        localStorage.setItem('currentUser', JSON.stringify(localUser));
+        window.location.href = `dashboard.html?completed=${currentSurveyId}&reward=${selectedSurvey.reward}`;
+      }
+    });
+  </script>
+</body>
+</html>
