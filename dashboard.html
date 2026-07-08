@@ -7,6 +7,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- ============================================ -->
+  <!-- LOAD CONFIG.JS FIRST (MUST BE SAME FOLDER) -->
+  <!-- ============================================ -->
+  <script src="config.js"></script>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -14,6 +19,19 @@
   
   <!-- EmailJS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+  <!-- ============================================ -->
+  <!-- CHECK IF CONFIG LOADED PROPERLY -->
+  <!-- ============================================ -->
+  <script>
+    if (typeof CONFIG === 'undefined') {
+      console.error('❌ config.js NOT loaded!');
+      alert('⚠️ config.js not found! Please create config.js from config-template.js');
+    } else {
+      console.log('✅ config.js loaded successfully!');
+      console.log('✅ DeepSeek API Key:', CONFIG.DEEPSEEK_API_KEY ? '✅ Present' : '❌ Missing');
+    }
+  </script>
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -589,26 +607,27 @@
 
   <script>
     // ============================================
-    // LOAD CONFIG
+    // USE CONFIG FROM config.js (loaded at top)
     // ============================================
-    const CONFIG = {
-      // Firebase
-      FIREBASE_API_KEY: 'AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo',
-      FIREBASE_AUTH_DOMAIN: 'earnspherehub-742e9.firebaseapp.com',
-      FIREBASE_PROJECT_ID: 'earnspherehub-742e9',
-      FIREBASE_STORAGE_BUCKET: 'earnspherehub-742e9.firebasestorage.app',
-      FIREBASE_MESSAGING_SENDER_ID: '173538573377',
-      FIREBASE_APP_ID: '1:173538573377:web:6d8c748376afcb9096dac0',
-      FIREBASE_MEASUREMENT_ID: 'G-3ZXY33620J',
-      
-      // EmailJS
-      EMAILJS_USER_ID: '-NzXZKbT0bcAmE84y',
-      EMAILJS_SERVICE_ID: 'service_7cd1v06',
-      EMAILJS_TEMPLATE_ID: 'template_8jsqprf',
-      
-      // DeepSeek AI - ADD YOUR API KEY HERE
-      DEEPSEEK_API_KEY: 'sk-your-deepseek-api-key-here'
-    };
+    
+    // Check if CONFIG loaded properly
+    if (typeof CONFIG === 'undefined') {
+      // Fallback if config.js didn't load
+      var CONFIG = {
+        FIREBASE_API_KEY: 'AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo',
+        FIREBASE_AUTH_DOMAIN: 'earnspherehub-742e9.firebaseapp.com',
+        FIREBASE_PROJECT_ID: 'earnspherehub-742e9',
+        FIREBASE_STORAGE_BUCKET: 'earnspherehub-742e9.firebasestorage.app',
+        FIREBASE_MESSAGING_SENDER_ID: '173538573377',
+        FIREBASE_APP_ID: '1:173538573377:web:6d8c748376afcb9096dac0',
+        FIREBASE_MEASUREMENT_ID: 'G-3ZXY33620J',
+        EMAILJS_USER_ID: '-NzXZKbT0bcAmE84y',
+        EMAILJS_SERVICE_ID: 'service_7rb5npp',
+        EMAILJS_TEMPLATE_ID: 'template_8jsqprf',
+        DEEPSEEK_API_KEY: '' // Empty - user must add to config.js
+      };
+      console.warn('⚠️ Using fallback config (config.js not found)');
+    }
 
     // ============================================
     // FIREBASE INIT
@@ -1044,10 +1063,17 @@
     }
 
     // ============================================
-    // REAL AI CHAT - ONLY DEEPSEEK API (NO LOCAL MESSAGES!)
+    // REAL AI CHAT - DEEPSEEK API
     // ============================================
     const DEEPSEEK_API_KEY = CONFIG.DEEPSEEK_API_KEY;
-    const hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY !== 'sk-your-deepseek-api-key-here';
+    const hasValidDeepSeek = DEEPSEEK_API_KEY && 
+                             DEEPSEEK_API_KEY !== 'sk-your-deepseek-api-key-here' &&
+                             DEEPSEEK_API_KEY !== 'YOUR_DEEPSEEK_API_KEY_HERE' &&
+                             DEEPSEEK_API_KEY !== '';
+
+    if (!hasValidDeepSeek) {
+      console.warn('⚠️ Please add your DeepSeek API key to config.js');
+    }
 
     async function sendAiMessage() {
       const input = document.getElementById('aiInput');
