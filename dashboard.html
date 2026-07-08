@@ -127,6 +127,15 @@
       box-shadow: 0 4px 15px rgba(59,130,246,.3);
     }
     .start-btn:disabled { background:#334155; cursor:not-allowed; opacity:0.7; }
+    .reset-timer {
+      color: #64748b;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      text-align: center;
+      padding: 6px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+    }
     .form-group { margin-bottom:1.2rem; }
     .form-group label { display:block; margin-bottom:.6rem; color:#cbd5e1; font-weight:500; font-size:.9rem; }
     .form-control {
@@ -238,10 +247,27 @@
       to { transform: rotate(360deg); }
     }
 
+    #aiChatBtn {
+      position:fixed; bottom:20px; right:20px; width:60px; height:60px;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      color:white; font-size:24px; cursor:pointer; z-index:10000;
+      box-shadow:0 4px 15px rgba(0,0,0,.3);
+      transition: transform 0.3s;
+    }
+    #aiChatBtn:hover { transform: scale(1.1); }
+    #aiChatWindow {
+      position:fixed; bottom:90px; right:20px; width:320px; height:400px;
+      background:#1e293b; border:1px solid rgba(255,255,255,.1);
+      border-radius:12px; display:none; flex-direction:column;
+      box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden;
+    }
+
     @media (max-width: 768px) {
       .navbar { padding:1rem; }
       .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
       .dashboard-container { padding:0 1rem; }
+      #aiChatWindow { width:280px; right:10px; bottom:80px; height:350px; }
     }
   </style>
 </head>
@@ -281,9 +307,15 @@
       </div>
 
       <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers</h2>
+      <div id="surveyResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> New surveys available daily at midnight
+      </div>
       <div class="offers-grid" id="surveyList"></div>
 
       <h2 class="section-title"><i class="fas fa-tasks"></i> Social Micro-Tasks</h2>
+      <div id="socialResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> New social task available every hour
+      </div>
       <div class="offers-grid" id="socialTaskList"></div>
 
       <h2 class="section-title"><i class="fas fa-headset"></i> Contact Support</h2>
@@ -332,6 +364,24 @@
     <p style="margin-top:1rem; font-size:.75rem;">© 2026 EarnSphere Hub Limited. All rights reserved.</p>
   </footer>
 
+  <!-- AI Chat Button -->
+  <div id="aiChatBtn" onclick="toggleAiChat()"><i class="fas fa-robot"></i></div>
+  <div id="aiChatWindow">
+    <div style="background:linear-gradient(to right, #3b82f6, #10b981); padding:12px 15px; color:white; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
+      <span><i class="fas fa-brain"></i> SphereAI Assistant</span>
+      <i class="fas fa-times" onclick="toggleAiChat()" style="cursor:pointer;"></i>
+    </div>
+    <div id="aiMessages" style="flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:14px;">
+      <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; max-width: 85%; align-self: flex-start; color: #cbd5e1;">
+        Hello! I'm SphereAI. Ask me about your balance, tasks, how to withdraw, or anything about EarnSphere!
+      </div>
+    </div>
+    <div style="padding:10px; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:8px; background:#0f172a;">
+      <input type="text" id="aiInput" placeholder="Ask something..." style="flex:1; padding:8px 12px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:white; font-size:14px; outline:none;">
+      <button onclick="sendAiMessage()" style="background:#3b82f6; border:none; color:white; padding:8px 12px; border-radius:6px; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
@@ -348,112 +398,125 @@
     let userData = null;
     let isProcessing = false;
 
-    // Initialize Firebase
     try {
       firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db = firebase.firestore();
       isFirebaseWorking = true;
-      
       db.enablePersistence().catch(err => console.warn('Persistence:', err));
     } catch (e) {
       isFirebaseWorking = false;
       console.warn('Firebase init failed:', e);
     }
 
-    // SURVEY DATABASE WITH FULL URLs
+    // SURVEY DATABASE - 12 Surveys
     const surveyDatabase = {
-      "srv_01": { 
-        title: "Social Media Usage", 
-        category: "Tech", 
-        reward: 150, 
-        desc: "Tell us about your screen time habits",
-        url: "https://earnspherehub.name.ng/social-media-survey.html"
-      },
-      "srv_02": { 
-        title: "Crypto Knowledge Check", 
-        category: "Finance", 
-        reward: 250, 
-        desc: "Your insights on digital assets",
-        url: "https://earnspherehub.name.ng/crypto-survey.html"
-      },
-      "srv_03": { 
-        title: "Fast Food Preferences", 
-        category: "Lifestyle", 
-        reward: 120, 
-        desc: "Help food brands structure logistics",
-        url: "https://earnspherehub.name.ng/food-survey.html"
-      },
-      "srv_04": { 
-        title: "Mobile Network Quality", 
-        category: "Telecom", 
-        reward: 200, 
-        desc: "Rate data stability in Nigeria",
-        url: "https://earnspherehub.name.ng/network-survey.html"
-      },
-      "srv_05": { 
-        title: "Streaming Services Study", 
-        category: "Entertainment", 
-        reward: 180, 
-        desc: "Where do you watch movies?",
-        url: "https://earnspherehub.name.ng/streaming-survey.html"
-      },
-      "srv_06": { 
-        title: "Student Device Survey", 
-        category: "Education", 
-        reward: 160, 
-        desc: "Tools used for your learning tracks",
-        url: "https://earnspherehub.name.ng/education-survey.html"
-      },
-      "srv_07": { 
-        title: "Banking & Fintech Apps", 
-        category: "Finance", 
-        reward: 220, 
-        desc: "Rate your digital wallet experience",
-        url: "https://earnspherehub.name.ng/banking-survey.html"
-      },
-      "srv_08": { 
-        title: "Fashion & Shopping Habits", 
-        category: "E-Commerce", 
-        reward: 140, 
-        desc: "Where do you buy your wear?",
-        url: "https://earnspherehub.name.ng/fashion-survey.html"
-      },
-      "srv_09": { 
-        title: "Gaming & Esports Habits", 
-        category: "Gaming", 
-        reward: 170, 
-        desc: "Let's track local mobile gaming data",
-        url: "https://earnspherehub.name.ng/gaming-survey.html"
-      },
-      "srv_10": { 
-        title: "Sport Betting Insights", 
-        category: "Lifestyle", 
-        reward: 200, 
-        desc: "Analyzing sports gaming data footprints",
-        url: "https://earnspherehub.name.ng/sports-survey.html"
-      },
-      "srv_11": { 
-        title: "Ride Hailing Safety Check", 
-        category: "Transport", 
-        reward: 180, 
-        desc: "Share your ride-hailing experience",
-        url: "https://earnspherehub.name.ng/ride-survey.html"
-      },
-      "srv_12": { 
-        title: "Fitness & Wellness Routine", 
-        category: "Health", 
-        reward: 150, 
-        desc: "Track health and supplement data metrics",
-        url: "https://earnspherehub.name.ng/fitness-survey.html"
-      }
+      "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
+      "srv_02": { title: "Crypto Knowledge Check", category: "Finance", reward: 250, desc: "Your insights on digital assets" },
+      "srv_03": { title: "Fast Food Preferences", category: "Lifestyle", reward: 120, desc: "Help food brands structure logistics" },
+      "srv_04": { title: "Mobile Network Quality", category: "Telecom", reward: 200, desc: "Rate data stability in Nigeria" },
+      "srv_05": { title: "Streaming Services Study", category: "Entertainment", reward: 180, desc: "Where do you watch movies?" },
+      "srv_06": { title: "Student Device Survey", category: "Education", reward: 160, desc: "Tools used for your learning tracks" },
+      "srv_07": { title: "Banking & Fintech Apps", category: "Finance", reward: 220, desc: "Rate your digital wallet experience" },
+      "srv_08": { title: "Fashion & Shopping Habits", category: "E-Commerce", reward: 140, desc: "Where do you buy your wear?" },
+      "srv_09": { title: "Gaming & Esports Habits", category: "Gaming", reward: 170, desc: "Let's track local mobile gaming data" },
+      "srv_10": { title: "Sport Betting Insights", category: "Lifestyle", reward: 200, desc: "Analyzing sports gaming data footprints" },
+      "srv_11": { title: "Ride Hailing Safety Check", category: "Transport", reward: 180, desc: "Share your ride-hailing experience" },
+      "srv_12": { title: "Fitness & Wellness Routine", category: "Health", reward: 150, desc: "Track health and supplement data metrics" }
     };
 
-    // SOCIAL TASKS
+    // SOCIAL TASKS - Hourly Rotation
     const socialTasks = [
       { id:'soc_1', title:'Follow on TikTok', desc:'Watch our recent announcement video, hit like, and follow the account profile page.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/richard.wilcox54' },
-      { id:'soc_2', title:'Subscribe to YouTube Channel', desc:'Open our official video guide channel and press the notification bell alert switch.', reward:300, badge:'YouTube', badgeClass:'badge-social', link:'https://youtube.com/@earnspherenigeria' }
+      { id:'soc_2', title:'Subscribe to YouTube Channel', desc:'Open our official video guide channel and press the notification bell alert switch.', reward:300, badge:'YouTube', badgeClass:'badge-social', link:'https://youtube.com/@earnspherenigeria' },
+      { id:'soc_3', title:'Follow on Instagram', desc:'Follow our official Instagram page and like our latest post.', reward:200, badge:'Instagram', badgeClass:'badge-social', link:'https://instagram.com/earnsphere' },
+      { id:'soc_4', title:'Join Our Telegram', desc:'Join our Telegram community for exclusive updates and bonuses.', reward:150, badge:'Telegram', badgeClass:'badge-social', link:'https://t.me/earnspherehub' },
+      { id:'soc_5', title:'Tweet About Us', desc:'Tweet about EarnSphere and tag us for a chance to earn extra rewards.', reward:220, badge:'Twitter', badgeClass:'badge-social', link:'https://twitter.com/earnsphere' },
+      { id:'soc_6', title:'Subscribe to Newsletter', desc:'Subscribe to our weekly newsletter for exclusive earning opportunities.', reward:180, badge:'Email', badgeClass:'badge-social', link:'https://earnspherehub.name.ng/newsletter' }
     ];
+
+    // Get today's surveys based on date
+    function getTodaysSurveys() {
+      const now = new Date();
+      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+      const dayOfYear = Math.floor((nigeriaTime - new Date(nigeriaTime.getFullYear(), 0, 0)) / 86400000);
+      
+      const surveyIds = Object.keys(surveyDatabase);
+      const index1 = (dayOfYear * 2) % surveyIds.length;
+      const index2 = (dayOfYear * 2 + 1) % surveyIds.length;
+      
+      return [surveyIds[index1], surveyIds[index2]];
+    }
+
+    // Get current hour's social task
+    function getCurrentSocialTask() {
+      const now = new Date();
+      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+      const currentHour = nigeriaTime.getHours();
+      
+      // Rotate through social tasks based on hour
+      const index = currentHour % socialTasks.length;
+      return socialTasks[index];
+    }
+
+    // Get time until midnight
+    function getTimeUntilMidnight() {
+      const now = new Date();
+      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+      const tomorrow = new Date(nigeriaTime);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const diff = tomorrow - nigeriaTime;
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      
+      return { hours, minutes, seconds, total: diff };
+    }
+
+    // Get time until next hour
+    function getTimeUntilNextHour() {
+      const now = new Date();
+      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+      const nextHour = new Date(nigeriaTime);
+      nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+      
+      const diff = nextHour - nigeriaTime;
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      
+      return { minutes, seconds, total: diff };
+    }
+
+    // Update reset timers
+    function updateResetTimers() {
+      // Survey timer
+      const surveyTimer = document.getElementById('surveyResetTimer');
+      if (surveyTimer) {
+        const timeLeft = getTimeUntilMidnight();
+        surveyTimer.innerHTML = `
+          <i class="fas fa-clock"></i> 
+          New surveys available in ${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s
+          <span style="display:block;font-size:0.8rem;color:#475569;margin-top:4px;">
+            (Surveys reset daily at midnight)
+          </span>
+        `;
+      }
+
+      // Social task timer
+      const socialTimer = document.getElementById('socialResetTimer');
+      if (socialTimer) {
+        const timeLeft = getTimeUntilNextHour();
+        socialTimer.innerHTML = `
+          <i class="fas fa-clock"></i> 
+          New social task available in ${timeLeft.minutes}m ${timeLeft.seconds}s
+          <span style="display:block;font-size:0.8rem;color:#475569;margin-top:4px;">
+            (Tasks rotate every hour)
+          </span>
+        `;
+      }
+    }
 
     function isTaskCompleted(taskId) {
       if (!userData || !userData.completedTaskIds) return false;
@@ -514,17 +577,10 @@
       surveyList.innerHTML = '';
       socialTaskList.innerHTML = '';
 
-      const now = new Date();
-      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
-      const currentDay = nigeriaTime.getDate();
+      // Get today's 2 surveys
+      const todaysSurveyIds = getTodaysSurveys();
 
-      // Show 2 surveys per day - rotate through all 12
-      const surveyIds = Object.keys(surveyDatabase);
-      const index1 = (currentDay * 2) % surveyIds.length;
-      const index2 = (currentDay * 2 + 1) % surveyIds.length;
-      const activeSurveyIds = [surveyIds[index1], surveyIds[index2]];
-
-      activeSurveyIds.forEach(surveyId => {
+      todaysSurveyIds.forEach(surveyId => {
         const survey = surveyDatabase[surveyId];
         const completed = isTaskCompleted(surveyId);
         surveyList.innerHTML += `
@@ -536,25 +592,35 @@
             <button class="start-btn" id="btn-${surveyId}" type="button" ${completed ? 'disabled' : ''} onclick="startSurvey('${surveyId}')">
               ${completed ? '✅ Completed' : 'Start Survey'}
             </button>
+            <div class="reset-timer">
+              <i class="fas fa-sync-alt"></i> Resets at midnight
+            </div>
           </div>
         `;
       });
 
-      // Social tasks - show all available
-      socialTasks.forEach(task => {
-        const completed = isTaskCompleted(task.id);
-        socialTaskList.innerHTML += `
-          <div class="offer-card">
-            <div class="offer-title">${task.title}</div>
-            <div class="offer-desc">${task.desc}</div>
-            <span class="badge ${task.badgeClass}">${task.badge}</span>
-            <div class="offer-reward">₦${task.reward}</div>
-            <button class="start-btn" id="btn-${task.id}" onclick="completeSocialTask('${task.id}', ${task.reward}, '${task.link}')" ${completed ? 'disabled' : ''}>
-              ${completed ? '✅ Completed' : 'Start Social Task'}
-            </button>
+      // Get current hour's social task (only 1 per hour)
+      const currentTask = getCurrentSocialTask();
+      const taskId = `${currentTask.id}_${new Date().getHours()}`;
+      const completed = isTaskCompleted(taskId);
+      
+      socialTaskList.innerHTML += `
+        <div class="offer-card">
+          <div class="offer-title">${currentTask.title}</div>
+          <div class="offer-desc">${currentTask.desc}</div>
+          <span class="badge ${currentTask.badgeClass}">${currentTask.badge}</span>
+          <div class="offer-reward">₦${currentTask.reward}</div>
+          <button class="start-btn" id="btn-${taskId}" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}')" ${completed ? 'disabled' : ''}>
+            ${completed ? '✅ Completed' : 'Start Social Task'}
+          </button>
+          <div class="reset-timer">
+            <i class="fas fa-sync-alt"></i> New task available every hour
           </div>
-        `;
-      });
+        </div>
+      `;
+
+      // Update timers
+      updateResetTimers();
     }
 
     function startSurvey(surveyId) {
@@ -562,22 +628,19 @@
         showToast('You already completed this survey!');
         return;
       }
-      // Open survey URL in new tab
-      const survey = surveyDatabase[surveyId];
-      if (survey && survey.url) {
-        window.open(survey.url, '_blank');
-        showToast('📝 Survey opened in new tab. Complete it to earn rewards!');
-      } else {
-        showToast('⚠️ Survey URL not found');
-      }
+      window.open(`survey.html?id=${surveyId}`, '_blank');
     }
 
-    async function completeSocialTask(id, reward, link) {
+    async function completeSocialTask(taskId, reward, link) {
       if (!currentUser || !userData) {
         showToast('⚠️ Please login first');
         return;
       }
-      if (isTaskCompleted(id)) {
+      
+      const hour = new Date().getHours();
+      const fullTaskId = `${taskId}_${hour}`;
+      
+      if (isTaskCompleted(fullTaskId)) {
         showToast('You already completed this task!');
         return;
       }
@@ -589,7 +652,7 @@
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
       
       if (!userData.completedTaskIds) userData.completedTaskIds = [];
-      userData.completedTaskIds.push(id);
+      userData.completedTaskIds.push(fullTaskId);
       
       updateInterfaceValues();
       renderTasks();
@@ -668,6 +731,58 @@
       supportBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
     });
 
+    // AI Chat Functions
+    function toggleAiChat() {
+      const chatWindow = document.getElementById('aiChatWindow');
+      chatWindow.style.display = chatWindow.style.display === 'none' || !chatWindow.style.display ? 'flex' : 'none';
+    }
+
+    function appendAiMessage(text, isUser) {
+      const msgBox = document.getElementById('aiMessages');
+      const msg = document.createElement('div');
+      msg.style.padding = '8px 12px';
+      msg.style.borderRadius = '8px';
+      msg.style.maxWidth = '85%';
+      msg.style.fontSize = '14px';
+      msg.style.lineHeight = '1.4';
+      msg.style.marginBottom = '6px';
+      msg.style.whiteSpace = 'pre-wrap';
+      msg.style.background = isUser ? '#3b82f6' : 'rgba(255,255,255,0.08)';
+      msg.style.color = 'white';
+      msg.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
+      msg.innerText = text;
+      msgBox.appendChild(msg);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    function sendAiMessage() {
+      const input = document.getElementById('aiInput');
+      const userPrompt = input.value.trim();
+      if (!userPrompt) return;
+
+      appendAiMessage(userPrompt, true);
+      input.value = '';
+
+      const lower = userPrompt.toLowerCase();
+      let reply = '';
+
+      if (lower.includes('balance') || lower.includes('wallet') || lower.includes('money')) {
+        const bal = userData?.balance || 0;
+        reply = `💰 Your current wallet balance is ₦${bal.toLocaleString()}. Keep completing tasks to earn more!`;
+      } else if (lower.includes('task') || lower.includes('survey') || lower.includes('complete')) {
+        const count = userData?.successfulTaskCount || 0;
+        reply = `📋 You've completed ${count} tasks so far.\n\n• Surveys: 2 new surveys available daily at midnight\n• Social Tasks: 1 new task available every hour\n\nKeep checking back for more earning opportunities!`;
+      } else if (lower.includes('withdraw') || lower.includes('withdrawal') || lower.includes('payout')) {
+        reply = `💳 To withdraw:\n• Go to the Withdraw page\n• Minimum withdrawal: ₦2,500\n• Make sure your bank details are verified\n• Processing takes 24-48 hours`;
+      } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+        reply = `👋 Hello there! I'm SphereAI, your EarnSphere assistant. How can I help you today?`;
+      } else {
+        reply = `🤔 I'm here to help! Ask me about:\n• Your balance and earnings\n• Available tasks and surveys\n• Withdrawal information\n• General questions\n\nWhat would you like to know?`;
+      }
+
+      appendAiMessage(reply, false);
+    }
+
     // Auth handler
     function setupAuth() {
       if (!isFirebaseWorking || !auth) {
@@ -714,20 +829,43 @@
           await saveUserDataToFirebase();
         }
 
+        // Check for completed survey
+        const urlParams = new URLSearchParams(window.location.search);
+        const completedSurvey = urlParams.get('completed');
+        const rewardAmount = urlParams.get('reward');
+        if (completedSurvey && rewardAmount) {
+          showToast(`🎉 Survey completed! +₦${rewardAmount} added to your wallet!`);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         updateInterfaceValues();
         renderTasks();
         showTelegramModal();
       });
     }
 
+    // Enter key for AI chat
     document.addEventListener('DOMContentLoaded', () => {
       setupAuth();
+      document.getElementById('aiInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendAiMessage();
+      });
+      
+      // Update timers every second
+      setInterval(updateResetTimers, 1000);
     });
 
     // Auto-save every 60 seconds
     setInterval(() => {
       if (userData && currentUser && isFirebaseWorking) {
         saveUserDataToFirebase();
+      }
+    }, 60000);
+
+    // Refresh tasks every minute to check for new hour
+    setInterval(() => {
+      if (userData) {
+        renderTasks();
       }
     }, 60000);
   </script>
