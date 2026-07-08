@@ -24,12 +24,36 @@
   <!-- CHECK IF CONFIG LOADED PROPERLY -->
   <!-- ============================================ -->
   <script>
+    // Check if CONFIG loaded from config.js
     if (typeof CONFIG === 'undefined') {
-      console.error('❌ config.js NOT loaded!');
-      alert('⚠️ config.js not found! Please create config.js from config-template.js');
+      console.error('❌ config.js NOT loaded! Please create config.js from config-template.js');
+      
+      // Create CONFIG with hardcoded values as fallback (NO DeepSeek key!)
+      var CONFIG = {
+        FIREBASE_API_KEY: 'AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo',
+        FIREBASE_AUTH_DOMAIN: 'earnspherehub-742e9.firebaseapp.com',
+        FIREBASE_PROJECT_ID: 'earnspherehub-742e9',
+        FIREBASE_STORAGE_BUCKET: 'earnspherehub-742e9.firebasestorage.app',
+        FIREBASE_MESSAGING_SENDER_ID: '173538573377',
+        FIREBASE_APP_ID: '1:173538573377:web:6d8c748376afcb9096dac0',
+        FIREBASE_MEASUREMENT_ID: 'G-3ZXY33620J',
+        EMAILJS_USER_ID: '-NzXZKbT0bcAmE84y',
+        EMAILJS_SERVICE_ID: 'service_7cd1v06',
+        EMAILJS_TEMPLATE_ID: 'template_8jsqprf',
+        TELEGRAM_BOT_TOKEN: '8409129212:AAHpzppiWeDk-bITkc1zOKDitL7B6ssI2Hw',
+        TELEGRAM_CHAT_ID: '8747781911',
+        DEEPSEEK_API_KEY: ''
+      };
+      console.warn('⚠️ Using fallback config (config.js not found)');
     } else {
       console.log('✅ config.js loaded successfully!');
-      console.log('✅ DeepSeek API Key:', CONFIG.DEEPSEEK_API_KEY ? '✅ Present' : '❌ Missing');
+    }
+
+    // Log DeepSeek status
+    if (CONFIG.DEEPSEEK_API_KEY && CONFIG.DEEPSEEK_API_KEY !== '') {
+      console.log('✅ DeepSeek API Key: Present');
+    } else {
+      console.warn('⚠️ DeepSeek API Key: Not configured in config.js');
     }
   </script>
 
@@ -607,30 +631,7 @@
 
   <script>
     // ============================================
-    // USE CONFIG FROM config.js (loaded at top)
-    // ============================================
-    
-    // Check if CONFIG loaded properly
-    if (typeof CONFIG === 'undefined') {
-      // Fallback if config.js didn't load
-      var CONFIG = {
-        FIREBASE_API_KEY: 'AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo',
-        FIREBASE_AUTH_DOMAIN: 'earnspherehub-742e9.firebaseapp.com',
-        FIREBASE_PROJECT_ID: 'earnspherehub-742e9',
-        FIREBASE_STORAGE_BUCKET: 'earnspherehub-742e9.firebasestorage.app',
-        FIREBASE_MESSAGING_SENDER_ID: '173538573377',
-        FIREBASE_APP_ID: '1:173538573377:web:6d8c748376afcb9096dac0',
-        FIREBASE_MEASUREMENT_ID: 'G-3ZXY33620J',
-        EMAILJS_USER_ID: '-NzXZKbT0bcAmE84y',
-        EMAILJS_SERVICE_ID: 'service_7rb5npp',
-        EMAILJS_TEMPLATE_ID: 'template_8jsqprf',
-        DEEPSEEK_API_KEY: '' // Empty - user must add to config.js
-      };
-      console.warn('⚠️ Using fallback config (config.js not found)');
-    }
-
-    // ============================================
-    // FIREBASE INIT
+    // FIREBASE INIT (Using CONFIG from config.js)
     // ============================================
     let auth, db, isFirebaseWorking = false;
     let currentUser = null;
@@ -651,6 +652,7 @@
       db = firebase.firestore();
       isFirebaseWorking = true;
       db.enablePersistence().catch(err => console.warn('Persistence:', err));
+      console.log('✅ Firebase initialized');
     } catch (e) {
       isFirebaseWorking = false;
       console.warn('Firebase init failed:', e);
@@ -661,6 +663,7 @@
     // ============================================
     if (typeof emailjs !== 'undefined') {
       emailjs.init(CONFIG.EMAILJS_USER_ID);
+      console.log('✅ EmailJS initialized');
     }
 
     // ============================================
@@ -1063,16 +1066,16 @@
     }
 
     // ============================================
-    // REAL AI CHAT - DEEPSEEK API
+    // REAL AI CHAT - USING DEEPSEEK FROM CONFIG.JS
     // ============================================
+    // Get DeepSeek API key from CONFIG (NO hardcoded key in HTML!)
     const DEEPSEEK_API_KEY = CONFIG.DEEPSEEK_API_KEY;
-    const hasValidDeepSeek = DEEPSEEK_API_KEY && 
-                             DEEPSEEK_API_KEY !== 'sk-your-deepseek-api-key-here' &&
-                             DEEPSEEK_API_KEY !== 'YOUR_DEEPSEEK_API_KEY_HERE' &&
-                             DEEPSEEK_API_KEY !== '';
+    const hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY !== '';
 
-    if (!hasValidDeepSeek) {
-      console.warn('⚠️ Please add your DeepSeek API key to config.js');
+    if (hasValidDeepSeek) {
+      console.log('✅ DeepSeek AI configured from config.js');
+    } else {
+      console.warn('⚠️ DeepSeek API key not configured in config.js');
     }
 
     async function sendAiMessage() {
@@ -1083,13 +1086,11 @@
       appendAiMessage(userPrompt, true);
       input.value = '';
 
-      // Check if DeepSeek is configured
       if (!hasValidDeepSeek) {
         appendAiMessage('⚠️ DeepSeek API key not configured. Please add your API key to config.js', false);
         return;
       }
 
-      // Show typing indicator
       const typingId = showTypingIndicator();
 
       try {
