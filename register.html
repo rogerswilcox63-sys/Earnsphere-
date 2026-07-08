@@ -4,608 +4,851 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Register - EarnSphereHub</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+  
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1a73e8);
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
       min-height: 100vh;
+      color: #f1f5f9;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       padding: 20px;
     }
-
-    .auth-box {
-      background: white;
-      padding: 2.5rem 2rem;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    .container {
+      max-width: 440px;
       width: 100%;
-      max-width: 420px;
+      background: rgba(30,41,59,0.8);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 32px 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .logo {
       text-align: center;
-    }
-
-    .auth-box .logo {
-      font-size: 2rem;
+      font-size: 28px;
       font-weight: 800;
-      color: #1a73e8;
-      margin-bottom: 0.25rem;
-    }
-
-    .auth-box .sub {
-      color: #666;
-      font-size: 0.95rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .auth-box h2 {
-      color: #1a73e8;
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .referral-banner {
-      background: #f0f7ff;
-      border: 1px solid #d0e3ff;
-      border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 1rem;
-      font-size: 0.85rem;
-      color: #1a73e8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .referral-banner strong {
-      background: #1a73e8;
-      color: white;
-      padding: 2px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-    }
-
-    .input-group {
-      margin: 0.8rem 0;
-      text-align: left;
-    }
-
-    .input-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #333;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
       margin-bottom: 4px;
     }
-
-    .input-group input {
-      width: 100%;
-      padding: 0.85rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 1rem;
-      transition: border-color 0.2s;
-      background: #f9fafb;
+    h1 { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
+    
+    .referral-badge {
+      background: rgba(16,185,129,0.15);
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 10px;
+      padding: 10px 16px;
+      text-align: center;
+      margin-bottom: 20px;
     }
-
-    .input-group input:focus {
-      outline: none;
-      border-color: #1a73e8;
-      background: white;
-    }
-
-    .input-group input:disabled {
-      background: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 0.95rem;
-      border: none;
-      border-radius: 12px;
-      background: #1a73e8;
-      color: white;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.2s;
-      margin-top: 0.5rem;
-    }
-
-    .btn-primary:hover {
-      background: #1558b0;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
-    }
-
-    .btn-primary:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .divider {
+    .referral-badge .label { color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .referral-badge .code { color: #4ade80; font-size: 18px; font-weight: 700; font-family: monospace; margin-top: 2px; }
+    
+    .tab-container {
       display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin: 1.5rem 0;
-      color: #999;
-      font-size: 0.85rem;
+      gap: 6px;
+      margin-bottom: 20px;
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 4px;
     }
-
-    .divider::before,
-    .divider::after {
-      content: '';
+    .tab-btn {
       flex: 1;
-      height: 1px;
-      background: #e5e7eb;
-    }
-
-    .btn-google {
-      width: 100%;
-      padding: 0.85rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      background: white;
-      color: #333;
-      font-size: 1rem;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.2s;
+      transition: all 0.3s;
+      background: transparent;
+      color: #94a3b8;
+    }
+    .tab-btn.active {
+      background: #2563eb;
+      color: #fff;
+    }
+    .tab-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #f1f5f9;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { outline: none; border-color: #3b82f6; }
+    
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #fff;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    
+    .btn-google {
+      background: #fff;
+      color: #0f172a;
+      margin-top: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
     }
-
-    .btn-google:hover {
-      background: #f8f9fa;
-      border-color: #1a73e8;
+    .btn-google:hover { background: #e2e8f0; box-shadow: 0 4px 20px rgba(255,255,255,0.2); }
+    
+    .btn-phone {
+      background: linear-gradient(135deg, #10b981, #059669);
+      margin-top: 8px;
     }
-
-    .switch-link {
-      margin-top: 1.5rem;
-      font-size: 0.9rem;
-      color: #555;
+    .btn-phone:hover { box-shadow: 0 4px 20px rgba(16,185,129,0.4); }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
     }
-
-    .switch-link a {
-      color: #1a73e8;
+    .btn-danger:hover { box-shadow: 0 4px 20px rgba(239,68,68,0.4); }
+    
+    .phone-input-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+    .phone-input-wrapper select {
+      width: 100px;
+      padding: 12px 8px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #f1f5f9;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .phone-input-wrapper input { flex: 1; }
+    
+    .otp-section {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(59,130,246,0.1);
+      border-radius: 10px;
+      border: 1px solid rgba(59,130,246,0.2);
+    }
+    .otp-section.show { display: block; }
+    
+    .otp-row {
+      display: flex;
+      gap: 8px;
+    }
+    .otp-row input { flex: 1; }
+    .otp-row .btn-sm {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .otp-row .btn-sm:hover { background: #3b82f6; }
+    .otp-row .btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .divider {
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+      margin: 16px 0;
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #334155;
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+    
+    .login-link { text-align: center; margin-top: 16px; color: #94a3b8; font-size: 14px; }
+    .login-link a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+    .login-link a:hover { text-decoration: underline; }
+    
+    .forgot-password-link {
+      text-align: right;
+      margin-top: 4px;
+    }
+    .forgot-password-link a {
+      color: #94a3b8;
+      font-size: 13px;
       text-decoration: none;
-      font-weight: 700;
+      transition: color 0.3s;
     }
-
-    .switch-link a:hover {
+    .forgot-password-link a:hover {
+      color: #3b82f6;
       text-decoration: underline;
     }
-
-    .error-msg {
-      color: #ef4444;
-      font-size: 0.85rem;
-      margin: 0.5rem 0;
-      min-height: 20px;
+    
+    /* Forgot Password Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 9998;
+      align-items: center;
+      justify-content: center;
     }
-
-    .success-msg {
-      color: #10b981;
-      font-size: 0.85rem;
-      margin: 0.5rem 0;
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 32px 24px;
+      max-width: 400px;
+      width: 90%;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
     }
-
-    .ref-badge {
-      display: inline-block;
-      background: #25D366;
-      color: white;
-      font-size: 0.7rem;
-      padding: 2px 10px;
+    .modal h2 { text-align: center; margin-bottom: 8px; }
+    .modal p { text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
+    .modal .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .modal .close-btn:hover { color: #f1f5f9; }
+    .modal .form-group { margin-bottom: 16px; }
+    
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      padding: 12px 24px;
       border-radius: 12px;
-      margin-left: 6px;
+      font-size: 14px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      z-index: 9999;
+      max-width: 90%;
+      font-weight: 500;
     }
-
-    .valid-code {
-      border-color: #10b981 !important;
-      background: #f0fdf4 !important;
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+    .toast.success { border-left: 4px solid #22c55e; }
+    .toast.error { border-left: 4px solid #ef4444; }
+    .toast.warning { border-left: 4px solid #facc15; }
+    
+    .debug-info {
+      background: #0f172a;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+      border: 1px solid #1e293b;
+      font-family: monospace;
+      word-break: break-all;
     }
-
-    .invalid-code {
-      border-color: #ef4444 !important;
-      background: #fef2f2 !important;
+    
+    .input-hint {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    
+    @media (max-width: 480px) {
+      .container { padding: 20px 16px; }
+      .phone-input-wrapper { flex-wrap: wrap; }
+      .phone-input-wrapper select { width: 100%; }
     }
   </style>
 </head>
 <body>
 
-  <div class="auth-box">
-    <div class="logo">💰 EarnSphereHub</div>
-    <div class="sub">Start earning today</div>
+  <div class="container">
+    <div class="logo">💰 EarnSphere</div>
+    <h1>Create Account</h1>
+    <p class="subtitle">Join and start earning today</p>
 
-    <h2>Create Account</h2>
-
-    <!-- Referral Code Display -->
-    <div class="referral-banner" id="referralBanner">
-      🎁 Referral bonus: <strong id="refCodeDisplay">—</strong>
-      <span class="ref-badge">+₦300 each</span>
+    <div class="referral-badge" id="referralBadge">
+      <div class="label">Referred by</div>
+      <div class="code" id="referralCodeDisplay">—</div>
     </div>
 
-    <!-- Register Form -->
-    <div id="register-form">
-      <div class="input-group">
-        <label>Email Address</label>
-        <input type="email" id="registerEmail" placeholder="you@example.com" />
-      </div>
-      <div class="input-group">
-        <label>Password (min 6 chars)</label>
-        <input type="password" id="registerPassword" placeholder="Create password" />
-      </div>
-      <div class="input-group">
-        <label>Referral Code (optional)</label>
-        <input type="text" id="registerReferral" placeholder="ESH-XXXXXX" />
-        <div style="font-size:0.75rem; color:#888; margin-top:4px;">
-          💡 Enter a friend's code to earn ₦300 bonus
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+      <button class="tab-btn active" data-tab="email" onclick="switchTab('email')">📧 Email</button>
+      <button class="tab-btn" data-tab="phone" onclick="switchTab('phone')">📱 Phone</button>
+      <button class="tab-btn" data-tab="google" onclick="switchTab('google')">🔵 Google</button>
+    </div>
+
+    <!-- ============ EMAIL TAB ============ -->
+    <div class="tab-content active" id="tab-email">
+      <form id="emailForm">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="emailFullName" placeholder="Enter your full name" required />
         </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="emailInput" placeholder="Enter your email" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="emailPassword" placeholder="Create a password (min 6 chars)" required />
+        </div>
+        <div class="forgot-password-link">
+          <a href="#" onclick="openForgotPassword()">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn" id="emailRegisterBtn">Create Account</button>
+      </form>
+    </div>
+
+    <!-- ============ PHONE TAB ============ -->
+    <div class="tab-content" id="tab-phone">
+      <form id="phoneForm">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="phoneFullName" placeholder="Enter your full name" required />
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <div class="phone-input-wrapper">
+            <select id="countryCode">
+              <option value="+234">🇳🇬 +234</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+91">🇮🇳 +91</option>
+              <option value="+233">🇬🇭 +233</option>
+              <option value="+254">🇰🇪 +254</option>
+              <option value="+27">🇿🇦 +27</option>
+            </select>
+            <input type="tel" id="phoneInput" placeholder="Enter phone number" required />
+          </div>
+          <div class="input-hint">Enter phone number without the country code</div>
+        </div>
+        
+        <div class="otp-section" id="otpSection">
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>Enter OTP Code</label>
+            <div class="otp-row">
+              <input type="text" id="otpInput" placeholder="Enter 6-digit code" maxlength="6" />
+              <button type="button" class="btn-sm" id="verifyOtpBtn" onclick="verifyPhoneOTP()">Verify</button>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:center; font-size:12px; color:#94a3b8;">
+            <span>Didn't receive code?</span>
+            <button type="button" onclick="sendPhoneOTP()" style="background:none;border:none;color:#3b82f6;cursor:pointer;font-weight:600;">Resend</button>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-phone" id="phoneRegisterBtn">
+          <i class="fas fa-phone"></i> Continue with Phone
+        </button>
+      </form>
+    </div>
+
+    <!-- ============ GOOGLE TAB ============ -->
+    <div class="tab-content" id="tab-google">
+      <div style="text-align:center; padding: 20px 0;">
+        <div style="font-size:48px; margin-bottom:16px;">🔵</div>
+        <p style="color:#94a3b8; margin-bottom:20px;">Sign up quickly with your Google account</p>
+        <button class="btn btn-google" onclick="signInWithGoogle()">
+          <svg width="20" height="20" viewBox="0 0 48 48">
+            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+          </svg>
+          Continue with Google
+        </button>
       </div>
-      <div id="registerError" class="error-msg"></div>
-      <button class="btn-primary" id="registerBtn">Create Account</button>
+    </div>
 
-      <div class="divider">or continue with</div>
+    <div class="login-link">
+      Already have an account? <a href="login.html">Sign in</a>
+    </div>
 
-      <button class="btn-google" id="googleRegisterBtn">
-        <svg width="20" height="20" viewBox="0 0 48 48">
-          <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
-          <path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
-          <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
-          <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
-        </svg>
-        Sign up with Google
-      </button>
-
-      <div class="switch-link">
-        Already have an account? <a href="login.html">Sign in</a>
-      </div>
+    <div class="debug-info" id="debugInfo">
+      🔍 Debug: Checking referral code...
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      sendEmailVerification,
-      signInWithPopup,
-      GoogleAuthProvider,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      setDoc,
-      getDoc,
-      updateDoc,
-      increment,
-      collection,
-      query,
-      where,
-      getDocs
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <!-- ============================================ -->
+  <!-- FORGOT PASSWORD MODAL -->
+  <!-- ============================================ -->
+  <div class="modal-overlay" id="forgotPasswordModal">
+    <div class="modal">
+      <button class="close-btn" onclick="closeForgotPassword()">✕</button>
+      <h2>🔐 Reset Password</h2>
+      <p>Enter your email address and we'll send you a password reset link.</p>
+      <form id="forgotPasswordForm">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="resetEmail" placeholder="Enter your email" required />
+        </div>
+        <button type="submit" class="btn" id="resetPasswordBtn">Send Reset Link</button>
+        <div style="margin-top:12px; text-align:center;">
+          <a href="#" onclick="closeForgotPassword()" style="color:#94a3b8; font-size:13px; text-decoration:none;">← Back to sign up</a>
+        </div>
+      </form>
+    </div>
+  </div>
 
-    // ─── Firebase Config ──────────────────────────────────────────────────
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // ============================================
+    // FIREBASE CONFIG
+    // ============================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
       projectId: "earnspherehub-742e9",
       storageBucket: "earnspherehub-742e9.firebasestorage.app",
       messagingSenderId: "173538573377",
-      appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0",
+      measurementId: "G-3ZXY33620J"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    // ─── DOM Elements ──────────────────────────────────────────────────────
-    const registerEmail = document.getElementById('registerEmail');
-    const registerPassword = document.getElementById('registerPassword');
-    const registerReferral = document.getElementById('registerReferral');
-    const registerBtn = document.getElementById('registerBtn');
-    const registerError = document.getElementById('registerError');
-    const refCodeDisplay = document.getElementById('refCodeDisplay');
+    // ============================================
+    // DOM REFS
+    // ============================================
+    const referralCodeDisplay = document.getElementById('referralCodeDisplay');
+    const toast = document.getElementById('toast');
+    const debugInfo = document.getElementById('debugInfo');
 
-    let appliedReferralCode = null;
+    // ============================================
+    // GET REFERRAL CODE FROM URL
+    // ============================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const referralCode = urlParams.get('ref');
+    let storedReferralCode = null;
 
-    // ─── 1. Auto-detect referral from URL ────────────────────────────────
-    function getReferralFromURL() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('ref') || params.get('referral') || null;
+    function showToast(msg, type = 'success') {
+      toast.textContent = msg;
+      toast.className = `toast ${type}`;
+      void toast.offsetWidth;
+      toast.classList.add('show');
+      clearTimeout(toast._hide);
+      toast._hide = setTimeout(() => toast.classList.remove('show'), 4000);
     }
 
-    const urlRef = getReferralFromURL();
-    if (urlRef) {
-      registerReferral.value = urlRef;
-      appliedReferralCode = urlRef;
-      refCodeDisplay.textContent = urlRef;
-      registerReferral.style.borderColor = '#10b981';
-      registerReferral.style.background = '#f0fdf4';
+    function generateReferralCode(uid) {
+      const prefix = uid.slice(0, 4).toUpperCase();
+      const rand = Math.floor(Math.random() * 90000 + 10000);
+      return `ESH${prefix}${rand}`;
+    }
+
+    // ============================================
+    // DISPLAY REFERRAL CODE
+    // ============================================
+    if (referralCode) {
+      storedReferralCode = referralCode;
+      referralCodeDisplay.textContent = referralCode;
+      localStorage.setItem('referral_code', referralCode);
+      debugInfo.innerHTML = `✅ Referral code found: <strong style="color:#4ade80;">${referralCode}</strong>`;
+      showToast(`✅ Referred by: ${referralCode}`, 'success');
     } else {
-      refCodeDisplay.textContent = 'None';
-    }
-
-    // ─── 2. Validate Referral Code (IMPROVED) ──────────────────────────
-    async function validateReferralCode(code) {
-      if (!code || code.trim() === '') return null;
-      const trimmed = code.trim().toUpperCase();
-      
-      try {
-        // Method 1: Check in referralCodes collection
-        const refDoc = await getDoc(doc(db, 'referralCodes', trimmed));
-        if (refDoc.exists()) {
-          return trimmed;
-        }
-
-        // Method 2: Check in users collection (fallback)
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('referralCode', '==', trimmed));
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          // Found the code in users collection - store it in referralCodes for future
-          const userDoc = querySnapshot.docs[0];
-          const uid = userDoc.id;
-          await setDoc(doc(db, 'referralCodes', trimmed), {
-            uid: uid,
-            createdAt: new Date().toISOString()
-          });
-          return trimmed;
-        }
-
-        return null;
-      } catch (err) {
-        console.error('Validation error:', err);
-        return null;
+      const storedCode = localStorage.getItem('referral_code');
+      if (storedCode) {
+        storedReferralCode = storedCode;
+        referralCodeDisplay.textContent = storedCode;
+        debugInfo.innerHTML = `📌 Using stored referral: <strong style="color:#60a5fa;">${storedCode}</strong>`;
+      } else {
+        referralCodeDisplay.textContent = 'Direct Signup (No Referral)';
+        referralCodeDisplay.style.color = '#94a3b8';
+        debugInfo.innerHTML = 'ℹ️ No referral code detected. Signing up directly.';
       }
     }
 
-    // ─── 3. Real-time referral code validation on input ──────────────────
-    let validationTimeout = null;
-    registerReferral.addEventListener('input', async () => {
-      clearTimeout(validationTimeout);
-      const code = registerReferral.value.trim().toUpperCase();
-      
-      if (!code) {
-        registerReferral.className = '';
+    // ============================================
+    // CREDIT REFERRER
+    // ============================================
+    async function creditReferrer(refCode) {
+      if (!refCode) {
+        console.log('ℹ️ No referral code to credit');
         return;
       }
 
-      validationTimeout = setTimeout(async () => {
-        const isValid = await validateReferralCode(code);
-        if (isValid) {
-          registerReferral.className = 'valid-code';
-          appliedReferralCode = code;
-          refCodeDisplay.textContent = code;
-          registerError.style.color = '#10b981';
-          registerError.textContent = '✅ Valid referral code! You\'ll both get ₦300.';
-        } else {
-          registerReferral.className = 'invalid-code';
-          appliedReferralCode = null;
-          refCodeDisplay.textContent = 'None';
-          registerError.style.color = '#ef4444';
-          registerError.textContent = '⚠️ Invalid referral code';
-        }
-      }, 500);
-    });
+      try {
+        console.log(`🔍 Looking for referrer with code: ${refCode}`);
+        const usersRef = db.collection('users');
+        const querySnapshot = await usersRef.where('referralCode', '==', refCode).get();
+        
+        if (!querySnapshot.empty) {
+          const referrerDoc = querySnapshot.docs[0];
+          const referrerData = referrerDoc.data();
+          const referrerRef = usersRef.doc(referrerDoc.id);
 
-    // ─── 4. Generate Referral Code ──────────────────────────────────────
-    function generateReferralCode(uid) {
-      return 'ESH-' + uid.slice(0, 6).toUpperCase() + Math.floor(Math.random() * 10000);
+          console.log(`✅ Found referrer: ${referrerData.email}`);
+          debugInfo.innerHTML = `✅ Found referrer: <strong style="color:#4ade80;">${referrerData.email}</strong>`;
+          
+          await referrerRef.update({
+            totalReferrals: firebase.firestore.FieldValue.increment(1),
+            pendingBonus: firebase.firestore.FieldValue.increment(300),
+            totalEarned: firebase.firestore.FieldValue.increment(300)
+          });
+
+          console.log('✅ Referrer credited!');
+          debugInfo.innerHTML += `<br>✅ Referrer credited with ₦300!`;
+          showToast('🎉 Your friend will receive ₦300 bonus!', 'success');
+          return true;
+        } else {
+          console.warn(`❌ No user found with referral code: ${refCode}`);
+          debugInfo.innerHTML = `❌ No user found with referral code: <strong style="color:#ef4444;">${refCode}</strong>`;
+          return false;
+        }
+      } catch (refError) {
+        console.error('❌ Referral credit error:', refError);
+        debugInfo.innerHTML = `❌ Error: ${refError.message}`;
+        return false;
+      }
     }
 
-    // ─── 5. Create User Document ──────────────────────────────────────────
-    async function createUserDocument(uid, email, referralCode) {
+    // ============================================
+    // SAVE USER TO FIRESTORE
+    // ============================================
+    async function saveUserToFirestore(user, fullName, refCode) {
+      const newReferralCode = generateReferralCode(user.uid);
+      
       const userData = {
-        email: email || '',
-        wallet: 0,
-        totalEarned: 0,
-        totalReferrals: 0,
-        pendingBonus: 0,
-        referralCode: referralCode,
+        uid: user.uid,
+        email: user.email || '',
+        displayName: fullName || user.displayName || 'User',
+        referralCode: newReferralCode,
+        referredBy: refCode || null,
+        balance: 0,
+        lifetimeTotal: 0,
+        successfulTaskCount: 0,
         completedTaskIds: [],
-        createdAt: new Date().toISOString(),
-        status: 'active'
+        totalReferrals: 0,
+        totalEarned: 0,
+        pendingBonus: 0,
+        wallet: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
       };
 
-      await setDoc(doc(db, 'users', uid), userData);
+      await db.collection('users').doc(user.uid).set(userData);
+      console.log('✅ User document created');
+      debugInfo.innerHTML += `<br>✅ Your referral code: <strong style="color:#4ade80;">${newReferralCode}</strong>`;
       
-      // Store in referralCodes collection for lookup
-      await setDoc(doc(db, 'referralCodes', referralCode), {
-        uid: uid,
-        createdAt: new Date().toISOString()
-      });
-
-      return userData;
-    }
-
-    // ─── 6. Reward Referrer ──────────────────────────────────────────────
-    async function rewardReferrer(referralCode) {
-      if (!referralCode) return false;
-
-      try {
-        // First check referralCodes collection
-        let refDoc = await getDoc(doc(db, 'referralCodes', referralCode));
-        let referrerUid = null;
-
-        if (refDoc.exists()) {
-          referrerUid = refDoc.data().uid;
-        } else {
-          // Fallback: check users collection
-          const usersRef = collection(db, 'users');
-          const q = query(usersRef, where('referralCode', '==', referralCode));
-          const querySnapshot = await getDocs(q);
-          
-          if (!querySnapshot.empty) {
-            referrerUid = querySnapshot.docs[0].id;
-            // Store in referralCodes for future
-            await setDoc(doc(db, 'referralCodes', referralCode), {
-              uid: referrerUid,
-              createdAt: new Date().toISOString()
-            });
-          }
-        }
-
-        if (referrerUid) {
-          const referrerRef = doc(db, 'users', referrerUid);
-          await updateDoc(referrerRef, {
-            totalReferrals: increment(1),
-            pendingBonus: increment(300),
-            totalEarned: increment(300)
-          });
-          console.log('✅ Referrer rewarded with ₦300');
-          return true;
-        }
-        return false;
-      } catch (err) {
-        console.error('Failed to reward referrer:', err);
-        return false;
+      if (refCode) {
+        await creditReferrer(refCode);
       }
+      
+      return newReferralCode;
     }
 
-    // ─── 7. Handle Registration ──────────────────────────────────────────
-    async function handleRegister(email, password, referralCode) {
-      const btn = registerBtn;
+    // ============================================
+    // TAB SWITCHING
+    // ============================================
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+    }
+
+    // ============================================
+    // FORGOT PASSWORD
+    // ============================================
+    function openForgotPassword() {
+      document.getElementById('forgotPasswordModal').classList.add('active');
+      document.getElementById('resetEmail').value = document.getElementById('emailInput').value || '';
+    }
+
+    function closeForgotPassword() {
+      document.getElementById('forgotPasswordModal').classList.remove('active');
+    }
+
+    document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('resetEmail').value.trim();
+      const btn = document.getElementById('resetPasswordBtn');
+      
+      if (!email) {
+        showToast('Please enter your email address', 'error');
+        return;
+      }
+
       btn.disabled = true;
-      btn.textContent = 'Creating account...';
-      registerError.textContent = '';
-      registerError.style.color = '#ef4444';
+      btn.textContent = 'Sending...';
 
       try {
-        // Validate referral code if provided
-        let validRef = null;
-        if (referralCode) {
-          validRef = await validateReferralCode(referralCode);
-          if (!validRef) {
-            registerError.textContent = '⚠️ Invalid referral code. Please check and try again.';
-            btn.disabled = false;
-            btn.textContent = 'Create Account';
-            return;
-          }
+        await auth.sendPasswordResetEmail(email);
+        showToast('✅ Password reset link sent to your email!', 'success');
+        closeForgotPassword();
+        document.getElementById('resetPasswordBtn').disabled = false;
+        document.getElementById('resetPasswordBtn').textContent = 'Send Reset Link';
+      } catch (err) {
+        console.error('Reset password error:', err);
+        let msg = 'Failed to send reset email. Please try again.';
+        if (err.code === 'auth/user-not-found') {
+          msg = 'No account found with this email address.';
+        } else if (err.code === 'auth/invalid-email') {
+          msg = 'Invalid email address.';
+        } else if (err.code === 'auth/too-many-requests') {
+          msg = 'Too many requests. Please wait a moment.';
         }
-
-        // Create user
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Generate referral code for new user
-        const newRefCode = generateReferralCode(user.uid);
-
-        // Create user document
-        await createUserDocument(user.uid, email, newRefCode);
-
-        // Reward referrer if valid
-        if (validRef) {
-          await rewardReferrer(validRef);
-        }
-
-        // Send verification email
-        await sendEmailVerification(user);
-
-        registerError.style.color = '#10b981';
-        registerError.textContent = '✅ Account created! Check your email for verification.';
-        btn.textContent = '✅ Done!';
-
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 2000);
-
-      } catch (error) {
-        console.error(error);
-        registerError.textContent = error.message;
+        showToast('❌ ' + msg, 'error');
         btn.disabled = false;
-        btn.textContent = 'Create Account';
+        btn.textContent = 'Send Reset Link';
       }
-    }
+    });
 
-    // ─── 8. Google Auth ──────────────────────────────────────────────────
-    async function handleGoogleSignUp() {
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-
-        // Check if user exists in Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-
-        if (!userDoc.exists()) {
-          // New user - create document
-          const newRefCode = generateReferralCode(user.uid);
-          await createUserDocument(user.uid, user.email, newRefCode);
-
-          // Check for referral from URL or input
-          const refCode = registerReferral.value.trim().toUpperCase() || urlRef;
-          if (refCode) {
-            const validRef = await validateReferralCode(refCode);
-            if (validRef) {
-              await rewardReferrer(validRef);
-            }
-          }
-        }
-
-        window.location.href = 'dashboard.html';
-
-      } catch (error) {
-        console.error('Google auth error:', error);
-        registerError.textContent = 'Google sign-up failed: ' + error.message;
+    // Close modal on overlay click
+    document.getElementById('forgotPasswordModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('forgotPasswordModal')) {
+        closeForgotPassword();
       }
-    }
+    });
 
-    // ─── 9. Event Listeners ──────────────────────────────────────────────
+    // ============================================
+    // EMAIL REGISTRATION
+    // ============================================
+    document.getElementById('emailForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const fullName = document.getElementById('emailFullName').value.trim();
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('emailPassword').value;
+      const btn = document.getElementById('emailRegisterBtn');
 
-    // Register button
-    registerBtn.addEventListener('click', () => {
-      const email = registerEmail.value.trim();
-      const password = registerPassword.value;
-      const referral = registerReferral.value.trim().toUpperCase();
-
-      if (!email || !password) {
-        registerError.textContent = '⚠️ Please fill in all fields';
+      if (!fullName || !email || !password) {
+        showToast('Please fill in all fields', 'error');
         return;
       }
       if (password.length < 6) {
-        registerError.textContent = '⚠️ Password must be at least 6 characters';
+        showToast('Password must be at least 6 characters', 'error');
         return;
       }
 
-      handleRegister(email, password, referral);
-    });
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
 
-    // Enter key support
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        registerBtn.click();
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        await user.updateProfile({ displayName: fullName });
+        await saveUserToFirestore(user, fullName, storedReferralCode);
+        
+        showToast('✅ Account created successfully!', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+      } catch (err) {
+        console.error(err);
+        let msg = 'Registration failed. Please try again.';
+        if (err.code === 'auth/email-already-in-use') msg = 'Email already registered. Please login.';
+        else if (err.code === 'auth/weak-password') msg = 'Password is too weak. Use at least 6 characters.';
+        else if (err.code === 'auth/invalid-email') msg = 'Invalid email address.';
+        showToast('❌ ' + msg, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
       }
     });
 
-    // Google button
-    document.getElementById('googleRegisterBtn').addEventListener('click', handleGoogleSignUp);
+    // ============================================
+    // PHONE REGISTRATION
+    // ============================================
+    let confirmationResult = null;
+    let phoneUser = null;
 
-    // ─── 10. Auto-redirect if already logged in ──────────────────────────
-    onAuthStateChanged(auth, (user) => {
+    document.getElementById('phoneForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const fullName = document.getElementById('phoneFullName').value.trim();
+      const countryCode = document.getElementById('countryCode').value;
+      const phoneNumber = document.getElementById('phoneInput').value.trim();
+
+      if (!fullName || !phoneNumber) {
+        showToast('Please fill in all fields', 'error');
+        return;
+      }
+
+      if (phoneNumber.length < 8) {
+        showToast('Please enter a valid phone number', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('phoneRegisterBtn');
+      btn.disabled = true;
+      btn.innerHTML = 'Sending OTP...';
+
+      try {
+        const fullPhoneNumber = countryCode + phoneNumber;
+        console.log('📱 Sending OTP to:', fullPhoneNumber);
+        
+        const appVerifier = new firebase.auth.RecaptchaVerifier('phoneRegisterBtn', {
+          size: 'invisible'
+        });
+        
+        confirmationResult = await auth.signInWithPhoneNumber(fullPhoneNumber, appVerifier);
+        phoneUser = { fullName, fullPhoneNumber };
+        
+        document.getElementById('otpSection').classList.add('show');
+        showToast('✅ OTP sent to your phone!', 'success');
+        btn.innerHTML = 'Verify OTP';
+        btn.onclick = verifyPhoneOTP;
+        
+      } catch (err) {
+        console.error('Phone auth error:', err);
+        let msg = 'Failed to send OTP. Please try again.';
+        if (err.code === 'auth/invalid-phone-number') msg = 'Invalid phone number format.';
+        else if (err.code === 'auth/too-many-requests') msg = 'Too many requests. Please wait.';
+        showToast('❌ ' + msg, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-phone"></i> Continue with Phone';
+      }
+    });
+
+    async function sendPhoneOTP() {
+      const countryCode = document.getElementById('countryCode').value;
+      const phoneNumber = document.getElementById('phoneInput').value.trim();
+      
+      if (!phoneNumber) {
+        showToast('Please enter your phone number', 'error');
+        return;
+      }
+
+      const btn = document.querySelector('#phoneForm .btn-phone');
+      btn.disabled = true;
+      btn.innerHTML = 'Sending...';
+
+      try {
+        const fullPhoneNumber = countryCode + phoneNumber;
+        const appVerifier = new firebase.auth.RecaptchaVerifier('phoneRegisterBtn', {
+          size: 'invisible'
+        });
+        
+        confirmationResult = await auth.signInWithPhoneNumber(fullPhoneNumber, appVerifier);
+        showToast('✅ New OTP sent!', 'success');
+      } catch (err) {
+        showToast('❌ Failed to send OTP: ' + err.message, 'error');
+      }
+      
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-phone"></i> Continue with Phone';
+    }
+
+    async function verifyPhoneOTP() {
+      const otp = document.getElementById('otpInput').value.trim();
+      const btn = document.getElementById('verifyOtpBtn');
+      
+      if (!otp || otp.length < 6) {
+        showToast('Please enter the 6-digit OTP', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      try {
+        const userCredential = await confirmationResult.confirm(otp);
+        const user = userCredential.user;
+        
+        const fullName = document.getElementById('phoneFullName').value.trim();
+        await saveUserToFirestore(user, fullName, storedReferralCode);
+        
+        showToast('✅ Phone verified and account created!', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+        
+      } catch (err) {
+        console.error('OTP verification error:', err);
+        let msg = 'Invalid OTP. Please try again.';
+        if (err.code === 'auth/invalid-verification-code') msg = 'Invalid code. Please check and try again.';
+        else if (err.code === 'auth/code-expired') msg = 'Code expired. Request a new one.';
+        showToast('❌ ' + msg, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Verify';
+      }
+    }
+
+    // ============================================
+    // GOOGLE REGISTRATION
+    // ============================================
+    async function signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      
+      try {
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+        
+        const userRef = db.collection('users').doc(user.uid);
+        const doc = await userRef.get();
+        
+        if (!doc.exists) {
+          await saveUserToFirestore(user, user.displayName, storedReferralCode);
+          showToast('✅ Google account linked!', 'success');
+        } else {
+          showToast('✅ Welcome back!', 'success');
+        }
+        
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+        
+      } catch (err) {
+        console.error('Google sign-in error:', err);
+        showToast('❌ Google sign-in failed: ' + err.message, 'error');
+      }
+    }
+
+    // ============================================
+    // CHECK IF ALREADY LOGGED IN
+    // ============================================
+    auth.onAuthStateChanged((user) => {
       if (user) {
-        getDoc(doc(db, 'users', user.uid)).then(snap => {
-          if (snap.exists()) {
-            window.location.href = 'dashboard.html';
-          }
-        }).catch(() => {});
+        window.location.href = 'dashboard.html';
       }
     });
 
-    console.log('%c✅ Register Page with Improved Referral Validation', 'color:#10b981');
+    console.log('✅ Register page loaded');
+    console.log('📌 Referral code:', storedReferralCode || 'None');
   </script>
+
 </body>
 </html>
