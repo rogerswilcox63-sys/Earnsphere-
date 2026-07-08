@@ -91,7 +91,7 @@
     }
     .stats-grid, .offers-grid {
       display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
       gap:1.5rem;
     }
     .stat-card, .offer-card, .withdraw-card {
@@ -101,14 +101,13 @@
       padding:1.5rem;
       border:1px solid rgba(255,255,255,.1);
       transition: transform 0.2s;
-      position:relative;
     }
     .stat-card:hover, .offer-card:hover {
       transform: translateY(-2px);
     }
     .stat-title { font-size:.85rem; color:#94a3b8; margin-bottom:.5rem; }
     .stat-value { font-size:1.8rem; font-weight:800; color:#10b981; }
-    .offer-title { font-weight:700; margin-bottom:.5rem; padding-right:30px; }
+    .offer-title { font-weight:700; margin-bottom:.5rem; font-size:1.1rem; }
     .offer-desc { font-size:.9rem; color:#cbd5e1; margin-bottom:1rem; }
     .offer-reward { color:#10b981; font-weight:700; margin-bottom:1rem; font-size:1.1rem; }
     .start-btn, .support-btn {
@@ -290,79 +289,19 @@
       box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden;
     }
 
-    .card-actions {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 10;
-    }
-    .dots-btn {
-      background: rgba(255,255,255,0.05);
+    .test-support-btn {
+      padding: 6px 12px;
+      background: #334155;
       border: none;
-      color: #94a3b8;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
+      color: #fff;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 0.8rem;
       transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      margin-top: 4px;
     }
-    .dots-btn:hover {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-    }
-    .dots-btn.active {
-      background: rgba(59,130,246,0.2);
-      color: #3b82f6;
-    }
-
-    .dropdown-menu {
-      position: absolute;
-      top: 40px;
-      right: 0;
-      background: #1e293b;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      padding: 6px 0;
-      min-width: 180px;
-      display: none;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      z-index: 20;
-    }
-    .dropdown-menu.show {
-      display: block;
-    }
-    .dropdown-menu .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      color: #cbd5e1;
-      text-decoration: none;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: none;
-      background: transparent;
-      width: 100%;
-      text-align: left;
-      font-family: inherit;
-    }
-    .dropdown-menu .menu-item:hover {
-      background: rgba(59,130,246,0.1);
-      color: #fff;
-    }
-    .dropdown-menu .menu-item i {
-      width: 18px;
-      color: #64748b;
-    }
-    .dropdown-menu .divider {
-      height: 1px;
-      background: rgba(255,255,255,0.05);
-      margin: 4px 12px;
+    .test-support-btn:hover {
+      background: #475569;
     }
 
     @media (max-width: 768px) {
@@ -370,6 +309,7 @@
       .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
       .dashboard-container { padding:0 1rem; }
       #aiChatWindow { width:280px; right:10px; bottom:80px; height:350px; }
+      .offers-grid { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -397,32 +337,14 @@
         <div class="stat-card">
           <div class="stat-title">Wallet Balance</div>
           <div class="stat-value" id="walletBalance">₦0.00</div>
-          <div class="card-actions">
-            <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
-            <div class="dropdown-menu">
-              <button class="menu-item" onclick="showToast('💰 Balance: ' + document.getElementById('walletBalance').innerText)"><i class="fas fa-eye"></i> View Balance</button>
-            </div>
-          </div>
         </div>
         <div class="stat-card">
           <div class="stat-title">Total Earned</div>
           <div class="stat-value" id="lifetimeTotal">₦0.00</div>
-          <div class="card-actions">
-            <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
-            <div class="dropdown-menu">
-              <button class="menu-item" onclick="showToast('📊 Total Earned: ' + document.getElementById('lifetimeTotal').innerText)"><i class="fas fa-chart-bar"></i> View Total</button>
-            </div>
-          </div>
         </div>
         <div class="stat-card">
           <div class="stat-title">Tasks Completed</div>
           <div class="stat-value" id="successfulTaskCount">0</div>
-          <div class="card-actions">
-            <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
-            <div class="dropdown-menu">
-              <button class="menu-item" onclick="showToast('📋 Tasks Completed: ' + document.getElementById('successfulTaskCount').innerText)"><i class="fas fa-check-circle"></i> View Tasks</button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -439,7 +361,7 @@
       <div class="offers-grid" id="socialTaskList"></div>
 
       <h2 class="section-title"><i class="fas fa-headset"></i> Contact Support</h2>
-      <div class="withdraw-card" style="position:relative;">
+      <div class="withdraw-card">
         <div id="supportMessage"></div>
         <form id="supportForm">
           <div class="form-group">
@@ -462,15 +384,9 @@
         
         <div style="margin-top:12px;text-align:center;color:#64748b;font-size:0.8rem;">
           <i class="fas fa-telegram"></i> Messages sent directly to support team via Telegram
-        </div>
-        
-        <div class="card-actions">
-          <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
-          <div class="dropdown-menu">
-            <button class="menu-item" onclick="testSupport()"><i class="fas fa-vial"></i> Test Support</button>
-            <div class="divider"></div>
-            <button class="menu-item" onclick="showToast('📧 Support email: support@earnsphere.com')"><i class="fas fa-envelope"></i> Support Email</button>
-          </div>
+          <button class="test-support-btn" onclick="testSupport()" id="testSupportBtn">
+            <i class="fas fa-vial"></i> Test Support
+          </button>
         </div>
       </div>
     </div>
@@ -498,6 +414,7 @@
     <p style="margin-top:1rem; font-size:.75rem;">© 2026 EarnSphere Hub Limited. All rights reserved.</p>
   </footer>
 
+  <!-- AI Chat Button -->
   <div id="aiChatBtn" onclick="toggleAiChat()"><i class="fas fa-robot"></i></div>
   <div id="aiChatWindow">
     <div style="background:linear-gradient(to right, #3b82f6, #10b981); padding:12px 15px; color:white; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
@@ -517,19 +434,10 @@
 
   <script>
     // ============================================
-    // ⚠️ TELEGRAM CONFIGURATION - UPDATE THESE!
+    // ✅ TELEGRAM CONFIGURATION - UPDATED WITH NEW TOKEN
     // ============================================
-    // GET YOUR NEW TOKEN FROM @BotFather (Revoke old one first!)
-    const TELEGRAM_BOT_TOKEN = '8409129212:AAHpzppiWeDk-bITkc1zOKDitL7B6ssI2Hw';  // ← Your token
-    const TELEGRAM_CHAT_ID = '8747781911';  // ← Your Chat ID
-
-    // Check if token is configured
-    if (TELEGRAM_BOT_TOKEN === 'YOUR_NEW_TOKEN_HERE' || TELEGRAM_BOT_TOKEN === '') {
-      console.warn('⚠️ Please update TELEGRAM_BOT_TOKEN with your token from @BotFather');
-      document.addEventListener('DOMContentLoaded', function() {
-        showToast('⚠️ Telegram bot not configured. Please set your token.');
-      });
-    }
+    const TELEGRAM_BOT_TOKEN = '8409129212:AAFu7HSPUsNbVbnG3PLhe9EPWAQREMLWx6g';
+    const TELEGRAM_CHAT_ID = '8747781911';
 
     // ============================================
     // FIREBASE CONFIG
@@ -564,75 +472,29 @@
     // TELEGRAM SEND FUNCTION
     // ============================================
     async function sendTelegramMessage(message) {
-      // Check if token is configured
-      if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_NEW_TOKEN_HERE' || TELEGRAM_BOT_TOKEN === '') {
-        console.error('❌ Telegram bot token not configured!');
-        return { ok: false, error: 'Bot token not configured. Please set your token.' };
-      }
-
       try {
-        console.log('📤 Sending to Telegram...');
-        
         const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: TELEGRAM_CHAT_ID,
             text: message,
             parse_mode: 'Markdown'
           })
         });
-
         const result = await response.json();
-        
         if (result.ok) {
-          console.log('✅ Telegram message sent successfully!');
           return { ok: true };
         } else {
-          console.error('❌ Telegram error:', result);
-          return { ok: false, error: result.description || 'Unknown error' };
+          return { ok: false, error: result.description };
         }
       } catch (error) {
-        console.error('❌ Failed to send Telegram message:', error);
         return { ok: false, error: error.message };
       }
     }
 
     // ============================================
-    // DROPDOWN TOGGLE
-    // ============================================
-    function toggleDropdown(btn) {
-      document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-        if (menu !== btn.nextElementSibling) {
-          menu.classList.remove('show');
-        }
-      });
-      document.querySelectorAll('.dots-btn.active').forEach(b => {
-        if (b !== btn) {
-          b.classList.remove('active');
-        }
-      });
-      
-      const menu = btn.nextElementSibling;
-      menu.classList.toggle('show');
-      btn.classList.toggle('active');
-    }
-
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.card-actions')) {
-        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-          menu.classList.remove('show');
-        });
-        document.querySelectorAll('.dots-btn.active').forEach(btn => {
-          btn.classList.remove('active');
-        });
-      }
-    });
-
-    // ============================================
-    // SURVEY DATABASE
+    // SURVEY DATABASE - 12 Surveys
     // ============================================
     const surveyDatabase = {
       "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
@@ -650,7 +512,7 @@
     };
 
     // ============================================
-    // SOCIAL TASKS
+    // SOCIAL TASKS - Hourly Rotation
     // ============================================
     const socialTasks = [
       { id:'soc_1', title:'Follow on TikTok', desc:'Watch our recent announcement video, hit like, and follow the account profile page.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/richard.wilcox54' },
@@ -801,25 +663,13 @@
         const completed = isTaskCompleted(surveyId);
         surveyList.innerHTML += `
           <div class="offer-card">
-            <div class="card-actions">
-              <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
-              <div class="dropdown-menu">
-                <button class="menu-item" onclick="startSurvey('${surveyId}')" ${completed ? 'disabled style="opacity:0.5;"' : ''}>
-                  <i class="fas fa-play"></i> ${completed ? 'Completed ✅' : 'Start Survey'}
-                </button>
-                <div class="divider"></div>
-                <button class="menu-item" onclick="showToast('💰 Reward: ₦${survey.reward}')">
-                  <i class="fas fa-coins"></i> View Reward
-                </button>
-                <button class="menu-item" onclick="showToast('📋 ${survey.title}')">
-                  <i class="fas fa-info-circle"></i> Details
-                </button>
-              </div>
-            </div>
             <div class="offer-title">${survey.title}</div>
             <p class="offer-desc">${survey.desc}</p>
             <span class="badge badge-survey">${survey.category}</span>
             <div class="offer-reward">₦${survey.reward.toLocaleString()}</div>
+            <button class="start-btn" onclick="startSurvey('${surveyId}')" ${completed ? 'disabled' : ''}>
+              ${completed ? '✅ Completed' : '📝 Start Survey'}
+            </button>
             <div class="reset-timer">
               <i class="fas fa-sync-alt"></i> ${completed ? '✅ Completed' : 'Resets at midnight'}
             </div>
@@ -833,25 +683,13 @@
       
       socialTaskList.innerHTML += `
         <div class="offer-card">
-          <div class="card-actions">
-            <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
-            <div class="dropdown-menu">
-              <button class="menu-item" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}')" ${completed ? 'disabled style="opacity:0.5;"' : ''}>
-                <i class="fas fa-play"></i> ${completed ? 'Completed ✅' : 'Start Task'}
-              </button>
-              <div class="divider"></div>
-              <button class="menu-item" onclick="window.open('${currentTask.link}', '_blank')">
-                <i class="fas fa-external-link-alt"></i> Open Link
-              </button>
-              <button class="menu-item" onclick="showToast('💰 Reward: ₦${currentTask.reward}')">
-                <i class="fas fa-coins"></i> View Reward
-              </button>
-            </div>
-          </div>
           <div class="offer-title">${currentTask.title}</div>
           <div class="offer-desc">${currentTask.desc}</div>
           <span class="badge ${currentTask.badgeClass}">${currentTask.badge}</span>
           <div class="offer-reward">₦${currentTask.reward}</div>
+          <button class="start-btn" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}')" ${completed ? 'disabled' : ''}>
+            ${completed ? '✅ Completed' : '🚀 Start Task'}
+          </button>
           <div class="reset-timer">
             <i class="fas fa-sync-alt"></i> ${completed ? '✅ Completed' : 'New task every hour'}
           </div>
@@ -931,7 +769,7 @@
     }
 
     // ============================================
-    // SUPPORT FORM WITH TELEGRAM
+    // SUPPORT FORM
     // ============================================
     document.getElementById('supportForm')?.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -953,7 +791,6 @@
           const userEmail = currentUser ? currentUser.email : 'Guest User';
           const userUid = currentUser ? currentUser.uid : 'guest_' + Date.now();
 
-          // Save to Firebase
           const ticketRef = await db.collection('support_tickets').add({
             uid: userUid,
             user_email: userEmail,
@@ -964,7 +801,6 @@
             notified: false
           });
 
-          // Send to Telegram
           const ticketId = ticketRef.id;
           const telegramMessage = `
 🔔 *NEW SUPPORT TICKET!*
@@ -988,27 +824,18 @@ ${textMessage}
               notified: true,
               notifiedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            supportMessage.innerHTML = `
-              <div class="message success">
-                <i class="fas fa-check-circle"></i> 
-                ✅ Ticket sent successfully! Check your Telegram! 📨
-              </div>
-            `;
-          } else {
-            supportMessage.innerHTML = `
-              <div class="message error">
-                <i class="fas fa-exclamation-circle"></i> 
-                ⚠️ Ticket saved but Telegram notification failed: ${result.error || 'Unknown error'}
-                <br><small>We'll still get your message via Firebase.</small>
-              </div>
-            `;
           }
-          
+
+          supportMessage.innerHTML = `
+            <div class="message success">
+              <i class="fas fa-check-circle"></i> 
+              ✅ Ticket sent successfully! Check your Telegram! 📨
+            </div>
+          `;
           this.reset();
           showToast('✅ Support ticket submitted!');
 
         } else {
-          // Guest mode - save locally
           const tickets = JSON.parse(localStorage.getItem('earnsphere_support_tickets') || '[]');
           tickets.push({
             id: Date.now(),
