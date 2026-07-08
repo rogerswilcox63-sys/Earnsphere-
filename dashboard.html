@@ -517,10 +517,19 @@
 
   <script>
     // ============================================
-    // ⚠️ UPDATE THIS WITH YOUR NEW TOKEN FROM @BotFather
+    // ⚠️ TELEGRAM CONFIGURATION - UPDATE THESE!
     // ============================================
-    const TELEGRAM_BOT_TOKEN = '8409129212:AAFu7HSPUsNbVbnG3PLhe9EPWAQREMLWx6g';  // ← GET NEW TOKEN FROM @BotFather
-    const TELEGRAM_CHAT_ID = '8747781911';
+    // GET YOUR NEW TOKEN FROM @BotFather (Revoke old one first!)
+    const TELEGRAM_BOT_TOKEN = '8409129212:AAHpzppiWeDk-bITkc1zOKDitL7B6ssI2Hw';  // ← Your token
+    const TELEGRAM_CHAT_ID = '8747781911';  // ← Your Chat ID
+
+    // Check if token is configured
+    if (TELEGRAM_BOT_TOKEN === 'YOUR_NEW_TOKEN_HERE' || TELEGRAM_BOT_TOKEN === '') {
+      console.warn('⚠️ Please update TELEGRAM_BOT_TOKEN with your token from @BotFather');
+      document.addEventListener('DOMContentLoaded', function() {
+        showToast('⚠️ Telegram bot not configured. Please set your token.');
+      });
+    }
 
     // ============================================
     // FIREBASE CONFIG
@@ -555,12 +564,15 @@
     // TELEGRAM SEND FUNCTION
     // ============================================
     async function sendTelegramMessage(message) {
-      if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === '8409129212:AAFu7HSPUsNbVbnG3PLhe9EPWAQREMLWx6g') {
-        console.error('❌ Please set your Telegram bot token');
-        return { ok: false, error: 'Bot token not configured' };
+      // Check if token is configured
+      if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_NEW_TOKEN_HERE' || TELEGRAM_BOT_TOKEN === '') {
+        console.error('❌ Telegram bot token not configured!');
+        return { ok: false, error: 'Bot token not configured. Please set your token.' };
       }
 
       try {
+        console.log('📤 Sending to Telegram...');
+        
         const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: {
@@ -580,7 +592,7 @@
           return { ok: true };
         } else {
           console.error('❌ Telegram error:', result);
-          return { ok: false, error: result.description };
+          return { ok: false, error: result.description || 'Unknown error' };
         }
       } catch (error) {
         console.error('❌ Failed to send Telegram message:', error);
@@ -1019,7 +1031,7 @@ ${textMessage}
     });
 
     // ============================================
-    // TEST SUPPORT - Uses the same function
+    // TEST SUPPORT
     // ============================================
     async function testSupport() {
       const userEmail = currentUser ? currentUser.email : 'test@earnsphere.com';
