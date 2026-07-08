@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -53,6 +52,7 @@
       font-weight:500;
       padding:.5rem 1rem;
       border-radius:.5rem;
+      transition: all 0.3s;
     }
     .nav-links a:hover, .nav-links a.active {
       color:#3b82f6;
@@ -66,7 +66,7 @@
       background-clip:text;
       color:transparent;
     }
-    .user-greeting { display:flex; align-items:center; gap:1rem; }
+    .user-greeting { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
     .logout-btn {
       background: rgba(59,130,246,.2);
       border:1px solid rgba(59,130,246,.3);
@@ -75,6 +75,10 @@
       font-weight:500;
       color:#3b82f6;
       cursor:pointer;
+      transition: all 0.3s;
+    }
+    .logout-btn:hover {
+      background: rgba(59,130,246,.3);
     }
     .dashboard-container { max-width:1200px; margin:2rem auto; padding:0 1.5rem; width:100%; }
     .section-title {
@@ -96,12 +100,16 @@
       border-radius:1rem;
       padding:1.5rem;
       border:1px solid rgba(255,255,255,.1);
+      transition: transform 0.2s;
+    }
+    .stat-card:hover, .offer-card:hover {
+      transform: translateY(-2px);
     }
     .stat-title { font-size:.85rem; color:#94a3b8; margin-bottom:.5rem; }
     .stat-value { font-size:1.8rem; font-weight:800; color:#10b981; }
     .offer-title { font-weight:700; margin-bottom:.5rem; }
     .offer-desc { font-size:.9rem; color:#cbd5e1; margin-bottom:1rem; }
-    .offer-reward { color:#10b981; font-weight:700; margin-bottom:1rem; }
+    .offer-reward { color:#10b981; font-weight:700; margin-bottom:1rem; font-size:1.1rem; }
     .start-btn, .support-btn {
       width:100%;
       background: linear-gradient(135deg, #3b82f6, #2563eb);
@@ -112,8 +120,13 @@
       font-size:1rem;
       font-weight:700;
       cursor:pointer;
+      transition: all 0.3s;
     }
-    .start-btn:disabled { background:#334155; cursor:not-allowed; }
+    .start-btn:hover:not(:disabled), .support-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 15px rgba(59,130,246,.3);
+    }
+    .start-btn:disabled { background:#334155; cursor:not-allowed; opacity:0.7; }
     .form-group { margin-bottom:1.2rem; }
     .form-group label { display:block; margin-bottom:.6rem; color:#cbd5e1; font-weight:500; font-size:.9rem; }
     .form-control {
@@ -124,7 +137,13 @@
       border-radius:.75rem;
       color:#f1f5f9;
       font-size:1rem;
+      transition: border 0.3s;
     }
+    .form-control:focus {
+      outline:none;
+      border-color:#3b82f6;
+    }
+    .form-control option { background:#1e293b; }
     .footer {
       background: rgba(15,23,42,.8);
       padding:2rem;
@@ -134,6 +153,8 @@
       font-size:.9rem;
       color:#64748b;
     }
+    .footer a { color:#64748b; text-decoration:none; margin:0 0.5rem; }
+    .footer a:hover { color:#3b82f6; }
     .toast {
       background: rgba(30,41,59,.95);
       padding:1rem 1.5rem;
@@ -141,6 +162,16 @@
       margin-bottom:.5rem;
       border:1px solid rgba(16,185,129,.3);
       color:#fff;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,.3);
+      position:fixed;
+      top:20px;
+      right:20px;
+      z-index:9999;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
     .message { padding:1rem; border-radius:.75rem; margin-bottom:1rem; text-align:center; font-weight:500; }
     .message.error { background: rgba(239,68,68,.2); border:1px solid rgba(239,68,68,.3); color:#fca5a5; }
@@ -175,22 +206,42 @@
       cursor:pointer;
       text-decoration:none;
       margin-bottom:.75rem;
+      transition: all 0.3s;
     }
     .telegram-btn { background:#0088cc; color:white; border:none; }
+    .telegram-btn:hover { background:#006699; }
     .close-modal { background: transparent; border:1px solid rgba(255,255,255,.2); color:#cbd5e1; }
+    .close-modal:hover { background: rgba(255,255,255,.1); }
 
-    #aiChatBtn {
-      position:fixed; bottom:20px; right:20px; width:60px; height:60px;
-      background: linear-gradient(135deg, #3b82f6, #10b981);
-      border-radius:50%; display:flex; align-items:center; justify-content:center;
-      color:white; font-size:24px; cursor:pointer; z-index:10000;
-      box-shadow:0 4px 15px rgba(0,0,0,.3);
+    .badge {
+      display:inline-block;
+      padding:.25rem .75rem;
+      border-radius:.25rem;
+      font-size:.8rem;
+      margin:.5rem 0;
     }
-    #aiChatWindow {
-      position:fixed; bottom:90px; right:20px; width:320px; height:400px;
-      background:#1e293b; border:1px solid rgba(255,255,255,.1);
-      border-radius:12px; display:none; flex-direction:column;
-      box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden;
+    .badge-survey { background: rgba(59,130,246,.2); color:#3b82f6; }
+    .badge-premium { background: rgba(245,158,11,.2); color:#f59e0b; }
+    .badge-telecom { background: rgba(16,185,129,.2); color:#10b981; }
+    .badge-social { background: rgba(139,92,246,.2); color:#8b5cf6; }
+
+    .loading-spinner {
+      display:inline-block;
+      width:20px;
+      height:20px;
+      border:2px solid rgba(255,255,255,.1);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding:1rem; }
+      .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
+      .dashboard-container { padding:0 1rem; }
     }
   </style>
 </head>
@@ -262,20 +313,18 @@
   <div class="modal-overlay" id="telegramModal">
     <div class="telegram-modal">
       <i class="fab fa-telegram" style="font-size:3rem;color:#0088cc;margin-bottom:1rem;"></i>
-      <h3>Join Our Telegram and Our WhatsApp</h3>
+      <h3>Join Our Telegram and WhatsApp</h3>
       <p style="color:#cbd5e1;margin:1rem 0 1.5rem;">Get instant updates, new tasks, and payment proofs.</p>
       <a href="https://t.me/earnspherehub" target="_blank" class="telegram-btn">Join Telegram Channel</a>
       <button class="close-modal" onclick="closeTelegramModal()">Maybe Later</button>
     </div>
   </div>
 
-  <div id="toastContainer" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
-
   <footer class="footer">
     <p>
-      <a href="privacy-policy.html">Privacy Policy</a> |
-      <a href="about.html">About</a> |
-      <a href="contact.html">Contact</a> |
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
       <a href="https://whatsapp.com/channel/0029Vb8HLi40rGiIn4314U3Z" target="_blank" style="color:#25D366;">
         <i class="fab fa-whatsapp"></i> WhatsApp Channel
       </a>
@@ -286,37 +335,352 @@
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-  authDomain: "earnspherehub-742e9.firebaseapp.com",
-  projectId: "earnspherehub-742e9",
-  storageBucket: "earnspherehub-742e9.firebasestorage.app",
-  messagingSenderId: "173538573377",
-  appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-  measurementId: "G-3ZXY33620J"
-};
+      authDomain: "earnspherehub-742e9.firebaseapp.com",
+      projectId: "earnspherehub-742e9",
+      storageBucket: "earnspherehub-742e9.firebasestorage.app",
+      messagingSenderId: "173538573377",
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0",
+      measurementId: "G-3ZXY33620J"
+    };
 
-    let auth, db, isFirebaseWorking = false, currentUser = null, userData = null;
-    const isPreviewMode = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    let auth, db, isFirebaseWorking = false;
+    let currentUser = null;
+    let userData = null;
+    let isProcessing = false;
 
-    function loadLocalPreviewData() {
-      currentUser = { uid: 'preview_user', email: 'preview@earnsphere.com' };
-      userData = { balance: 2450, lifetimeTotal: 5000, successfulTaskCount: 8, completedTaskIds: [], taskCooldowns: {} };
-      document.getElementById('userName').innerText = 'Welcome, Preview Mode';
-      updateInterfaceValues();
-      renderTasks();
-    }
-
+    // Initialize Firebase
     try {
       firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db = firebase.firestore();
       isFirebaseWorking = true;
+      
+      db.enablePersistence().catch(err => console.warn('Persistence:', err));
     } catch (e) {
       isFirebaseWorking = false;
+      console.warn('Firebase init failed:', e);
     }
 
-    function setupAuthHandler() {
-      if (isPreviewMode || !auth || !isFirebaseWorking) {
-        loadLocalPreviewData();
+    // SURVEY DATABASE WITH FULL URLs
+    const surveyDatabase = {
+      "srv_01": { 
+        title: "Social Media Usage", 
+        category: "Tech", 
+        reward: 150, 
+        desc: "Tell us about your screen time habits",
+        url: "https://earnspherehub.name.ng/social-media-survey.html"
+      },
+      "srv_02": { 
+        title: "Crypto Knowledge Check", 
+        category: "Finance", 
+        reward: 250, 
+        desc: "Your insights on digital assets",
+        url: "https://earnspherehub.name.ng/crypto-survey.html"
+      },
+      "srv_03": { 
+        title: "Fast Food Preferences", 
+        category: "Lifestyle", 
+        reward: 120, 
+        desc: "Help food brands structure logistics",
+        url: "https://earnspherehub.name.ng/food-survey.html"
+      },
+      "srv_04": { 
+        title: "Mobile Network Quality", 
+        category: "Telecom", 
+        reward: 200, 
+        desc: "Rate data stability in Nigeria",
+        url: "https://earnspherehub.name.ng/network-survey.html"
+      },
+      "srv_05": { 
+        title: "Streaming Services Study", 
+        category: "Entertainment", 
+        reward: 180, 
+        desc: "Where do you watch movies?",
+        url: "https://earnspherehub.name.ng/streaming-survey.html"
+      },
+      "srv_06": { 
+        title: "Student Device Survey", 
+        category: "Education", 
+        reward: 160, 
+        desc: "Tools used for your learning tracks",
+        url: "https://earnspherehub.name.ng/education-survey.html"
+      },
+      "srv_07": { 
+        title: "Banking & Fintech Apps", 
+        category: "Finance", 
+        reward: 220, 
+        desc: "Rate your digital wallet experience",
+        url: "https://earnspherehub.name.ng/banking-survey.html"
+      },
+      "srv_08": { 
+        title: "Fashion & Shopping Habits", 
+        category: "E-Commerce", 
+        reward: 140, 
+        desc: "Where do you buy your wear?",
+        url: "https://earnspherehub.name.ng/fashion-survey.html"
+      },
+      "srv_09": { 
+        title: "Gaming & Esports Habits", 
+        category: "Gaming", 
+        reward: 170, 
+        desc: "Let's track local mobile gaming data",
+        url: "https://earnspherehub.name.ng/gaming-survey.html"
+      },
+      "srv_10": { 
+        title: "Sport Betting Insights", 
+        category: "Lifestyle", 
+        reward: 200, 
+        desc: "Analyzing sports gaming data footprints",
+        url: "https://earnspherehub.name.ng/sports-survey.html"
+      },
+      "srv_11": { 
+        title: "Ride Hailing Safety Check", 
+        category: "Transport", 
+        reward: 180, 
+        desc: "Share your ride-hailing experience",
+        url: "https://earnspherehub.name.ng/ride-survey.html"
+      },
+      "srv_12": { 
+        title: "Fitness & Wellness Routine", 
+        category: "Health", 
+        reward: 150, 
+        desc: "Track health and supplement data metrics",
+        url: "https://earnspherehub.name.ng/fitness-survey.html"
+      }
+    };
+
+    // SOCIAL TASKS
+    const socialTasks = [
+      { id:'soc_1', title:'Follow on TikTok', desc:'Watch our recent announcement video, hit like, and follow the account profile page.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/richard.wilcox54' },
+      { id:'soc_2', title:'Subscribe to YouTube Channel', desc:'Open our official video guide channel and press the notification bell alert switch.', reward:300, badge:'YouTube', badgeClass:'badge-social', link:'https://youtube.com/@earnspherenigeria' }
+    ];
+
+    function isTaskCompleted(taskId) {
+      if (!userData || !userData.completedTaskIds) return false;
+      return userData.completedTaskIds.includes(taskId);
+    }
+
+    function updateInterfaceValues() {
+      if (!userData) return;
+      document.getElementById('walletBalance').innerText = `₦${(userData.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      document.getElementById('lifetimeTotal').innerText = `₦${(userData.lifetimeTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      document.getElementById('successfulTaskCount').innerText = userData.successfulTaskCount || 0;
+    }
+
+    async function saveUserDataToFirebase() {
+      if (!isFirebaseWorking || !db || !currentUser || !userData || isProcessing) return;
+      isProcessing = true;
+      try {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        await userRef.set({
+          balance: userData.balance || 0,
+          lifetimeTotal: userData.lifetimeTotal || 0,
+          successfulTaskCount: userData.successfulTaskCount || 0,
+          completedTaskIds: userData.completedTaskIds || [],
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+      } catch (e) {
+        console.error('Save error:', e);
+      } finally {
+        isProcessing = false;
+      }
+    }
+
+    async function loadUserDataFromFirebase(user) {
+      if (!isFirebaseWorking || !db || !user) return null;
+      try {
+        const userRef = db.collection('users').doc(user.uid);
+        const doc = await userRef.get();
+        if (doc.exists) {
+          const data = doc.data();
+          return {
+            balance: data.balance || 0,
+            lifetimeTotal: data.lifetimeTotal || 0,
+            successfulTaskCount: data.successfulTaskCount || 0,
+            completedTaskIds: data.completedTaskIds || []
+          };
+        }
+      } catch (e) {
+        console.warn('Load error:', e);
+      }
+      return null;
+    }
+
+    function renderTasks() {
+      if (!userData) return;
+      
+      const surveyList = document.getElementById('surveyList');
+      const socialTaskList = document.getElementById('socialTaskList');
+      surveyList.innerHTML = '';
+      socialTaskList.innerHTML = '';
+
+      const now = new Date();
+      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+      const currentDay = nigeriaTime.getDate();
+
+      // Show 2 surveys per day - rotate through all 12
+      const surveyIds = Object.keys(surveyDatabase);
+      const index1 = (currentDay * 2) % surveyIds.length;
+      const index2 = (currentDay * 2 + 1) % surveyIds.length;
+      const activeSurveyIds = [surveyIds[index1], surveyIds[index2]];
+
+      activeSurveyIds.forEach(surveyId => {
+        const survey = surveyDatabase[surveyId];
+        const completed = isTaskCompleted(surveyId);
+        surveyList.innerHTML += `
+          <div class="offer-card">
+            <div class="offer-title">${survey.title}</div>
+            <p class="offer-desc">${survey.desc}</p>
+            <span class="badge badge-survey">${survey.category}</span>
+            <div class="offer-reward">₦${survey.reward.toLocaleString()}</div>
+            <button class="start-btn" id="btn-${surveyId}" type="button" ${completed ? 'disabled' : ''} onclick="startSurvey('${surveyId}')">
+              ${completed ? '✅ Completed' : 'Start Survey'}
+            </button>
+          </div>
+        `;
+      });
+
+      // Social tasks - show all available
+      socialTasks.forEach(task => {
+        const completed = isTaskCompleted(task.id);
+        socialTaskList.innerHTML += `
+          <div class="offer-card">
+            <div class="offer-title">${task.title}</div>
+            <div class="offer-desc">${task.desc}</div>
+            <span class="badge ${task.badgeClass}">${task.badge}</span>
+            <div class="offer-reward">₦${task.reward}</div>
+            <button class="start-btn" id="btn-${task.id}" onclick="completeSocialTask('${task.id}', ${task.reward}, '${task.link}')" ${completed ? 'disabled' : ''}>
+              ${completed ? '✅ Completed' : 'Start Social Task'}
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function startSurvey(surveyId) {
+      if (isTaskCompleted(surveyId)) {
+        showToast('You already completed this survey!');
+        return;
+      }
+      // Open survey URL in new tab
+      const survey = surveyDatabase[surveyId];
+      if (survey && survey.url) {
+        window.open(survey.url, '_blank');
+        showToast('📝 Survey opened in new tab. Complete it to earn rewards!');
+      } else {
+        showToast('⚠️ Survey URL not found');
+      }
+    }
+
+    async function completeSocialTask(id, reward, link) {
+      if (!currentUser || !userData) {
+        showToast('⚠️ Please login first');
+        return;
+      }
+      if (isTaskCompleted(id)) {
+        showToast('You already completed this task!');
+        return;
+      }
+      
+      window.open(link, '_blank');
+      
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+      
+      if (!userData.completedTaskIds) userData.completedTaskIds = [];
+      userData.completedTaskIds.push(id);
+      
+      updateInterfaceValues();
+      renderTasks();
+      await saveUserDataToFirebase();
+      showToast(`+₦${reward.toLocaleString()} added to wallet! 🎉`);
+    }
+
+    function showToast(msg) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    function logout() {
+      if (isFirebaseWorking && auth) {
+        auth.signOut().then(() => {
+          window.location.href = 'login.html';
+        });
+      } else {
+        window.location.href = 'login.html';
+      }
+    }
+
+    function showTelegramModal() {
+      const hasSeen = localStorage.getItem('earnsphere_telegram_seen');
+      if (!hasSeen) {
+        document.getElementById('telegramModal').classList.add('active');
+      }
+    }
+    
+    function closeTelegramModal() {
+      document.getElementById('telegramModal').classList.remove('active');
+      localStorage.setItem('earnsphere_telegram_seen', 'true');
+    }
+
+    // Support form
+    document.getElementById('supportForm')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const supportBtn = document.getElementById('supportBtn');
+      const supportMessage = document.getElementById('supportMessage');
+      const issueType = document.getElementById('issue_type').value;
+      const textMessage = document.getElementById('support_text_message').value.trim();
+
+      if (!issueType || !textMessage) {
+        supportMessage.innerHTML = '<div class="message error">Please select an issue type and write a message.</div>';
+        return;
+      }
+
+      supportBtn.disabled = true;
+      supportBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
+
+      try {
+        if (isFirebaseWorking && db && currentUser) {
+          await db.collection('support_tickets').add({
+            uid: currentUser.uid,
+            user_email: currentUser.email || 'N/A',
+            issue_type: issueType,
+            message: textMessage,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'pending'
+          });
+          supportMessage.innerHTML = '<div class="message success">✅ Ticket sent successfully! We\'ll respond within 24 hours.</div>';
+          this.reset();
+        } else {
+          supportMessage.innerHTML = '<div class="message error">⚠️ Please login to send a support ticket.</div>';
+        }
+      } catch (err) {
+        supportMessage.innerHTML = '<div class="message error">❌ Failed to send ticket. Please try again later.</div>';
+      }
+
+      supportBtn.disabled = false;
+      supportBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+    });
+
+    // Auth handler
+    function setupAuth() {
+      if (!isFirebaseWorking || !auth) {
+        const savedData = localStorage.getItem('earnsphere_user_data');
+        if (savedData) {
+          try {
+            userData = JSON.parse(savedData);
+            currentUser = { uid: 'guest' };
+            document.getElementById('userName').innerText = 'Welcome, Guest';
+            updateInterfaceValues();
+            renderTasks();
+          } catch (e) {}
+        }
         return;
       }
 
@@ -334,16 +698,20 @@
         }
 
         currentUser = user;
-        document.getElementById('userName').innerText = `Welcome, ${user.email.split('@')[0]}`;
+        document.getElementById('userName').innerText = `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}`;
 
-        const userRef = db.collection('users').doc(user.uid);
-        const doc = await userRef.get();
-
-        if (!doc.exists) {
-          userData = { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [], taskCooldowns: {} };
-          await userRef.set(userData);
+        const firebaseData = await loadUserDataFromFirebase(user);
+        
+        if (firebaseData) {
+          userData = firebaseData;
         } else {
-          userData = doc.data();
+          userData = {
+            balance: 0,
+            lifetimeTotal: 0,
+            successfulTaskCount: 0,
+            completedTaskIds: []
+          };
+          await saveUserDataToFirebase();
         }
 
         updateInterfaceValues();
@@ -352,245 +720,16 @@
       });
     }
 
-    function updateInterfaceValues() {
-      if (!userData) return;
-      document.getElementById('walletBalance').innerText = `₦${(userData.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      document.getElementById('lifetimeTotal').innerText = `₦${(userData.lifetimeTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      document.getElementById('successfulTaskCount').innerText = userData.successfulTaskCount || 0;
-    }
-
-    const baseSurveys = [
-      { id:'srv_1', title:'Market Brand Survey', desc:'Give direct feedback on local retail beverage consumer choices inside Nigerian marketplaces.', reward:450, badge:'Survey', url:'https://earnspherehub.name.ng/beverage.html' },
-      { id:'srv_2', title:'Fintech App Layout Review', desc:'Evaluate user workflow efficiency regarding standard digital wallet funds transfer speeds.', reward:600, badge:'Premium', url:'https://earnspherehub.name.ng/fintech-survey.html' },
-      { id:'srv_3', title:'Network Provider Check', desc:'Test your network speed and coverage across various regional cellular bands.', reward:150, badge:'Telecom', url:'https://earnspherehub.name.ng/network.html' },
-      { id:'srv_4', title:'Online Shopping Habits', desc:'Share your e-commerce experience and preferences regarding local logistics delivery speeds.', reward:250, badge:'E-commerce', url:'https://earnspherehub.name.ng/shopping.html' },
-      { id:'srv_5', title:'Crypto Adoption Survey', desc:'Provide insights on peer-to-peer crypto payment app selections among micro-vendors.', reward:500, badge:'Web3', url:'https://earnspherehub.name.ng/crypto.html' },
-      { id:'srv_6', title:'Student Education Tools', desc:'Review current remote learning management platform accessibility features.', reward:200, badge:'Education', url:'https://earnspherehub.name.ng/education.html' },
-      { id:'srv_7', title:'Ride-Hailing Preferences', desc:'Analyze app reliability factors concerning transport option availability during peak hours.', reward:350, badge:'Transport', url:'https://earnspherehub.name.ng/transport.html' },
-      { id:'srv_8', title:'Streaming Media Insights', desc:'Share your favorite localized audio and video streaming service consumption limits.', reward:300, badge:'Entertainment', url:'https://earnspherehub.name.ng/streaming.html' },
-      { id:'srv_9', title:'Renewable Energy Outlook', desc:'Provide feedback on solar inverter adoption rates and electricity reliance trends.', reward:400, badge:'Energy', url:'https://earnspherehub.name.ng/energy.html' },
-      { id:'srv_10', title:'Real Estate App Feedback', desc:'Evaluate apartment tracking interface features for tracking short-let properties.', reward:550, badge:'Housing', url:'https://earnspherehub.name.ng/housing.html' },
-      { id:'srv_11', title:'Gig Economy Demographics', desc:'Provide details on typical working hours and payout cycles for remote freelance creators.', reward:350, badge:'Freelance', url:'https://earnspherehub.name.ng/freelance.html' },
-      { id:'srv_12', title:'Health & Fitness Tracking', desc:'Assess consumer demand patterns regarding biometric hardware monitors or calorie trackers.', reward:400, badge:'Health', url:'https://earnspherehub.name.ng/health.html' }
-    ];
-
-    const baseSocialTasks = [
-      { id:'soc_1', title:'Follow on TikTok', desc:'Watch our recent announcement video, hit like, and follow the account profile page.', reward:250, badge:'TikTok', link:'https://tiktok.com/richard.wilcox54' },
-      { id:'soc_2', title:'Subscribe to YouTube Channel', desc:'Open our official video guide channel and press the notification bell alert switch.', reward:300, badge:'YouTube', link:'https://youtube.com/@earnspherenigeria' }
-    ];
-
-    function renderTasks() {
-      if (!userData) return;
-      const surveyList = document.getElementById('surveyList');
-      const socialTaskList = document.getElementById('socialTaskList');
-      surveyList.innerHTML = '';
-      socialTaskList.innerHTML = '';
-
-      const now = new Date();
-      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
-      const currentHour = nigeriaTime.getHours();
-      const currentDay = nigeriaTime.getDate();
-
-      const surveyIndex1 = (currentDay * 2) % baseSurveys.length;
-      const surveyIndex2 = (currentDay * 2 + 1) % baseSurveys.length;
-      const activeSurveys = [baseSurveys[surveyIndex1], baseSurveys[surveyIndex2]];
-
-      const hoursUntilMidnight = 23 - currentHour;
-      const minsUntilNextHour = 59 - nigeriaTime.getMinutes();
-
-      activeSurveys.forEach(activeSurvey => {
-        const completed = (userData.completedTaskIds || []).includes(activeSurvey.id);
-        surveyList.innerHTML += `
-          <div class="offer-card">
-            <div class="offer-title">${activeSurvey.title}</div>
-            <p class="offer-desc">${activeSurvey.desc}</p>
-            <span style="background: rgba(59,130,246,.2); color:#3b82f6; padding:.25rem .5rem; border-radius:.25rem; font-size:.8rem; display:inline-block; margin:.5rem 0;">${activeSurvey.badge}</span>
-            <div class="offer-reward">₦${activeSurvey.reward.toLocaleString()}</div>
-            <button class="start-btn" id="btn-${activeSurvey.id}" type="button" ${completed ? 'disabled' : ''} onclick="completeSurvey('${activeSurvey.id}', ${activeSurvey.reward}, '${activeSurvey.url}')">
-              ${completed ? 'Completed' : 'Start Survey'}
-            </button>
-            <p style="color:#888;font-size:12px;margin-top:10px;">Resets in ${hoursUntilMidnight}h ${minsUntilNextHour}m</p>
-          </div>
-        `;
-      });
-
-      const rotatingIndex = currentHour % baseSocialTasks.length;
-      const task = baseSocialTasks[rotatingIndex];
-      const hourlyId = task.id + '_' + currentHour;
-      const completed = (userData.completedTaskIds || []).includes(hourlyId);
-
-      socialTaskList.innerHTML += `
-        <div class="offer-card">
-          <div class="offer-title">${task.title}</div>
-          <div class="offer-desc">${task.desc}</div>
-          <span style="background: rgba(16,185,129,.2); color:#10b981; padding:.25rem .5rem; border-radius:.25rem; font-size:.8rem; display:inline-block; margin:.5rem 0;">${task.badge}</span>
-          <div class="offer-reward">₦${task.reward}</div>
-          <button class="start-btn" id="btn-${task.id}" onclick="completeSocialTask('${task.id}', ${task.reward}, '${task.link}', ${currentHour})" ${completed ? 'disabled' : ''}>
-            ${completed ? 'Completed' : 'Start Social Task'}
-          </button>
-          <p style="color:#888;font-size:12px;margin-top:10px;">Next task rotation in ${minsUntilNextHour}m</p>
-        </div>
-      `;
-    }
-
-    async function completeSurvey(id, reward, link) {
-      if (!currentUser || !userData) return;
-      if ((userData.completedTaskIds || []).includes(id)) return;
-      window.open(link, '_blank');
-      userData.balance = (userData.balance || 0) + reward;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-      userData.completedTaskIds = [...(userData.completedTaskIds || []), id];
-      updateInterfaceValues();
-      renderTasks();
-      showToast(`+₦${reward} added to wallet!`);
-    }
-
-    async function completeSocialTask(id, reward, link, activeHour) {
-      if (!currentUser || !userData) return;
-      const hourlyId = id + '_' + activeHour;
-      if ((userData.completedTaskIds || []).includes(hourlyId)) return;
-      window.open(link, '_blank');
-      userData.balance = (userData.balance || 0) + reward;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-      userData.completedTaskIds = [...(userData.completedTaskIds || []), hourlyId];
-      updateInterfaceValues();
-      renderTasks();
-      showToast(`+₦${reward} added to wallet!`);
-    }
-
-    function showToast(msg) {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-      document.getElementById('toastContainer').appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    function logout() {
-      if (isFirebaseWorking && auth) {
-        auth.signOut().then(() => window.location.href = 'login.html');
-      } else {
-        alert('Preview mode: Logged out.');
-        window.location.reload();
-      }
-    }
-
-    function showTelegramModal() {
-      document.getElementById('telegramModal').classList.add('active');
-    }
-    function closeTelegramModal() {
-      document.getElementById('telegramModal').classList.remove('active');
-    }
-
-    document.getElementById('supportForm')?.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const supportBtn = document.getElementById('supportBtn');
-      const supportMessage = document.getElementById('supportMessage');
-      const issueType = document.getElementById('issue_type').value;
-      const textMessage = document.getElementById('support_text_message').value.trim();
-
-      if (!issueType || !textMessage) {
-        supportMessage.innerHTML = '<div class="message error">Please select an issue type and write a message.</div>';
-        return;
-      }
-
-      supportBtn.disabled = true;
-      supportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-      try {
-        if (isFirebaseWorking && db && currentUser) {
-          await db.collection('support_tickets').add({
-            uid: currentUser.uid,
-            user_email: currentUser.email || 'N/A',
-            issue_type: issueType,
-            message: textMessage,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          supportMessage.innerHTML = '<div class="message success">Ticket sent successfully via Firebase!</div>';
-          this.reset();
-        } else {
-          supportMessage.innerHTML = '<div class="message success">Preview mode: Message recorded.</div>';
-          this.reset();
-        }
-      } catch (err) {
-        supportMessage.innerHTML = '<div class="message error">Failed to send ticket. Please try again later.</div>';
-      }
-
-      supportBtn.disabled = false;
-      supportBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-    });
-
-    async function sendAiMessage() {
-      const input = document.getElementById('aiInput');
-      const userPrompt = input.value.trim();
-      if (!userPrompt) return;
-
-      appendAiMessage(userPrompt, true);
-      input.value = '';
-
-      try {
-        const response = await fetch('/api/sphere-ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: userPrompt })
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Request failed');
-        appendAiMessage(data.reply || 'Empty response from AI.', false);
-      } catch (error) {
-        appendAiMessage('Error: ' + error.message, false);
-      }
-    }
-
-    function toggleAiChat() {
-      const chatWindow = document.getElementById('aiChatWindow');
-      chatWindow.style.display = (chatWindow.style.display === 'none' || !chatWindow.style.display) ? 'flex' : 'none';
-    }
-
-    function appendAiMessage(text, isUser) {
-      const msgBox = document.getElementById('aiMessages');
-      const msg = document.createElement('div');
-      msg.style.padding = '8px 12px';
-      msg.style.borderRadius = '8px';
-      msg.style.maxWidth = '85%';
-      msg.style.fontSize = '14px';
-      msg.style.lineHeight = '1.4';
-      msg.style.marginBottom = '6px';
-      msg.style.whiteSpace = 'pre-wrap';
-      msg.style.background = isUser ? '#3b82f6' : 'rgba(255,255,255,0.08)';
-      msg.style.color = 'white';
-      msg.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
-      msg.innerText = text;
-      msgBox.appendChild(msg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
-      setupAuthHandler();
-      document.getElementById('aiInput')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendAiMessage();
-      });
+      setupAuth();
     });
-  </script>
 
-  <div id="aiChatBtn" onclick="toggleAiChat()"><i class="fas fa-robot"></i></div>
-  <div id="aiChatWindow">
-    <div style="background:linear-gradient(to right, #3b82f6, #10b981); padding:12px 15px; color:white; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
-      <span><i class="fas fa-brain"></i> SphereAI Assistant</span>
-      <i class="fas fa-times" onclick="toggleAiChat()" style="cursor:pointer;"></i>
-    </div>
-    <div id="aiMessages" style="flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:14px;">
-      <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; max-width: 85%; align-self: flex-start; color: #cbd5e1;">
-        Hello! I'm SphereAI. Ask me about your balance, tasks, how to withdraw, or anything about EarnSphere!
-      </div>
-    </div>
-    <div style="padding:10px; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:8px; background:#0f172a;">
-      <input type="text" id="aiInput" placeholder="Ask something..." style="flex:1; padding:8px 12px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:white; font-size:14px; outline:none;">
-      <button onclick="sendAiMessage()" style="background:#3b82f6; border:none; color:white; padding:8px 12px; border-radius:6px; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
-    </div>
-  </div>
+    // Auto-save every 60 seconds
+    setInterval(() => {
+      if (userData && currentUser && isFirebaseWorking) {
+        saveUserDataToFirebase();
+      }
+    }, 60000);
+  </script>
 </body>
 </html>
