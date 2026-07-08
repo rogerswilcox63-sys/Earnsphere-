@@ -1,0 +1,49 @@
+# .gitignore - ⚠️ Tells Git what to ignore
+
+# ============================================
+# SECRET FILES - NEVER UPLOAD TO GITHUB!
+# ============================================
+config.js
+.env
+.env.local
+.env.*.local
+*.secret
+*.key
+secrets.js
+credentials.js
+private-key.json
+service-account.json
+
+# ============================================
+# NODE MODULES
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ============================================
+# BUILD FILES
+# ============================================
+dist/
+build/
+*.min.js
+*.min.css
+
+# ============================================
+# OS FILES
+# ============================================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+*.tmp
+
+# ============================================
+# IDE FILES
+# ============================================
+.vscode/
+.idea/
+*.iml

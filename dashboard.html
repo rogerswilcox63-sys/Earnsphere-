@@ -6,13 +6,14 @@
   <title>EarnSphere Nigeria - Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -212,42 +213,137 @@
       border: 1px solid rgba(16,185,129,0.3); 
       color: #6ee7b7; 
     }
+    
+    /* Telegram Popup */
     .modal-overlay {
-      display:none;
-      position:fixed;
-      inset:0;
-      background: rgba(0,0,0,.8);
-      backdrop-filter: blur(8px);
-      z-index:9998;
-      align-items:center;
-      justify-content:center;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.5s ease;
     }
-    .modal-overlay.active { display:flex; }
+    .modal-overlay.active { display: flex; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
     .telegram-modal {
-      background: rgba(30,41,59,.95);
-      border-radius:1.5rem;
-      padding:2rem;
-      max-width:400px;
-      width:90%;
-      text-align:center;
-      border:1px solid rgba(59,130,246,.3);
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border-radius: 24px;
+      padding: 32px 28px;
+      max-width: 420px;
+      width: 92%;
+      text-align: center;
+      border: 1px solid rgba(59,130,246,0.2);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: hidden;
     }
-    .telegram-btn, .close-modal {
-      display:block;
-      width:100%;
-      padding:1rem;
-      border-radius:.75rem;
-      font-weight:600;
-      font-size:1rem;
-      cursor:pointer;
-      text-decoration:none;
-      margin-bottom:.75rem;
+    .telegram-modal .telegram-icon {
+      font-size: 56px;
+      color: #0088cc;
+      display: block;
+      margin-bottom: 12px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .telegram-modal h2 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .telegram-modal p {
+      color: #94a3b8;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+    .telegram-modal .features {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 16px 0 20px;
+      text-align: left;
+    }
+    .telegram-modal .features .feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #cbd5e1;
+      font-size: 14px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+    }
+    .telegram-modal .features .feature i {
+      color: #3b82f6;
+      width: 20px;
+      text-align: center;
+    }
+    .telegram-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      margin-bottom: 10px;
       transition: all 0.3s;
     }
-    .telegram-btn { background:#0088cc; color:white; border:none; }
-    .telegram-btn:hover { background:#006699; }
-    .close-modal { background: transparent; border:1px solid rgba(255,255,255,.2); color:#cbd5e1; }
-    .close-modal:hover { background: rgba(255,255,255,.1); }
+    .telegram-btn.primary {
+      background: linear-gradient(135deg, #0088cc, #006699);
+      color: white;
+      border: none;
+    }
+    .telegram-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,136,204,0.4);
+    }
+    .telegram-btn.secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8;
+    }
+    .telegram-btn.secondary:hover {
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+    }
+    .telegram-modal .join-text {
+      color: #64748b;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .telegram-modal .close-icon {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 22px;
+      cursor: pointer;
+      transition: color 0.3s;
+      z-index: 10;
+    }
+    .telegram-modal .close-icon:hover {
+      color: #f1f5f9;
+    }
 
     .badge {
       display:inline-block;
@@ -307,12 +403,40 @@
       background: #475569;
     }
 
+    /* Typing Indicator */
+    .typing-dots {
+      display: inline-block;
+      width: 20px;
+      text-align: left;
+    }
+    .typing-dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+      100% { content: ''; }
+    }
+    .typing-indicator {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: #94a3b8;
+      font-size: 14px;
+      align-self: flex-start;
+      margin-bottom: 6px;
+    }
+
     @media (max-width: 768px) {
       .navbar { padding:1rem; }
       .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
       .dashboard-container { padding:0 1rem; }
       #aiChatWindow { width:280px; right:10px; bottom:80px; height:350px; }
       .offers-grid { grid-template-columns:1fr; }
+      .telegram-modal { padding: 24px 16px; }
     }
   </style>
 </head>
@@ -396,13 +520,40 @@
     </div>
   </div>
 
+  <!-- Telegram Popup -->
   <div class="modal-overlay" id="telegramModal">
     <div class="telegram-modal">
-      <i class="fab fa-telegram" style="font-size:3rem;color:#0088cc;margin-bottom:1rem;"></i>
-      <h3>Join Our Telegram and WhatsApp</h3>
-      <p style="color:#cbd5e1;margin:1rem 0 1.5rem;">Get instant updates, new tasks, and payment proofs.</p>
-      <a href="https://t.me/earnspherehub" target="_blank" class="telegram-btn">Join Telegram Channel</a>
-      <button class="close-modal" onclick="closeTelegramModal()">Maybe Later</button>
+      <button class="close-icon" onclick="closeTelegramModal()">✕</button>
+      <span class="telegram-icon"><i class="fab fa-telegram"></i></span>
+      <h2>Join Our Community! 🚀</h2>
+      <p>Get instant updates, new tasks, and payment proofs.</p>
+      
+      <div class="features">
+        <div class="feature">
+          <i class="fas fa-bullhorn"></i>
+          <span>Get notified about new earning opportunities</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-users"></i>
+          <span>Connect with other EarnSphere members</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-wallet"></i>
+          <span>See payment proofs and withdrawal tips</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-headset"></i>
+          <span>Get faster support from our team</span>
+        </div>
+      </div>
+
+      <a href="https://t.me/earnspherehub" target="_blank" class="telegram-btn primary" onclick="closeTelegramModal()">
+        <i class="fab fa-telegram"></i> Join Telegram Channel
+      </a>
+      <button class="telegram-btn secondary" onclick="closeTelegramModal()">
+        Maybe Later
+      </button>
+      <p class="join-text">🔒 Join 2,000+ members already earning</p>
     </div>
   </div>
 
@@ -418,7 +569,7 @@
     <p style="margin-top:1rem; font-size:.75rem;">© 2026 EarnSphere Hub Limited. All rights reserved.</p>
   </footer>
 
-  <!-- AI Chat Button -->
+  <!-- AI Chat -->
   <div id="aiChatBtn" onclick="toggleAiChat()"><i class="fas fa-robot"></i></div>
   <div id="aiChatWindow">
     <div style="background:linear-gradient(to right, #3b82f6, #10b981); padding:12px 15px; color:white; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
@@ -438,35 +589,45 @@
 
   <script>
     // ============================================
-    // 📧 EMAILJS CONFIGURATION - YOUR IDs
+    // LOAD CONFIG
     // ============================================
-    const EMAILJS_USER_ID = '-NzXZKbT0bcAmE84y';
-    const EMAILJS_SERVICE_ID = 'service_7cd1v06';
-    const EMAILJS_TEMPLATE_ID = 'template_8jsqprf';
-
-    // Initialize EmailJS
-    emailjs.init(EMAILJS_USER_ID);
-
-    // ============================================
-    // FIREBASE CONFIG
-    // ============================================
-    const firebaseConfig = {
-      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-      authDomain: "earnspherehub-742e9.firebaseapp.com",
-      projectId: "earnspherehub-742e9",
-      storageBucket: "earnspherehub-742e9.firebasestorage.app",
-      messagingSenderId: "173538573377",
-      appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-      measurementId: "G-3ZXY33620J"
+    const CONFIG = {
+      // Firebase
+      FIREBASE_API_KEY: 'AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo',
+      FIREBASE_AUTH_DOMAIN: 'earnspherehub-742e9.firebaseapp.com',
+      FIREBASE_PROJECT_ID: 'earnspherehub-742e9',
+      FIREBASE_STORAGE_BUCKET: 'earnspherehub-742e9.firebasestorage.app',
+      FIREBASE_MESSAGING_SENDER_ID: '173538573377',
+      FIREBASE_APP_ID: '1:173538573377:web:6d8c748376afcb9096dac0',
+      FIREBASE_MEASUREMENT_ID: 'G-3ZXY33620J',
+      
+      // EmailJS
+      EMAILJS_USER_ID: '-NzXZKbT0bcAmE84y',
+      EMAILJS_SERVICE_ID: 'service_7cd1v06',
+      EMAILJS_TEMPLATE_ID: 'template_8jsqprf',
+      
+      // DeepSeek AI - ADD YOUR API KEY HERE
+      DEEPSEEK_API_KEY: 'sk-your-deepseek-api-key-here'
     };
 
+    // ============================================
+    // FIREBASE INIT
+    // ============================================
     let auth, db, isFirebaseWorking = false;
     let currentUser = null;
     let userData = null;
     let isProcessing = false;
 
     try {
-      firebase.initializeApp(firebaseConfig);
+      firebase.initializeApp({
+        apiKey: CONFIG.FIREBASE_API_KEY,
+        authDomain: CONFIG.FIREBASE_AUTH_DOMAIN,
+        projectId: CONFIG.FIREBASE_PROJECT_ID,
+        storageBucket: CONFIG.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: CONFIG.FIREBASE_MESSAGING_SENDER_ID,
+        appId: CONFIG.FIREBASE_APP_ID,
+        measurementId: CONFIG.FIREBASE_MEASUREMENT_ID
+      });
       auth = firebase.auth();
       db = firebase.firestore();
       isFirebaseWorking = true;
@@ -474,6 +635,26 @@
     } catch (e) {
       isFirebaseWorking = false;
       console.warn('Firebase init failed:', e);
+    }
+
+    // ============================================
+    // EMAILJS INIT
+    // ============================================
+    if (typeof emailjs !== 'undefined') {
+      emailjs.init(CONFIG.EMAILJS_USER_ID);
+    }
+
+    // ============================================
+    // TELEGRAM POPUP
+    // ============================================
+    function showTelegramModal() {
+      document.getElementById('telegramModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeTelegramModal() {
+      document.getElementById('telegramModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
     }
 
     // ============================================
@@ -739,20 +920,8 @@
       }
     }
 
-    function showTelegramModal() {
-      const hasSeen = localStorage.getItem('earnsphere_telegram_seen');
-      if (!hasSeen) {
-        document.getElementById('telegramModal').classList.add('active');
-      }
-    }
-    
-    function closeTelegramModal() {
-      document.getElementById('telegramModal').classList.remove('active');
-      localStorage.setItem('earnsphere_telegram_seen', 'true');
-    }
-
     // ============================================
-    // SEND SUPPORT EMAIL VIA EMAILJS
+    // SEND SUPPORT EMAIL
     // ============================================
     async function sendSupportEmail(userEmail, userName, issueType, message) {
       const templateParams = {
@@ -765,16 +934,11 @@
 
       try {
         const response = await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
+          CONFIG.EMAILJS_SERVICE_ID,
+          CONFIG.EMAILJS_TEMPLATE_ID,
           templateParams
         );
-        
-        if (response.status === 200) {
-          return { success: true };
-        } else {
-          return { success: false, error: 'Failed to send email' };
-        }
+        return response.status === 200 ? { success: true } : { success: false, error: 'Failed to send email' };
       } catch (error) {
         console.error('EmailJS error:', error);
         return { success: false, error: error.message };
@@ -803,7 +967,6 @@
         const userEmail = currentUser ? currentUser.email : 'Guest User';
         const userName = currentUser ? currentUser.displayName || userEmail.split('@')[0] : 'Guest';
 
-        // Send email via EmailJS
         const result = await sendSupportEmail(userEmail, userName, issueType, textMessage);
 
         if (result.success) {
@@ -817,27 +980,26 @@
             </div>
           `;
           this.reset();
-          showToast('✅ Support ticket sent! Check your email for confirmation.');
+          showToast('✅ Support ticket sent!');
+
+          if (isFirebaseWorking && db && currentUser) {
+            await db.collection('support_tickets').add({
+              uid: currentUser.uid,
+              user_email: currentUser.email,
+              issue_type: issueType,
+              message: textMessage,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              status: 'pending'
+            });
+          }
         } else {
           supportMessage.innerHTML = `
             <div class="message error">
               <i class="fas fa-exclamation-circle"></i> 
               ❌ Failed to send: ${result.error || 'Unknown error'}
-              <br><small style="font-size:0.8rem;">Please try again or contact us directly.</small>
+              <br><small style="font-size:0.8rem;">Please try again or contact us directly at earnspherenigeria@gmail.com</small>
             </div>
           `;
-        }
-
-        // Also save to Firebase for record
-        if (isFirebaseWorking && db && currentUser) {
-          await db.collection('support_tickets').add({
-            uid: currentUser.uid,
-            user_email: currentUser.email,
-            issue_type: issueType,
-            message: textMessage,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'pending'
-          });
         }
 
       } catch (err) {
@@ -882,32 +1044,12 @@
     }
 
     // ============================================
-    // AI CHAT FUNCTIONS
+    // REAL AI CHAT - ONLY DEEPSEEK API (NO LOCAL MESSAGES!)
     // ============================================
-    function toggleAiChat() {
-      const chatWindow = document.getElementById('aiChatWindow');
-      chatWindow.style.display = chatWindow.style.display === 'none' || !chatWindow.style.display ? 'flex' : 'none';
-    }
+    const DEEPSEEK_API_KEY = CONFIG.DEEPSEEK_API_KEY;
+    const hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY !== 'sk-your-deepseek-api-key-here';
 
-    function appendAiMessage(text, isUser) {
-      const msgBox = document.getElementById('aiMessages');
-      const msg = document.createElement('div');
-      msg.style.padding = '8px 12px';
-      msg.style.borderRadius = '8px';
-      msg.style.maxWidth = '85%';
-      msg.style.fontSize = '14px';
-      msg.style.lineHeight = '1.4';
-      msg.style.marginBottom = '6px';
-      msg.style.whiteSpace = 'pre-wrap';
-      msg.style.background = isUser ? '#3b82f6' : 'rgba(255,255,255,0.08)';
-      msg.style.color = 'white';
-      msg.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
-      msg.innerText = text;
-      msgBox.appendChild(msg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    }
-
-    function sendAiMessage() {
+    async function sendAiMessage() {
       const input = document.getElementById('aiInput');
       const userPrompt = input.value.trim();
       if (!userPrompt) return;
@@ -915,26 +1057,154 @@
       appendAiMessage(userPrompt, true);
       input.value = '';
 
-      const lower = userPrompt.toLowerCase();
-      let reply = '';
-
-      if (lower.includes('balance') || lower.includes('wallet') || lower.includes('money')) {
-        const bal = userData?.balance || 0;
-        reply = `💰 Your current wallet balance is ₦${bal.toLocaleString()}. Keep completing tasks to earn more!`;
-      } else if (lower.includes('task') || lower.includes('survey') || lower.includes('complete')) {
-        const count = userData?.successfulTaskCount || 0;
-        reply = `📋 You've completed ${count} tasks so far.\n\n• Surveys: 2 new surveys available daily at midnight\n• Social Tasks: 1 new task available every hour\n\nKeep checking back for more earning opportunities!`;
-      } else if (lower.includes('withdraw') || lower.includes('withdrawal') || lower.includes('payout')) {
-        reply = `💳 To withdraw:\n• Go to the Withdraw page\n• Minimum withdrawal: ₦2,500\n• Make sure your bank details are verified\n• Processing takes 24-48 hours`;
-      } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
-        reply = `👋 Hello there! I'm SphereAI, your EarnSphere assistant. How can I help you today?`;
-      } else if (lower.includes('support') || lower.includes('help') || lower.includes('issue')) {
-        reply = `🆘 For support:\n1. Use the Contact Support form above\n2. Messages are sent to earnspherenigeria@gmail.com\n3. We'll respond within 24 hours\n\nNeed urgent help? Join our Telegram community for faster responses!`;
-      } else {
-        reply = `🤔 I'm here to help! Ask me about:\n• Your balance and earnings\n• Available tasks and surveys\n• Withdrawal information\n• Support and issues\n\nWhat would you like to know?`;
+      // Check if DeepSeek is configured
+      if (!hasValidDeepSeek) {
+        appendAiMessage('⚠️ DeepSeek API key not configured. Please add your API key to config.js', false);
+        return;
       }
 
-      appendAiMessage(reply, false);
+      // Show typing indicator
+      const typingId = showTypingIndicator();
+
+      try {
+        const response = await callDeepSeekAPI(userPrompt);
+        removeTypingIndicator(typingId);
+        
+        if (response.success) {
+          appendAiMessage(response.reply, false);
+        } else {
+          appendAiMessage('⚠️ ' + response.error, false);
+        }
+      } catch (error) {
+        removeTypingIndicator(typingId);
+        appendAiMessage('❌ Error: ' + error.message, false);
+      }
+    }
+
+    async function callDeepSeekAPI(message) {
+      try {
+        const systemPrompt = `
+You are SphereAI, an AI assistant for EarnSphere Nigeria.
+You help users with their questions about the platform.
+
+Platform Info:
+- EarnSphere is a micro-task earning platform in Nigeria
+- Users complete surveys and social tasks to earn money
+- Surveys: 2 new surveys available daily at midnight (Nigeria time)
+- Social Tasks: 1 new task available every hour
+- Minimum Withdrawal: ₦2,500
+- Support Email: earnspherenigeria@gmail.com
+- Telegram: t.me/earnspherehub
+
+User Context:
+- Balance: ₦${userData?.balance || 0}
+- Tasks Completed: ${userData?.successfulTaskCount || 0}
+- Total Earned: ₦${userData?.lifetimeTotal || 0}
+
+Be friendly, helpful, and concise. Keep responses under 150 words.
+If you don't know something, say so honestly.
+        `;
+
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: message }
+            ],
+            temperature: 0.7,
+            max_tokens: 300,
+            stream: false
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          console.error('DeepSeek API Error:', data.error);
+          return { 
+            success: false, 
+            error: data.error.message || 'AI service error'
+          };
+        }
+
+        const reply = data.choices?.[0]?.message?.content || 'No response from AI.';
+        return { success: true, reply: reply };
+
+      } catch (error) {
+        console.error('DeepSeek API Error:', error);
+        return { 
+          success: false, 
+          error: 'Failed to connect to AI service. Please try again.'
+        };
+      }
+    }
+
+    // ============================================
+    // TYPING INDICATOR
+    // ============================================
+    let typingTimeout = null;
+
+    function showTypingIndicator() {
+      const id = 'typing-' + Date.now();
+      const msgBox = document.getElementById('aiMessages');
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = 'typing-indicator';
+      div.innerHTML = '🤔 Thinking<span class="typing-dots"></span>';
+      msgBox.appendChild(div);
+      msgBox.scrollTop = msgBox.scrollHeight;
+      
+      typingTimeout = setTimeout(() => {
+        removeTypingIndicator(id);
+      }, 30000);
+      
+      return id;
+    }
+
+    function removeTypingIndicator(id) {
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        typingTimeout = null;
+      }
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    // ============================================
+    // APPEND AI MESSAGE
+    // ============================================
+    function appendAiMessage(text, isUser) {
+      const msgBox = document.getElementById('aiMessages');
+      const msg = document.createElement('div');
+      msg.style.cssText = `
+        padding: 8px 12px;
+        border-radius: 8px;
+        max-width: 85%;
+        font-size: 14px;
+        line-height: 1.4;
+        margin-bottom: 6px;
+        white-space: pre-wrap;
+        background: ${isUser ? '#3b82f6' : 'rgba(255,255,255,0.08)'};
+        color: white;
+        align-self: ${isUser ? 'flex-end' : 'flex-start'};
+      `;
+      msg.innerText = text;
+      msgBox.appendChild(msg);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    // ============================================
+    // TOGGLE AI CHAT
+    // ============================================
+    function toggleAiChat() {
+      const chatWindow = document.getElementById('aiChatWindow');
+      chatWindow.style.display = chatWindow.style.display === 'none' || !chatWindow.style.display ? 'flex' : 'none';
     }
 
     // ============================================
@@ -995,7 +1265,10 @@
 
         updateInterfaceValues();
         renderTasks();
-        showTelegramModal();
+        
+        setTimeout(() => {
+          showTelegramModal();
+        }, 1500);
       });
     }
 
@@ -1023,5 +1296,6 @@
       }
     }, 60000);
   </script>
+
 </body>
 </html>
