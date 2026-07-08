@@ -304,6 +304,16 @@
       background: #475569;
     }
 
+    .email-badge {
+      display: inline-block;
+      background: #ea4335;
+      color: #fff;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      margin-left: 6px;
+    }
+
     @media (max-width: 768px) {
       .navbar { padding:1rem; }
       .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
@@ -383,7 +393,9 @@
         </form>
         
         <div style="margin-top:12px;text-align:center;color:#64748b;font-size:0.8rem;">
-          <i class="fas fa-telegram"></i> Messages sent directly to support team via Telegram
+          <i class="fas fa-envelope" style="color:#ea4335;"></i> 
+          Messages sent to: <strong>earnspherenigeria@gmail.com</strong>
+          <span class="email-badge">LIVE</span>
           <button class="test-support-btn" onclick="testSupport()" id="testSupportBtn">
             <i class="fas fa-vial"></i> Test Support
           </button>
@@ -434,10 +446,9 @@
 
   <script>
     // ============================================
-    // ✅ TELEGRAM CONFIGURATION - UPDATED WITH NEW TOKEN
+    // SUPPORT EMAIL (No secrets exposed!)
     // ============================================
-    const TELEGRAM_BOT_TOKEN = '8409129212:AAFu7HSPUsNbVbnG3PLhe9EPWAQREMLWx6g';
-    const TELEGRAM_CHAT_ID = '8747781911';
+    const SUPPORT_EMAIL = 'earnspherenigeria@gmail.com';
 
     // ============================================
     // FIREBASE CONFIG
@@ -466,31 +477,6 @@
     } catch (e) {
       isFirebaseWorking = false;
       console.warn('Firebase init failed:', e);
-    }
-
-    // ============================================
-    // TELEGRAM SEND FUNCTION
-    // ============================================
-    async function sendTelegramMessage(message) {
-      try {
-        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: message,
-            parse_mode: 'Markdown'
-          })
-        });
-        const result = await response.json();
-        if (result.ok) {
-          return { ok: true };
-        } else {
-          return { ok: false, error: result.description };
-        }
-      } catch (error) {
-        return { ok: false, error: error.message };
-      }
     }
 
     // ============================================
@@ -646,7 +632,7 @@
     }
 
     // ============================================
-    // RENDER TASKS
+    // RENDER TASKS - WITH VISIBLE BUTTONS!
     // ============================================
     function renderTasks() {
       if (!userData) return;
@@ -769,7 +755,7 @@
     }
 
     // ============================================
-    // SUPPORT FORM
+    // SUPPORT FORM - SENDS TO FIREBASE (Cloud Function sends email)
     // ============================================
     document.getElementById('supportForm')?.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -791,51 +777,30 @@
           const userEmail = currentUser ? currentUser.email : 'Guest User';
           const userUid = currentUser ? currentUser.uid : 'guest_' + Date.now();
 
-          const ticketRef = await db.collection('support_tickets').add({
+          // Save to Firebase - Cloud Function will send email
+          await db.collection('support_tickets').add({
             uid: userUid,
             user_email: userEmail,
             issue_type: issueType,
             message: textMessage,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'pending',
-            notified: false
+            status: 'pending'
           });
-
-          const ticketId = ticketRef.id;
-          const telegramMessage = `
-🔔 *NEW SUPPORT TICKET!*
-
-🆔 Ticket: #${ticketId.slice(0,8)}
-👤 User: ${userEmail}
-📋 Issue: ${issueType}
-
-💬 *Message:*
-${textMessage}
-
-📅 Time: ${new Date().toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}
-
-⚠️ *Action Required!* Please respond to this user.
-          `;
-
-          const result = await sendTelegramMessage(telegramMessage);
-          
-          if (result.ok) {
-            await ticketRef.update({
-              notified: true,
-              notifiedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          }
 
           supportMessage.innerHTML = `
             <div class="message success">
               <i class="fas fa-check-circle"></i> 
-              ✅ Ticket sent successfully! Check your Telegram! 📨
+              ✅ Ticket sent successfully! We'll respond within 24 hours.
+              <br><small style="color:#94a3b8;font-size:0.8rem;display:block;margin-top:4px;">
+                <i class="fas fa-envelope"></i> A copy has been sent to ${SUPPORT_EMAIL}
+              </small>
             </div>
           `;
           this.reset();
-          showToast('✅ Support ticket submitted!');
+          showToast('✅ Support ticket sent! Check your email for confirmation.');
 
         } else {
+          // Guest mode - save locally
           const tickets = JSON.parse(localStorage.getItem('earnsphere_support_tickets') || '[]');
           tickets.push({
             id: Date.now(),
@@ -861,31 +826,34 @@ ${textMessage}
     // TEST SUPPORT
     // ============================================
     async function testSupport() {
-      const userEmail = currentUser ? currentUser.email : 'test@earnsphere.com';
-      
-      const testMessage = `
-🔔 *TEST SUPPORT TICKET!*
+      const testBtn = document.getElementById('testSupportBtn');
+      testBtn.disabled = true;
+      testBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
 
-👤 User: ${userEmail}
-📋 Issue: Test Message
+      try {
+        if (isFirebaseWorking && db) {
+          const userEmail = currentUser ? currentUser.email : 'test@earnsphere.com';
+          const userUid = currentUser ? currentUser.uid : 'test_user';
 
-💬 *Message:*
-🧪 This is a test support message from the dashboard. If you receive this in Telegram, the support system is working perfectly! 🎉
+          await db.collection('support_tickets').add({
+            uid: userUid,
+            user_email: userEmail,
+            issue_type: 'Test Message',
+            message: '🧪 This is a test support message. If you receive this email, the support system is working perfectly! 🎉',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'test'
+          });
 
-📅 Time: ${new Date().toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}
-
-✅ This is a test - System is working!
-      `;
-
-      showToast('📨 Sending test message to Telegram...');
-      
-      const result = await sendTelegramMessage(testMessage);
-      
-      if (result.ok) {
-        showToast('📨 Test ticket sent! Check your Telegram! 🎉');
-      } else {
-        showToast('❌ Test failed: ' + (result.error || 'Unknown error'));
+          showToast('📨 Test ticket sent! Check your email: earnspherenigeria@gmail.com 🎉');
+        } else {
+          showToast('⚠️ Please login to test support');
+        }
+      } catch (err) {
+        showToast('❌ Test failed: ' + err.message);
       }
+
+      testBtn.disabled = false;
+      testBtn.innerHTML = '<i class="fas fa-vial"></i> Test Support';
     }
 
     // ============================================
@@ -936,7 +904,7 @@ ${textMessage}
       } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
         reply = `👋 Hello there! I'm SphereAI, your EarnSphere assistant. How can I help you today?`;
       } else if (lower.includes('support') || lower.includes('help') || lower.includes('issue')) {
-        reply = `🆘 For support:\n1. Use the Contact Support form above\n2. Messages are sent directly to our support team via Telegram\n3. We'll respond within 24 hours\n\nNeed urgent help? Join our Telegram community for faster responses!`;
+        reply = `🆘 For support:\n1. Use the Contact Support form above\n2. Messages are sent to earnspherenigeria@gmail.com\n3. We'll respond within 24 hours\n\nNeed urgent help? Join our Telegram community for faster responses!`;
       } else {
         reply = `🤔 I'm here to help! Ask me about:\n• Your balance and earnings\n• Available tasks and surveys\n• Withdrawal information\n• Support and issues\n\nWhat would you like to know?`;
       }
