@@ -98,6 +98,7 @@
       transition: border-color 0.2s;
     }
     .form-group input:focus { outline: none; border-color: #3b82f6; }
+    .form-group input:disabled { opacity: 0.5; cursor: not-allowed; }
     
     .btn {
       width: 100%;
@@ -111,7 +112,7 @@
       color: #fff;
       background: linear-gradient(135deg, #3b82f6, #2563eb);
     }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     
     .btn-google {
@@ -123,18 +124,23 @@
       justify-content: center;
       gap: 10px;
     }
-    .btn-google:hover { background: #e2e8f0; box-shadow: 0 4px 20px rgba(255,255,255,0.2); }
+    .btn-google:hover:not(:disabled) { background: #e2e8f0; box-shadow: 0 4px 20px rgba(255,255,255,0.2); }
     
     .btn-phone {
       background: linear-gradient(135deg, #10b981, #059669);
       margin-top: 8px;
     }
-    .btn-phone:hover { box-shadow: 0 4px 20px rgba(16,185,129,0.4); }
+    .btn-phone:hover:not(:disabled) { box-shadow: 0 4px 20px rgba(16,185,129,0.4); }
     
-    .btn-danger {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
     }
-    .btn-danger:hover { box-shadow: 0 4px 20px rgba(239,68,68,0.4); }
+    .btn-success:hover:not(:disabled) { box-shadow: 0 4px 20px rgba(34,197,94,0.4); }
+    
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    .btn-warning:hover:not(:disabled) { box-shadow: 0 4px 20px rgba(245,158,11,0.4); }
     
     .phone-input-wrapper {
       display: flex;
@@ -178,7 +184,7 @@
       color: #fff;
       white-space: nowrap;
     }
-    .otp-row .btn-sm:hover { background: #3b82f6; }
+    .otp-row .btn-sm:hover:not(:disabled) { background: #3b82f6; }
     .otp-row .btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
     
     .divider {
@@ -218,7 +224,46 @@
       text-decoration: underline;
     }
     
-    /* Forgot Password Modal */
+    /* ============================================
+       VERIFICATION BANNER
+    ============================================ */
+    .verification-banner {
+      display: none;
+      background: rgba(245,158,11,0.15);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .verification-banner.show { display: block; }
+    .verification-banner .icon { font-size: 32px; display: block; margin-bottom: 8px; }
+    .verification-banner h3 { color: #f59e0b; margin-bottom: 4px; }
+    .verification-banner p { color: #94a3b8; font-size: 14px; }
+    .verification-banner .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .verification-banner .btn-group .btn-sm {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .verification-banner .btn-group .btn-sm:hover { transform: scale(1.02); }
+    .verification-banner .btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
+    .resend-timer {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+    
+    /* Modal */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -301,6 +346,8 @@
       .container { padding: 20px 16px; }
       .phone-input-wrapper { flex-wrap: wrap; }
       .phone-input-wrapper select { width: 100%; }
+      .verification-banner .btn-group { flex-direction: column; }
+      .verification-banner .btn-group .btn-sm { width: 100%; }
     }
   </style>
 </head>
@@ -316,8 +363,24 @@
       <div class="code" id="referralCodeDisplay">—</div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- VERIFICATION BANNER (shown after email signup) -->
+    <!-- ========================================== -->
+    <div class="verification-banner" id="verificationBanner">
+      <span class="icon">📧</span>
+      <h3>Verify Your Email</h3>
+      <p>We've sent a verification link to <strong id="verifyEmailDisplay"></strong>. Please check your inbox and click the link to activate your account.</p>
+      <div class="btn-group">
+        <button class="btn-sm btn-success" id="resendBtn" onclick="resendVerificationEmail()">🔄 Resend Email</button>
+        <button class="btn-sm btn-warning" onclick="checkVerificationStatus()">✅ I've Verified</button>
+      </div>
+      <p style="font-size:12px; color:#64748b; margin-top:8px;">
+        ⏳ <span id="resendTimer">60</span>s before you can resend
+      </p>
+    </div>
+
     <!-- Tab Navigation -->
-    <div class="tab-container">
+    <div class="tab-container" id="tabContainer">
       <button class="tab-btn active" data-tab="email" onclick="switchTab('email')">📧 Email</button>
       <button class="tab-btn" data-tab="phone" onclick="switchTab('phone')">📱 Phone</button>
       <button class="tab-btn" data-tab="google" onclick="switchTab('google')">🔵 Google</button>
@@ -462,13 +525,22 @@
     const referralCodeDisplay = document.getElementById('referralCodeDisplay');
     const toast = document.getElementById('toast');
     const debugInfo = document.getElementById('debugInfo');
+    const verificationBanner = document.getElementById('verificationBanner');
+    const verifyEmailDisplay = document.getElementById('verifyEmailDisplay');
+    const resendTimer = document.getElementById('resendTimer');
+    const resendBtn = document.getElementById('resendBtn');
+    const tabContainer = document.getElementById('tabContainer');
+
+    let storedReferralCode = null;
+    let pendingUserEmail = null;
+    let resendCountdown = 0;
+    let resendInterval = null;
 
     // ============================================
     // GET REFERRAL CODE FROM URL
     // ============================================
     const urlParams = new URLSearchParams(window.location.search);
     const referralCode = urlParams.get('ref');
-    let storedReferralCode = null;
 
     function showToast(msg, type = 'success') {
       toast.textContent = msg;
@@ -493,7 +565,6 @@
       referralCodeDisplay.textContent = referralCode;
       localStorage.setItem('referral_code', referralCode);
       debugInfo.innerHTML = `✅ Referral code found: <strong style="color:#4ade80;">${referralCode}</strong>`;
-      showToast(`✅ Referred by: ${referralCode}`, 'success');
     } else {
       const storedCode = localStorage.getItem('referral_code');
       if (storedCode) {
@@ -511,23 +582,15 @@
     // CREDIT REFERRER
     // ============================================
     async function creditReferrer(refCode) {
-      if (!refCode) {
-        console.log('ℹ️ No referral code to credit');
-        return;
-      }
+      if (!refCode) return;
 
       try {
-        console.log(`🔍 Looking for referrer with code: ${refCode}`);
         const usersRef = db.collection('users');
         const querySnapshot = await usersRef.where('referralCode', '==', refCode).get();
         
         if (!querySnapshot.empty) {
           const referrerDoc = querySnapshot.docs[0];
-          const referrerData = referrerDoc.data();
           const referrerRef = usersRef.doc(referrerDoc.id);
-
-          console.log(`✅ Found referrer: ${referrerData.email}`);
-          debugInfo.innerHTML = `✅ Found referrer: <strong style="color:#4ade80;">${referrerData.email}</strong>`;
           
           await referrerRef.update({
             totalReferrals: firebase.firestore.FieldValue.increment(1),
@@ -535,18 +598,15 @@
             totalEarned: firebase.firestore.FieldValue.increment(300)
           });
 
-          console.log('✅ Referrer credited!');
           debugInfo.innerHTML += `<br>✅ Referrer credited with ₦300!`;
           showToast('🎉 Your friend will receive ₦300 bonus!', 'success');
           return true;
         } else {
-          console.warn(`❌ No user found with referral code: ${refCode}`);
           debugInfo.innerHTML = `❌ No user found with referral code: <strong style="color:#ef4444;">${refCode}</strong>`;
           return false;
         }
       } catch (refError) {
-        console.error('❌ Referral credit error:', refError);
-        debugInfo.innerHTML = `❌ Error: ${refError.message}`;
+        console.error('Referral credit error:', refError);
         return false;
       }
     }
@@ -571,11 +631,11 @@
         totalEarned: 0,
         pendingBonus: 0,
         wallet: 0,
+        emailVerified: user.emailVerified || false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       };
 
       await db.collection('users').doc(user.uid).set(userData);
-      console.log('✅ User document created');
       debugInfo.innerHTML += `<br>✅ Your referral code: <strong style="color:#4ade80;">${newReferralCode}</strong>`;
       
       if (refCode) {
@@ -586,9 +646,107 @@
     }
 
     // ============================================
+    // EMAIL VERIFICATION FUNCTIONS
+    // ============================================
+    function showVerificationBanner(email) {
+      pendingUserEmail = email;
+      verifyEmailDisplay.textContent = email;
+      verificationBanner.classList.add('show');
+      tabContainer.style.display = 'none';
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelector('.login-link').style.display = 'none';
+      startResendTimer();
+    }
+
+    function hideVerificationBanner() {
+      verificationBanner.classList.remove('show');
+      tabContainer.style.display = 'flex';
+      document.querySelector('.login-link').style.display = 'block';
+      if (resendInterval) {
+        clearInterval(resendInterval);
+        resendInterval = null;
+      }
+    }
+
+    function startResendTimer() {
+      resendCountdown = 60;
+      resendTimer.textContent = resendCountdown;
+      resendBtn.disabled = true;
+      
+      if (resendInterval) {
+        clearInterval(resendInterval);
+      }
+      
+      resendInterval = setInterval(() => {
+        resendCountdown--;
+        resendTimer.textContent = resendCountdown;
+        
+        if (resendCountdown <= 0) {
+          clearInterval(resendInterval);
+          resendInterval = null;
+          resendTimer.textContent = 'Ready';
+          resendBtn.disabled = false;
+        }
+      }, 1000);
+    }
+
+    async function resendVerificationEmail() {
+      if (resendCountdown > 0 && resendInterval) {
+        showToast(`Please wait ${resendCountdown}s before resending`, 'warning');
+        return;
+      }
+
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          await user.sendEmailVerification();
+          showToast('✅ Verification email resent! Please check your inbox.', 'success');
+          startResendTimer();
+        } else {
+          showToast('❌ No user found. Please sign up again.', 'error');
+        }
+      } catch (err) {
+        console.error('Resend error:', err);
+        showToast('❌ Failed to resend: ' + err.message, 'error');
+      }
+    }
+
+    async function checkVerificationStatus() {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          showToast('❌ No user found. Please sign up again.', 'error');
+          return;
+        }
+
+        await user.reload();
+        
+        if (user.emailVerified) {
+          const userRef = db.collection('users').doc(user.uid);
+          await userRef.update({ emailVerified: true });
+          
+          showToast('✅ Email verified! Redirecting to dashboard...', 'success');
+          hideVerificationBanner();
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1500);
+        } else {
+          showToast('❌ Email not verified yet. Please check your inbox and click the verification link.', 'warning');
+        }
+      } catch (err) {
+        console.error('Verification check error:', err);
+        showToast('❌ Error checking verification: ' + err.message, 'error');
+      }
+    }
+
+    // ============================================
     // TAB SWITCHING
     // ============================================
     function switchTab(tab) {
+      if (verificationBanner.classList.contains('show')) {
+        showToast('Please verify your email first', 'warning');
+        return;
+      }
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(`tab-${tab}`).classList.add('active');
@@ -599,6 +757,10 @@
     // FORGOT PASSWORD
     // ============================================
     function openForgotPassword() {
+      if (verificationBanner.classList.contains('show')) {
+        showToast('Please verify your email first', 'warning');
+        return;
+      }
       document.getElementById('forgotPasswordModal').classList.add('active');
       document.getElementById('resetEmail').value = document.getElementById('emailInput').value || '';
     }
@@ -625,25 +787,19 @@
         await auth.sendPasswordResetEmail(email);
         showToast('✅ Password reset link sent to your email!', 'success');
         closeForgotPassword();
-        document.getElementById('resetPasswordBtn').disabled = false;
-        document.getElementById('resetPasswordBtn').textContent = 'Send Reset Link';
       } catch (err) {
         console.error('Reset password error:', err);
         let msg = 'Failed to send reset email. Please try again.';
-        if (err.code === 'auth/user-not-found') {
-          msg = 'No account found with this email address.';
-        } else if (err.code === 'auth/invalid-email') {
-          msg = 'Invalid email address.';
-        } else if (err.code === 'auth/too-many-requests') {
-          msg = 'Too many requests. Please wait a moment.';
-        }
+        if (err.code === 'auth/user-not-found') msg = 'No account found with this email address.';
+        else if (err.code === 'auth/invalid-email') msg = 'Invalid email address.';
+        else if (err.code === 'auth/too-many-requests') msg = 'Too many requests. Please wait a moment.';
         showToast('❌ ' + msg, 'error');
-        btn.disabled = false;
-        btn.textContent = 'Send Reset Link';
       }
+      
+      btn.disabled = false;
+      btn.textContent = 'Send Reset Link';
     });
 
-    // Close modal on overlay click
     document.getElementById('forgotPasswordModal').addEventListener('click', (e) => {
       if (e.target === document.getElementById('forgotPasswordModal')) {
         closeForgotPassword();
@@ -651,7 +807,7 @@
     });
 
     // ============================================
-    // EMAIL REGISTRATION
+    // EMAIL REGISTRATION WITH VERIFICATION
     // ============================================
     document.getElementById('emailForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -676,13 +832,20 @@
       try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
+        
         await user.updateProfile({ displayName: fullName });
+        await user.sendEmailVerification();
+        
         await saveUserToFirestore(user, fullName, storedReferralCode);
         
-        showToast('✅ Account created successfully!', 'success');
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+        showVerificationBanner(email);
+        showToast('📧 Verification email sent! Please check your inbox.', 'success');
+        
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+        
       } catch (err) {
-        console.error(err);
+        console.error('Registration error:', err);
         let msg = 'Registration failed. Please try again.';
         if (err.code === 'auth/email-already-in-use') msg = 'Email already registered. Please login.';
         else if (err.code === 'auth/weak-password') msg = 'Password is too weak. Use at least 6 characters.';
@@ -697,7 +860,6 @@
     // PHONE REGISTRATION
     // ============================================
     let confirmationResult = null;
-    let phoneUser = null;
 
     document.getElementById('phoneForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -722,14 +884,12 @@
 
       try {
         const fullPhoneNumber = countryCode + phoneNumber;
-        console.log('📱 Sending OTP to:', fullPhoneNumber);
         
         const appVerifier = new firebase.auth.RecaptchaVerifier('phoneRegisterBtn', {
           size: 'invisible'
         });
         
         confirmationResult = await auth.signInWithPhoneNumber(fullPhoneNumber, appVerifier);
-        phoneUser = { fullName, fullPhoneNumber };
         
         document.getElementById('otpSection').classList.add('show');
         showToast('✅ OTP sent to your phone!', 'success');
@@ -813,6 +973,11 @@
     // GOOGLE REGISTRATION
     // ============================================
     async function signInWithGoogle() {
+      if (verificationBanner.classList.contains('show')) {
+        showToast('Please verify your email first', 'warning');
+        return;
+      }
+
       const provider = new firebase.auth.GoogleAuthProvider();
       
       try {
@@ -840,14 +1005,23 @@
     // ============================================
     // CHECK IF ALREADY LOGGED IN
     // ============================================
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
-        window.location.href = 'dashboard.html';
+        if (user.emailVerified) {
+          try {
+            const userRef = db.collection('users').doc(user.uid);
+            await userRef.update({ emailVerified: true });
+          } catch (e) {}
+          window.location.href = 'dashboard.html';
+        } else if (user.email && !user.emailVerified) {
+          showVerificationBanner(user.email);
+        } else {
+          window.location.href = 'dashboard.html';
+        }
       }
     });
 
     console.log('✅ Register page loaded');
-    console.log('📌 Referral code:', storedReferralCode || 'None');
   </script>
 
 </body>
