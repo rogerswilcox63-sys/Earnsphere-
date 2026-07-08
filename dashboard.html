@@ -101,13 +101,14 @@
       padding:1.5rem;
       border:1px solid rgba(255,255,255,.1);
       transition: transform 0.2s;
+      position:relative;
     }
     .stat-card:hover, .offer-card:hover {
       transform: translateY(-2px);
     }
     .stat-title { font-size:.85rem; color:#94a3b8; margin-bottom:.5rem; }
     .stat-value { font-size:1.8rem; font-weight:800; color:#10b981; }
-    .offer-title { font-weight:700; margin-bottom:.5rem; }
+    .offer-title { font-weight:700; margin-bottom:.5rem; padding-right:30px; }
     .offer-desc { font-size:.9rem; color:#cbd5e1; margin-bottom:1rem; }
     .offer-reward { color:#10b981; font-weight:700; margin-bottom:1rem; font-size:1.1rem; }
     .start-btn, .support-btn {
@@ -122,11 +123,15 @@
       cursor:pointer;
       transition: all 0.3s;
     }
-    .start-btn:hover:not(:disabled), .support-btn:hover {
+    .start-btn:hover:not(:disabled), .support-btn:hover:not(:disabled) {
       transform: scale(1.02);
       box-shadow: 0 4px 15px rgba(59,130,246,.3);
     }
-    .start-btn:disabled { background:#334155; cursor:not-allowed; opacity:0.7; }
+    .start-btn:disabled, .support-btn:disabled { 
+      background:#334155; 
+      cursor:not-allowed; 
+      opacity:0.7; 
+    }
     .reset-timer {
       color: #64748b;
       font-size: 0.8rem;
@@ -177,14 +182,39 @@
       top:20px;
       right:20px;
       z-index:9999;
+      max-width: 90%;
     }
     @keyframes slideIn {
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
-    .message { padding:1rem; border-radius:.75rem; margin-bottom:1rem; text-align:center; font-weight:500; }
-    .message.error { background: rgba(239,68,68,.2); border:1px solid rgba(239,68,68,.3); color:#fca5a5; }
-    .message.success { background: rgba(16,185,129,.2); border:1px solid rgba(16,185,129,.3); color:#6ee7b7; }
+    .message { 
+      padding: 12px 16px; 
+      border-radius: 10px; 
+      margin-bottom: 16px; 
+      font-size: 0.95rem; 
+      text-align: center; 
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .message.error { 
+      background: rgba(239,68,68,0.15); 
+      border: 1px solid rgba(239,68,68,0.3); 
+      color: #fca5a5; 
+    }
+    .message.success { 
+      background: rgba(16,185,129,0.15); 
+      border: 1px solid rgba(16,185,129,0.3); 
+      color: #6ee7b7; 
+    }
+    .message.info { 
+      background: rgba(59,130,246,0.15); 
+      border: 1px solid rgba(59,130,246,0.3); 
+      color: #93b5f8; 
+    }
     .modal-overlay {
       display:none;
       position:fixed;
@@ -242,6 +272,8 @@
       border-top-color:#fff;
       border-radius:50%;
       animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -261,6 +293,106 @@
       background:#1e293b; border:1px solid rgba(255,255,255,.1);
       border-radius:12px; display:none; flex-direction:column;
       box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden;
+    }
+
+    /* Three Dots Dropdown Menu */
+    .card-actions {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 10;
+    }
+    .dots-btn {
+      background: rgba(255,255,255,0.05);
+      border: none;
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dots-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .dots-btn.active {
+      background: rgba(59,130,246,0.2);
+      color: #3b82f6;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 40px;
+      right: 0;
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 6px 0;
+      min-width: 180px;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      z-index: 20;
+    }
+    .dropdown-menu.show {
+      display: block;
+    }
+    .dropdown-menu .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+    .dropdown-menu .menu-item:hover {
+      background: rgba(59,130,246,0.1);
+      color: #fff;
+    }
+    .dropdown-menu .menu-item i {
+      width: 18px;
+      color: #64748b;
+    }
+    .dropdown-menu .menu-item.danger {
+      color: #ef4444;
+    }
+    .dropdown-menu .menu-item.danger:hover {
+      background: rgba(239,68,68,0.1);
+    }
+    .dropdown-menu .menu-item.danger i {
+      color: #ef4444;
+    }
+    .dropdown-menu .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.05);
+      margin: 4px 12px;
+    }
+
+    .test-support-btn {
+      padding: 6px 12px;
+      background: #334155;
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+      margin-top: 4px;
+    }
+    .test-support-btn:hover {
+      background: #475569;
     }
 
     @media (max-width: 768px) {
@@ -295,14 +427,32 @@
         <div class="stat-card">
           <div class="stat-title">Wallet Balance</div>
           <div class="stat-value" id="walletBalance">₦0.00</div>
+          <div class="card-actions">
+            <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
+            <div class="dropdown-menu">
+              <button class="menu-item" onclick="showToast('💰 Balance: ' + document.getElementById('walletBalance').innerText)"><i class="fas fa-eye"></i> View Balance</button>
+            </div>
+          </div>
         </div>
         <div class="stat-card">
           <div class="stat-title">Total Earned</div>
           <div class="stat-value" id="lifetimeTotal">₦0.00</div>
+          <div class="card-actions">
+            <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
+            <div class="dropdown-menu">
+              <button class="menu-item" onclick="showToast('📊 Total Earned: ' + document.getElementById('lifetimeTotal').innerText)"><i class="fas fa-chart-bar"></i> View Total</button>
+            </div>
+          </div>
         </div>
         <div class="stat-card">
           <div class="stat-title">Tasks Completed</div>
           <div class="stat-value" id="successfulTaskCount">0</div>
+          <div class="card-actions">
+            <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
+            <div class="dropdown-menu">
+              <button class="menu-item" onclick="showToast('📋 Tasks Completed: ' + document.getElementById('successfulTaskCount').innerText)"><i class="fas fa-check-circle"></i> View Tasks</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -319,7 +469,7 @@
       <div class="offers-grid" id="socialTaskList"></div>
 
       <h2 class="section-title"><i class="fas fa-headset"></i> Contact Support</h2>
-      <div class="withdraw-card">
+      <div class="withdraw-card" style="position:relative;">
         <div id="supportMessage"></div>
         <form id="supportForm">
           <div class="form-group">
@@ -329,15 +479,29 @@
               <option value="Payment Not Received">Payment Not Received</option>
               <option value="Task Not Credited">Task Not Credited</option>
               <option value="Account Problem">Account Problem</option>
+              <option value="General Inquiry">General Inquiry</option>
               <option value="Other">Other</option>
             </select>
           </div>
           <div class="form-group">
             <label>Your Message</label>
-            <textarea id="support_text_message" class="form-control" rows="4" placeholder="Describe your issue..." required></textarea>
+            <textarea id="support_text_message" class="form-control" rows="3" placeholder="Describe your issue in detail..." required></textarea>
           </div>
           <button type="submit" class="support-btn" id="supportBtn"><i class="fas fa-paper-plane"></i> Send Message</button>
         </form>
+        
+        <div style="margin-top:12px;text-align:center;color:#64748b;font-size:0.8rem;">
+          <i class="fas fa-telegram"></i> Messages sent directly to support team via Telegram
+        </div>
+        
+        <div class="card-actions">
+          <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
+          <div class="dropdown-menu">
+            <button class="menu-item" onclick="testSupport()"><i class="fas fa-vial"></i> Test Support</button>
+            <div class="divider"></div>
+            <button class="menu-item" onclick="showToast('📧 Support email: support@earnsphere.com')"><i class="fas fa-envelope"></i> Support Email</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -383,6 +547,15 @@
   </div>
 
   <script>
+    // ============================================
+    // TELEGRAM CONFIGURATION - YOUR SETTINGS
+    // ============================================
+    const TELEGRAM_BOT_TOKEN = '8409129212:AAHpzppiWeDk-bITkc1zOKDitL7B6ssI2Hw';
+    const TELEGRAM_CHAT_ID = '8747781911';  // Your Chat ID
+
+    // ============================================
+    // FIREBASE CONFIG
+    // ============================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -409,7 +582,40 @@
       console.warn('Firebase init failed:', e);
     }
 
+    // ============================================
+    // DROPDOWN TOGGLE
+    // ============================================
+    function toggleDropdown(btn) {
+      document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+        if (menu !== btn.nextElementSibling) {
+          menu.classList.remove('show');
+        }
+      });
+      document.querySelectorAll('.dots-btn.active').forEach(b => {
+        if (b !== btn) {
+          b.classList.remove('active');
+        }
+      });
+      
+      const menu = btn.nextElementSibling;
+      menu.classList.toggle('show');
+      btn.classList.toggle('active');
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.card-actions')) {
+        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+          menu.classList.remove('show');
+        });
+        document.querySelectorAll('.dots-btn.active').forEach(btn => {
+          btn.classList.remove('active');
+        });
+      }
+    });
+
+    // ============================================
     // SURVEY DATABASE - 12 Surveys
+    // ============================================
     const surveyDatabase = {
       "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
       "srv_02": { title: "Crypto Knowledge Check", category: "Finance", reward: 250, desc: "Your insights on digital assets" },
@@ -425,7 +631,9 @@
       "srv_12": { title: "Fitness & Wellness Routine", category: "Health", reward: 150, desc: "Track health and supplement data metrics" }
     };
 
-    // SOCIAL TASKS - Hourly Rotation
+    // ============================================
+    // SOCIAL TASKS - Hourly Rotation (6 tasks)
+    // ============================================
     const socialTasks = [
       { id:'soc_1', title:'Follow on TikTok', desc:'Watch our recent announcement video, hit like, and follow the account profile page.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/richard.wilcox54' },
       { id:'soc_2', title:'Subscribe to YouTube Channel', desc:'Open our official video guide channel and press the notification bell alert switch.', reward:300, badge:'YouTube', badgeClass:'badge-social', link:'https://youtube.com/@earnspherenigeria' },
@@ -435,63 +643,52 @@
       { id:'soc_6', title:'Subscribe to Newsletter', desc:'Subscribe to our weekly newsletter for exclusive earning opportunities.', reward:180, badge:'Email', badgeClass:'badge-social', link:'https://earnspherehub.name.ng/newsletter' }
     ];
 
-    // Get today's surveys based on date
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
     function getTodaysSurveys() {
       const now = new Date();
       const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
       const dayOfYear = Math.floor((nigeriaTime - new Date(nigeriaTime.getFullYear(), 0, 0)) / 86400000);
-      
       const surveyIds = Object.keys(surveyDatabase);
       const index1 = (dayOfYear * 2) % surveyIds.length;
       const index2 = (dayOfYear * 2 + 1) % surveyIds.length;
-      
       return [surveyIds[index1], surveyIds[index2]];
     }
 
-    // Get current hour's social task
     function getCurrentSocialTask() {
       const now = new Date();
       const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
       const currentHour = nigeriaTime.getHours();
-      
-      // Rotate through social tasks based on hour
       const index = currentHour % socialTasks.length;
       return socialTasks[index];
     }
 
-    // Get time until midnight
     function getTimeUntilMidnight() {
       const now = new Date();
       const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
       const tomorrow = new Date(nigeriaTime);
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
-      
       const diff = tomorrow - nigeriaTime;
       const hours = Math.floor(diff / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
-      
       return { hours, minutes, seconds, total: diff };
     }
 
-    // Get time until next hour
     function getTimeUntilNextHour() {
       const now = new Date();
       const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
       const nextHour = new Date(nigeriaTime);
       nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
-      
       const diff = nextHour - nigeriaTime;
       const minutes = Math.floor(diff / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
-      
       return { minutes, seconds, total: diff };
     }
 
-    // Update reset timers
     function updateResetTimers() {
-      // Survey timer
       const surveyTimer = document.getElementById('surveyResetTimer');
       if (surveyTimer) {
         const timeLeft = getTimeUntilMidnight();
@@ -504,7 +701,6 @@
         `;
       }
 
-      // Social task timer
       const socialTimer = document.getElementById('socialResetTimer');
       if (socialTimer) {
         const timeLeft = getTimeUntilNextHour();
@@ -569,6 +765,9 @@
       return null;
     }
 
+    // ============================================
+    // RENDER TASKS
+    // ============================================
     function renderTasks() {
       if (!userData) return;
       
@@ -577,7 +776,6 @@
       surveyList.innerHTML = '';
       socialTaskList.innerHTML = '';
 
-      // Get today's 2 surveys
       const todaysSurveyIds = getTodaysSurveys();
 
       todaysSurveyIds.forEach(surveyId => {
@@ -585,41 +783,63 @@
         const completed = isTaskCompleted(surveyId);
         surveyList.innerHTML += `
           <div class="offer-card">
+            <div class="card-actions">
+              <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
+              <div class="dropdown-menu">
+                <button class="menu-item" onclick="startSurvey('${surveyId}')" ${completed ? 'disabled style="opacity:0.5;"' : ''}>
+                  <i class="fas fa-play"></i> ${completed ? 'Completed ✅' : 'Start Survey'}
+                </button>
+                <div class="divider"></div>
+                <button class="menu-item" onclick="showToast('💰 Reward: ₦${survey.reward}')">
+                  <i class="fas fa-coins"></i> View Reward
+                </button>
+                <button class="menu-item" onclick="showToast('📋 ${survey.title}')">
+                  <i class="fas fa-info-circle"></i> Details
+                </button>
+              </div>
+            </div>
             <div class="offer-title">${survey.title}</div>
             <p class="offer-desc">${survey.desc}</p>
             <span class="badge badge-survey">${survey.category}</span>
             <div class="offer-reward">₦${survey.reward.toLocaleString()}</div>
-            <button class="start-btn" id="btn-${surveyId}" type="button" ${completed ? 'disabled' : ''} onclick="startSurvey('${surveyId}')">
-              ${completed ? '✅ Completed' : 'Start Survey'}
-            </button>
             <div class="reset-timer">
-              <i class="fas fa-sync-alt"></i> Resets at midnight
+              <i class="fas fa-sync-alt"></i> ${completed ? '✅ Completed' : 'Resets at midnight'}
             </div>
           </div>
         `;
       });
 
-      // Get current hour's social task (only 1 per hour)
       const currentTask = getCurrentSocialTask();
       const taskId = `${currentTask.id}_${new Date().getHours()}`;
       const completed = isTaskCompleted(taskId);
       
       socialTaskList.innerHTML += `
         <div class="offer-card">
+          <div class="card-actions">
+            <button class="dots-btn" onclick="toggleDropdown(this)"><i class="fas fa-ellipsis-v"></i></button>
+            <div class="dropdown-menu">
+              <button class="menu-item" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}')" ${completed ? 'disabled style="opacity:0.5;"' : ''}>
+                <i class="fas fa-play"></i> ${completed ? 'Completed ✅' : 'Start Task'}
+              </button>
+              <div class="divider"></div>
+              <button class="menu-item" onclick="window.open('${currentTask.link}', '_blank')">
+                <i class="fas fa-external-link-alt"></i> Open Link
+              </button>
+              <button class="menu-item" onclick="showToast('💰 Reward: ₦${currentTask.reward}')">
+                <i class="fas fa-coins"></i> View Reward
+              </button>
+            </div>
+          </div>
           <div class="offer-title">${currentTask.title}</div>
           <div class="offer-desc">${currentTask.desc}</div>
           <span class="badge ${currentTask.badgeClass}">${currentTask.badge}</span>
           <div class="offer-reward">₦${currentTask.reward}</div>
-          <button class="start-btn" id="btn-${taskId}" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}')" ${completed ? 'disabled' : ''}>
-            ${completed ? '✅ Completed' : 'Start Social Task'}
-          </button>
           <div class="reset-timer">
-            <i class="fas fa-sync-alt"></i> New task available every hour
+            <i class="fas fa-sync-alt"></i> ${completed ? '✅ Completed' : 'New task every hour'}
           </div>
         </div>
       `;
 
-      // Update timers
       updateResetTimers();
     }
 
@@ -667,7 +887,7 @@
       toast.className = 'toast';
       toast.innerHTML = msg;
       document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 4000);
+      setTimeout(() => toast.remove(), 5000);
     }
 
     function logout() {
@@ -692,7 +912,9 @@
       localStorage.setItem('earnsphere_telegram_seen', 'true');
     }
 
-    // Support form
+    // ============================================
+    // SUPPORT FORM WITH TELEGRAM
+    // ============================================
     document.getElementById('supportForm')?.addEventListener('submit', async function(e) {
       e.preventDefault();
       const supportBtn = document.getElementById('supportBtn');
@@ -709,29 +931,131 @@
       supportBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
 
       try {
-        if (isFirebaseWorking && db && currentUser) {
-          await db.collection('support_tickets').add({
-            uid: currentUser.uid,
-            user_email: currentUser.email || 'N/A',
+        if (isFirebaseWorking && db) {
+          const userEmail = currentUser ? currentUser.email : 'Guest User';
+          const userUid = currentUser ? currentUser.uid : 'guest_' + Date.now();
+
+          const ticketRef = await db.collection('support_tickets').add({
+            uid: userUid,
+            user_email: userEmail,
             issue_type: issueType,
             message: textMessage,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'pending'
+            status: 'pending',
+            notified: false
           });
-          supportMessage.innerHTML = '<div class="message success">✅ Ticket sent successfully! We\'ll respond within 24 hours.</div>';
+
+          // Send to Telegram
+          try {
+            const ticketId = ticketRef.id;
+            const telegramMessage = `
+🔔 *NEW SUPPORT TICKET!*
+
+🆔 Ticket: #${ticketId.slice(0,8)}
+👤 User: ${userEmail}
+📋 Issue: ${issueType}
+
+💬 *Message:*
+${textMessage}
+
+📅 Time: ${new Date().toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}
+
+⚠️ *Action Required!* Please respond to this user.
+            `;
+
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: telegramMessage,
+                parse_mode: 'Markdown'
+              })
+            });
+
+            await ticketRef.update({
+              notified: true,
+              notifiedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+          } catch (telegramError) {
+            console.error('Telegram error:', telegramError);
+          }
+
+          supportMessage.innerHTML = `
+            <div class="message success">
+              <i class="fas fa-check-circle"></i> 
+              ✅ Ticket sent successfully! Our support team will respond within 24 hours.
+            </div>
+          `;
           this.reset();
+          showToast('✅ Support ticket sent successfully! Check Telegram! 📨');
+
         } else {
-          supportMessage.innerHTML = '<div class="message error">⚠️ Please login to send a support ticket.</div>';
+          const tickets = JSON.parse(localStorage.getItem('earnsphere_support_tickets') || '[]');
+          tickets.push({
+            id: Date.now(),
+            issue_type: issueType,
+            message: textMessage,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem('earnsphere_support_tickets', JSON.stringify(tickets));
+          supportMessage.innerHTML = '<div class="message success">✅ Message saved! We\'ll get back to you soon.</div>';
+          this.reset();
+          showToast('✅ Support message saved locally.');
         }
       } catch (err) {
-        supportMessage.innerHTML = '<div class="message error">❌ Failed to send ticket. Please try again later.</div>';
+        console.error('Support error:', err);
+        supportMessage.innerHTML = `<div class="message error">❌ Failed to send ticket: ${err.message || 'Please try again later'}</div>`;
       }
 
       supportBtn.disabled = false;
       supportBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
     });
 
-    // AI Chat Functions
+    // ============================================
+    // TEST SUPPORT
+    // ============================================
+    function testSupport() {
+      const userEmail = currentUser ? currentUser.email : 'test@earnsphere.com';
+
+      fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: `
+🔔 *TEST SUPPORT TICKET!*
+
+👤 User: ${userEmail}
+📋 Issue: Test Message
+
+💬 *Message:*
+🧪 This is a test support message from the dashboard. If you receive this in Telegram, the support system is working perfectly! 🎉
+
+📅 Time: ${new Date().toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}
+
+✅ This is a test - System is working!
+          `,
+          parse_mode: 'Markdown'
+        })
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.ok) {
+          showToast('📨 Test ticket sent! Check your Telegram! 🎉');
+        } else {
+          showToast('❌ Test failed: ' + result.description);
+        }
+      })
+      .catch(err => {
+        showToast('❌ Test failed: ' + err.message);
+      });
+    }
+
+    // ============================================
+    // AI CHAT FUNCTIONS
+    // ============================================
     function toggleAiChat() {
       const chatWindow = document.getElementById('aiChatWindow');
       chatWindow.style.display = chatWindow.style.display === 'none' || !chatWindow.style.display ? 'flex' : 'none';
@@ -776,14 +1100,18 @@
         reply = `💳 To withdraw:\n• Go to the Withdraw page\n• Minimum withdrawal: ₦2,500\n• Make sure your bank details are verified\n• Processing takes 24-48 hours`;
       } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
         reply = `👋 Hello there! I'm SphereAI, your EarnSphere assistant. How can I help you today?`;
+      } else if (lower.includes('support') || lower.includes('help') || lower.includes('issue')) {
+        reply = `🆘 For support:\n1. Use the Contact Support form above\n2. Messages are sent directly to our support team via Telegram\n3. We'll respond within 24 hours\n\nNeed urgent help? Join our Telegram community for faster responses!`;
       } else {
-        reply = `🤔 I'm here to help! Ask me about:\n• Your balance and earnings\n• Available tasks and surveys\n• Withdrawal information\n• General questions\n\nWhat would you like to know?`;
+        reply = `🤔 I'm here to help! Ask me about:\n• Your balance and earnings\n• Available tasks and surveys\n• Withdrawal information\n• Support and issues\n\nWhat would you like to know?`;
       }
 
       appendAiMessage(reply, false);
     }
 
-    // Auth handler
+    // ============================================
+    // AUTH HANDLER
+    // ============================================
     function setupAuth() {
       if (!isFirebaseWorking || !auth) {
         const savedData = localStorage.getItem('earnsphere_user_data');
@@ -829,7 +1157,6 @@
           await saveUserDataToFirebase();
         }
 
-        // Check for completed survey
         const urlParams = new URLSearchParams(window.location.search);
         const completedSurvey = urlParams.get('completed');
         const rewardAmount = urlParams.get('reward');
@@ -844,25 +1171,24 @@
       });
     }
 
-    // Enter key for AI chat
+    // ============================================
+    // INITIALIZATION
+    // ============================================
     document.addEventListener('DOMContentLoaded', () => {
       setupAuth();
       document.getElementById('aiInput')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendAiMessage();
       });
       
-      // Update timers every second
       setInterval(updateResetTimers, 1000);
     });
 
-    // Auto-save every 60 seconds
     setInterval(() => {
       if (userData && currentUser && isFirebaseWorking) {
         saveUserDataToFirebase();
       }
     }, 60000);
 
-    // Refresh tasks every minute to check for new hour
     setInterval(() => {
       if (userData) {
         renderTasks();
