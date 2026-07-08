@@ -1,49 +1,43 @@
-# .gitignore - ⚠️ Tells Git what to ignore
+# Dependencies
+node_modules/
 
-# ============================================
-# SECRET FILES - NEVER UPLOAD TO GITHUB!
-# ============================================
-config.js
+# Environment variables (IMPORTANT - contains your API keys!)
 .env
 .env.local
 .env.*.local
-*.secret
-*.key
-secrets.js
-credentials.js
-private-key.json
-service-account.json
+.env.development.local
+.env.test.local
+.env.production.local
 
-# ============================================
-# NODE MODULES
-# ============================================
-node_modules/
+# Config files with potential secrets
+config.js
+config.local.js
+
+# Build output
+dist/
+build/
+out/
+
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 
-# ============================================
-# BUILD FILES
-# ============================================
-dist/
-build/
-*.min.js
-*.min.css
-
-# ============================================
-# OS FILES
-# ============================================
+# OS generated files
 .DS_Store
 Thumbs.db
-*.swp
-*.swo
-*~
-*.tmp
 
-# ============================================
-# IDE FILES
-# ============================================
-.vscode/
+# Editor directories and files
 .idea/
-*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Misc
+.cache/
+*.tgz
