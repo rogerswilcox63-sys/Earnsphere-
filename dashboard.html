@@ -6,6 +6,9 @@
   <title>EarnSphere Nigeria - Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -304,16 +307,6 @@
       background: #475569;
     }
 
-    .email-badge {
-      display: inline-block;
-      background: #ea4335;
-      color: #fff;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      margin-left: 6px;
-    }
-
     @media (max-width: 768px) {
       .navbar { padding:1rem; }
       .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
@@ -395,7 +388,6 @@
         <div style="margin-top:12px;text-align:center;color:#64748b;font-size:0.8rem;">
           <i class="fas fa-envelope" style="color:#ea4335;"></i> 
           Messages sent to: <strong>earnspherenigeria@gmail.com</strong>
-          <span class="email-badge">LIVE</span>
           <button class="test-support-btn" onclick="testSupport()" id="testSupportBtn">
             <i class="fas fa-vial"></i> Test Support
           </button>
@@ -446,9 +438,14 @@
 
   <script>
     // ============================================
-    // SUPPORT EMAIL (No secrets exposed!)
+    // 📧 EMAILJS CONFIGURATION - YOUR IDs
     // ============================================
-    const SUPPORT_EMAIL = 'earnspherenigeria@gmail.com';
+    const EMAILJS_USER_ID = '-NzXZKbT0bcAmE84y';
+    const EMAILJS_SERVICE_ID = 'service_7rb5npp';
+    const EMAILJS_TEMPLATE_ID = 'template_8jsqprf';
+
+    // Initialize EmailJS
+    emailjs.init(EMAILJS_USER_ID);
 
     // ============================================
     // FIREBASE CONFIG
@@ -480,7 +477,7 @@
     }
 
     // ============================================
-    // SURVEY DATABASE - 12 Surveys
+    // SURVEY DATABASE
     // ============================================
     const surveyDatabase = {
       "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
@@ -498,7 +495,7 @@
     };
 
     // ============================================
-    // SOCIAL TASKS - Hourly Rotation
+    // SOCIAL TASKS
     // ============================================
     const socialTasks = [
       { id:'soc_1', title:'Follow on TikTok', desc:'Watch our recent announcement video, hit like, and follow the account profile page.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/richard.wilcox54' },
@@ -632,7 +629,7 @@
     }
 
     // ============================================
-    // RENDER TASKS - WITH VISIBLE BUTTONS!
+    // RENDER TASKS
     // ============================================
     function renderTasks() {
       if (!userData) return;
@@ -755,7 +752,37 @@
     }
 
     // ============================================
-    // SUPPORT FORM - SENDS TO FIREBASE (Cloud Function sends email)
+    // SEND SUPPORT EMAIL VIA EMAILJS
+    // ============================================
+    async function sendSupportEmail(userEmail, userName, issueType, message) {
+      const templateParams = {
+        name: userName || 'Anonymous',
+        email: userEmail || 'No email provided',
+        title: issueType || 'General Inquiry',
+        message: message || 'No message provided',
+        time: new Date().toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })
+      };
+
+      try {
+        const response = await emailjs.send(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_ID,
+          templateParams
+        );
+        
+        if (response.status === 200) {
+          return { success: true };
+        } else {
+          return { success: false, error: 'Failed to send email' };
+        }
+      } catch (error) {
+        console.error('EmailJS error:', error);
+        return { success: false, error: error.message };
+      }
+    }
+
+    // ============================================
+    // SUPPORT FORM
     // ============================================
     document.getElementById('supportForm')?.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -773,46 +800,46 @@
       supportBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
 
       try {
-        if (isFirebaseWorking && db) {
-          const userEmail = currentUser ? currentUser.email : 'Guest User';
-          const userUid = currentUser ? currentUser.uid : 'guest_' + Date.now();
+        const userEmail = currentUser ? currentUser.email : 'Guest User';
+        const userName = currentUser ? currentUser.displayName || userEmail.split('@')[0] : 'Guest';
 
-          // Save to Firebase - Cloud Function will send email
-          await db.collection('support_tickets').add({
-            uid: userUid,
-            user_email: userEmail,
-            issue_type: issueType,
-            message: textMessage,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'pending'
-          });
+        // Send email via EmailJS
+        const result = await sendSupportEmail(userEmail, userName, issueType, textMessage);
 
+        if (result.success) {
           supportMessage.innerHTML = `
             <div class="message success">
               <i class="fas fa-check-circle"></i> 
               ✅ Ticket sent successfully! We'll respond within 24 hours.
               <br><small style="color:#94a3b8;font-size:0.8rem;display:block;margin-top:4px;">
-                <i class="fas fa-envelope"></i> A copy has been sent to ${SUPPORT_EMAIL}
+                <i class="fas fa-envelope"></i> A copy has been sent to earnspherenigeria@gmail.com
               </small>
             </div>
           `;
           this.reset();
           showToast('✅ Support ticket sent! Check your email for confirmation.');
-
         } else {
-          // Guest mode - save locally
-          const tickets = JSON.parse(localStorage.getItem('earnsphere_support_tickets') || '[]');
-          tickets.push({
-            id: Date.now(),
+          supportMessage.innerHTML = `
+            <div class="message error">
+              <i class="fas fa-exclamation-circle"></i> 
+              ❌ Failed to send: ${result.error || 'Unknown error'}
+              <br><small style="font-size:0.8rem;">Please try again or contact us directly.</small>
+            </div>
+          `;
+        }
+
+        // Also save to Firebase for record
+        if (isFirebaseWorking && db && currentUser) {
+          await db.collection('support_tickets').add({
+            uid: currentUser.uid,
+            user_email: currentUser.email,
             issue_type: issueType,
             message: textMessage,
-            timestamp: new Date().toISOString()
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'pending'
           });
-          localStorage.setItem('earnsphere_support_tickets', JSON.stringify(tickets));
-          supportMessage.innerHTML = '<div class="message success">✅ Message saved! We\'ll get back to you soon.</div>';
-          this.reset();
-          showToast('✅ Support message saved locally.');
         }
+
       } catch (err) {
         console.error('Support error:', err);
         supportMessage.innerHTML = `<div class="message error">❌ Failed to send ticket: ${err.message || 'Please try again later'}</div>`;
@@ -831,22 +858,20 @@
       testBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
 
       try {
-        if (isFirebaseWorking && db) {
-          const userEmail = currentUser ? currentUser.email : 'test@earnsphere.com';
-          const userUid = currentUser ? currentUser.uid : 'test_user';
+        const userEmail = currentUser ? currentUser.email : 'test@earnsphere.com';
+        const userName = currentUser ? currentUser.displayName || 'Test User' : 'Test User';
 
-          await db.collection('support_tickets').add({
-            uid: userUid,
-            user_email: userEmail,
-            issue_type: 'Test Message',
-            message: '🧪 This is a test support message. If you receive this email, the support system is working perfectly! 🎉',
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'test'
-          });
+        const result = await sendSupportEmail(
+          userEmail,
+          userName,
+          'Test Message',
+          '🧪 This is a test support message. If you receive this email, the support system is working perfectly! 🎉'
+        );
 
+        if (result.success) {
           showToast('📨 Test ticket sent! Check your email: earnspherenigeria@gmail.com 🎉');
         } else {
-          showToast('⚠️ Please login to test support');
+          showToast('❌ Test failed: ' + (result.error || 'Unknown error'));
         }
       } catch (err) {
         showToast('❌ Test failed: ' + err.message);
