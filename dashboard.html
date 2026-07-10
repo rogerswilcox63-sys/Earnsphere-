@@ -640,14 +640,14 @@
 
     try {
       firebase.initializeApp({
-        apiKey: CONFIG.FIREBASE_API_KEY,
-        authDomain: CONFIG.FIREBASE_AUTH_DOMAIN,
-        projectId: CONFIG.FIREBASE_PROJECT_ID,
-        storageBucket: CONFIG.FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: CONFIG.FIREBASE_MESSAGING_SENDER_ID,
-        appId: CONFIG.FIREBASE_APP_ID,
-        measurementId: CONFIG.FIREBASE_MEASUREMENT_ID
-      });
+        apiKey: AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+      authDomain: "earnspherehub-742e9.firebaseapp.com",
+      projectId: "earnspherehub-742e9",
+      storageBucket: "earnspherehub-742e9.firebasestorage.app",
+      messagingSenderId: "173538573377",
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0",
+      measurementId: "G-3ZXY33620J"
+    };
       auth = firebase.auth();
       db = firebase.firestore();
       isFirebaseWorking = true;
@@ -1065,52 +1065,56 @@
       testBtn.innerHTML = '<i class="fas fa-vial"></i> Test Support';
     }
 
-    // ============================================
-    // REAL AI CHAT - USING DEEPSEEK FROM CONFIG.JS
-    // ============================================
-    // Get DeepSeek API key from CONFIG (NO hardcoded key in HTML!)
-    const DEEPSEEK_API_KEY = CONFIG.DEEPSEEK_API_KEY;
-    const hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY !== '';
+// ============================================
+// REAL AI CHAT - USING DEEPSEEK VIA PROXY
+// ============================================
+// Get DeepSeek API key from CONFIG (NO hardcoded key in HTML!)
+const DEEPSEEK_API_KEY = window.CONFIG?.DEEPSEEK_API_KEY;
+const hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY !== '' && DEEPSEEK_API_KEY !== 'YOUR_DEEPSEEK_API_KEY_HERE';
 
-    if (hasValidDeepSeek) {
-      console.log('✅ DeepSeek AI configured from config.js');
+if (hasValidDeepSeek) {
+  console.log('✅ DeepSeek AI configured from config.js');
+} else {
+  console.warn('⚠️ DeepSeek API key not configured in config.js');
+}
+
+async function sendAiMessage() {
+  const input = document.getElementById('aiInput');
+  if (!input) return;
+  
+  const userPrompt = input.value.trim();
+  if (!userPrompt) return;
+
+  // Append user message to UI
+  appendAiMessage(userPrompt, true);
+  input.value = '';
+
+  if (!hasValidDeepSeek) {
+    appendAiMessage('⚠️ DeepSeek API key not configured. Please add your API key to config.js', false);
+    return;
+  }
+
+  const typingId = showTypingIndicator();
+
+  try {
+    const response = await callDeepSeekAPI(userPrompt);
+    removeTypingIndicator(typingId);
+    
+    if (response.success) {
+      appendAiMessage(response.reply, false);
     } else {
-      console.warn('⚠️ DeepSeek API key not configured in config.js');
+      appendAiMessage('⚠️ ' + response.error, false);
     }
+  } catch (error) {
+    removeTypingIndicator(typingId);
+    appendAiMessage('❌ Error: ' + error.message, false);
+  }
+}
 
-    async function sendAiMessage() {
-      const input = document.getElementById('aiInput');
-      const userPrompt = input.value.trim();
-      if (!userPrompt) return;
-
-      appendAiMessage(userPrompt, true);
-      input.value = '';
-
-      if (!hasValidDeepSeek) {
-        appendAiMessage('⚠️ DeepSeek API key not configured. Please add your API key to config.js', false);
-        return;
-      }
-
-      const typingId = showTypingIndicator();
-
-      try {
-        const response = await callDeepSeekAPI(userPrompt);
-        removeTypingIndicator(typingId);
-        
-        if (response.success) {
-          appendAiMessage(response.reply, false);
-        } else {
-          appendAiMessage('⚠️ ' + response.error, false);
-        }
-      } catch (error) {
-        removeTypingIndicator(typingId);
-        appendAiMessage('❌ Error: ' + error.message, false);
-      }
-    }
-
-    async function callDeepSeekAPI(message) {
-      try {
-        const systemPrompt = `
+async function callDeepSeekAPI(message) {
+  try {
+    // Dynamically reads your logged-in Firebase user variables
+    const systemPrompt = `
 You are SphereAI, an AI assistant for EarnSphere Nigeria.
 You help users with their questions about the platform.
 
@@ -1124,115 +1128,136 @@ Platform Info:
 - Telegram: t.me/earnspherehub
 
 User Context:
-- Balance: ₦${userData?.balance || 0}
-- Tasks Completed: ${userData?.successfulTaskCount || 0}
-- Total Earned: ₦${userData?.lifetimeTotal || 0}
+- Balance: ₦${typeof userData !== 'undefined' ? (userData?.balance || 0) : 0}
+- Tasks Completed: ${typeof userData !== 'undefined' ? (userData?.successfulTaskCount || 0) : 0}
+- Total Earned: ₦${typeof userData !== 'undefined' ? (userData?.lifetimeTotal || 0) : 0}
 
 Be friendly, helpful, and concise. Keep responses under 150 words.
 If you don't know something, say so honestly.
-        `;
+    `;
 
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'deepseek-chat',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: message }
-            ],
-            temperature: 0.7,
-            max_tokens: 300,
-            stream: false
-          })
-        });
+    // Using a public CORS proxy so it runs on mobile browsers/Acode preview without security blocks
+    const proxyUrl = 'https://herokuapp.com';
+    const targetUrl = 'https://deepseek.com';
 
-        const data = await response.json();
+    const response = await fetch(proxyUrl + targetUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
+        ],
+        temperature: 0.7,
+        max_tokens: 300,
+        stream: false
+      })
+    });
 
-        if (data.error) {
-          console.error('DeepSeek API Error:', data.error);
-          return { 
-            success: false, 
-            error: data.error.message || 'AI service error'
-          };
-        }
-
-        const reply = data.choices?.[0]?.message?.content || 'No response from AI.';
-        return { success: true, reply: reply };
-
-      } catch (error) {
-        console.error('DeepSeek API Error:', error);
-        return { 
-          success: false, 
-          error: 'Failed to connect to AI service. Please try again.'
-        };
-      }
+    // Handle initial network errors or proxy blocks
+    if (response.status === 403) {
+      return {
+        success: false,
+        error: 'CORS Proxy Access Required. Please visit https://herokuapp.comcorsdemo and click "Request temporary access" to enable testing.'
+      };
     }
 
-    // ============================================
-    // TYPING INDICATOR
-    // ============================================
-    let typingTimeout = null;
+    const data = await response.json();
 
-    function showTypingIndicator() {
-      const id = 'typing-' + Date.now();
-      const msgBox = document.getElementById('aiMessages');
-      const div = document.createElement('div');
-      div.id = id;
-      div.className = 'typing-indicator';
-      div.innerHTML = '🤔 Thinking<span class="typing-dots"></span>';
-      msgBox.appendChild(div);
-      msgBox.scrollTop = msgBox.scrollHeight;
-      
-      typingTimeout = setTimeout(() => {
-        removeTypingIndicator(id);
-      }, 30000);
-      
-      return id;
+    if (data.error) {
+      console.error('DeepSeek API Error:', data.error);
+      return { 
+        success: false, 
+        error: data.error.message || 'AI service error'
+      };
     }
 
-    function removeTypingIndicator(id) {
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
-        typingTimeout = null;
-      }
-      const el = document.getElementById(id);
-      if (el) el.remove();
-    }
+    const reply = data.choices?.[0]?.message?.content || 'No response from AI.';
+    return { success: true, reply: reply };
 
-    // ============================================
-    // APPEND AI MESSAGE
-    // ============================================
-    function appendAiMessage(text, isUser) {
-      const msgBox = document.getElementById('aiMessages');
-      const msg = document.createElement('div');
-      msg.style.cssText = `
-        padding: 8px 12px;
-        border-radius: 8px;
-        max-width: 85%;
-        font-size: 14px;
-        line-height: 1.4;
-        margin-bottom: 6px;
-        white-space: pre-wrap;
-        background: ${isUser ? '#3b82f6' : 'rgba(255,255,255,0.08)'};
-        color: white;
-        align-self: ${isUser ? 'flex-end' : 'flex-start'};
-      `;
-      msg.innerText = text;
-      msgBox.appendChild(msg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    }
+  } catch (error) {
+    console.error('DeepSeek API Error:', error);
+    return { 
+      success: false, 
+      error: 'Failed to connect to AI service. Please check your internet connection or proxy access.'
+    };
+  }
+}
 
-    // ============================================
-    // TOGGLE AI CHAT
-    // ============================================
-    function toggleAiChat() {
-      const chatWindow = document.getElementById('aiChatWindow');
-      chatWindow.style.display = chatWindow.style.display === 'none' || !chatWindow.style.display ? 'flex' : 'none';
-    }
+// ============================================
+// TYPING INDICATOR
+// ============================================
+let typingTimeout = null;
+
+function showTypingIndicator() {
+  const id = 'typing-' + Date.now();
+  const msgBox = document.getElementById('aiMessages');
+  if (!msgBox) return id;
+  
+  const div = document.createElement('div');
+  div.id = id;
+  div.className = 'typing-indicator';
+  div.innerHTML = '🤔 Thinking<span class="typing-dots"></span>';
+  msgBox.appendChild(div);
+  msgBox.scrollTop = msgBox.scrollHeight;
+  
+  typingTimeout = setTimeout(() => {
+    removeTypingIndicator(id);
+  }, 30000);
+  
+  return id;
+}
+
+function removeTypingIndicator(id) {
+  if (typingTimeout) {
+    clearTimeout(typingTimeout);
+    typingTimeout = null;
+  }
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// ============================================
+// APPEND AI MESSAGE
+// ============================================
+function appendAiMessage(text, isUser) {
+  const msgBox = document.getElementById('aiMessages');
+  if (!msgBox) return;
+  
+  const msg = document.createElement('div');
+  msg.style.cssText = `
+    padding: 8px 12px;
+    border-radius: 8px;
+    max-width: 85%;
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    white-space: pre-wrap;
+    background: ${isUser ? '#3b82f6' : 'rgba(255,255,255,0.08)'};
+    color: white;
+    align-self: ${isUser ? 'flex-end' : 'flex-start'};
+  `;
+  msg.innerText = text;
+  msgBox.appendChild(msg);
+  msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+// ============================================
+// TOGGLE AI CHAT
+// ============================================
+function toggleAiChat() {
+  const chatWindow = document.getElementById('aiChatWindow');
+  if (chatWindow) {
+    chatWindow.style.display = chatWindow.style.display === 'none' || !chatWindow.style.display ? 'flex' : 'none';
+  }
+}
+
+
 
     // ============================================
     // AUTH HANDLER
@@ -1322,26 +1347,6 @@ If you don't know something, say so honestly.
         renderTasks();
       }
     }, 60000);
-    
-    // If using modules in your HTML script tag
-import config from './config.js';
-
-async function callDeepSeek() {
-  const response = await fetch(`${config.baseURL}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/join',
-      'Authorization': `Bearer ${config.apiKey}`
-    },
-    body: JSON.stringify({
-      model: "deepseek-chat",
-      messages: [{ role: "user", content: "Hello!" }]
-    })
-  });
-  const data = await response.json();
-  console.log(data);
-}
-
   </script>
 
 </body>
