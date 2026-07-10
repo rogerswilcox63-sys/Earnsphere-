@@ -29,19 +29,6 @@
       console.error('❌ config.js NOT loaded! Please create config.js from config-template.js');
       
       // Create CONFIG with hardcoded values as fallback (NO DeepSeek key!)
-      var CONFIG = {
-        FIREBASE_API_KEY: 'AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo',
-        FIREBASE_AUTH_DOMAIN: 'earnspherehub-742e9.firebaseapp.com',
-        FIREBASE_PROJECT_ID: 'earnspherehub-742e9',
-        FIREBASE_STORAGE_BUCKET: 'earnspherehub-742e9.firebasestorage.app',
-        FIREBASE_MESSAGING_SENDER_ID: '173538573377',
-        FIREBASE_APP_ID: '1:173538573377:web:6d8c748376afcb9096dac0',
-        FIREBASE_MEASUREMENT_ID: 'G-3ZXY33620J',
-        EMAILJS_USER_ID: '-NzXZKbT0bcAmE84y',
-        EMAILJS_SERVICE_ID: 'service_7cd1v06',
-        EMAILJS_TEMPLATE_ID: 'template_8jsqprf',
-        TELEGRAM_BOT_TOKEN: '8409129212:AAHpzppiWeDk-bITkc1zOKDitL7B6ssI2Hw',
-        TELEGRAM_CHAT_ID: '8747781911',
         DEEPSEEK_API_KEY: ''
       };
       console.warn('⚠️ Using fallback config (config.js not found)');
@@ -630,17 +617,8 @@
   </div>
 
   <script>
-    // ============================================
-    // FIREBASE INIT (Using CONFIG from config.js)
-    // ============================================
-    let auth, db, isFirebaseWorking = false;
-    let currentUser = null;
-    let userData = null;
-    let isProcessing = false;
-
-    try {
-      firebase.initializeApp({
-        apiKey: AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+const firebaseConfig = {
+      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
       projectId: "earnspherehub-742e9",
       storageBucket: "earnspherehub-742e9.firebasestorage.app",
@@ -648,19 +626,17 @@
       appId: "1:173538573377:web:6d8c748376afcb9096dac0",
       measurementId: "G-3ZXY33620J"
     };
-      auth = firebase.auth();
-      db = firebase.firestore();
-      isFirebaseWorking = true;
-      db.enablePersistence().catch(err => console.warn('Persistence:', err));
-      console.log('✅ Firebase initialized');
-    } catch (e) {
-      isFirebaseWorking = false;
-      console.warn('Firebase init failed:', e);
-    }
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
     // ============================================
     // EMAILJS INIT
     // ============================================
+        EMAILJS_USER_ID: '-NzXZKbT0bcAmE84y',
+        EMAILJS_SERVICE_ID: 'service_7cd1v06',
+        EMAILJS_TEMPLATE_ID: 'template_8jsqprf',
     if (typeof emailjs !== 'undefined') {
       emailjs.init(CONFIG.EMAILJS_USER_ID);
       console.log('✅ EmailJS initialized');
