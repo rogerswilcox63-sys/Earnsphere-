@@ -1,7 +1,5 @@
-// config-template.js - Safe to commit to Git
-const config = {
+// config-template.js - Safe to commit to GitHub
+window.API_CONFIG = {
   apiKey: "YOUR_DEEPSEEK_API_KEY_HERE",
   baseURL: "https://deepseek.com"
 };
-
-module.exports = config;
