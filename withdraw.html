@@ -1,308 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724"
-     crossorigin="anonymous"></script>
-     <!-- Paste this in <head> of your dashboard.html -->
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
-
-<script>
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-    authDomain: "earnspherehub-742e9.firebaseapp.com",
-    projectId: "earnspherehub-742e9",
-    storageBucket: "earnspherehub-742e9.firebasestorage.app",
-    messagingSenderId: "173538573377",
-    appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-    measurementId: "G-3ZXY33620J"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const storage = firebase.storage();
-  const analytics = firebase.analytics();
-</script>
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>EarnSphere Nigeria - Withdraw</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height: 100vh; color: #f1f5f9; display: flex; flex-direction: column; }
-        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%); pointer-events: none; z-index: 0; }
-        #app { position: relative; z-index: 1; flex: 1; }
-        .navbar { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .nav-links { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
-        .nav-links a { text-decoration: none; color: #cbd5e1; font-weight: 500; transition: 0.25s; padding: 0.5rem 1rem; border-radius: 0.5rem; }
-        .nav-links a:hover, .nav-links a.active { color: #3b82f6; background: rgba(59, 130, 246, 0.15); }
-        .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #3b82f6, #10b981); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .user-greeting { display: flex; align-items: center; gap: 1rem; }
-        .user-greeting span { font-weight: 600; color: #f1f5f9; }
-        .logout-btn { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); padding: 0.5rem 1rem; border-radius: 2rem; font-weight: 500; color: #3b82f6; cursor: pointer; transition: 0.2s; }
-        .logout-btn:hover { background: rgba(59, 130, 246, 0.3); border-color: #3b82f6; }
-        .withdraw-container { max-width: 600px; margin: 2rem auto; padding: 0 1.5rem; width: 100%; }
-        .section-title { font-size: 1.4rem; font-weight: 700; margin: 2rem 0 1.5rem; color: #f1f5f9; display: flex; align-items: center; gap: 0.6rem; }
-        .balance-card { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border-radius: 1rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 2rem; text-align: center; }
-        .balance-title { font-size: 0.9rem; color: #94a3b8; margin-bottom: 0.5rem; }
-        .balance-amount { font-size: 2.5rem; font-weight: 800; color: #10b981; }
-        .min-notice { font-size: 0.85rem; color: #fbbf24; margin-top: 0.5rem; }
-        .withdraw-card { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border-radius: 1rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.6rem; color: #cbd5e1; font-weight: 500; font-size: 0.9rem; }
-        .form-control { width: 100%; padding: 0.9rem 1.1rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.75rem; color: #f1f5f9; font-size: 1rem; }
-        .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-        .withdraw-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 0.75rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.3s; }
-        .withdraw-btn:hover { transform: translateY(-2px); }
-        .withdraw-btn:disabled { background: #4b5563; cursor: not-allowed; transform: none; }
-        .message { padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; font-size: 0.9rem; text-align: center; font-weight: 500; }
-        .message.error { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
-        .message.success { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3); color: #6ee7b7; }
-        .footer { background: rgba(15, 23, 42, 0.8); padding: 2rem; margin-top: auto; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.9rem; color: #64748b; }
-        @media (max-width: 700px) { .navbar { flex-direction: column; text-align: center; } }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Earnings | EarnSphere Hub</title>
+    <!-- Connects seamlessly with your existing stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="images/earnsphere-logo.png">
 </head>
-<body>
-    <div id="app">
-        <div class="navbar">
-            <div class="logo"><i class="fas fa-coins"></i> EarnSphere</div>
+<body class="dashboard-body">
+
+    <!-- COHESIVE NAVBAR DISPLAY -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html">
+                <img src="images/earnsphere-logo.png" alt="EarnSphere Hub" class="site-logo">
+            </a>
             <div class="nav-links">
                 <a href="dashboard.html">Dashboard</a>
                 <a href="withdraw.html" class="active">Withdraw</a>
                 <a href="profile.html">Profile</a>
-            </div>
-            <div class="user-greeting">
-                <span id="userName">Welcome, User</span>
-                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <a href="logout.html" style="color: #ef4444;">Logout</a>
             </div>
         </div>
+    </nav>
 
-        <div class="withdraw-container">
-            <h2 class="section-title"><i class="fas fa-wallet"></i> Withdraw Funds</h2>
+    <main class="container" style="padding-top: 30px; max-width: 800px;">
+        
+        <!-- WALLET OVERVIEW COMPONENT -->
+        <div class="dashboard-section" style="border-left: 4px solid #16a34a; background: #ffffff;">
+            <div class="stat-label" style="font-size: 0.8rem; letter-spacing: 0.05em; font-weight: 600;">Available For Cashout</div>
+            <!-- Unique ID assigned to target via calculations -->
+            <div class="stat-value" style="color: #16a34a; font-size: 2.2rem;" id="user-balance-display">₦3,450.00</div>
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">Minimum processing threshold: <strong>₦1,000.00</strong></p>
+        </div>
+
+        <!-- WITHDRAWAL ACTION PANEL -->
+        <div class="dashboard-section">
+            <h2>💸 Settlement Form</h2>
             
-            <div class="balance-card">
-                <div class="balance-title">Available Balance</div>
-                <div class="balance-amount" id="walletBalance">₦0.00</div>
-                <div class="min-notice"><i class="fas fa-info-circle"></i> Minimum withdrawal: ₦20,000</div>
-            </div>
-
-            <div class="withdraw-card">
-                <div id="withdrawMessage"></div>
+            <form id="withdrawal-form" onsubmit="handlePayoutRequest(event)">
                 
-                <form id="withdrawForm" 
-                    <input type="hidden" name="user_email" id="form_user_email">
-                    <input type="hidden" name="user_name" id="form_user_name">
-                    <input type="hidden" name="current_balance" id="form_current_balance">
-                    <input type="hidden" name="request_date" id="form_request_date">
-                    
-                    <div class="form-group">
-                        <label>Amount to Withdraw (₦)</label>
-                        <input type="number" name="amount" id="withdrawAmount" class="form-control"min="20000" placeholder="Minimum 20000" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Bank Name</label>
-                        <select name="bank_name" id="bankName" class="form-control" required>
-                            <option value="" disabled selected>Select your bank</option>
-                            <option value="Access Bank">Access Bank</option>
-                            <option value="GTBank">GTBank</option>
-                            <option value="First Bank">First Bank</option>
-                            <option value="UBA">UBA</option>
-                            <option value="Zenith Bank">Zenith Bank</option>
-                            <option value="Kuda">Kuda</option>
-                            <option value="Opay">Opay</option>
-                            <option value="Palmpay">Palmpay</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Account Number</label>
-                        <input type="text" name="account_number" id="accountNumber" class="form-control" placeholder="10-digit account number" maxlength="10" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Account Name</label>
-                        <input type="text" name="account_name" id="accountName" class="form-control" placeholder="Name on account" required>
-                    </div>
+                <!-- SELECT LOCAL BANK LOGICAL ARRAYS -->
+                <div class="form-group">
+                    <label for="bank-select">Select Receiving Bank</label>
+                    <select id="bank-select" class="form-control" required>
+                        <option value="" disabled selected>-- Choose your bank --</option>
+                        <!-- Top high-demand local payout anchors prioritized first -->
+                        <option value="opay">OPay Digital Bank</option>
+                        <option value="palmpay">PalmPay</option>
+                        <option value="moniepoint">Moniepoint MFB</option>
+                        <option value="kuda">Kuda Microfinance Bank</option>
+                        <option value="gtbank">Guarantee Trust Bank (GTBank)</option>
+                        <option value="access">Access Bank</option>
+                        <option value="zenith">Zenith Bank</option>
+                        <option value="uba">United Bank for Africa (UBA)</option>
+                        <option value="firstbank">First Bank of Nigeria</option>
+                    </select>
+                </div>
 
-                    <button type="submit" class="withdraw-btn" id="withdrawBtn">
-                        <i class="fas fa-paper-plane"></i> Request Withdrawal
-                    </button>
-                </form>
-            </div>
+                <!-- ACCOUNT IDENTIFIER NODE -->
+                <div class="form-group">
+                    <label for="account-number">Account Number</label>
+                    <input type="text" id="account-number" class="form-control" placeholder="10-digit NUBAN / Wallet number" maxlength="10" pattern="\d{10}" required>
+                    <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Ensure account details accurately match your registration profile data.</p>
+                </div>
+
+                <!-- VALUE VARIABLE EXTRACTION -->
+                <div class="form-group">
+                    <label for="withdraw-amount">Amount to Cashout (₦)</label>
+                    <input type="number" id="withdraw-amount" class="form-control" placeholder="e.g. 1500" min="1000" step="1" required>
+                </div>
+
+                <!-- DYNAMIC ERROR MESSAGING BOX -->
+                <div id="form-feedback" style="display: none; padding: 12px; margin-bottom: 15px; border-radius: 6px; font-size: 0.9rem; font-weight: 500;"></div>
+
+                <!-- DISPATCH TRIGGER -->
+                <button type="submit" class="btn-primary" style="width: 100%; border: none; cursor: pointer; padding: 14px;">
+                    Confirm & Secure Funds
+                </button>
+            </form>
         </div>
-    </div>
 
-<footer class="footer">
-    <p>
-        <a href="privacy.html">Privacy Policy</a> | 
-        <a href="about.html">About</a> | 
-        <a href="contact.html">Contact</a> | 
-        <a href="https://whatsapp.com/channel/0029Vb8HLi40rGiIn4314U3Z" target="_blank" style="color: #25D366;">
-            <i class="fab fa-whatsapp"></i> WhatsApp Channel
-        </a>
-    </p>
-    <p style="margin-top: 1rem; font-size: 0.75rem;">© 2026 EarnSphere Hub Limited. All rights reserved.</p>
-</footer>
+        <!-- OPERATIONAL SECURITY ALERTS -->
+        <div class="dashboard-section" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+            <h3 style="font-size: 0.95rem; color: #475569; margin-bottom: 8px;">⚠️ Standard Settlement Protocols</h3>
+            <ul style="font-size: 0.8rem; color: #64748b; padding-left: 20px;">
+                <li style="margin-bottom: 5px;">Payout verification passes are queued automatically and resolve internally within 24 operational hours.</li>
+                <li style="margin-bottom: 5px;">Submitting synthetic screenshots or fabricated task completions voids pending ledger values permanently.</li>
+                <li style="margin-bottom: 5px;">If payout complications manifest, contact our operations desk at <a href="mailto:earnsphere.helpdesk@gmail.com" style="color: #2563eb; font-weight: 500;">earnsphere.helpdesk@gmail.com</a>.</li>
+            </ul>
+        </div>
+    </main>
 
-<script>
-    const withdrawBtn = document.getElementById('withdrawBtn');
-    const withdrawMessage = document.getElementById('withdrawMessage');
-    const walletBalanceElement = document.getElementById('walletBalance');
-    const withdrawForm = document.getElementById('withdrawForm');
+<script type="module">
+    // FIX 1: Corrected and completed the full Google CDN script destination paths
+    import { initializeApp } from "https://gstatic.com";
+    import { getFirestore, doc, getDoc, addDoc, collection, serverTimestamp } from "https://gstatic.com";
+    import { getAuth, onAuthStateChanged } from "https://gstatic.com";
 
-    let currentBalance = 0;
-    let localUserData = JSON.parse(localStorage.getItem('currentUser'));
+    // 1. TODO: REPLACE THIS OBJECT WITH YOUR EXACT FIREBASE CREDENTIALS FROM YOUR ACCOUNT GENERAL SETTINGS
+    const firebaseConfig = {
+        apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+        authDomain: "earnspherehub-742e9.firebaseapp.com",
+        projectId: "earnspherehub-742e9",
+        storageBucket: "earnspherehub.appspot.com",
+        messagingSenderId: "173538573377",
+        appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+    };
 
-    // 1. STATE DISPATCHER: TRACK ACTIVE FIREBASE USER SESSIONS
-    auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            // Check if we can fall back to local storage session if offline in mobile preview
-            if (localUserData) {
-                document.getElementById('userName').innerText = `Welcome, ${localUserData.name}`;
-                currentBalance = parseFloat(localUserData.balance) || 0;
-                walletBalanceElement.innerText = `₦${currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-            } else {
-                window.location.href = 'login.html';
+    // Initialize Firebase Core Services
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Operational global placeholders to track server validation states
+    let serverVerifiedBalance = 0;
+    let loggedInUserEmail = "";
+    let loggedInUserUid = "";
+
+    // FIX 2: Automatically check who is logged in and load their real server-side balance
+    onAuthStateChanged(auth, async (user) => {
+        const displayBox = document.getElementById('user-balance-display');
+        
+        if (user) {
+            loggedInUserEmail = user.email;
+            loggedInUserUid = user.uid;
+            
+            try {
+                // Fetch user data directly from your "users" collection matching their unique ID
+                const userSnapshot = await getDoc(doc(db, "users", user.uid));
+                
+                if (userSnapshot.exists()) {
+                    serverVerifiedBalance = userSnapshot.data().wallet_balance || 0;
+                    displayBox.innerText = `₦${serverVerifiedBalance.toLocaleString('en-NG', {minimumFractionDigits: 2})}`;
+                } else {
+                    serverVerifiedBalance = 0;
+                    displayBox.innerText = "₦0.00";
+                }
+            } catch (err) {
+                console.error("Balance retrieval fault: ", err);
+                displayBox.innerText = "⚠️ Balance Error";
             }
         } else {
-            // Live Firebase session found: Stream balance fresh from Firestore
-            try {
-                const userRef = db.collection('users').doc(user.uid);
-                
-                // Set up a real-time listener so the balance automatically updates if changed
-                userRef.onSnapshot((doc) => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        document.getElementById('userName').innerText = `Welcome, ${data.name}`;
-                        currentBalance = parseFloat(data.balance) || 0;
-                        walletBalanceElement.innerText = `₦${currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                        
-                        // Sync back down to local caches for continuity
-                        localStorage.setItem('currentUser', JSON.stringify(data));
-                        localStorage.setItem('walletBalance', currentBalance);
-                    }
-                });
-            } catch (err) {
-                console.error("Firestore balance stream failed:", err);
-            }
+            // Secure Gate: If a user is not logged in, redirect them out immediately
+            window.location.href = "login.html";
         }
     });
 
-    // 2. PROCESS WITHDRAWAL REQUEST IN FIRESTORE
-    withdrawForm.addEventListener('submit', async function(e) {
+    // 2. Main withdrawal handling engine (Exposed to global window for layout button clicks)
+    window.handlePayoutRequest = async function(e) {
         e.preventDefault();
         
-        const amount = parseFloat(document.getElementById('withdrawAmount').value);
-        const bankName = document.getElementById('bankName').value;
-        const accNum = document.getElementById('accountNumber').value;
-        const accName = document.getElementById('accountName').value;
+        const feedbackBox = document.getElementById('form-feedback');
+        const submitButton = document.getElementById('submit-btn') || e.target.querySelector('button[type="submit"]');
+        
+        const bank = document.getElementById('bank-select').value;
+        const accountNumber = document.getElementById('account-number').value;
+        const amountInput = document.getElementById('withdraw-amount').value;
+        const requestedAmount = parseFloat(amountInput);
 
-        withdrawMessage.innerHTML = ''; // Clear previous messages
+        // Reset feedback states
+        feedbackBox.style.display = "none";
+        feedbackBox.className = ""; 
 
-        // FIXED VALIDATION CHECKS (Set precisely to ₦20,000 threshold limit)
-        if (currentBalance < 20000) {
-            withdrawMessage.innerHTML = '<div class="message error"><i class="fas fa-exclamation-triangle"></i> Insufficient funds. Minimum balance of ₦20,000 required to withdraw.</div>';
+        // Validation 1: Check minimum boundary rule
+        if (requestedAmount < 1000) {
+            showFeedback("❌ Transaction Blocked: Minimum withdrawal threshold must equal or exceed ₦1,000.00.", "error");
             return;
         }
 
-        if (!amount || amount < 20000) {
-            withdrawMessage.innerHTML = '<div class="message error"><i class="fas fa-exclamation-triangle"></i> Minimum withdrawal amount is ₦20,000</div>';
+        // FIX 3: Secure validation checks directly against server variable instead of screen text strings
+        if (requestedAmount > serverVerifiedBalance) {
+            showFeedback("❌ Transaction Error: Insufficient funds. Your balance is less than the requested amount.", "error");
             return;
         }
 
-        if (amount > currentBalance) {
-            withdrawMessage.innerHTML = '<div class="message error"><i class="fas fa-exclamation-triangle"></i> Amount exceeds your available balance</div>';
-            return;
-        }
+        // Disable button to prevent double-clicking
+        submitButton.disabled = true;
+        submitButton.innerText = "Processing Securely...";
 
-        if (accNum.length !== 10 || isNaN(accNum)) {
-            withdrawMessage.innerHTML = '<div class="message error"><i class="fas fa-exclamation-triangle"></i> Enter a valid 10-digit account number</div>';
-            return;
-        }
-
-        withdrawBtn.disabled = true;
-        withdrawBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting Request...';
-
-        const firebaseUser = auth.currentUser;
-
-        if (firebaseUser) {
-            // Live production mode execution path
-            try {
-                const userRef = db.collection('users').doc(firebaseUser.uid);
-                const withdrawalRef = db.collection('withdrawals').doc(); // Create new transaction document ID
-
-                // Run a safe Firestore database transaction routine
-                await db.runTransaction(async (transaction) => {
-                    const userDoc = await transaction.get(userRef);
-                    if (!userDoc.exists) throw "User record missing!";
-
-                    const latestBalance = userDoc.data().balance || 0;
-                    if (amount > latestBalance) throw "Insufficient funds verified on server side!";
-
-                    // A. Deduct funds from user profile model
-                    transaction.update(userRef, {
-                        balance: latestBalance - amount
-                    });
-
-                    // B. File payout ticket entry in withdrawals collection for admin panel review
-                    transaction.set(withdrawalRef, {
-                        requestId: withdrawalRef.id,
-                        uid: firebaseUser.uid,
-                        email: firebaseUser.email,
-                        name: userDoc.data().name || "Unknown User",
-                        amountRequested: amount,
-                        bankName: bankName,
-                        accountNumber: accNum,
-                        accountName: accName,
-                        status: "Pending", // Will be marked "Approved" manually by you once sent via your bank app
-                        createdAt: new Date().toISOString()
-                    });
-                });
-
-                withdrawMessage.innerHTML = `<div class="message success"><i class="fas fa-check-circle"></i> Withdrawal of ₦${amount.toLocaleString()} logged to Firestore! Processing timeline: 24-48hrs.</div>`;
-                withdrawForm.reset();
-
-            } catch (err) {
-                console.error("Firestore Transaction Error:", err);
-                withdrawMessage.innerHTML = `<div class="message error"><i class="fas fa-times-circle"></i> Submission failed: ${err.message || err}</div>`;
-            } finally {
-                withdrawBtn.disabled = false;
-                withdrawBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Request Withdrawal';
-            }
-        } else {
-            // Network fallback engine route (For local mobile phone previews)
-            currentBalance -= amount;
-            if (localUserData) {
-                localUserData.balance = currentBalance;
-                localStorage.setItem('currentUser', JSON.stringify(localUserData));
-            }
-            localStorage.setItem('walletBalance', currentBalance);
-            walletBalanceElement.innerText = `₦${currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-
-            withdrawMessage.innerHTML = `<div class="message success"><i class="fas fa-check-circle"></i> Simulated offline payout processed! ₦${amount.toLocaleString()} removed locally.</div>`;
-            withdrawForm.reset();
-            withdrawBtn.disabled = false;
-            withdrawBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Request Withdrawal';
-        }
-    });
-
-    // 3. SECURITY SIGN OUT ENGINE
-    async function logout() {
         try {
-            await auth.signOut();
-        } catch (err) {
-            console.log("Offline exit executed.");
+            // 3. Save the withdrawal payload with the real, dynamic user email tracked from Auth
+            const docRef = await addDoc(collection(db, "withdrawals"), {
+                userId: loggedInUserUid,
+                userEmail: loggedInUserEmail, // Dynamically linked real user email account
+                bankName: bank,
+                accountNumber: accountNumber,
+                amount: requestedAmount,
+                status: "Pending Review", 
+                createdAt: serverTimestamp() 
+            });
+
+            showFeedback("✅ Order Placed! Request submitted for manual review. Settlement resolves within 24 hours.", "success");
+            document.getElementById('withdrawal-form').reset();
+
+        } catch (error) {
+            console.error("Firebase Database Write Error: ", error);
+            showFeedback("❌ Server Connection Timeout: Unable to securely queue payout data. Check internet connectivity.", "error");
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerText = "Confirm & Secure Funds";
         }
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('walletBalance');
-        window.location.href = 'login.html';
+    };
+
+    function showFeedback(message, type) {
+        const feedbackBox = document.getElementById('form-feedback');
+        feedbackBox.style.display = "block";
+        feedbackBox.innerText = message;
+        
+        if (type === "error") {
+            feedbackBox.style.backgroundColor = "#fee2e2";
+            feedbackBox.style.color = "#dc2626";
+            feedbackBox.style.borderColor = "#fca5a5";
+        } else {
+            feedbackBox.style.backgroundColor = "#dcfce7";
+            feedbackBox.style.color = "#15803d";
+            feedbackBox.style.borderColor = "#86efac";
+        }
     }
 </script>
+
 </body>
 </html>

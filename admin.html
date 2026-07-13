@@ -50,95 +50,92 @@ h1{color:#f59e0b; text-align:center}
   <div id="transactions" style="display:none"></div>
 </div>
 
-<script>
-// YOUR FIREBASE CONFIG
-const firebaseConfig = {
-  apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-  authDomain: "earnspherehub-742e9.firebaseapp.com",
-  projectId: "earnspherehub-742e9",
-  storageBucket: "earnspherehub-742e9.firebasestorage.app",
-  messagingSenderId: "173538573377",
-  appId: "1:173538573377:web:6d8c748376afcb9096dac0"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+<!-- PLACE AT THE BOTTOM OF admin.html -->
+<script type="module">
+    import { initializeApp } from "https://gstatic.com";
+    import { getFirestore, collection, query, where, getDocs, doc, updateDoc, increment } from "https://gstatic.com";
+    import { getAuth, onAuthStateChanged } from "https://gstatic.com";
 
-const ADMIN_EMAIL = "wilcoxrichard85@gmail.com"; // LOCKED TO YOU
+    // Insert your unique Firebase Project credentials object here
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "://firebaseapp.com",
+        projectId: "earnspherehub",
+        storageBucket: "://appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
 
-// CHECK IF ALREADY LOGGED IN
-auth.onAuthStateChanged(user => {
-  if(user && user.email === ADMIN_EMAIL){
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    loadData();
-  } else {
-    if(user) auth.signOut(); // kick out any other user
-    document.getElementById('loginScreen').style.display = 'block';
-    document.getElementById('adminPanel').style.display = 'none';
-  }
-})
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-function adminLogin(){
-  const email = adminEmail.value;
-  const pass = adminPass.value;
-  auth.signInWithEmailAndPassword(email, pass)
-  .catch(err => loginMsg.innerText = err.message);
-}
+    // RESTRICT ACCESS TO YOUR ADMIN EMAIL ONLY
+    onAuthStateChanged(auth, (user) => {
+        if (!user || user.email !== "wilcoxrichard85@gmail.com") {
+            alert("⛔ Access Denied: Unauthorized Admin Session.");
+            window.location.href = "dashboard.html";
+        } else {
+            loadPendingCashouts();
+        }
+    });
 
-function logout(){ auth.signOut(); }
+    // FETCH PENDING RECORDS FROM THE WITHDRAWALS COLLECTION
+    async function loadPendingCashouts() {
+        // Target whatever container ID or element you hold your withdrawals layout in
+        const container = document.getElementById('withdrawals-list-container') || document.body;
+        
+        try {
+            const q = query(collection(db, "withdrawals"), where("status", "==", "Pending Review"));
+            const querySnapshot = await getDocs(q);
 
-function showTab(tab, el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('withdrawals').style.display = tab=='withdrawals'?'block':'none';
-  document.getElementById('transactions').style.display = tab=='transactions'?'block':'none';
-}
+            if (querySnapshot.empty) {
+                container.innerHTML = "<p style='color:#94a3b8; text-align:center;'>No pending withdrawals found.</p>";
+                return;
+            }
 
-function loadData(){
-  // LOAD WITHDRAWALS
-  db.collection('withdrawals').where('status','==','pending').orderBy('requestedAt','desc')
-  .onSnapshot(snap=>{
-    withdrawals.innerHTML = snap.empty? '<p>No pending withdrawals</p>' : '';
-    snap.forEach(doc=>{
-      const d = doc.data();
-      withdrawals.innerHTML += `
-      <div class="card">
-        <b>${d.email}</b> <span class="small">${d.requestedAt?.toDate().toLocaleString() || ''}</span><br>
-        <b>Amount: ₦${d.amount?.toLocaleString()}</b><br>
-        Bank: ${d.bankName} <br>
-        Account: ${d.accountNumber} - ${d.accountName}<br><br>
-        <button class="btn approve" onclick="updateStatus('withdrawals','${doc.id}','paid')">Approve & Pay</button>
-        <button class="btn decline" onclick="updateStatus('withdrawals','${doc.id}','declined')">Decline</button>
-      </div>`
-    })
-  })
+            container.innerHTML = ""; // Clear loader text
+            querySnapshot.forEach((withdrawalDoc) => {
+                const data = withdrawalDoc.data();
+                const docId = withdrawalDoc.id;
 
-  // LOAD TRANSACTIONS
-  db.collection('transactions').where('status','==','pending').orderBy('createdAt','desc')
-  .onSnapshot(snap=>{
-    transactions.innerHTML = snap.empty? '<p>No pending transactions</p>' : '';
-    snap.forEach(doc=>{
-      const d = doc.data();
-      transactions.innerHTML += `
-      <div class="card">
-        <b>${d.type.toUpperCase()}</b> - ₦${d.amount?.toLocaleString()}<br>
-        <span class="small">User: ${d.userId}</span><br>
-        ${d.phone? `Phone: ${d.phone}<br>` : ''}
-        ${d.network? `Network: ${d.network}<br>` : ''}
-        ${d.biller? `Biller: ${d.biller} - ${d.account}<br>` : ''}
-        <span class="small">${d.createdAt?.toDate().toLocaleString() || ''}</span><br><br>
-        <button class="btn approve" onclick="updateStatus('transactions','${doc.id}','completed')">Mark Completed</button>
-        <button class="btn decline" onclick="updateStatus('transactions','${doc.id}','failed')">Mark Failed</button>
-      </div>`
-    })
-  })
-}
+                container.innerHTML += `
+                    <div id="row-${docId}" style="background:#1e293b; padding:16px; border-radius:8px; margin-bottom:12px; border:1px solid #334155;">
+                        <p style="color:#ffffff; font-weight:600;">${data.userEmail}</p>
+                        <p style="color:#94a3b8; font-size:0.85rem;">${data.bankName} • ${data.accountNumber}</p>
+                        <p style="color:#4ade80; font-weight:700; margin-top:4px;">₦${data.amount}</p>
+                        <div style="margin-top:10px; display:flex; gap:10px;">
+                            <button onclick="approvePayout('${docId}', '${data.userId}', ${data.amount})" style="background:#16a34a; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer;">Approve</button>
+                            <button onclick="rejectPayout('${docId}')" style="background:#dc2626; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer;">Reject</button>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch(err) {
+            console.error(err);
+        }
+    }
 
-async function updateStatus(collection, id, status){
-  await db.collection(collection).doc(id).update({status: status});
-  alert('Updated to: ' + status);
-}
+    // MAP ACTIONS GLOBAL TO THE WINDOW FOR BUTTON CLICK LIFECYCLES
+    window.approvePayout = async function(docId, userId, amount) {
+        if(!confirm("Approve this payout? This will deduct balance on the server.")) return;
+        try {
+            await updateDoc(doc(db, "withdrawals", docId), { status: "Approved" });
+            await updateDoc(doc(db, "users", userId), { wallet_balance: increment(-amount) });
+            document.getElementById(`row-${docId}`).remove();
+            alert("Payout approved and balance deducted successfully!");
+        } catch(e) { alert("Error updating records."); }
+    };
+
+    window.rejectPayout = async function(docId) {
+        if(!confirm("Reject this payout?")) return;
+        try {
+            await updateDoc(doc(db, "withdrawals", docId), { status: "Rejected" });
+            document.getElementById(`row-${docId}`).remove();
+            alert("Payout rejected.");
+        } catch(e) { alert("Error rejecting payout."); }
+    };
 </script>
+
 </body>
 </html>

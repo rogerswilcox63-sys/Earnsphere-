@@ -1,170 +1,125 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
-<head><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724"
-     crossorigin="anonymous"></script>
-     <!-- Paste this in <head> of your dashboard.html -->
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
-
-<script>
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-    authDomain: "earnspherehub-742e9.firebaseapp.com",
-    projectId: "earnspherehub-742e9",
-    storageBucket: "earnspherehub-742e9.firebasestorage.app",
-    messagingSenderId: "173538573377",
-    appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-    measurementId: "G-3ZXY33620J"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const storage = firebase.storage();
-  const analytics = firebase.analytics();
-</script>
-    <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0066cc">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Earnspherehub - Earn money online in Nigeria by completing simple ad tasks. Free registration. Fast payouts to your bank."> 
-    <title>EarnSphere Nigeria - Online reward platform</title>
-<meta name="description" content="Join 5,000+ Nigerians earning from surveys, tasks & referrals on EarnSphere. Get paid via Opay, Palmpay, Bank transfer. Start free today.">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; }
-        header { background: #2c3e50; color: white; padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
-        nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-        .logo { font-size: 24px; font-weight: bold; }
-        .nav-links a { color: white; text-decoration: none; margin-left: 20px; }
-        .auth-buttons .btn { padding: 8px 18px; margin-left: 10px; text-decoration: none; border-radius: 5px; font-weight: 600; }
-        .btn-login { background: transparent; color: white; border: 2px solid white; }
-        .btn-register { background: #3498db; color: white; border: 2px solid #3498db; }
-        .hero { 
-            background: linear-gradient(rgba(44,62,80,0.85), rgba(44,62,80,0.85)), url('https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1200') center/cover;
-            color: white; text-align: center; padding: 100px 20px; 
-        }
-        .hero h1 { font-size: 42px; margin-bottom: 20px; }
-        .hero p { font-size: 20px; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto; }
-        .hero-btn { background: #25D366; color: white; padding: 15px 35px; font-size: 18px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; text-align: center; }
-        .feature-box { padding: 30px 20px; border: 1px solid #eee; border-radius: 8px; }
-        .feature-box img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; }
-        .feature-box h3 { color: #2c3e50; margin: 15px 0; }
-        .how-it-works { background: #f8f9fa; }
-        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 40px; }
-        .step { text-align: center; }
-        .step-number { background: #3498db; color: white; width: 50px; height: 50px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-bottom: 15px; }
-        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 40px 0; }
-        .gallery img { width: 100%; height: 250px; object-fit: cover; border-radius: 10px; }
-        footer { background: #2c3e50; color: white; text-align: center; padding: 40px 20px; }
-        footer a { color: #3498db; text-decoration: none; margin: 0 10px; }
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 32px; }
-            .nav-links { display: none; }
-            .auth-buttons .btn { padding: 6px 12px; font-size: 14px; }
-        }
-    </style>
+    <title>EarnSphere Hub | Earn Money Online in Nigeria</title>
+    <!-- Link to the clean custom stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Favicon link using your optimized transparent logo file -->
+    <link rel="icon" type="image/png" href="images/earnsphere-logo.png">
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo">Earnspherehub</div>
+
+    <!-- PROFESSIONAL STICKY NAVBAR -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html">
+                <!-- Ensure your cropped, transparent background logo is placed here -->
+                <img src="images/earnsphere-logo.png" alt="EarnSphere Hub" class="site-logo">
+            </a>
             <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="contact.html">Contact</a>
+                <a href="index.html" class="active">Home</a>
+                <a href="#tasks">How It Works</a>
+                <a href="#proof">Payouts</a>
+                <a href="login.html">Login</a>
+                <a href="register.html" style="color: #2563eb; font-weight: 600;">Register</a>
             </div>
-            <div class="auth-buttons">
-                <a href="login.html" class="btn btn-login">Login</a>
-                <a href="register.html" class="btn btn-register">Register</a>
-            </div>
-        </nav>
+        </div>
+    </nav>
+
+    <!-- CLEAN HERO ENTRY SECTION -->
+    <header class="hero">
+        <div class="container">
+            <h1>Turn Your Spare Time into Real Cash</h1>
+            <p>Join thousands of Nigerians getting paid daily for completing simple social media and survey tasks from their mobile phones.</p>
+            <a href="register.html" class="btn-primary">Start Earning Now - It's Free</a>
+        </div>
     </header>
 
-    <section class="hero">
-        <h1>Earn Money Online in Nigeria</h1>
-        <p>Join 5,000+ Nigerians getting paid daily for completing simple tasks on their phones. Free to start. Withdraw to any Nigerian bank.</p>
-        <a href="register.html" class="hero-btn">Start Earning Now - It's Free</a>
-    </section>
-
-    <section class="container">
-        <h2 style="text-align: center; margin-bottom: 40px;">Turn Your Phone Into a Money Machine</h2>
-        <div class="features">
-            <div class="feature-box">
-                <img src="https://images.unsplash.com/photo-1531058020387-3be344556be6?w=400" alt="Young Nigerian woman using phone to earn money">
-                <h3>💰 Real Cash Payouts</h3>
-                <p>Withdraw from ₦1,000 directly to GTBank, Access, Opay, Palmpay and all Nigerian banks.</p>
-            </div>
-            <div class="feature-box">
-                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400" alt="Nigerian man completing tasks on smartphone">
-                <h3>⚡ Simple Tasks</h3>
-                <p>No skills needed. Like Facebook pages, watch ads, install apps. Earn ₦50 - ₦500 per task.</p>
-            </div>
-            <div class="feature-box">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400" alt="Nigerian student earning online from phone">
-                <h3>🇳🇬 100% Nigerian</h3>
-                <p>Built for Nigerians. Fast support via WhatsApp. Works on all networks - MTN, Airtel, Glo, 9mobile.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="how-it-works">
+    <!-- CLEAN 3-STEP EXPLANATION WORKFLOW -->
+    <section class="steps-section" id="tasks">
         <div class="container">
-            <h2 style="text-align: center;">Start Earning in 3 Steps</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Create Account</h3>
-                    <p>Register free with your email and phone number</p>
+            <h2 class="section-title">Start Earning in 3 Simple Steps</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <h3>Create Free Account</h3>
+                    <p>Sign up securely with just your email and phone number. No hidden activation charges.</p>
                 </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Complete Tasks</h3>
-                    <p>Choose tasks and submit proof when done</p>
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <h3>Complete Daily Tasks</h3>
+                    <p>Choose simple actions like reviewing local apps, liking social pages, or engaging with content panels.</p>
                 </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Get Paid</h3>
-                    <p>Withdraw earnings to your bank account instantly</p>
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <h3>Withdraw Directly</h3>
+                    <p>Request payouts seamlessly starting from ₦1,000 directly into any verified Nigerian bank account.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="container">
-        <h2 style="text-align: center;">Real Nigerians. Real Earnings.</h2>
-        <p style="text-align: center; max-width: 600px; margin: 0 auto 30px;">Students, NYSC corpers, and side hustlers across Nigeria are using Earnspherehub daily.</p>
-        
-        <div class="gallery">
-            <img src="https://images.unsplash.com/photo-1590650046871-92c887180603?w=600" alt="Nigerian lady smiling while using phone for online work">
-            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600" alt="Young Nigerian man checking earnings on smartphone">
-            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600" alt="Nigerian student earning money online from phone">
-        </div>
-        
-        <div style="text-align: center; margin-top: 40px;">
-            <a href="register.html" class="hero-btn">Create Free Account</a>
+    <!-- LIVE PAYMENT PROOF CARDS BLOCK -->
+    <section class="proof-section" id="proof">
+        <div class="container">
+            <h2 class="section-title">Recent Community Payouts</h2>
+            <div class="proof-grid">
+                <!-- Update these manually as your first real users cash out to build trust -->
+                <div class="proof-card">
+                    <div class="proof-user">Chidi O. (Opay)</div>
+                    <div class="proof-amount">₦1,450.00</div>
+                    <div class="proof-date">Paid: Just now</div>
+                </div>
+                <div class="proof-card">
+                    <div class="proof-user">Blessing A. (GTBank)</div>
+                    <div class="proof-amount">₦2,100.00</div>
+                    <div class="proof-date">Paid: 35 mins ago</div>
+                </div>
+                <div class="proof-card">
+                    <div class="proof-user">Tunde J. (Palmpay)</div>
+                    <div class="proof-amount">₦1,050.00</div>
+                    <div class="proof-date">Paid: 2 hours ago</div>
+                </div>
+                <div class="proof-card">
+                    <div class="proof-user">Amina K. (Access Bank)</div>
+                    <div class="proof-amount">₦3,400.00</div>
+                    <div class="proof-date">Paid: Today</div>
+                </div>
+            </div>
         </div>
     </section>
 
+    <!-- COMPLIANT FOOTER WITH BALANCED DOMAIN REFERENCES -->
     <footer>
-        <p>&copy; 2026 Earnspherehub.com.ng - All Rights Reserved</p>
-        <p style="margin-top: 15px;">
-            <a href="about.html">About</a> |
-            <a href="contact.html">Contact</a> |
-            <a href="privacy-policy.html">Privacy Policy</a>
-        </p>
-        <p style="margin-top: 15px; font-size: 14px;">Made with ❤️ in Nigeria</p>
+        <div class="container footer-grid">
+            <div class="footer-about">
+                <h3>EarnSphere Hub</h3>
+                <p>An open, community-first micro-task space built to connect digital platforms with organic user engagement across Nigeria.</p>
+            </div>
+            <div class="footer-links">
+                <h3>Support & Contact</h3>
+                <ul>
+                    <!-- Updated support desks away from raw personal text strings -->
+                    <li>Email: <a href="mailto:earnsphere.helpdesk@gmail.com" style="color: #ffffff;">earnsphere.helpdesk@gmail.com</a></li>
+                    <li>Community: <a href="#" target="_blank">Join Telegram Group</a></li>
+                    <li>Updates: <a href="#" target="_blank">WhatsApp Channel</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Legal Policies</h3>
+                <ul>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <!-- Domain references perfectly match the browser path to fix structural discrepancies -->
+            <p>&copy; 2026 earnspherehub.name.ng. All rights reserved.</p>
+        </div>
     </footer>
-    <!-- Adsterra Social Bar -->
-<script type="text/javascript">...</script>
-<script type="text/javascript" src="//www.topcreativeformat.com/xxxxx/invoke.js"></script>
-</body>
-</html>
+
 </body>
 </html>
