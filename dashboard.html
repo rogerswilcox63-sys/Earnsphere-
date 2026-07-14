@@ -745,15 +745,14 @@
     }
 
     // ============================================
-    // FIXED SAVE + LOAD WITH LOCALSTORAGE BACKUP
+    // FIXED FORCE SAVE SYSTEM
     // ============================================
     async function saveUserDataToFirebase() {
       if (!userData) return;
 
       localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
 
-      if (!isFirebaseWorking || !db || !currentUser || isProcessing) return;
-      isProcessing = true;
+      if (!isFirebaseWorking || !db || !currentUser) return;
 
       try {
         const userRef = db.collection('users').doc(currentUser.uid);
@@ -764,12 +763,9 @@
           completedTaskIds: userData.completedTaskIds || [],
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-        console.log('✅ Data saved to Firebase');
+        console.log('✅ Data cleanly synced to Firebase');
       } catch (e) {
-        console.error('❌ Save error:', e);
-        showToast('⚠️ Failed to sync. Data saved locally.');
-      } finally {
-        isProcessing = false;
+        console.error('❌ Sync error:', e);
       }
     }
 
@@ -787,7 +783,7 @@
         if (doc.exists) {
           const dbData = doc.data();
           
-          // Secure Merge Structure: Keep whichever has recorded the task completions securely
+          // Cross-reference data paths cleanly: combine array matches so data isn't deleted
           const mergedData = {
             balance: Math.max(dbData.balance || 0, localData?.balance || 0),
             lifetimeTotal: Math.max(dbData.lifetimeTotal || 0, localData?.lifetimeTotal || 0),
@@ -799,7 +795,7 @@
           return mergedData;
         }
       } catch (e) {
-        console.warn('Load error, using local data backup:', e);
+        console.warn('Network load fallback:', e);
       }
       return localData;
     }
@@ -1006,39 +1002,6 @@
     });
 
     // ============================================
-    // TEST SUPPORT
-    // ============================================
-    async function testSupport() {
-      const testBtn = document.getElementById('testSupportBtn');
-      if (!testBtn) return;
-      testBtn.disabled = true;
-      testBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
-
-      try {
-        const userEmail = currentUser ? currentUser.email : 'test@earnsphere.com';
-        const userName = currentUser ? currentUser.displayName || 'Test User' : 'Test User';
-
-        const result = await sendSupportEmail(
-          userEmail,
-          userName,
-          'Test Message',
-          '🧪 This is a test support message. If you receive this email, the support system is working perfectly! 🎉'
-        );
-
-        if (result.success) {
-          showToast('📨 Test ticket sent! Check your email: earnspherehub@gmail.com 🎉');
-        } else {
-          showToast('❌ Test failed: ' + (result.error || 'Unknown error'));
-        }
-      } catch (err) {
-        showToast('❌ Test failed: ' + err.message);
-      }
-
-      testBtn.disabled = false;
-      testBtn.innerHTML = '<i class="fas fa-vial"></i> Test Support';
-    }
-
-    // ============================================
     // AI CHAT
     // ============================================
     async function sendAiMessage() {
@@ -1184,18 +1147,34 @@
     // AUTH HANDLER
     // ============================================
     function setupAuth() {
-      // Step 1: Instantly load cached local storage data before the network authenticates
+      // 1. Process inbound parameters IMMEDIATELY to prevent early sync overwriting
+      const urlParams = new URLSearchParams(window.location.search);
+      const completedSurvey = urlParams.get('completed');
+      const rewardAmount = parseFloat(urlParams.get('reward'));
+      
       const savedData = localStorage.getItem('earnsphere_user_data');
       if (savedData) {
         userData = JSON.parse(savedData);
-        updateInterfaceValues();
-        renderTasks();
       }
+
+      if (completedSurvey && !isNaN(rewardAmount)) {
+        if (!userData.completedTaskIds.includes(completedSurvey)) {
+          userData.balance = (userData.balance || 0) + rewardAmount;
+          userData.lifetimeTotal = (userData.lifetimeTotal || 0) + rewardAmount;
+          userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+          userData.completedTaskIds.push(completedSurvey);
+          
+          // Securely write directly to local memory so refreshing can't break it
+          localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
+        }
+      }
+
+      // Render the current balance immediately layout elements don't show old numbers
+      updateInterfaceValues();
+      renderTasks();
 
       if (!isFirebaseWorking || !auth) {
         currentUser = { uid: 'guest' };
-        const userEl = document.getElementById('userName');
-        if (userEl) userEl.innerText = 'Welcome, Guest (Offline Mode)';
         return;
       }
 
@@ -1216,38 +1195,21 @@
         const userEl = document.getElementById('userName');
         if (userEl) userEl.innerText = `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}`;
 
-        // Step 2: Load backend data and perform conflict resolution logic
-        const syncedData = await loadUserDataFromFirebase(user);
-
-        if (syncedData) {
-          userData = syncedData;
-        } else if (!savedData) {
-          // Initialize fresh data setup only if cloud and local storage are both empty
-          userData = { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [] };
+        // Force write back up to cloud immediately if we processed a survey payout
+        if (completedSurvey && !isNaN(rewardAmount)) {
           await saveUserDataToFirebase();
+          showToast(`🎉 Survey completed! +₦${rewardAmount} added to your wallet!`);
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // Step 3: Parse and credit query parameters from inbound survey updates safely
-        const urlParams = new URLSearchParams(window.location.search);
-        const completedSurvey = urlParams.get('completed');
-        const rewardAmount = parseFloat(urlParams.get('reward'));
-        
-        if (completedSurvey && !isNaN(rewardAmount)) {
-          if (!userData.completedTaskIds.includes(completedSurvey)) {
-            userData.balance = (userData.balance || 0) + rewardAmount;
-            userData.lifetimeTotal = (userData.lifetimeTotal || 0) + rewardAmount;
-            userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-            userData.completedTaskIds.push(completedSurvey);
-            
-            await saveUserDataToFirebase();
-            showToast(`🎉 Survey completed! +₦${rewardAmount} added to your wallet!`);
-          }
-          window.history.replaceState({}, document.title, window.location.pathname);
+        // Fetch cloud data and merge securely
+        const syncedData = await loadUserDataFromFirebase(user);
+        if (syncedData) {
+          userData = syncedData;
         }
 
         updateInterfaceValues();
         renderTasks();
-
         setTimeout(() => { showTelegramModal(); }, 1500);
       });
     }
