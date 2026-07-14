@@ -638,7 +638,7 @@
     // GLOBAL VARIABLES
     // ============================================
     let currentUser = null;
-    let userData = null;
+    let userData = { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [] };
     let isFirebaseWorking = true;
     let isProcessing = false;
 
@@ -774,29 +774,34 @@
     }
 
     async function loadUserDataFromFirebase(user) {
+      const savedData = localStorage.getItem('earnsphere_user_data');
+      let localData = savedData ? JSON.parse(savedData) : null;
+
       if (!isFirebaseWorking || !db || !user) {
-        const savedData = localStorage.getItem('earnsphere_user_data');
-        return savedData ? JSON.parse(savedData) : null;
+        return localData;
       }
+
       try {
         const userRef = db.collection('users').doc(user.uid);
         const doc = await userRef.get();
         if (doc.exists) {
-          const data = doc.data();
-          const loadedData = {
-            balance: data.balance || 0,
-            lifetimeTotal: data.lifetimeTotal || 0,
-            successfulTaskCount: data.successfulTaskCount || 0,
-            completedTaskIds: data.completedTaskIds || []
+          const dbData = doc.data();
+          
+          // Secure Merge Structure: Keep whichever has recorded the task completions securely
+          const mergedData = {
+            balance: Math.max(dbData.balance || 0, localData?.balance || 0),
+            lifetimeTotal: Math.max(dbData.lifetimeTotal || 0, localData?.lifetimeTotal || 0),
+            successfulTaskCount: Math.max(dbData.successfulTaskCount || 0, localData?.successfulTaskCount || 0),
+            completedTaskIds: Array.from(new Set([...(dbData.completedTaskIds || []), ...(localData?.completedTaskIds || [])]))
           };
-          localStorage.setItem('earnsphere_user_data', JSON.stringify(loadedData));
-          return loadedData;
+          
+          localStorage.setItem('earnsphere_user_data', JSON.stringify(mergedData));
+          return mergedData;
         }
       } catch (e) {
-        console.warn('Load error:', e);
+        console.warn('Load error, using local data backup:', e);
       }
-      const savedData = localStorage.getItem('earnsphere_user_data');
-      return savedData ? JSON.parse(savedData) : null;
+      return localData;
     }
 
     // ============================================
@@ -904,6 +909,7 @@
     }
 
     function logout() {
+      localStorage.removeItem('earnsphere_user_data');
       if (isFirebaseWorking && auth) {
         auth.signOut().then(() => {
           window.location.href = 'login.html';
@@ -1084,8 +1090,6 @@
     Be friendly, helpful, and concise. Keep responses under 150 words.
         `;
 
-        // Direct connection string. WARNING: Client-side keys are easily stolen! 
-        // Move this logic to Firebase Cloud Functions for security.
         const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -1110,7 +1114,7 @@
         return { success: true, reply: reply };
 
       } catch (error) {
-        return { success: false, error: 'Failed to connect to AI service. Ensure CORS config or backends are set.' };
+        return { success: false, error: 'Failed to connect to AI service.' };
       }
     }
 
@@ -1180,16 +1184,18 @@
     // AUTH HANDLER
     // ============================================
     function setupAuth() {
+      // Step 1: Instantly load cached local storage data before the network authenticates
+      const savedData = localStorage.getItem('earnsphere_user_data');
+      if (savedData) {
+        userData = JSON.parse(savedData);
+        updateInterfaceValues();
+        renderTasks();
+      }
+
       if (!isFirebaseWorking || !auth) {
-        const savedData = localStorage.getItem('earnsphere_user_data');
-        if (savedData) {
-          userData = JSON.parse(savedData);
-          currentUser = { uid: 'guest' };
-          const userEl = document.getElementById('userName');
-          if (userEl) userEl.innerText = 'Welcome, Guest';
-          updateInterfaceValues();
-          renderTasks();
-        }
+        currentUser = { uid: 'guest' };
+        const userEl = document.getElementById('userName');
+        if (userEl) userEl.innerText = 'Welcome, Guest (Offline Mode)';
         return;
       }
 
@@ -1210,20 +1216,32 @@
         const userEl = document.getElementById('userName');
         if (userEl) userEl.innerText = `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}`;
 
-        const firebaseData = await loadUserDataFromFirebase(user);
+        // Step 2: Load backend data and perform conflict resolution logic
+        const syncedData = await loadUserDataFromFirebase(user);
 
-        if (firebaseData) {
-          userData = firebaseData;
-        } else {
+        if (syncedData) {
+          userData = syncedData;
+        } else if (!savedData) {
+          // Initialize fresh data setup only if cloud and local storage are both empty
           userData = { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [] };
           await saveUserDataToFirebase();
         }
 
+        // Step 3: Parse and credit query parameters from inbound survey updates safely
         const urlParams = new URLSearchParams(window.location.search);
         const completedSurvey = urlParams.get('completed');
-        const rewardAmount = urlParams.get('reward');
-        if (completedSurvey && rewardAmount) {
-          showToast(`🎉 Survey completed! +₦${rewardAmount} added to your wallet!`);
+        const rewardAmount = parseFloat(urlParams.get('reward'));
+        
+        if (completedSurvey && !isNaN(rewardAmount)) {
+          if (!userData.completedTaskIds.includes(completedSurvey)) {
+            userData.balance = (userData.balance || 0) + rewardAmount;
+            userData.lifetimeTotal = (userData.lifetimeTotal || 0) + rewardAmount;
+            userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+            userData.completedTaskIds.push(completedSurvey);
+            
+            await saveUserDataToFirebase();
+            showToast(`🎉 Survey completed! +₦${rewardAmount} added to your wallet!`);
+          }
           window.history.replaceState({}, document.title, window.location.pathname);
         }
 
