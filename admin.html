@@ -26,7 +26,6 @@ h1{color:#f59e0b; text-align:center}
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
 <div id="loginScreen" class="login-box">
   <h1><i class="fas fa-shield-alt"></i> Admin Login</h1>
   <input type="email" id="adminEmail" placeholder="Admin Email" value="wilcoxrichard85@gmail.com">
@@ -35,7 +34,6 @@ h1{color:#f59e0b; text-align:center}
   <p id="loginMsg" style="color:#ef4444; text-align:center"></p>
 </div>
 
-<!-- ADMIN DASHBOARD -->
 <div id="adminPanel" style="display:none">
   <h1><i class="fas fa-shield-alt"></i> EarnSphereHub Admin 
     <button onclick="logout()" style="float:right; width:auto; padding:8px 12px; background:#ef4444">Logout</button>
@@ -46,19 +44,21 @@ h1{color:#f59e0b; text-align:center}
     <div class="tab" onclick="showTab('transactions', this)">Transactions</div>
   </div>
 
-  <div id="withdrawals"></div>
-  <div id="transactions" style="display:none"></div>
+  <div id="withdrawals">
+    <div id="withdrawals-list-container"></div>
+  </div>
+  
+  <div id="transactions" style="display:none">
+    <div id="transactions-list-container"></div>
+  </div>
 </div>
 
-<!-- PLACE AT THE BOTTOM OF admin.html -->
-<script type="module">
-    import { initializeApp } from "https://gstatic.com";
-    import { getFirestore, collection, query, where, getDocs, doc, updateDoc, increment } from "https://gstatic.com";
-    import { getAuth, onAuthStateChanged } from "https://gstatic.com";
-
-    // Insert your unique Firebase Project credentials object here
+<script>
+    // ============================================
+    // FIREBASE INITIALIZATION (COMPAT MODE)
+    // ============================================
     const firebaseConfig = {
-        apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
       projectId: "earnspherehub-742e9",
       storageBucket: "earnspherehub-742e9.firebasestorage.app",
@@ -67,74 +67,178 @@ h1{color:#f59e0b; text-align:center}
       measurementId: "G-3ZXY33620J"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    // RESTRICT ACCESS TO YOUR ADMIN EMAIL ONLY
-    onAuthStateChanged(auth, (user) => {
-        if (!user || user.email !== "wilcoxrichard85@gmail.com") {
-            alert("⛔ Access Denied: Unauthorized Admin Session.");
-            window.location.href = "dashboard.html";
+    const ALLOWED_ADMIN_EMAIL = "wilcoxrichard85@gmail.com";
+
+    // ============================================
+    // AUTH MONITOR STATE
+    // ============================================
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            if (user.email === ALLOWED_ADMIN_EMAIL) {
+                // Secure verified credentials, show dashboard options
+                document.getElementById("loginScreen").style.display = "none";
+                document.getElementById("adminPanel").style.display = "block";
+                loadPendingCashouts();
+                loadAllTransactions();
+            } else {
+                // Logged in, but unauthorized email account context
+                alert("⛔ Access Denied: Unauthorized Admin Account.");
+                auth.signOut().then(() => {
+                    window.location.href = "dashboard.html";
+                });
+            }
         } else {
-            loadPendingCashouts();
+            // Keep on login screen display structure safely
+            document.getElementById("loginScreen").style.display = "block";
+            document.getElementById("adminPanel").style.display = "none";
         }
     });
 
-    // FETCH PENDING RECORDS FROM THE WITHDRAWALS COLLECTION
-    async function loadPendingCashouts() {
-        // Target whatever container ID or element you hold your withdrawals layout in
-        const container = document.getElementById('withdrawals-list-container') || document.body;
-        
+    // ============================================
+    // LOGIN & LOGOUT FUNCTIONALITY
+    // ============================================
+    async function adminLogin() {
+        const email = document.getElementById("adminEmail").value.trim();
+        const pass = document.getElementById("adminPass").value;
+        const msg = document.getElementById("loginMsg");
+
+        if (email !== ALLOWED_ADMIN_EMAIL) {
+            msg.innerText = "Error: Invalid admin route authentication parameters.";
+            return;
+        }
+
         try {
-            const q = query(collection(db, "withdrawals"), where("status", "==", "Pending Review"));
-            const querySnapshot = await getDocs(q);
-
-            if (querySnapshot.empty) {
-                container.innerHTML = "<p style='color:#94a3b8; text-align:center;'>No pending withdrawals found.</p>";
-                return;
-            }
-
-            container.innerHTML = ""; // Clear loader text
-            querySnapshot.forEach((withdrawalDoc) => {
-                const data = withdrawalDoc.data();
-                const docId = withdrawalDoc.id;
-
-                container.innerHTML += `
-                    <div id="row-${docId}" style="background:#1e293b; padding:16px; border-radius:8px; margin-bottom:12px; border:1px solid #334155;">
-                        <p style="color:#ffffff; font-weight:600;">${data.userEmail}</p>
-                        <p style="color:#94a3b8; font-size:0.85rem;">${data.bankName} • ${data.accountNumber}</p>
-                        <p style="color:#4ade80; font-weight:700; margin-top:4px;">₦${data.amount}</p>
-                        <div style="margin-top:10px; display:flex; gap:10px;">
-                            <button onclick="approvePayout('${docId}', '${data.userId}', ${data.amount})" style="background:#16a34a; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer;">Approve</button>
-                            <button onclick="rejectPayout('${docId}')" style="background:#dc2626; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer;">Reject</button>
-                        </div>
-                    </div>
-                `;
-            });
-        } catch(err) {
-            console.error(err);
+            msg.innerText = "Authenticating Admin...";
+            await auth.signInWithEmailAndPassword(email, pass);
+        } catch (error) {
+            msg.innerText = "Login Failed: " + error.message;
         }
     }
 
-    // MAP ACTIONS GLOBAL TO THE WINDOW FOR BUTTON CLICK LIFECYCLES
-    window.approvePayout = async function(docId, userId, amount) {
-        if(!confirm("Approve this payout? This will deduct balance on the server.")) return;
+    function logout() {
+        auth.signOut().then(() => {
+            window.location.reload();
+        });
+    }
+
+    // ============================================
+    // TAB MANAGEMENT SWITCHER
+    // ============================================
+    function showTab(tabId, element) {
+        document.getElementById("withdrawals").style.display = tabId === "withdrawals" ? "block" : "none";
+        document.getElementById("transactions").style.display = tabId === "transactions" ? "block" : "none";
+
+        document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+        element.classList.add("active");
+    }
+
+    // ============================================
+    // DATA LAYER REQUISITIONS (FIRESTORE)
+    // ============================================
+    async function loadPendingCashouts() {
+        const container = document.getElementById('withdrawals-list-container');
+        if (!container) return;
+        
+        container.innerHTML = "<p style='color:#94a3b8; text-align:center;'>Loading pending queries...</p>";
+
         try {
-            await updateDoc(doc(db, "withdrawals", docId), { status: "Approved" });
-            await updateDoc(doc(db, "users", userId), { wallet_balance: increment(-amount) });
-            document.getElementById(`row-${docId}`).remove();
-            alert("Payout approved and balance deducted successfully!");
-        } catch(e) { alert("Error updating records."); }
+            db.collection("withdrawals")
+              .where("status", "==", "Pending Review")
+              .onSnapshot((querySnapshot) => {
+                  if (querySnapshot.empty) {
+                      container.innerHTML = "<p style='color:#94a3b8; text-align:center;'>No pending withdrawals found.</p>";
+                      return;
+                  }
+
+                  container.innerHTML = "";
+                  querySnapshot.forEach((doc) => {
+                      const data = doc.data();
+                      const docId = doc.id;
+
+                      container.innerHTML += `
+                          <div id="row-${docId}" style="background:#1e293b; padding:16px; border-radius:8px; margin-bottom:12px; border:1px solid #334155;">
+                              <p style="color:#ffffff; font-weight:600;">${data.userEmail || 'Unknown Account'}</p>
+                              <p style="color:#94a3b8; font-size:0.85rem;">${data.bankName || 'N/A'} • ${data.accountNumber || 'N/A'}</p>
+                              <p style="color:#4ade80; font-weight:700; margin-top:4px;">₦${(data.amount || 0).toLocaleString()}</p>
+                              <div style="margin-top:10px; display:flex; gap:10px;">
+                                  <button onclick="approvePayout('${docId}', '${data.userId}', ${data.amount})" style="background:#16a34a; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:600;">Approve</button>
+                                  <button onclick="rejectPayout('${docId}')" style="background:#dc2626; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:600;">Reject</button>
+                              </div>
+                          </div>
+                      `;
+                  });
+              });
+        } catch(err) {
+            console.error("Error reading data logs:", err);
+            container.innerHTML = "<p style='color:#ef4444;'>Failed to load records container parameters.</p>";
+        }
+    }
+
+    async function loadAllTransactions() {
+        const container = document.getElementById('transactions-list-container');
+        if (!container) return;
+
+        try {
+            // Pull history list sorted by creation sequence
+            db.collection("withdrawals")
+              .limit(30)
+              .onSnapshot((querySnapshot) => {
+                  if (querySnapshot.empty) {
+                      container.innerHTML = "<p style='color:#94a3b8; text-align:center;'>No transaction records found.</p>";
+                      return;
+                  }
+                  container.innerHTML = "";
+                  querySnapshot.forEach((doc) => {
+                      const data = doc.data();
+                      let badgeColor = "#f59e0b"; // Pending
+                      if (data.status === "Approved") badgeColor = "#22c55e";
+                      if (data.status === "Rejected") badgeColor = "#ef4444";
+
+                      container.innerHTML += `
+                          <div class="card" style="border-left: 4px solid ${badgeColor}">
+                              <span style="float:right; font-size:12px; font-weight:bold; color:${badgeColor}">${data.status}</span>
+                              <div style="font-weight:600;">${data.userEmail}</div>
+                              <div class="small">Amount: ₦${(data.amount || 0).toLocaleString()}</div>
+                              <div class="small">Bank Details: ${data.bankName} - ${data.accountNumber}</div>
+                          </div>
+                      `;
+                  });
+              });
+        } catch (e) {
+            container.innerHTML = "Error loading transactional ledgers.";
+        }
+    }
+
+    // ============================================
+    // ADMIN ACTION WORKFLOWS
+    // ============================================
+    window.approvePayout = async function(docId, userId, amount) {
+        if(!confirm("Approve this payout? This will deduct the balance on the server database records.")) return;
+        try {
+            await db.collection("withdrawals").doc(docId).update({ status: "Approved" });
+            
+            // Adjusts wallet balance field name explicitly down to balance parameters safely
+            await db.collection("users").doc(userId).update({
+                balance: firebase.firestore.FieldValue.increment(-amount)
+            });
+            
+            alert("Payout approved and balance synchronized cleanly!");
+        } catch(e) { 
+            console.error(e);
+            alert("Error running update sequences. Verify variable naming configurations inside your users directory schema collections."); 
+        }
     };
 
     window.rejectPayout = async function(docId) {
         if(!confirm("Reject this payout?")) return;
         try {
-            await updateDoc(doc(db, "withdrawals", docId), { status: "Rejected" });
-            document.getElementById(`row-${docId}`).remove();
-            alert("Payout rejected.");
-        } catch(e) { alert("Error rejecting payout."); }
+            await db.collection("withdrawals").doc(docId).update({ status: "Rejected" });
+            alert("Payout rejected successfully.");
+        } catch(e) { alert("Error handling write sequence."); }
     };
 </script>
 
