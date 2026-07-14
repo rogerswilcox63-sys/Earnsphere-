@@ -3,411 +3,604 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earnsphere Withdraw</title>
-    <style>
-        /* EarnsphereHub Premium Dark Theme Variables */
-:root {
-    --bg-main: #0d1117;
-    --bg-container: #161b22;
-    --bg-input: #0d1117;
-    --border-color: #30363d;
-    --accent-cyan: #58a6ff;
-    --accent-green: #238636;
-    --accent-green-hover: #2ea043;
-    --text-primary: #c9d1d9;
-    --text-muted: #8b949e;
-    --text-heading: #f0f6fc;
-    --danger-red: #f85149;
-}
-
-body { 
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    background-color: var(--bg-main); 
-    color: var(--text-primary); 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    min-height: 100vh; 
-    margin: 0; 
-    padding: 20px 0; 
-    box-sizing: border-box; 
-}
-
-.container { 
-    background-color: var(--bg-container); 
-    padding: 30px; 
-    border-radius: 6px; 
-    border: 1px solid var(--border-color);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); 
-    width: 100%; 
-    max-width: 460px; 
-    box-sizing: border-box; 
-}
-
-/* Dashboard Top Branding Row */
-.dashboard-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.dashboard-logo {
-    max-height: 40px;
-    width: auto;
-    object-fit: contain;
-}
-
-.header-title { 
-    color: var(--text-heading); 
-    margin: 0; 
-    font-size: 20px; 
-    font-weight: 600; 
-    letter-spacing: 0.5px;
-}
-
-.minimum-alert { 
-    text-align: center; 
-    background-color: rgba(248, 81, 73, 0.1); 
-    border: 1px solid rgba(248, 81, 73, 0.4); 
-    color: var(--danger-red); 
-    padding: 10px; 
-    border-radius: 6px; 
-    font-size: 13px; 
-    font-weight: 500; 
-    margin-bottom: 20px; 
-}
-
-/* Balance Display Panel */
-.balance-card { 
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-color);
-    padding: 18px; 
-    border-radius: 6px; 
-    text-align: center; 
-    margin-bottom: 25px; 
-}
-
-.balance-card h3 { 
-    margin: 0; 
-    font-size: 12px; 
-    text-transform: uppercase; 
-    letter-spacing: 1px; 
-    color: var(--text-muted); 
-}
-
-.balance-card p { 
-    margin: 8px 0 0 0; 
-    font-size: 28px; 
-    font-weight: 600; 
-    color: var(--accent-cyan); 
-}
-
-/* Input Form Group Elements */
-.form-group { 
-    margin-bottom: 20px; 
-}
-
-label { 
-    display: block; 
-    margin-bottom: 8px; 
-    color: var(--text-heading); 
-    font-weight: 500; 
-    font-size: 14px; 
-}
-
-input, select { 
-    width: 100%; 
-    padding: 10px 12px; 
-    border: 1px solid var(--border-color); 
-    border-radius: 6px; 
-    box-sizing: border-box; 
-    font-size: 14px; 
-    background-color: var(--bg-input); 
-    color: var(--text-primary); 
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-input:focus, select:focus { 
-    outline: none; 
-    border-color: var(--accent-cyan); 
-    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3); 
-}
-
-option { 
-    background-color: var(--bg-container); 
-    color: var(--text-primary); 
-}
-
-/* Call To Action Buttons */
-button { 
-    width: 100%; 
-    padding: 12px; 
-    background-color: var(--accent-green); 
-    color: #ffffff; 
-    border: 1px solid rgba(240, 246, 252, 0.1); 
-    border-radius: 6px; 
-    cursor: pointer; 
-    font-size: 14px; 
-    font-weight: 600; 
-    transition: background-color 0.1s;
-}
-
-button:hover { 
-    background-color: var(--accent-green-hover); 
-}
-
-button:disabled { 
-    background-color: #21262d; 
-    color: var(--text-muted); 
-    border-color: var(--border-color);
-    cursor: not-allowed; 
-}
-
-#status { 
-    text-align: center; 
-    margin-top: 15px; 
-    font-size: 14px; 
-}
-
-/* Verified Audit Trail Payout Feed */
-.proofs-section { 
-    margin-top: 30px; 
-    border-top: 1px solid var(--border-color); 
-    padding-top: 20px; 
-}
-
-.proofs-title { 
-    font-size: 13px; 
-    color: var(--text-muted); 
-    margin-bottom: 15px; 
-    font-weight: 600; 
-    text-transform: uppercase; 
-    text-align: center; 
-    letter-spacing: 0.5px; 
-}
-
-.proof-item { 
-    background-color: var(--bg-main); 
-    padding: 12px; 
-    border-radius: 6px; 
-    margin-bottom: 10px; 
-    border: 1px solid var(--border-color);
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    font-size: 13px; 
-}
-
-.proof-meta { 
-    color: var(--text-muted); 
-    font-size: 12px; 
-    margin-top: 2px;
-}
-
-.proof-amount { 
-    color: #56d364; 
-    font-weight: 600; 
-}
-
-    </style>
+    <title>EarnSphere Hub - Withdrawal</title>
 </head>
 <body>
 
-<div class="container">
-    <!-- Main Heading Elements -->
-    <h1 class="header-title">Earnsphere Withdraw</h1>
-    <div class="minimum-alert">⚠️ Minimum Withdrawal Limit: ₦1,000.00</div>
+    <!-- Header Section -->
+    <header>
+        <p>EarnSphere Hub</p>
+        <h1>EarnSphere Withdrawal</h1>
+    </header>
+    <style>
+    /* EarnSphere HD Dark Theme Color Palette Variables */
+:root {
+    --bg-dark: #0b0f19;
+    --bg-card: #151d30;
+    --accent-glow: #10b981;
+    --accent-hover: #059669;
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --error-red: #ef4444;
+    --border-color: #24324f;
+    --status-pending: #f59e0b;
+    --status-success: #10b981;
+}
 
-    <!-- Balance Card -->
-    <div class="balance-card">
-        <h3>Available Balance</h3>
-        <p id="currentBalance">₦0.00</p>
+/* Global Form Resets */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Page Layout Wrapper */
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+    gap: 30px;
+}
+
+/* Main Container Card with Subtle Neon Glow */
+.container, .history-container {
+    background: var(--bg-card);
+    width: 100%;
+    max-width: 480px;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--border-color);
+}
+
+/* History container unique padding adjustments */
+.history-container {
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Typography Headers */
+header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+header p {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-glow);
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.history-title, h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-main);
+}
+
+/* Current Funds Display Badge */
+.balance-card, .container > div:first-of-type {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.balance-card span:first-child, .container > div:first-of-type span:first-child {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.balance-card span:last-child, .container > div:first-of-type span:last-child {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Input Fields and Select Elements Layout wrappers */
+form > div {
+    margin-bottom: 20px;
+    position: relative;
+    width: 100%;
+}
+
+label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+input, select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: var(--text-main);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* Custom Dropdown Arrow Icon Indicator styling inside forms */
+form > div:first-of-type::after {
+    content: "";
+    position: absolute;
+    right: 16px;
+    top: 43px; /* Aligns visually below the label text layout */
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--text-muted);
+    pointer-events: none;
+}
+
+/* Style options to render nicely on dark backgrounds */
+select option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent-glow);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+/* Secure character mask display spacing for Security PIN */
+input[type="password"] {
+    letter-spacing: 8px;
+    text-align: center;
+    font-size: 1.25rem;
+}
+
+form p, .info-note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+form > div:nth-last-of-type(1) p {
+    text-align: center;
+}
+
+/* Form Validation Feedback Containers */
+#error-box, #success-box {
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.87rem;
+    margin-bottom: 20px;
+    display: none; /* Toggle via JS or manual inspection */
+    animation: fadeIn 0.3s ease;
+}
+
+#error-box {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--error-red);
+    color: var(--error-red);
+}
+
+#success-box {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--accent-glow);
+    color: var(--accent-glow);
+}
+
+/* Call to Action Primary Button */
+.btn-withdraw, button[type="submit"] {
+    width: 100%;
+    background: var(--accent-glow);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-withdraw:hover, button[type="submit"]:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.btn-withdraw:disabled, button[type="submit"]:disabled {
+    background: #24324f;
+    color: var(--text-muted);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Scannable Logs Table Design */
+.history-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+th {
+    color: var(--text-muted);
+    font-weight: 500;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+td {
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    color: var(--text-main);
+}
+
+td span:last-child {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Status Badges conditional highlights mappings */
+table tbody tr:nth-child(odd) td:last-child span { /* Success Status */
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--status-success);
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+table tbody tr:nth-child(even) td:last-child span { /* Pending Status */
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--status-pending);
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Entry Animation for States */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+
+    <!-- Real-time Balance Display Section -->
+    <div>
+        <span>Your Balance</span>
+        <span>₦<span id="user-balance">0.00</span></span>
     </div>
 
-    <!-- Payout Form -->
-    <form id="withdrawalForm">
-        <!-- Nigerian Bank Selection -->
-        <div class="form-group">
-            <label for="bankName">Select Bank</label>
-            <select id="bankName" required>
+    <!-- Error Message Display Area -->
+    <div id="error-box">Insufficient funds. Please check your balance.</div>
+
+    <!-- Success Message Display Area -->
+    <div id="success-box">Withdrawal request processed successfully.</div>
+
+    <!-- Withdrawal Input Form -->
+    <form id="withdrawal-form">
+        
+        <!-- Bank Selection Dropdown -->
+        <div>
+            <label for="withdraw-bank">Select Bank</label>
+            <select id="withdraw-bank" required>
                 <option value="" disabled selected>Choose your bank</option>
-                <option value="Access Bank">Access Bank</option>
-                <option value="Access Bank (Diamond)">Access Bank (Diamond)</option>
-                <option value="Citibank Nigeria">Citibank Nigeria</option>
-                <option value="Ecobank Nigeria">Ecobank Nigeria</option>
-                <option value="Fidelity Bank">Fidelity Bank</option>
-                <option value="First Bank of Nigeria">First Bank of Nigeria</option>
-                <option value="First City Monument Bank (FCMB)">First City Monument Bank (FCMB)</option>
-                <option value="Globus Bank">Globus Bank</option>
-                <option value="Guaranty Trust Bank (GTBank)">Guaranty Trust Bank (GTBank)</option>
-                <option value="Heritage Bank">Heritage Bank</option>
-                <option value="Jaiz Bank">Jaiz Bank</option>
-                <option value="Keystone Bank">Keystone Bank</option>
-                <option value="Lotus Bank">Lotus Bank</option>
-                <option value="Moniepoint MFB">Moniepoint MFB</option>
-                <option value="OPay">OPay (Digital Wallet)</option>
-                <option value="Optimimus Bank">Optimimus Bank</option>
-                <option value="Palmpay">Palmpay</option>
-                <option value="Parallex Bank">Parallex Bank</option>
-                <option value="Polaris Bank">Polaris Bank</option>
-                <option value="PremiumTrust Bank">PremiumTrust Bank</option>
-                <option value="Providus Bank">Providus Bank</option>
-                <option value="Stanbic IBTC Bank">Stanbic IBTC Bank</option>
-                <option value="Standard Chartered Bank">Standard Chartered Bank</option>
-                <option value="Sterling Bank">Sterling Bank</option>
-                <option value="SunTrust Bank">SunTrust Bank</option>
-                <option value="TAJBank">TAJBank</option>
-                <option value="Titan Trust Bank">Titan Trust Bank</option>
-                <option value="Union Bank of Nigeria">Union Bank of Nigeria</option>
-                <option value="United Bank for Africa (UBA)">United Bank for Africa (UBA)</option>
-                <option value="Unity Bank">Unity Bank</option>
-                <option value="Wema Bank">Wema Bank</option>
-                <option value="Zenith Bank">Zenith Bank</option>
+                <option value="9psb">9Payment Service Bank (9PSB)</option>
+                <option value="access">Access Bank</option>
+                <option value="citibank">Citibank Nigeria</option>
+                <option value="coronation">Coronation Merchant Bank</option>
+                <option value="ecobank">Ecobank Nigeria</option>
+                <option value="fbnmerchant">FBNQuest Merchant Bank</option>
+                <option value="fcmb">First City Monument Bank (FCMB)</option>
+                <option value="fidelity">Fidelity Bank</option>
+                <option value="firstbank">First Bank of Nigeria</option>
+                <option value="globus">Globus Bank</option>
+                <option value="gtbank">Guaranty Trust Bank (GTBank)</option>
+                <option value="heritage">Heritage Bank</option>
+                <option value="jaiz">Jaiz Bank</option>
+                <option value="keystone">Keystone Bank</option>
+                <option value="kuda">Kuda Bank</option>
+                <option value="lotus">Lotus Bank</option>
+                <option value="moniepoint">Moniepoint Microfinance Bank</option>
+                <option value="nova">Nova Merchant Bank</option>
+                <option value="opay">OPay</option>
+                <option value="palmpay">PalmPay</option>
+                <option value="optimum">Optimum Bank</option>
+                <option value="providus">Providus Bank</option>
+                <option value="signature">Signature Bank</option>
+                <option value="stanbic">Stanbic IBTC Bank</option>
+                <option value="standard_chartered">Standard Chartered Bank</option>
+                <option value="sterling">Sterling Bank</option>
+                <option value="suntrust">SunTrust Bank</option>
+                <option value="taj">TAJBank</option>
+                <option value="titan">Titan Trust Bank</option>
+                <option value="uba">United Bank for Africa (UBA)</option>
+                <option value="union">Union Bank of Nigeria</option>
+                <option value="unity">Unity Bank</option>
+                <option value="vfd">VFD Microfinance Bank</option>
+                <option value="wema">Wema Bank</option>
+                <option value="zenith">Zenith Bank</option>
             </select>
         </div>
 
-        <!-- 10 Digit Account Number -->
-        <div class="form-group">
-            <label for="accountNumber">Account Number</label>
-            <input type="text" id="accountNumber" pattern="\d{10}" title="Please enter a valid 10-digit NUBAN account number" maxlength="10" placeholder="e.g. 0123456789" required>
+        <!-- Account Number Input -->
+        <div>
+            <label for="account-number">10-Digit Account Number</label>
+            <input type="text" id="account-number" placeholder="e.g. 0123456789" pattern="\d{10}" maxlength="10" required>
         </div>
 
-        <!-- Account Holder Name -->
-        <div class="form-group">
-            <label for="accountName">Account Name</label>
-            <input type="text" id="accountName" placeholder="e.g. John Obi" required>
+        <!-- Amount Input -->
+        <div>
+            <label for="withdraw-amount">Amount (₦)</label>
+            <input type="number" id="withdraw-amount" placeholder="0.00" min="1000" step="any" required>
+            <p>Minimum withdrawal is ₦1,000</p>
         </div>
 
-        <!-- Amount Input Field -->
-        <div class="form-group">
-            <label for="amount">Withdrawal Amount (₦)</label>
-            <input type="number" id="amount" min="1000" placeholder="Minimum 1,000" required>
+        <!-- Security Transaction PIN -->
+        <div>
+            <label for="security-pin">4-Digit Security PIN</label>
+            <input type="password" id="security-pin" placeholder="••••" pattern="\d{4}" maxlength="4" inputmode="numeric" required>
+            <p>Enter your secret transaction PIN authorization</p>
         </div>
 
-        <!-- Submit CTA -->
-        <button type="submit" id="submitBtn">Submit Request</button>
+        <!-- Submit Action -->
+        <button type="submit" id="submit-btn">Request Withdrawal</button>
     </form>
-    
-    <!-- Submission Response Node -->
-    <div id="status"></div>
 
-    <!-- Payout Proofs Feed Container -->
-    <div class="proofs-section">
-        <div class="proofs-title">Recent Payout Proofs</div>
-        <div id="payoutProofsContainer">
-            <div class="proof-item" style="border-left-color: #3a506b;">
-                <div>
-                    <div>Syncing verification logs...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+    <!-- Recent Transaction History Table Section -->
+    <section>
+        <h2>Recent Withdrawals</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Bank Details</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GTBank<br><span>0123***789</span></td>
+                    <td>₦5,000.00</td>
+                    <td><span>Success</span></td>
+                </tr>
+                <tr>
+                    <td>Moniepoint<br><span>5678***123</span></td>
+                    <td>₦12,500.00</td>
+                    <td><span>Pending</span></td>
+                </tr>
+                <tr>
+                    <td>OPay<br><span>9012***456</span></td>
+                    <td>₦2,200.00</td>
+                    <td><span>Success</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
 <script>
-    // 1. Paste your Firebase configuration here
+    import { initializeApp } from "https://gstatic.com";
+import { getAuth, onAuthStateChanged } from "https://gstatic.com";
+import { 
+    getFirestore, 
+    doc, 
+    onSnapshot, 
+    runTransaction, 
+    collection, 
+    serverTimestamp 
+} from "https://gstatic.com";
+
+// 1. Firebase Project Setup Credentials
 const firebaseConfig = {
-    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-    authDomain: "earnspherehub-742e9.firebaseapp.com",
-    projectId: "earnspherehub-742e9",
-    storageBucket: "earnspherehub-742e9.firebasestorage.app",
-    messagingSenderId: "173538573377",
-    appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-    measurementId: "G-3ZXY33620J"
-  };
+    apiKey: "YOUR_API_KEY_HERE",
+    authDomain: "YOUR_PROJECT_://firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_://appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
 
-// 2. Initialize Firebase Components
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// Initialize App Services
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-// 3. Handle Withdrawal Form Submission
-const form = document.getElementById('withdrawalForm');
-const statusDiv = document.getElementById('status');
+// 2. DOM Interface Selectors
+const balanceEl = document.getElementById('user-balance');
+const withdrawForm = document.getElementById('withdrawal-form');
+const bankSelect = document.getElementById('withdraw-bank');
+const accountInput = document.getElementById('account-number');
+const amountInput = document.getElementById('withdraw-amount');
+const pinInput = document.getElementById('security-pin');
+const errorBox = document.getElementById('error-box');
+const successBox = document.getElementById('success-box');
+const submitBtn = document.getElementById('submit-btn');
 
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    // Validate minimum limit before processing
-    const amountInput = document.getElementById('amount').value;
-    if(parseFloat(amountInput) < 1000) {
-        statusDiv.style.color = "#e63946";
-        statusDiv.textContent = "The minimum payout amount is ₦1,000.";
+// Runtime Tracking Parameters
+let currentBalance = 0;
+const MIN_WITHDRAWAL = 1000;
+
+// Helper: Formats numbers into localized Naira (₦) display rules
+const formatNaira = (value) => {
+    return new Intl.NumberFormat('en-NG', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
+};
+
+// 3. User Session Tracking & Dynamic Wallet Syncing
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Establishes a permanent websocket listener to the user document for live balance changes
+        const userDocRef = doc(db, "users", user.uid);
+        
+        onSnapshot(userDocRef, (snapshot) => {
+            if (snapshot.exists()) {
+                currentBalance = snapshot.data().balance || 0;
+                balanceEl.textContent = formatNaira(currentBalance);
+                submitBtn.disabled = false;
+            } else {
+                showError("User profile account database document was not located.");
+                submitBtn.disabled = true;
+            }
+        }, (error) => {
+            showError("Network connection interrupted: " + error.message);
+        });
+    } else {
+        showError("Access Denied. Please connect your session to EarnSphere Hub to execute transactions.");
+        submitBtn.disabled = true;
+        balanceEl.textContent = "0.00";
+    }
+});
+
+// 4. Interface Form-Field Input Masking Enforcements
+accountInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, ''); // Blocks alphanumeric inputs (NUBAN must be digits only)
+});
+
+pinInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, ''); // Restricts interaction to numeric inputs only
+});
+
+// 5. Atomic Double-Spending Protected Form Handler Routine
+withdrawForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearMessages();
+
+    const user = auth.currentUser;
+    const bankName = bankSelect.value;
+    const accountNumber = accountInput.value;
+    const requestedAmount = parseFloat(amountInput.value);
+    const enteredPin = pinInput.value;
+
+    // Boundary Integrity Confirmations
+    if (!user) {
+        showError("Your login state expired. Please authenticate into EarnSphere.");
         return;
     }
 
-    // UI Feedback: Disable button to prevent double-clicks
-    const submitBtn = document.getElementById('submitBtn');
+    if (accountNumber.length !== 10) {
+        showError("Invalid account matrix. Standard Nigerian bank numbers must span exactly 10 digits.");
+        return;
+    }
+
+    if (requestedAmount < MIN_WITHDRAWAL) {
+        showError(`Transaction declined. The system minimum limit per processing run is ₦${formatNaira(MIN_WITHDRAWAL)}.`);
+        return;
+    }
+
+    if (requestedAmount > currentBalance) {
+        showError(`Insufficient funds. Your active wallet balance cannot settle a ₦${formatNaira(requestedAmount)} payment.`);
+        return;
+    }
+
+    if (enteredPin.length !== 4) {
+        showError("Access validation fault. Security PIN strings must measure exactly 4 digits long.");
+        return;
+    }
+
+    // Freeze input elements during active network requests
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Processing...';
+    submitBtn.textContent = "Verifying Credentials...";
 
-    const bankName = document.getElementById('bankName').value;
-    const accountNumber = document.getElementById('accountNumber').value;
-    const accountName = document.getElementById('accountName').value;
+    try {
+        const userDocRef = doc(db, "users", user.uid);
+        const payoutLogRef = doc(collection(db, "payouts"));
 
-    // Save payload to Firestore 'withdrawals' collection
-    db.collection("withdrawals").add({
-        bankName: bankName,
-        accountNumber: accountNumber,
-        accountName: accountName,
-        amount: parseFloat(amountInput),
-        currency: "NGN",
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        status: "Pending"
-    })
-    .then(() => {
-        statusDiv.style.color = "#b4fedb";
-        statusDiv.textContent = "Payout request submitted successfully!";
-        form.reset();
-    })
-    .catch((error) => {
-        statusDiv.style.color = "#e63946";
-        statusDiv.textContent = "Error submitting request: " + error.message;
-    })
-    .finally(() => {
+        // Executes an isolated transaction directly on the database cluster to block race condition hacks
+        await runTransaction(db, async (transaction) => {
+            const userSnapshot = await transaction.get(userDocRef);
+            
+            if (!userSnapshot.exists()) {
+                throw new Error("Active user context missing from registry record.");
+            }
+
+            const userData = userSnapshot.data();
+            const serverSideBalance = userData.balance || 0;
+            const validSecurityPin = userData.transactionPin; // Assumes profile schema possesses this element
+
+            // Pin validation check
+            if (!validSecurityPin || enteredPin !== String(validSecurityPin)) {
+                throw new Error("Invalid security authorization code. Payout cancelled.");
+            }
+
+            // Server-side fallback safety balance validation 
+            if (requestedAmount > serverSideBalance) {
+                throw new Error("Insufficient funds confirmed during process synchronization.");
+            }
+
+            // Perform transaction mutation changes across variables atomic steps
+            const adjustedBalance = serverSideBalance - requestedAmount;
+            transaction.update(userDocRef, { balance: adjustedBalance });
+
+            // Feed processing log targets to operations queues
+            transaction.set(payoutLogRef, {
+                uid: user.uid,
+                email: user.email || "anonymous@earnsphere.hub",
+                bankCode: bankName,
+                nubanDestination: accountNumber,
+                amountNGN: requestedAmount,
+                status: "pending",
+                timestamp: serverTimestamp()
+            });
+        });
+
+        showSuccess(`Payout authorized! Your request for ₦${formatNaira(requestedAmount)} is now queued for batch clear processing.`);
+        withdrawForm.reset();
+
+    } catch (transactionFault) {
+        showError(transactionFault.message || "A routing fault disrupted database communications.");
+    } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Request';
-    });
+        submitBtn.textContent = "Request Withdrawal";
+    }
 });
 
-// 4. Live Payout Proofs Realtime Listener
-db.collection("withdrawals")
-  .where("status", "==", "Approved")
-  .orderBy("timestamp", "desc")
-  .limit(3)
-  .onSnapshot((snapshot) => {
-      const container = document.getElementById('payoutProofsContainer');
-      container.innerHTML = '';
-      
-      if(snapshot.empty) {
-          container.innerHTML = '<div class="proof-item" style="border-left-color: #3a506b;"><div>No payouts processed yet. Simulated live stream ready.</div></div>';
-          return;
-      }
+// 6. Messaging Box Element Controllers
+function showError(message) {
+    successBox.style.display = 'none';
+    errorBox.textContent = message;
+    errorBox.style.display = 'block';
+}
 
-      snapshot.forEach((doc) => {
-          const data = doc.data();
-          // Mask names for privacy (e.g. "John Obi" -> "John***")
-          const maskedName = data.accountName ? data.accountName.substr(0, 4) + "***" : "User***";
-          const formattedAmount = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(data.amount);
-          
-          const itemHtml = `
-              <div class="proof-item">
-                  <div>
-                      <strong>${maskedName}</strong>
-                      <div class="proof-meta">${data.bankName || 'Bank Transfer'} • Paid</div>
-                  </div>
-                  <div class="proof-amount">${formattedAmount}</div>
-              </div>
-          `;
-          container.innerHTML += itemHtml;
-      });
-  }, (error) => {
-      console.log("Error loading proofs: ", error);
-      document.getElementById('payoutProofsContainer').innerHTML = '<div class="proof-item" style="border-left-color: #e63946;"><div>Unable to load live payout feed.</div></div>';
-  });
+function showSuccess(message) {
+    errorBox.style.display = 'none';
+    successBox.textContent = message;
+    successBox.style.display = 'block';
+}
+
+function clearMessages() {
+    errorBox.style.display = 'none';
+    successBox.style.display = 'none';
+}
 
 </script>
 </body>
