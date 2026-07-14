@@ -1,12 +1,17 @@
 {
+  "id": "https://earnspherehub.name.ng",
   "name": "EarnSphere Hub",
   "short_name": "EarnSphere",
-  "description": "Earn money online in Nigeria by completing simple tasks and surveys on your phone. Fast payouts to your bank.",
+  "description": "Earn money online in Nigeria by completing simple tasks and surveys. Get fast payouts to your bank account.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#00C853",
+  "lang": "en",
   "orientation": "portrait",
+  "categories": ["finance", "productivity", "utilities"],
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -17,12 +22,6 @@
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
-    },
-    {
-      "src": "/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png"
     }
-  ],
-  "scope": "/"
+  ]
 }
