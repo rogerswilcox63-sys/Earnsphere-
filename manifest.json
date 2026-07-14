@@ -6,7 +6,11 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#00C853",
   "theme_color": "#00C853",
   "lang": "en",
@@ -38,7 +42,7 @@
       "name": "Withdraw Earnings",
       "short_name": "Withdraw",
       "description": "Cash out to your bank",
-      "url": "/withdraw",
+      "url": "/withdraw.html",
       "icons": [
         {
           "src": "/android-chrome-192x192.png",
@@ -46,6 +50,29 @@
           "type": "image/png"
         }
       ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/index.png",
+      "sizes": "720x1600",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Index"
+    },
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "720x1600",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard"
+    },
+    {
+      "src": "/screenshots/withdraw.png",
+      "sizes": "720x1600",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Withdraw"
     }
   ],
   "icons": [
