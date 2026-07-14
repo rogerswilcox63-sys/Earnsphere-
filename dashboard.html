@@ -591,8 +591,7 @@
   </div>
 
   <script>
-<script>
-    // ============================================
+      // ============================================
     // FIREBASE CONFIG
     // ============================================
     const firebaseConfig = {
@@ -618,7 +617,7 @@
       TEMPLATE_ID: 'template_8jsqprf'
     };
 
-    if (typeof emailjs!== 'undefined') {
+    if (typeof emailjs !== 'undefined') {
       emailjs.init(EMAILJS_CONFIG.USER_ID);
       console.log('✅ EmailJS initialized');
     }
@@ -629,9 +628,9 @@
     let DEEPSEEK_API_KEY = null;
     let hasValidDeepSeek = false;
 
-    if (typeof CONFIG!== 'undefined' && CONFIG.DEEPSEEK_API_KEY) {
+    if (typeof CONFIG !== 'undefined' && CONFIG.DEEPSEEK_API_KEY) {
       DEEPSEEK_API_KEY = CONFIG.DEEPSEEK_API_KEY;
-      hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY!== '' && DEEPSEEK_API_KEY!== 'YOUR_DEEPSEEK_API_KEY_HERE';
+      hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY !== '' && DEEPSEEK_API_KEY !== 'YOUR_DEEPSEEK_API_KEY_HERE';
       if (hasValidDeepSeek) console.log('✅ DeepSeek AI configured');
     }
 
@@ -673,9 +672,13 @@
     // ============================================
     // HELPER FUNCTIONS
     // ============================================
-    function getTodaysSurveys() {
+    function getNigeriaTime() {
       const now = new Date();
-      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+      return new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+    }
+
+    function getTodaysSurveys() {
+      const nigeriaTime = getNigeriaTime();
       const dayOfYear = Math.floor((nigeriaTime - new Date(nigeriaTime.getFullYear(), 0, 0)) / 86400000);
       const surveyIds = Object.keys(surveyDatabase);
       const index1 = (dayOfYear * 2) % surveyIds.length;
@@ -683,17 +686,15 @@
       return [surveyIds[index1], surveyIds[index2]];
     }
 
-    function getCurrentSocialTask() {
-      const now = new Date();
-      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+    function getCurrentSocialTaskData() {
+      const nigeriaTime = getNigeriaTime();
       const currentHour = nigeriaTime.getHours();
       const index = currentHour % socialTasks.length;
-      return socialTasks[index];
+      return { task: socialTasks[index], hour: currentHour };
     }
 
     function getTimeUntilMidnight() {
-      const now = new Date();
-      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+      const nigeriaTime = getNigeriaTime();
       const tomorrow = new Date(nigeriaTime);
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
@@ -705,8 +706,7 @@
     }
 
     function getTimeUntilNextHour() {
-      const now = new Date();
-      const nigeriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+      const nigeriaTime = getNigeriaTime();
       const nextHour = new Date(nigeriaTime);
       nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
       const diff = nextHour - nigeriaTime;
@@ -729,15 +729,19 @@
     }
 
     function isTaskCompleted(taskId) {
-      if (!userData ||!userData.completedTaskIds) return false;
+      if (!userData || !userData.completedTaskIds) return false;
       return userData.completedTaskIds.includes(taskId);
     }
 
     function updateInterfaceValues() {
       if (!userData) return;
-      document.getElementById('walletBalance').innerText = `₦${(userData.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      document.getElementById('lifetimeTotal').innerText = `₦${(userData.lifetimeTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      document.getElementById('successfulTaskCount').innerText = userData.successfulTaskCount || 0;
+      const walletEl = document.getElementById('walletBalance');
+      const lifetimeEl = document.getElementById('lifetimeTotal');
+      const countEl = document.getElementById('successfulTaskCount');
+
+      if (walletEl) walletEl.innerText = `₦${(userData.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      if (lifetimeEl) lifetimeEl.innerText = `₦${(userData.lifetimeTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      if (countEl) countEl.innerText = userData.successfulTaskCount || 0;
     }
 
     // ============================================
@@ -746,10 +750,9 @@
     async function saveUserDataToFirebase() {
       if (!userData) return;
 
-      // Always save to localStorage first as backup
       localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
 
-      if (!isFirebaseWorking ||!db ||!currentUser || isProcessing) return;
+      if (!isFirebaseWorking || !db || !currentUser || isProcessing) return;
       isProcessing = true;
 
       try {
@@ -771,11 +774,9 @@
     }
 
     async function loadUserDataFromFirebase(user) {
-      if (!isFirebaseWorking ||!db ||!user) {
-        // Try load from localStorage if firebase fails
+      if (!isFirebaseWorking || !db || !user) {
         const savedData = localStorage.getItem('earnsphere_user_data');
-        if (savedData) return JSON.parse(savedData);
-        return null;
+        return savedData ? JSON.parse(savedData) : null;
       }
       try {
         const userRef = db.collection('users').doc(user.uid);
@@ -788,17 +789,14 @@
             successfulTaskCount: data.successfulTaskCount || 0,
             completedTaskIds: data.completedTaskIds || []
           };
-          // Save to localStorage too
           localStorage.setItem('earnsphere_user_data', JSON.stringify(loadedData));
           return loadedData;
         }
       } catch (e) {
         console.warn('Load error:', e);
       }
-      // Fallback to localStorage
       const savedData = localStorage.getItem('earnsphere_user_data');
-      if (savedData) return JSON.parse(savedData);
-      return null;
+      return savedData ? JSON.parse(savedData) : null;
     }
 
     // ============================================
@@ -809,49 +807,52 @@
 
       const surveyList = document.getElementById('surveyList');
       const socialTaskList = document.getElementById('socialTaskList');
-      surveyList.innerHTML = '';
-      socialTaskList.innerHTML = '';
+      if (surveyList) surveyList.innerHTML = '';
+      if (socialTaskList) socialTaskList.innerHTML = '';
 
       const todaysSurveyIds = getTodaysSurveys();
 
-      todaysSurveyIds.forEach(surveyId => {
-        const survey = surveyDatabase[surveyId];
-        const completed = isTaskCompleted(surveyId);
-        surveyList.innerHTML += `
+      if (surveyList) {
+        todaysSurveyIds.forEach(surveyId => {
+          const survey = surveyDatabase[surveyId];
+          const completed = isTaskCompleted(surveyId);
+          surveyList.innerHTML += `
+            <div class="offer-card">
+              <div class="offer-title">${survey.title}</div>
+              <p class="offer-desc">${survey.desc}</p>
+              <span class="badge badge-survey">${survey.category}</span>
+              <div class="offer-reward">₦${survey.reward.toLocaleString()}</div>
+              <button class="start-btn" onclick="startSurvey('${surveyId}')" ${completed ? 'disabled' : ''}>
+                ${completed ? '✅ Completed' : '📝 Start Survey'}
+              </button>
+              <div class="reset-timer">
+                <i class="fas fa-sync-alt"></i> ${completed ? '✅ Completed' : 'Resets at midnight'}
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      const { task: currentTask, hour } = getCurrentSocialTaskData();
+      const fullTaskId = `${currentTask.id}_${hour}`;
+      const socialCompleted = isTaskCompleted(fullTaskId);
+
+      if (socialTaskList) {
+        socialTaskList.innerHTML = `
           <div class="offer-card">
-            <div class="offer-title">${survey.title}</div>
-            <p class="offer-desc">${survey.desc}</p>
-            <span class="badge badge-survey">${survey.category}</span>
-            <div class="offer-reward">₦${survey.reward.toLocaleString()}</div>
-            <button class="start-btn" onclick="startSurvey('${surveyId}')" ${completed? 'disabled' : ''}>
-              ${completed? '✅ Completed' : '📝 Start Survey'}
+            <div class="offer-title">${currentTask.title}</div>
+            <div class="offer-desc">${currentTask.desc}</div>
+            <span class="badge ${currentTask.badgeClass}">${currentTask.badge}</span>
+            <div class="offer-reward">₦${currentTask.reward}</div>
+            <button class="start-btn" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}', ${hour})" ${socialCompleted ? 'disabled' : ''}>
+              ${socialCompleted ? '✅ Completed' : '🚀 Start Task'}
             </button>
             <div class="reset-timer">
-              <i class="fas fa-sync-alt"></i> ${completed? '✅ Completed' : 'Resets at midnight'}
+              <i class="fas fa-sync-alt"></i> ${socialCompleted ? '✅ Completed' : 'New task every hour'}
             </div>
           </div>
         `;
-      });
-
-      const currentTask = getCurrentSocialTask();
-      const hour = new Date().getHours();
-      const taskId = `${currentTask.id}_${hour}`;
-      const completed = isTaskCompleted(taskId);
-
-      socialTaskList.innerHTML += `
-        <div class="offer-card">
-          <div class="offer-title">${currentTask.title}</div>
-          <div class="offer-desc">${currentTask.desc}</div>
-          <span class="badge ${currentTask.badgeClass}">${currentTask.badge}</span>
-          <div class="offer-reward">₦${currentTask.reward}</div>
-          <button class="start-btn" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}')" ${completed? 'disabled' : ''}>
-            ${completed? '✅ Completed' : '🚀 Start Task'}
-          </button>
-          <div class="reset-timer">
-            <i class="fas fa-sync-alt"></i> ${completed? '✅ Completed' : 'New task every hour'}
-          </div>
-        </div>
-      `;
+      }
 
       updateResetTimers();
     }
@@ -864,14 +865,13 @@
       window.open(`survey.html?id=${surveyId}`, '_blank');
     }
 
-    async function completeSocialTask(taskId, reward, link) {
-      if (!currentUser ||!userData) {
+    async function completeSocialTask(taskId, reward, link, taskHour) {
+      if (!currentUser || !userData) {
         showToast('⚠️ Please login first');
         return;
       }
 
-      const hour = new Date().getHours();
-      const fullTaskId = `${taskId}_${hour}`;
+      const fullTaskId = `${taskId}_${taskHour}`;
 
       if (isTaskCompleted(fullTaskId)) {
         showToast('You already completed this task!');
@@ -900,12 +900,14 @@
       toast.className = 'toast';
       toast.innerHTML = msg;
       document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 5000);
+      setTimeout(() => { if(toast) toast.remove(); }, 4000);
     }
 
     function logout() {
       if (isFirebaseWorking && auth) {
         auth.signOut().then(() => {
+          window.location.href = 'login.html';
+        }).catch(() => {
           window.location.href = 'login.html';
         });
       } else {
@@ -931,7 +933,7 @@
           EMAILJS_CONFIG.TEMPLATE_ID,
           templateParams
         );
-        return response.status === 200? { success: true } : { success: false, error: 'Failed to send email' };
+        return response.status === 200 ? { success: true } : { success: false, error: 'Failed to send email' };
       } catch (error) {
         console.error('EmailJS error:', error);
         return { success: false, error: error.message };
@@ -948,8 +950,8 @@
       const issueType = document.getElementById('issue_type').value;
       const textMessage = document.getElementById('support_text_message').value.trim();
 
-      if (!issueType ||!textMessage) {
-        supportMessage.innerHTML = '<div class="message error">Please select an issue type and write a message.</div>';
+      if (!issueType || !textMessage) {
+        if (supportMessage) supportMessage.innerHTML = '<div class="message error">Please select an issue type and write a message.</div>';
         return;
       }
 
@@ -957,18 +959,20 @@
       supportBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
 
       try {
-        const userEmail = currentUser? currentUser.email : 'Guest User';
-        const userName = currentUser? currentUser.displayName || userEmail.split('@')[0] : 'Guest';
+        const userEmail = currentUser ? currentUser.email : 'Guest User';
+        const userName = currentUser ? currentUser.displayName || userEmail.split('@')[0] : 'Guest';
 
         const result = await sendSupportEmail(userEmail, userName, issueType, textMessage);
 
         if (result.success) {
-          supportMessage.innerHTML = `
-            <div class="message success">
-              <i class="fas fa-check-circle"></i>
-              ✅ Ticket sent successfully! We'll respond within 24 hours.
-            </div>
-          `;
+          if (supportMessage) {
+            supportMessage.innerHTML = `
+              <div class="message success">
+                <i class="fas fa-check-circle"></i>
+                ✅ Ticket sent successfully! We'll respond within 24 hours.
+              </div>
+            `;
+          }
           this.reset();
           showToast('✅ Support ticket sent!');
 
@@ -983,12 +987,12 @@
             });
           }
         } else {
-          supportMessage.innerHTML = `<div class="message error">❌ Failed to send: ${result.error || 'Unknown error'}</div>`;
+          if (supportMessage) supportMessage.innerHTML = `<div class="message error">❌ Failed to send: ${result.error || 'Unknown error'}</div>`;
         }
 
       } catch (err) {
         console.error('Support error:', err);
-        supportMessage.innerHTML = `<div class="message error">❌ Failed to send ticket: ${err.message || 'Please try again later'}</div>`;
+        if (supportMessage) supportMessage.innerHTML = `<div class="message error">❌ Failed to send ticket: ${err.message || 'Please try again later'}</div>`;
       }
 
       supportBtn.disabled = false;
@@ -1000,12 +1004,13 @@
     // ============================================
     async function testSupport() {
       const testBtn = document.getElementById('testSupportBtn');
+      if (!testBtn) return;
       testBtn.disabled = true;
       testBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
 
       try {
-        const userEmail = currentUser? currentUser.email : 'test@earnsphere.com';
-        const userName = currentUser? currentUser.displayName || 'Test User' : 'Test User';
+        const userEmail = currentUser ? currentUser.email : 'test@earnsphere.com';
+        const userName = currentUser ? currentUser.displayName || 'Test User' : 'Test User';
 
         const result = await sendSupportEmail(
           userEmail,
@@ -1074,15 +1079,14 @@
     - Support Email: earnspherehub@gmail.com
     - Telegram: t.me/earnspherehub
     User Context:
-    - Balance: ₦${typeof userData!== 'undefined'? (userData?.balance || 0) : 0}
-    - Tasks Completed: ${typeof userData!== 'undefined'? (userData?.successfulTaskCount || 0) : 0}
+    - Balance: ₦${typeof userData !== 'undefined' ? (userData?.balance || 0) : 0}
+    - Tasks Completed: ${typeof userData !== 'undefined' ? (userData?.successfulTaskCount || 0) : 0}
     Be friendly, helpful, and concise. Keep responses under 150 words.
         `;
 
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        const targetUrl = 'https://api.deepseek.com/chat/completions';
-
-        const response = await fetch(proxyUrl + targetUrl, {
+        // Direct connection string. WARNING: Client-side keys are easily stolen! 
+        // Move this logic to Firebase Cloud Functions for security.
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
@@ -1099,10 +1103,6 @@
           })
         });
 
-        if (response.status === 403) {
-          return { success: false, error: 'CORS Proxy Access Required. Visit https://cors-anywhere.herokuapp.com/' };
-        }
-
         const data = await response.json();
         if (data.error) return { success: false, error: data.error.message || 'AI service error' };
 
@@ -1110,7 +1110,7 @@
         return { success: true, reply: reply };
 
       } catch (error) {
-        return { success: false, error: 'Failed to connect to AI service.' };
+        return { success: false, error: 'Failed to connect to AI service. Ensure CORS config or backends are set.' };
       }
     }
 
@@ -1149,8 +1149,8 @@
       msg.style.cssText = `
         padding: 8px 12px; border-radius: 8px; max-width: 85%; font-size: 14px;
         line-height: 1.4; margin-bottom: 6px; white-space: pre-wrap;
-        background: ${isUser? '#3b82f6' : 'rgba(255,255,255,0.08)'};
-        color: white; align-self: ${isUser? 'flex-end' : 'flex-start'};
+        background: ${isUser ? '#3b82f6' : 'rgba(255,255,255,0.08)'};
+        color: white; align-self: ${isUser ? 'flex-end' : 'flex-start'};
       `;
       msg.innerText = text;
       msgBox.appendChild(msg);
@@ -1160,17 +1160,19 @@
     function toggleAiChat() {
       const chatWindow = document.getElementById('aiChatWindow');
       if (chatWindow) {
-        chatWindow.style.display = chatWindow.style.display === 'none' ||!chatWindow.style.display? 'flex' : 'none';
+        chatWindow.style.display = chatWindow.style.display === 'none' || !chatWindow.style.display ? 'flex' : 'none';
       }
     }
 
     function showTelegramModal() {
-      document.getElementById('telegramModal').classList.add('active');
+      const modal = document.getElementById('telegramModal');
+      if (modal) modal.classList.add('active');
       document.body.style.overflow = 'hidden';
     }
 
     function closeTelegramModal() {
-      document.getElementById('telegramModal').classList.remove('active');
+      const modal = document.getElementById('telegramModal');
+      if (modal) modal.classList.remove('active');
       document.body.style.overflow = 'auto';
     }
 
@@ -1178,12 +1180,13 @@
     // AUTH HANDLER
     // ============================================
     function setupAuth() {
-      if (!isFirebaseWorking ||!auth) {
+      if (!isFirebaseWorking || !auth) {
         const savedData = localStorage.getItem('earnsphere_user_data');
         if (savedData) {
           userData = JSON.parse(savedData);
           currentUser = { uid: 'guest' };
-          document.getElementById('userName').innerText = 'Welcome, Guest';
+          const userEl = document.getElementById('userName');
+          if (userEl) userEl.innerText = 'Welcome, Guest';
           updateInterfaceValues();
           renderTasks();
         }
@@ -1204,7 +1207,8 @@
         }
 
         currentUser = user;
-        document.getElementById('userName').innerText = `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}`;
+        const userEl = document.getElementById('userName');
+        if (userEl) userEl.innerText = `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}`;
 
         const firebaseData = await loadUserDataFromFirebase(user);
 
@@ -1240,7 +1244,7 @@
       });
 
       setInterval(updateResetTimers, 1000);
-      setInterval(() => { if (userData && currentUser && isFirebaseWorking) saveUserDataToFirebase(); }, 10000); // Auto-save every 10s
+      setInterval(() => { if (userData && currentUser && isFirebaseWorking) saveUserDataToFirebase(); }, 10000); 
       setInterval(() => { if (userData) renderTasks(); }, 60000);
     });
   </script>
