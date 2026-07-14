@@ -591,8 +591,9 @@
   </div>
 
   <script>
+<script>
     // ============================================
-    // FIREBASE CONFIG - Hardcoded directly
+    // FIREBASE CONFIG
     // ============================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
@@ -609,7 +610,7 @@
     const db = firebase.firestore();
 
     // ============================================
-    // EMAILJS - Hardcoded directly
+    // EMAILJS
     // ============================================
     const EMAILJS_CONFIG = {
       USER_ID: '-NzXZKbT0bcAmE84y',
@@ -617,28 +618,21 @@
       TEMPLATE_ID: 'template_8jsqprf'
     };
 
-    if (typeof emailjs !== 'undefined') {
+    if (typeof emailjs!== 'undefined') {
       emailjs.init(EMAILJS_CONFIG.USER_ID);
       console.log('✅ EmailJS initialized');
     }
 
     // ============================================
-    // DEEPSEEK - ONLY THIS USES config.js
+    // DEEPSEEK
     // ============================================
     let DEEPSEEK_API_KEY = null;
     let hasValidDeepSeek = false;
 
-    // Check if CONFIG loaded from config.js
-    if (typeof CONFIG !== 'undefined' && CONFIG.DEEPSEEK_API_KEY) {
+    if (typeof CONFIG!== 'undefined' && CONFIG.DEEPSEEK_API_KEY) {
       DEEPSEEK_API_KEY = CONFIG.DEEPSEEK_API_KEY;
-      hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY !== '' && DEEPSEEK_API_KEY !== 'YOUR_DEEPSEEK_API_KEY_HERE';
-      if (hasValidDeepSeek) {
-        console.log('✅ DeepSeek AI configured from config.js');
-      } else {
-        console.warn('⚠️ DeepSeek API key not configured in config.js');
-      }
-    } else {
-      console.warn('⚠️ config.js not found or missing DEEPSEEK_API_KEY');
+      hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY!== '' && DEEPSEEK_API_KEY!== 'YOUR_DEEPSEEK_API_KEY_HERE';
+      if (hasValidDeepSeek) console.log('✅ DeepSeek AI configured');
     }
 
     // ============================================
@@ -650,20 +644,7 @@
     let isProcessing = false;
 
     // ============================================
-    // TELEGRAM POPUP
-    // ============================================
-    function showTelegramModal() {
-      document.getElementById('telegramModal').classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeTelegramModal() {
-      document.getElementById('telegramModal').classList.remove('active');
-      document.body.style.overflow = 'auto';
-    }
-
-    // ============================================
-    // SURVEY DATABASE
+    // SURVEY + SOCIAL DATABASE
     // ============================================
     const surveyDatabase = {
       "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
@@ -680,9 +661,6 @@
       "srv_12": { title: "Fitness & Wellness Routine", category: "Health", reward: 150, desc: "Track health and supplement data metrics" }
     };
 
-    // ============================================
-    // SOCIAL TASKS
-    // ============================================
     const socialTasks = [
       { id:'soc_1', title:'Follow on TikTok', desc:'Watch our recent announcement video, hit like, and follow the account profile page.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/richard.wilcox54' },
       { id:'soc_2', title:'Subscribe to YouTube Channel', desc:'Open our official video guide channel and press the notification bell alert switch.', reward:300, badge:'YouTube', badgeClass:'badge-social', link:'https://youtube.com/@earnspherenigeria' },
@@ -723,7 +701,7 @@
       const hours = Math.floor(diff / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
-      return { hours, minutes, seconds, total: diff };
+      return { hours, minutes, seconds };
     }
 
     function getTimeUntilNextHour() {
@@ -734,37 +712,24 @@
       const diff = nextHour - nigeriaTime;
       const minutes = Math.floor(diff / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
-      return { minutes, seconds, total: diff };
+      return { minutes, seconds };
     }
 
     function updateResetTimers() {
       const surveyTimer = document.getElementById('surveyResetTimer');
       if (surveyTimer) {
-        const timeLeft = getTimeUntilMidnight();
-        surveyTimer.innerHTML = `
-          <i class="fas fa-clock"></i> 
-          New surveys available in ${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s
-          <span style="display:block;font-size:0.8rem;color:#475569;margin-top:4px;">
-            (Surveys reset daily at midnight)
-          </span>
-        `;
+        const t = getTimeUntilMidnight();
+        surveyTimer.innerHTML = `<i class="fas fa-clock"></i> New surveys in ${t.hours}h ${t.minutes}m ${t.seconds}s`;
       }
-
       const socialTimer = document.getElementById('socialResetTimer');
       if (socialTimer) {
-        const timeLeft = getTimeUntilNextHour();
-        socialTimer.innerHTML = `
-          <i class="fas fa-clock"></i> 
-          New social task available in ${timeLeft.minutes}m ${timeLeft.seconds}s
-          <span style="display:block;font-size:0.8rem;color:#475569;margin-top:4px;">
-            (Tasks rotate every hour)
-          </span>
-        `;
+        const t = getTimeUntilNextHour();
+        socialTimer.innerHTML = `<i class="fas fa-clock"></i> New task in ${t.minutes}m ${t.seconds}s`;
       }
     }
 
     function isTaskCompleted(taskId) {
-      if (!userData || !userData.completedTaskIds) return false;
+      if (!userData ||!userData.completedTaskIds) return false;
       return userData.completedTaskIds.includes(taskId);
     }
 
@@ -775,9 +740,18 @@
       document.getElementById('successfulTaskCount').innerText = userData.successfulTaskCount || 0;
     }
 
+    // ============================================
+    // FIXED SAVE + LOAD WITH LOCALSTORAGE BACKUP
+    // ============================================
     async function saveUserDataToFirebase() {
-      if (!isFirebaseWorking || !db || !currentUser || !userData || isProcessing) return;
+      if (!userData) return;
+
+      // Always save to localStorage first as backup
+      localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
+
+      if (!isFirebaseWorking ||!db ||!currentUser || isProcessing) return;
       isProcessing = true;
+
       try {
         const userRef = db.collection('users').doc(currentUser.uid);
         await userRef.set({
@@ -787,30 +761,43 @@
           completedTaskIds: userData.completedTaskIds || [],
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
+        console.log('✅ Data saved to Firebase');
       } catch (e) {
-        console.error('Save error:', e);
+        console.error('❌ Save error:', e);
+        showToast('⚠️ Failed to sync. Data saved locally.');
       } finally {
         isProcessing = false;
       }
     }
 
     async function loadUserDataFromFirebase(user) {
-      if (!isFirebaseWorking || !db || !user) return null;
+      if (!isFirebaseWorking ||!db ||!user) {
+        // Try load from localStorage if firebase fails
+        const savedData = localStorage.getItem('earnsphere_user_data');
+        if (savedData) return JSON.parse(savedData);
+        return null;
+      }
       try {
         const userRef = db.collection('users').doc(user.uid);
         const doc = await userRef.get();
         if (doc.exists) {
           const data = doc.data();
-          return {
+          const loadedData = {
             balance: data.balance || 0,
             lifetimeTotal: data.lifetimeTotal || 0,
             successfulTaskCount: data.successfulTaskCount || 0,
             completedTaskIds: data.completedTaskIds || []
           };
+          // Save to localStorage too
+          localStorage.setItem('earnsphere_user_data', JSON.stringify(loadedData));
+          return loadedData;
         }
       } catch (e) {
         console.warn('Load error:', e);
       }
+      // Fallback to localStorage
+      const savedData = localStorage.getItem('earnsphere_user_data');
+      if (savedData) return JSON.parse(savedData);
       return null;
     }
 
@@ -819,7 +806,7 @@
     // ============================================
     function renderTasks() {
       if (!userData) return;
-      
+
       const surveyList = document.getElementById('surveyList');
       const socialTaskList = document.getElementById('socialTaskList');
       surveyList.innerHTML = '';
@@ -836,31 +823,32 @@
             <p class="offer-desc">${survey.desc}</p>
             <span class="badge badge-survey">${survey.category}</span>
             <div class="offer-reward">₦${survey.reward.toLocaleString()}</div>
-            <button class="start-btn" onclick="startSurvey('${surveyId}')" ${completed ? 'disabled' : ''}>
-              ${completed ? '✅ Completed' : '📝 Start Survey'}
+            <button class="start-btn" onclick="startSurvey('${surveyId}')" ${completed? 'disabled' : ''}>
+              ${completed? '✅ Completed' : '📝 Start Survey'}
             </button>
             <div class="reset-timer">
-              <i class="fas fa-sync-alt"></i> ${completed ? '✅ Completed' : 'Resets at midnight'}
+              <i class="fas fa-sync-alt"></i> ${completed? '✅ Completed' : 'Resets at midnight'}
             </div>
           </div>
         `;
       });
 
       const currentTask = getCurrentSocialTask();
-      const taskId = `${currentTask.id}_${new Date().getHours()}`;
+      const hour = new Date().getHours();
+      const taskId = `${currentTask.id}_${hour}`;
       const completed = isTaskCompleted(taskId);
-      
+
       socialTaskList.innerHTML += `
         <div class="offer-card">
           <div class="offer-title">${currentTask.title}</div>
           <div class="offer-desc">${currentTask.desc}</div>
           <span class="badge ${currentTask.badgeClass}">${currentTask.badge}</span>
           <div class="offer-reward">₦${currentTask.reward}</div>
-          <button class="start-btn" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}')" ${completed ? 'disabled' : ''}>
-            ${completed ? '✅ Completed' : '🚀 Start Task'}
+          <button class="start-btn" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}')" ${completed? 'disabled' : ''}>
+            ${completed? '✅ Completed' : '🚀 Start Task'}
           </button>
           <div class="reset-timer">
-            <i class="fas fa-sync-alt"></i> ${completed ? '✅ Completed' : 'New task every hour'}
+            <i class="fas fa-sync-alt"></i> ${completed? '✅ Completed' : 'New task every hour'}
           </div>
         </div>
       `;
@@ -877,28 +865,28 @@
     }
 
     async function completeSocialTask(taskId, reward, link) {
-      if (!currentUser || !userData) {
+      if (!currentUser ||!userData) {
         showToast('⚠️ Please login first');
         return;
       }
-      
+
       const hour = new Date().getHours();
       const fullTaskId = `${taskId}_${hour}`;
-      
+
       if (isTaskCompleted(fullTaskId)) {
         showToast('You already completed this task!');
         return;
       }
-      
+
       window.open(link, '_blank');
-      
+
       userData.balance = (userData.balance || 0) + reward;
       userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-      
+
       if (!userData.completedTaskIds) userData.completedTaskIds = [];
       userData.completedTaskIds.push(fullTaskId);
-      
+
       updateInterfaceValues();
       renderTasks();
       await saveUserDataToFirebase();
@@ -943,7 +931,7 @@
           EMAILJS_CONFIG.TEMPLATE_ID,
           templateParams
         );
-        return response.status === 200 ? { success: true } : { success: false, error: 'Failed to send email' };
+        return response.status === 200? { success: true } : { success: false, error: 'Failed to send email' };
       } catch (error) {
         console.error('EmailJS error:', error);
         return { success: false, error: error.message };
@@ -960,7 +948,7 @@
       const issueType = document.getElementById('issue_type').value;
       const textMessage = document.getElementById('support_text_message').value.trim();
 
-      if (!issueType || !textMessage) {
+      if (!issueType ||!textMessage) {
         supportMessage.innerHTML = '<div class="message error">Please select an issue type and write a message.</div>';
         return;
       }
@@ -969,19 +957,16 @@
       supportBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
 
       try {
-        const userEmail = currentUser ? currentUser.email : 'Guest User';
-        const userName = currentUser ? currentUser.displayName || userEmail.split('@')[0] : 'Guest';
+        const userEmail = currentUser? currentUser.email : 'Guest User';
+        const userName = currentUser? currentUser.displayName || userEmail.split('@')[0] : 'Guest';
 
         const result = await sendSupportEmail(userEmail, userName, issueType, textMessage);
 
         if (result.success) {
           supportMessage.innerHTML = `
             <div class="message success">
-              <i class="fas fa-check-circle"></i> 
+              <i class="fas fa-check-circle"></i>
               ✅ Ticket sent successfully! We'll respond within 24 hours.
-              <br><small style="color:#94a3b8;font-size:0.8rem;display:block;margin-top:4px;">
-                <i class="fas fa-envelope"></i> A copy has been sent to earnspherenigeria@gmail.com
-              </small>
             </div>
           `;
           this.reset();
@@ -998,13 +983,7 @@
             });
           }
         } else {
-          supportMessage.innerHTML = `
-            <div class="message error">
-              <i class="fas fa-exclamation-circle"></i> 
-              ❌ Failed to send: ${result.error || 'Unknown error'}
-              <br><small style="font-size:0.8rem;">Please try again or contact us directly at earnspherenigeria@gmail.com</small>
-            </div>
-          `;
+          supportMessage.innerHTML = `<div class="message error">❌ Failed to send: ${result.error || 'Unknown error'}</div>`;
         }
 
       } catch (err) {
@@ -1025,8 +1004,8 @@
       testBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
 
       try {
-        const userEmail = currentUser ? currentUser.email : 'test@earnsphere.com';
-        const userName = currentUser ? currentUser.displayName || 'Test User' : 'Test User';
+        const userEmail = currentUser? currentUser.email : 'test@earnsphere.com';
+        const userName = currentUser? currentUser.displayName || 'Test User' : 'Test User';
 
         const result = await sendSupportEmail(
           userEmail,
@@ -1036,7 +1015,7 @@
         );
 
         if (result.success) {
-          showToast('📨 Test ticket sent! Check your email: earnspherenigeria@gmail.com 🎉');
+          showToast('📨 Test ticket sent! Check your email: earnspherehub@gmail.com 🎉');
         } else {
           showToast('❌ Test failed: ' + (result.error || 'Unknown error'));
         }
@@ -1049,12 +1028,12 @@
     }
 
     // ============================================
-    // AI CHAT - Uses DeepSeek from config.js
+    // AI CHAT
     // ============================================
     async function sendAiMessage() {
       const input = document.getElementById('aiInput');
       if (!input) return;
-      
+
       const userPrompt = input.value.trim();
       if (!userPrompt) return;
 
@@ -1071,7 +1050,7 @@
       try {
         const response = await callDeepSeekAPI(userPrompt);
         removeTypingIndicator(typingId);
-        
+
         if (response.success) {
           appendAiMessage(response.reply, false);
         } else {
@@ -1087,24 +1066,17 @@
       try {
         const systemPrompt = `
     You are SphereAI, an AI assistant for EarnSphere Nigeria.
-    You help users with their questions about the platform.
-
     Platform Info:
     - EarnSphere is a micro-task earning platform in Nigeria
-    - Users complete surveys and social tasks to earn money
     - Surveys: 2 new surveys available daily at midnight (Nigeria time)
     - Social Tasks: 1 new task available every hour
     - Minimum Withdrawal: ₦2,500
-    - Support Email: earnspherenigeria@gmail.com
+    - Support Email: earnspherehub@gmail.com
     - Telegram: t.me/earnspherehub
-
     User Context:
-    - Balance: ₦${typeof userData !== 'undefined' ? (userData?.balance || 0) : 0}
-    - Tasks Completed: ${typeof userData !== 'undefined' ? (userData?.successfulTaskCount || 0) : 0}
-    - Total Earned: ₦${typeof userData !== 'undefined' ? (userData?.lifetimeTotal || 0) : 0}
-
+    - Balance: ₦${typeof userData!== 'undefined'? (userData?.balance || 0) : 0}
+    - Tasks Completed: ${typeof userData!== 'undefined'? (userData?.successfulTaskCount || 0) : 0}
     Be friendly, helpful, and concise. Keep responses under 150 words.
-    If you don't know something, say so honestly.
         `;
 
         const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
@@ -1114,8 +1086,7 @@
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-            'Content-Type': 'application/json',
-            'Origin': window.location.origin
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             model: 'deepseek-chat',
@@ -1124,37 +1095,22 @@
               { role: 'user', content: message }
             ],
             temperature: 0.7,
-            max_tokens: 300,
-            stream: false
+            max_tokens: 300
           })
         });
 
         if (response.status === 403) {
-          return {
-            success: false,
-            error: 'CORS Proxy Access Required. Please visit https://cors-anywhere.herokuapp.com/ and request temporary access.'
-          };
+          return { success: false, error: 'CORS Proxy Access Required. Visit https://cors-anywhere.herokuapp.com/' };
         }
 
         const data = await response.json();
-
-        if (data.error) {
-          console.error('DeepSeek API Error:', data.error);
-          return { 
-            success: false, 
-            error: data.error.message || 'AI service error'
-          };
-        }
+        if (data.error) return { success: false, error: data.error.message || 'AI service error' };
 
         const reply = data.choices?.[0]?.message?.content || 'No response from AI.';
         return { success: true, reply: reply };
 
       } catch (error) {
-        console.error('DeepSeek API Error:', error);
-        return { 
-          success: false, 
-          error: 'Failed to connect to AI service. Please check your internet connection.'
-        };
+        return { success: false, error: 'Failed to connect to AI service.' };
       }
     }
 
@@ -1167,79 +1123,69 @@
       const id = 'typing-' + Date.now();
       const msgBox = document.getElementById('aiMessages');
       if (!msgBox) return id;
-      
+
       const div = document.createElement('div');
       div.id = id;
       div.className = 'typing-indicator';
       div.innerHTML = '🤔 Thinking<span class="typing-dots"></span>';
       msgBox.appendChild(div);
       msgBox.scrollTop = msgBox.scrollHeight;
-      
-      typingTimeout = setTimeout(() => {
-        removeTypingIndicator(id);
-      }, 30000);
-      
+
+      typingTimeout = setTimeout(() => { removeTypingIndicator(id); }, 30000);
       return id;
     }
 
     function removeTypingIndicator(id) {
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
-        typingTimeout = null;
-      }
+      if (typingTimeout) { clearTimeout(typingTimeout); typingTimeout = null; }
       const el = document.getElementById(id);
       if (el) el.remove();
     }
 
-    // ============================================
-    // APPEND AI MESSAGE
-    // ============================================
     function appendAiMessage(text, isUser) {
       const msgBox = document.getElementById('aiMessages');
       if (!msgBox) return;
-      
+
       const msg = document.createElement('div');
       msg.style.cssText = `
-        padding: 8px 12px;
-        border-radius: 8px;
-        max-width: 85%;
-        font-size: 14px;
-        line-height: 1.4;
-        margin-bottom: 6px;
-        white-space: pre-wrap;
-        background: ${isUser ? '#3b82f6' : 'rgba(255,255,255,0.08)'};
-        color: white;
-        align-self: ${isUser ? 'flex-end' : 'flex-start'};
+        padding: 8px 12px; border-radius: 8px; max-width: 85%; font-size: 14px;
+        line-height: 1.4; margin-bottom: 6px; white-space: pre-wrap;
+        background: ${isUser? '#3b82f6' : 'rgba(255,255,255,0.08)'};
+        color: white; align-self: ${isUser? 'flex-end' : 'flex-start'};
       `;
       msg.innerText = text;
       msgBox.appendChild(msg);
       msgBox.scrollTop = msgBox.scrollHeight;
     }
 
-    // ============================================
-    // TOGGLE AI CHAT
-    // ============================================
     function toggleAiChat() {
       const chatWindow = document.getElementById('aiChatWindow');
       if (chatWindow) {
-        chatWindow.style.display = chatWindow.style.display === 'none' || !chatWindow.style.display ? 'flex' : 'none';
+        chatWindow.style.display = chatWindow.style.display === 'none' ||!chatWindow.style.display? 'flex' : 'none';
       }
+    }
+
+    function showTelegramModal() {
+      document.getElementById('telegramModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeTelegramModal() {
+      document.getElementById('telegramModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
     }
 
     // ============================================
     // AUTH HANDLER
     // ============================================
     function setupAuth() {
-      if (!isFirebaseWorking || !auth) {
+      if (!isFirebaseWorking ||!auth) {
         const savedData = localStorage.getItem('earnsphere_user_data');
         if (savedData) {
-          try {
-            userData = JSON.parse(savedData);
-            currentUser = { uid: 'guest' };
-            document.getElementById('userName').innerText = 'Welcome, Guest';
-            updateInterfaceValues();
-            renderTasks();
-          } catch (e) {}
+          userData = JSON.parse(savedData);
+          currentUser = { uid: 'guest' };
+          document.getElementById('userName').innerText = 'Welcome, Guest';
+          updateInterfaceValues();
+          renderTasks();
         }
         return;
       }
@@ -1261,16 +1207,11 @@
         document.getElementById('userName').innerText = `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}`;
 
         const firebaseData = await loadUserDataFromFirebase(user);
-        
+
         if (firebaseData) {
           userData = firebaseData;
         } else {
-          userData = {
-            balance: 0,
-            lifetimeTotal: 0,
-            successfulTaskCount: 0,
-            completedTaskIds: []
-          };
+          userData = { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [] };
           await saveUserDataToFirebase();
         }
 
@@ -1284,10 +1225,8 @@
 
         updateInterfaceValues();
         renderTasks();
-        
-        setTimeout(() => {
-          showTelegramModal();
-        }, 1500);
+
+        setTimeout(() => { showTelegramModal(); }, 1500);
       });
     }
 
@@ -1299,21 +1238,11 @@
       document.getElementById('aiInput')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendAiMessage();
       });
-      
+
       setInterval(updateResetTimers, 1000);
+      setInterval(() => { if (userData && currentUser && isFirebaseWorking) saveUserDataToFirebase(); }, 10000); // Auto-save every 10s
+      setInterval(() => { if (userData) renderTasks(); }, 60000);
     });
-
-    setInterval(() => {
-      if (userData && currentUser && isFirebaseWorking) {
-        saveUserDataToFirebase();
-      }
-    }, 60000);
-
-    setInterval(() => {
-      if (userData) {
-        renderTasks();
-      }
-    }, 60000);
   </script>
 
 </body>

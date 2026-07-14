@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Successful - EarnSphere Hub</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: #151d30;
+            --accent-glow: #10b981;
+            --accent-hover: #059669;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #24324f;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+       .success-card {
+            background: var(--bg-card);
+            width: 100%;
+            max-width: 420px;
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--border-color);
+            animation: fadeInUp 0.5s ease;
+        }
+
+       .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 24px;
+            border: 2px solid var(--accent-glow);
+        }
+
+       .success-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: var(--accent-glow);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+       .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+        }
+
+       .details-box {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+       .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+       .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+       .detail-label {
+            color: var(--text-muted);
+        }
+
+       .detail-value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+       .amount {
+            font-size: 1.25rem;
+            color: var(--accent-glow);
+        }
+
+       .info-note {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+       .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+       .btn-primary {
+            width: 100%;
+            background: var(--accent-glow);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+       .btn-primary:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+       .btn-secondary {
+            width: 100%;
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+       .btn-secondary:hover {
+            border-color: var(--accent-glow);
+            color: var(--accent-glow);
+        }
+
+       .btn-receipt {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+       }
+
+       .btn-receipt:hover {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+       }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-card">
+        <div class="success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+        </div>
+
+        <h1>Withdrawal Successful!</h1>
+        <p class="subtitle">Your request has been submitted</p>
+
+        <div class="details-box">
+            <div class="detail-row">
+                <span class="detail-label">Amount</span>
+                <span class="detail-value amount" id="withdraw-amount">₦20,000.00</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Bank</span>
+                <span class="detail-value" id="withdraw-bank">OPay</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status</span>
+                <span class="detail-value" style="color: var(--accent-glow);">Processing</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Reference</span>
+                <span class="detail-value" id="ref-number">ES<span id="random-ref"></span></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Date</span>
+                <span class="detail-value" id="current-date"></span>
+            </div>
+        </div>
+
+        <p class="info-note">
+            Funds will be credited to your account within 24 hours.
+            You will receive a notification once completed.
+        </p>
+
+        <div class="btn-group">
+            <button class="btn-receipt" onclick="downloadReceipt()">📄 Download Receipt</button>
+            <a href="withdraw.html" class="btn-primary">Make Another Withdrawal</a>
+            <a href="dashboard.html" class="btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Hidden canvas for generating receipt image -->
+    <canvas id="receiptCanvas" width="400" height="650" style="display:none;"></canvas>
+
+    <script>
+        let amount = "20000";
+        let bank = "opay";
+        let refNumber = "";
+        let currentDate = "";
+
+        // Get data from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        amount = urlParams.get('amount') || amount;
+        bank = urlParams.get('bank') || bank;
+
+        // Format amount to Naira
+        const formattedAmount = new Intl.NumberFormat('en-NG', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+        document.getElementById('withdraw-amount').textContent = `₦${formattedAmount}`;
+
+        // Format bank name
+        const bankNames = {
+            'opay': 'OPay',
+            'gtbank': 'GTBank',
+            'access': 'Access Bank',
+            'firstbank': 'First Bank',
+            'zenith': 'Zenith Bank',
+            'kuda': 'Kuda Bank',
+            'moniepoint': 'Moniepoint MFB',
+            'palmpay': 'PalmPay',
+            'uba': 'UBA',
+            'union': 'Union Bank'
+        };
+        const bankDisplay = bankNames[bank] || bank;
+        document.getElementById('withdraw-bank').textContent = bankDisplay;
+
+        // Generate random reference
+        refNumber = "ES" + Math.floor(Math.random() * 900000 + 100000);
+        document.getElementById('random-ref').textContent = refNumber.replace("ES", "");
+
+        // Set current date
+        currentDate = new Date().toLocaleString('en-NG', { 
+            dateStyle: 'medium', 
+            timeStyle: 'short' 
+        });
+        document.getElementById('current-date').textContent = currentDate;
+
+        // Function to generate and download receipt image
+        function downloadReceipt() {
+            const canvas = document.getElementById('receiptCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#0b0f19';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Header
+            ctx.fillStyle = '#10b981';
+            ctx.font = 'bold 24px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('EarnSphere Hub', canvas.width/2, 50);
+
+            // Success icon
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, 110, 35, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#0b0f19';
+            ctx.font = 'bold 40px Arial';
+            ctx.fillText('✓', canvas.width/2, 122);
+
+            // Title
+            ctx.fillStyle = '#f3f4f6';
+            ctx.font = 'bold 20px Inter, sans-serif';
+            ctx.fillText('Transfer Successful', canvas.width/2, 170);
+
+            // Amount
+            ctx.font = 'bold 32px Inter, sans-serif';
+            ctx.fillStyle = '#10b981';
+            ctx.fillText(`₦${formattedAmount}`, canvas.width/2, 220);
+
+            // Details box
+            ctx.fillStyle = '#151d30';
+            ctx.fillRect(30, 250, 340, 280);
+            ctx.strokeStyle = '#24324f';
+            ctx.strokeRect(30, 250, 340, 280);
+
+            let y = 290;
+            const details = [
+                ['Bank', bankDisplay],
+                ['Status', 'Processing'],
+                ['Reference', refNumber],
+                ['Date', currentDate],
+                ['Description', 'EarnSphere Withdrawal']
+            ];
+
+            ctx.font = '14px Inter, sans-serif';
+            details.forEach(([label, value]) => {
+                ctx.fillStyle = '#9ca3af';
+                ctx.textAlign = 'left';
+                ctx.fillText(label, 50, y);
+                ctx.fillStyle = '#f3f4f6';
+                ctx.textAlign = 'right';
+                ctx.fillText(value, 350, y);
+                y += 45;
+            });
+
+            // Footer
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('This is a system generated receipt', canvas.width/2, 580);
+            ctx.fillText('EarnSphere.ng', canvas.width/2, 600);
+
+            // Download
+            const link = document.createElement('a');
+            link.download = `EarnSphere_Receipt_${refNumber}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
