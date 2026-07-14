@@ -26,7 +26,7 @@ h1{color:#f59e0b; text-align:center}
 </head>
 <body>
 
-<div id="loginScreen" class="login-box">
+<div id="loginScreen" class="login-box" style="display:none">
   <h1><i class="fas fa-shield-alt"></i> Admin Login</h1>
   <input type="email" id="adminEmail" placeholder="Admin Email" value="wilcoxrichard85@gmail.com">
   <input type="password" id="adminPass" placeholder="Password">
@@ -55,7 +55,7 @@ h1{color:#f59e0b; text-align:center}
 
 <script>
     // ============================================
-    // FIREBASE INITIALIZATION (COMPAT MODE)
+    // FIREBASE INITIALIZATION
     // ============================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
@@ -77,22 +77,24 @@ h1{color:#f59e0b; text-align:center}
     // AUTH MONITOR STATE
     // ============================================
     auth.onAuthStateChanged((user) => {
+        console.log("Auth state changed. User object:", user);
+        
         if (user) {
             if (user.email === ALLOWED_ADMIN_EMAIL) {
-                // Secure verified credentials, show dashboard options
+                console.log("✅ Admin authorized. Opening panel...");
                 document.getElementById("loginScreen").style.display = "none";
                 document.getElementById("adminPanel").style.display = "block";
                 loadPendingCashouts();
                 loadAllTransactions();
             } else {
-                // Logged in, but unauthorized email account context
+                console.warn("⛔ Unauthorized email tried to access admin panel:", user.email);
                 alert("⛔ Access Denied: Unauthorized Admin Account.");
                 auth.signOut().then(() => {
                     window.location.href = "dashboard.html";
                 });
             }
         } else {
-            // Keep on login screen display structure safely
+            console.log("No user detected. Showing login screen.");
             document.getElementById("loginScreen").style.display = "block";
             document.getElementById("adminPanel").style.display = "none";
         }
@@ -107,7 +109,7 @@ h1{color:#f59e0b; text-align:center}
         const msg = document.getElementById("loginMsg");
 
         if (email !== ALLOWED_ADMIN_EMAIL) {
-            msg.innerText = "Error: Invalid admin route authentication parameters.";
+            msg.innerText = "Error: Invalid admin account routing parameters.";
             return;
         }
 
@@ -115,6 +117,7 @@ h1{color:#f59e0b; text-align:center}
             msg.innerText = "Authenticating Admin...";
             await auth.signInWithEmailAndPassword(email, pass);
         } catch (error) {
+            console.error("Login error:", error);
             msg.innerText = "Login Failed: " + error.message;
         }
     }
@@ -137,13 +140,13 @@ h1{color:#f59e0b; text-align:center}
     }
 
     // ============================================
-    // DATA LAYER REQUISITIONS (FIRESTORE)
+    // DATA LAYER (FIRESTORE)
     // ============================================
     async function loadPendingCashouts() {
         const container = document.getElementById('withdrawals-list-container');
         if (!container) return;
         
-        container.innerHTML = "<p style='color:#94a3b8; text-align:center;'>Loading pending queries...</p>";
+        container.innerHTML = "<p style='color:#94a3b8; text-align:center;'>Loading pending records...</p>";
 
         try {
             db.collection("withdrawals")
@@ -165,16 +168,18 @@ h1{color:#f59e0b; text-align:center}
                               <p style="color:#94a3b8; font-size:0.85rem;">${data.bankName || 'N/A'} • ${data.accountNumber || 'N/A'}</p>
                               <p style="color:#4ade80; font-weight:700; margin-top:4px;">₦${(data.amount || 0).toLocaleString()}</p>
                               <div style="margin-top:10px; display:flex; gap:10px;">
-                                  <button onclick="approvePayout('${docId}', '${data.userId}', ${data.amount})" style="background:#16a34a; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:600;">Approve</button>
-                                  <button onclick="rejectPayout('${docId}')" style="background:#dc2626; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:600;">Reject</button>
+                                  <button onclick="approvePayout('${docId}', '${data.userId}', ${data.amount})" style="background:#16a34a; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:600; width:auto; margin:0;">Approve</button>
+                                  <button onclick="rejectPayout('${docId}')" style="background:#dc2626; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:600; width:auto; margin:0;">Reject</button>
                               </div>
                           </div>
                       `;
                   });
+              }, (error) => {
+                  console.error("Snapshot error:", error);
+                  container.innerHTML = "<p style='color:#ef4444; text-align:center;'>Firestore rule block or database offline.</p>";
               });
         } catch(err) {
             console.error("Error reading data logs:", err);
-            container.innerHTML = "<p style='color:#ef4444;'>Failed to load records container parameters.</p>";
         }
     }
 
@@ -183,7 +188,6 @@ h1{color:#f59e0b; text-align:center}
         if (!container) return;
 
         try {
-            // Pull history list sorted by creation sequence
             db.collection("withdrawals")
               .limit(30)
               .onSnapshot((querySnapshot) => {
@@ -194,42 +198,39 @@ h1{color:#f59e0b; text-align:center}
                   container.innerHTML = "";
                   querySnapshot.forEach((doc) => {
                       const data = doc.data();
-                      let badgeColor = "#f59e0b"; // Pending
+                      let badgeColor = "#f59e0b"; 
                       if (data.status === "Approved") badgeColor = "#22c55e";
                       if (data.status === "Rejected") badgeColor = "#ef4444";
 
                       container.innerHTML += `
                           <div class="card" style="border-left: 4px solid ${badgeColor}">
                               <span style="float:right; font-size:12px; font-weight:bold; color:${badgeColor}">${data.status}</span>
-                              <div style="font-weight:600;">${data.userEmail}</div>
+                              <div style="font-weight:600;">${data.userEmail || 'N/A'}</div>
                               <div class="small">Amount: ₦${(data.amount || 0).toLocaleString()}</div>
-                              <div class="small">Bank Details: ${data.bankName} - ${data.accountNumber}</div>
+                              <div class="small">Bank Details: ${data.bankName || 'N/A'} - ${data.accountNumber || 'N/A'}</div>
                           </div>
                       `;
                   });
               });
         } catch (e) {
-            container.innerHTML = "Error loading transactional ledgers.";
+            console.error(e);
         }
     }
 
     // ============================================
-    // ADMIN ACTION WORKFLOWS
+    // GLOBAL EXPOSURES FOR WINDOW ACTION BUTTONS
     // ============================================
     window.approvePayout = async function(docId, userId, amount) {
         if(!confirm("Approve this payout? This will deduct the balance on the server database records.")) return;
         try {
             await db.collection("withdrawals").doc(docId).update({ status: "Approved" });
-            
-            // Adjusts wallet balance field name explicitly down to balance parameters safely
             await db.collection("users").doc(userId).update({
                 balance: firebase.firestore.FieldValue.increment(-amount)
             });
-            
             alert("Payout approved and balance synchronized cleanly!");
         } catch(e) { 
             console.error(e);
-            alert("Error running update sequences. Verify variable naming configurations inside your users directory schema collections."); 
+            alert("Error updating database field elements. Ensure that your 'users' collection document matches the variable string name 'balance'!"); 
         }
     };
 
@@ -238,8 +239,16 @@ h1{color:#f59e0b; text-align:center}
         try {
             await db.collection("withdrawals").doc(docId).update({ status: "Rejected" });
             alert("Payout rejected successfully.");
-        } catch(e) { alert("Error handling write sequence."); }
+        } catch(e) { 
+            console.error(e);
+            alert("Error handling database write sequence."); 
+        }
     };
+
+    // Make functions globally available to buttons
+    window.adminLogin = adminLogin;
+    window.logout = logout;
+    window.showTab = showTab;
 </script>
 
 </body>
