@@ -8,7 +8,7 @@
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="manifest" href="/manifest.json">
 
-<!-- LINK TO YOUR SEPARATE CSS FILE (ADDED FIX) -->
+<!-- LINK TO YOUR SEPARATE CSS FILE -->
 <link rel="stylesheet" href="style.css">
 
 <!-- Schema.org for Google Search -->
@@ -18,7 +18,7 @@
   "@type": "Organization",
   "name": "EarnSphere Hub",
   "url": "https://earnspherehub.name.ng",
-  "logo": "https://earnspherehub.name.ng/logo.png",
+  "logo": "https://earnspherehub.name.ng",
   "description": "Earn money online in Nigeria by completing simple mobile tasks and surveys with fast bank payouts."
 }
 </script>
@@ -28,14 +28,16 @@
 
     <!-- PROFESSIONAL STICKY NAVBAR -->
     <nav class="navbar">
-        <div class="container nav-container">
-            <!-- FIXED LOGO HTML STRUCTURE -->
-            <a href="index.html" class="logo-link">
-                <img src="/logo.png" 
-                     alt="EarnSphere Hub - Earn Money Online in Nigeria" 
-                     width="220" 
-                     style="max-width: 100%; height: auto;">
-            </a>
+        <div class="container nav-container" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+            <!-- FIXED LOGO HTML WITH INLINE BUFFER TO PREVENT OVERLAPPING -->
+            <div class="brand-logo" style="flex-shrink: 0; display: flex; align-items: center;">
+                <a href="index.html" class="logo-link" style="display: inline-block; vertical-align: middle;">
+                    <img src="/logo.png" 
+                         alt="EarnSphere Hub - Earn Money Online in Nigeria" 
+                         width="220" 
+                         style="max-width: 100%; height: auto; display: block;">
+                </a>
+            </div>
             <div class="nav-links">
                 <a href="index.html" class="active">Home</a>
                 <a href="#tasks">How It Works</a>
