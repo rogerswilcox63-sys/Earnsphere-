@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <!-- ========== FAVICON + SEO SETUP ========== -->
@@ -7,6 +7,9 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="manifest" href="/manifest.json">
+
+<!-- LINK TO YOUR SEPARATE CSS FILE (ADDED FIX) -->
+<link rel="stylesheet" href="style.css">
 
 <!-- Schema.org for Google Search -->
 <script type="application/ld+json">
@@ -26,13 +29,12 @@
     <!-- PROFESSIONAL STICKY NAVBAR -->
     <nav class="navbar">
         <div class="container nav-container">
-            <a href="index.html">
-                <a href="/">
-  <img src="/logo.png" 
-       alt="EarnSphere Hub - Earn Money Online in Nigeria" 
-       width="220" 
-       style="max-width: 100%; height: auto;">
-</a>
+            <!-- FIXED LOGO HTML STRUCTURE -->
+            <a href="index.html" class="logo-link">
+                <img src="/logo.png" 
+                     alt="EarnSphere Hub - Earn Money Online in Nigeria" 
+                     width="220" 
+                     style="max-width: 100%; height: auto;">
             </a>
             <div class="nav-links">
                 <a href="index.html" class="active">Home</a>
@@ -82,7 +84,6 @@
         <div class="container">
             <h2 class="section-title">Recent Community Payouts</h2>
             <div class="proof-grid">
-                <!-- Update these manually as your first real users cash out to build trust -->
                 <div class="proof-card">
                     <div class="proof-user">Chidi O. (Opay)</div>
                     <div class="proof-amount">₦1,450.00</div>
@@ -117,7 +118,6 @@
             <div class="footer-links">
                 <h3>Support & Contact</h3>
                 <ul>
-                    <!-- Updated support desks away from raw personal text strings -->
                     <li>Email: <a href="mailto:earnsphere.helpdesk@gmail.com" style="color: #ffffff;">earnsphere.helpdesk@gmail.com</a></li>
                     <li>Community: <a href="#" target="_blank">Join Telegram Group</a></li>
                     <li>Updates: <a href="#" target="_blank">WhatsApp Channel</a></li>
@@ -132,7 +132,6 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <!-- Domain references perfectly match the browser path to fix structural discrepancies -->
             <p>&copy; 2026 earnspherehub.name.ng. All rights reserved.</p>
         </div>
     </footer>
