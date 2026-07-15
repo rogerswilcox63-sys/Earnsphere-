@@ -1,4 +1,4 @@
-const CACHE_NAME = "earnsphere-v1";
+const CACHE_NAME = "earnsphere-v2";
 
 const urlsToCache = [
   "/",
