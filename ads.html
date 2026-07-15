@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Ads Feedback - Earn Sphere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f172a; color: #fff; padding: 20px; min-height: 100vh;
+        }
+        .container {max-width: 500px; margin: 0 auto;}
+        .back {
+            color: #94a3b8; text-decoration: none; display: inline-flex; 
+            align-items: center; gap: .5rem; margin-bottom: 1rem; font-weight: 600;
+        }
+        .back:hover {color: #fff;}
+        .header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem;
+            border: 1px solid #334155; text-align: center;
+        }
+        .badge {
+            display: inline-block; background: #6366f1; color: #fff;
+            padding: .3rem .8rem; border-radius: 20px; font-size: .8rem;
+            font-weight: 700; margin-bottom: .8rem;
+        }
+        .header h1 {font-size: 1.5rem; margin-bottom: .5rem;}
+        .header p {color: #94a3b8; margin-bottom: 1rem;}
+        .reward {
+            color: #10b981; font-weight: 700; font-size: 1.3rem;
+            display: flex; align-items: center; justify-content: center; gap: .5rem;
+        }
+        .form-card {
+            background: #1e293b; padding: 1.5rem; border-radius: 16px;
+            border: 1px solid #334155;
+        }
+        label {
+            display: block; margin: 1.2rem 0 .5rem; font-weight: 600; 
+            color: #cbd5e1; font-size: .95rem;
+        }
+        input, select, textarea {
+            width: 100%; padding: .9rem; border-radius: 10px;
+            border: 1px solid #334155; background: #0f172a; color: #fff;
+            font-size: 1rem; transition: border .2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: #3b82f6;
+        }
+        .start-btn {
+            width: 100%; background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff; border: none; padding: 1rem; border-radius: 14px;
+            font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 1.5rem;
+            transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .start-btn:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+        }
+        .start-btn:active {transform: scale(0.96);}
+        .note {
+            text-align: center; color: #64748b; font-size: .85rem; 
+            margin-top: 1rem; line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="dashboard.html" class="back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        
+        <div class="header">
+            <span class="badge">Marketing</span>
+            <h1>Digital Ads Feedback</h1>
+            <p>Help brands improve their ads</p>
+            <div class="reward">
+                <i class="fas fa-coins"></i> ₦90 Reward
+            </div>
+        </div>
+
+        <form class="form-card" method="POST">
+
+            
+            <input type="hidden" name="survey_id" value="srv_12">
+            <input type="hidden" name="survey_name" value="Digital Ads Feedback">
+            <input type="hidden" name="reward" value="90">
+            <input type="hidden" name="_subject" value="New Survey: Digital Ads Feedback - ₦90">
+            <input type="hidden" name="_next" value="https://earnspherehub.name.ng/dashboard.html?completed=srv_12">
+            
+            <label>1. Where do you see ads most often?</label>
+            <select name="q1_platform" required>
+                <option value="">Select platform</option>
+                <option value="Facebook">Facebook</option>
+                <option value="Instagram">Instagram</option>
+                <option value="TikTok">TikTok</option>
+                <option value="YouTube">YouTube</option>
+                <option value="Twitter/X">Twitter/X</option>
+                <option value="Google">Google Search</option>
+                <option value="WhatsApp">WhatsApp Status</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label>2. What type of ads do you engage with most?</label>
+            <select name="q2_ad_type" required>
+                <option value="">Select type</option>
+                <option value="Video ads">Video ads</option>
+                <option value="Image ads">Image/Photo ads</option>
+                <option value="Story ads">Story ads</option>
+                <option value="Influencer posts">Influencer posts</option>
+                <option value="Text ads">Text ads</option>
+                <option value="None">I skip all ads</option>
+            </select>
+
+            <label>3. Have you bought something after seeing an online ad?</label>
+            <select name="q3_purchased" required>
+                <option value="">Select option</option>
+                <option value="Yes, multiple times">Yes, multiple times</option>
+                <option value="Yes, once or twice">Yes, once or twice</option>
+                <option value="No, but clicked">No, but I clicked to view</option>
+                <option value="No, ignore">No, I ignore all ads</option>
+            </select>
+
+            <label>4. What makes you click on an ad?</label>
+            <select name="q4_click_reason" required>
+                <option value="">Select reason</option>
+                <option value="Discount/Offer">Discount/Offer</option>
+                <option value="Interesting product">Interesting product</option>
+                <option value="Catchy video">Catchy video/creative</option>
+                <option value="Celebrity">Celebrity/Influencer</option>
+                <option value="Need product">I actually need it</option>
+                <option value="Don't click">I don't click ads</option>
+            </select>
+
+            <label>5. How do you feel about personalized ads?</label>
+            <select name="q5_personalized" required>
+                <option value="">Select opinion</option>
+                <option value="Love them">Love them - very relevant</option>
+                <option value="Like them">Like them - sometimes useful</option>
+                <option value="Neutral">Neutral - don't mind</option>
+                <option value="Dislike">Dislike - feels creepy</option>
+                <option value="Hate">Hate them - invasion of privacy</option>
+            </select>
+
+            <label>6. Your phone number for ₦90 reward</label>
+            <input type="tel" name="phone_number" placeholder="08012345678" pattern="[0-9]{11}" required>
+
+            <button type="submit" class="start-btn">
+                <i class="fas fa-paper-plane"></i> Submit & Claim ₦90
+            </button>
+            
+            <p class="note">
+                By submitting, you confirm answers are accurate. 
+                Reward will be credited within 24 hours.
+            </p>
+        </form>
+    </div>
+
+    <script>
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const btn = form.querySelector('.start-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            btn.disabled = true;
+        });
+        // When user clicks final "Submit" button
+function submitSurvey() {
+    // Save answers if you want, then redirect back
+    window.location.href = 'dashboard.html?completed=srv_11';
+}
+    </script>
+</body>
+</html>
