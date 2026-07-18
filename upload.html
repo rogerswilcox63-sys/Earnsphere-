@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnSphere - Submit Task Proof</title>
+    <style>
+        :root {
+            --primary-color: #0052cc;
+            --dark-color: #003d99;
+            --light-bg: #f4f7fc;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+            --success-color: #166534;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .upload-card {
+            background: #ffffff;
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 82, 204, 0.06);
+            border: 1px solid rgba(0, 82, 204, 0.08);
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .upload-header h1 {
+            color: var(--dark-color);
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .upload-header p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* Drag & Drop Area Box */
+        .drop-zone {
+            width: 100%;
+            height: 200px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 2px dashed var(--primary-color);
+            border-radius: 8px;
+            background-color: rgba(0, 82, 204, 0.02);
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone--over {
+            border-style: solid;
+            background-color: rgba(0, 82, 204, 0.08);
+        }
+
+        .drop-zone__input {
+            display: none;
+        }
+
+        .drop-zone__prompt {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .drop-zone__file-name {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #475569;
+            word-break: break-all;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: #22c55e; /* Green matching submission workflow */
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #16a34a;
+        }
+
+        #upload-status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .success { background: #dcfce7; color: var(--success-color); border: 1px solid #bbf7d0; }
+        .error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+
+<div class="upload-card">
+    <div class="upload-header">
+        <h1>Upload Proof of Task</h1>
+        <p>Upload a screenshot of your app gameplay level or installation verification page.</p>
+    </div>
+
+    <form id="uploadForm">
+        <div class="drop-zone" id="dropZone">
+            <span class="drop-zone__prompt">Click to browse or drop screenshot here</span>
+            <span class="drop-zone__file-name" id="fileNameDisplay"></span>
+            <input type="file" name="taskScreenshot" id="fileInput" class="drop-zone__input" accept="image/png, image/jpeg" required>
+        </div>
+
+        <button type="submit" class="submit-btn">Upload Screenshot & Verify</button>
+    </form>
+
+    <div id="upload-status"></div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const uploadStatus = document.getElementById('upload-status');
+
+    // Click trigger to browse local storage directory
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Update prompt display text on file selection changes
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+            updateFileInfo(fileInput.files[0]);
+        }
+    });
+
+    // Drag over element boundary detection wrapper rules
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drop-zone--over');
+    });
+
+    ['dragleave', 'dragend'].forEach(type => {
+        dropZone.addEventListener(type, () => {
+            dropZone.classList.remove('drop-zone--over');
+        });
+    });
+
+    // Capture file parameters dropped directly into layout zone
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drop-zone--over');
+
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileInfo(e.dataTransfer.files[0]);
+        }
+    });
+
+    function updateFileInfo(file) {
+        // Enforce basic filter rules to restrict inputs to image objects
+        if (!file.type.startsWith('image/')) {
+            uploadStatus.className = 'error';
+            uploadStatus.textContent = 'Invalid file extension type. Please submit a JPG or PNG screenshot.';
+            uploadStatus.style.display = 'block';
+            fileInput.value = '';
+            fileNameDisplay.textContent = '';
+            return;
+        }
+        
+        // Output clean file descriptor feedback parameters into display window
+        uploadStatus.style.display = 'none';
+        fileNameDisplay.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+    }
+
+    // Capture submit events
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (!fileInput.files.length) {
+            uploadStatus.className = 'error';
+            uploadStatus.textContent = 'Please select a screenshot file first.';
+            uploadStatus.style.display = 'block';
+            return;
+        }
+
+        // Action workflow script visualization confirmation update
+        uploadStatus.className = 'success';
+        uploadStatus.textContent = 'Screenshot file recorded! Reward validation pending manual verification review.';
+        uploadStatus.style.display = 'block';
+
+        // Clear layout storage containers back to default values
+        document.getElementById('uploadForm').reset();
+        fileNameDisplay.textContent = '';
+    });
+</script>
+
+</body>
+</html>

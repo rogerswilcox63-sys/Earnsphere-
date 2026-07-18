@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnSphere - App Testing Survey</title>
+    <style>
+        :root {
+            --primary-color: #0052cc;
+            --dark-color: #003d99;
+            --light-bg: #f4f7fc;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+            --success-color: #166534;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .survey-card {
+            background: #ffffff;
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 82, 204, 0.06);
+            border: 1px solid rgba(0, 82, 204, 0.08);
+        }
+
+        .survey-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .survey-header h1 {
+            color: var(--dark-color);
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .survey-header p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Palmstore Download Button Container */
+        .download-box {
+            background-color: rgba(0, 82, 204, 0.04);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed var(--primary-color);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 82, 204, 0.15);
+        }
+
+        .download-btn:hover {
+            background-color: var(--dark-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            color: var(--text-color);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+        }
+
+        /* Speed Rating Blocks */
+        .rating-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .rating-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .rating-btn.selected {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: #22c55e; /* Green for Action Submission */
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background-color: #16a34a;
+        }
+
+        #alert-msg {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .success { background: #dcfce7; color: var(--success-color); border: 1px solid #bbf7d0; }
+        .error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+
+<div class="survey-card">
+    <div class="survey-header">
+        <h1>App Testing Assignment</h1>
+        <p>Complete the task below exactly as instructed to earn your dashboard rewards.</p>
+    </div>
+
+    <div class="download-box">
+        <label style="margin-bottom: 10px;">Step 1: Download & Install the App</label>
+        <a href="https://www.palmstoreapp.com/detail?packageName=com.dts.freefireth" target="_blank" class="download-btn">
+            Download Free Fire on Palmstore &rarr;
+        </a>
+    </div>
+
+    <form id="appSurveyForm">
+        <label style="color: var(--dark-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 15px;">
+            Step 2: Submit Your Verification Review
+        </label>
+
+        <div class="form-group">
+            <label for="appName">Confirm the app name you tested:</label>
+            <select id="appName" required>
+                <option value="">-- Select tested app --</option>
+                <option value="free_fire">Garena Free Fire</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Rate the gameplay speed & performance (1-5):</label>
+            <div class="rating-group">
+                <button type="button" class="rating-btn" onclick="setRating(1)">1</button>
+                <button type="button" class="rating-btn" onclick="setRating(2)">2</button>
+                <button type="button" class="rating-btn" onclick="setRating(3)">3</button>
+                <button type="button" class="rating-btn" onclick="setRating(4)">4</button>
+                <button type="button" class="rating-btn" onclick="setRating(5)">5</button>
+            </div>
+            <input type="hidden" id="appRating" required>
+        </div>
+
+        <div class="form-group">
+            <label for="issues">Did you run into any functional lags or errors?</label>
+            <select id="issues" required>
+                <option value="no">No, the app loaded properly</option>
+                <option value="minor">Yes, noticed brief server lags</option>
+                <option value="major">Yes, the app closed unexpectedly</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="feedbackText">Detailed Review Notes (Minimum 15 words):</label>
+            <textarea id="feedbackText" rows="4" placeholder="Explain your user experience. What loaded well? What features need optimization?" required></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Verify Task & Claim Points</button>
+    </form>
+
+    <div id="alert-msg"></div>
+</div>
+
+<script>
+    let selectedRating = 0;
+
+    // Manages custom evaluation layout buttons
+    function setRating(val) {
+        selectedRating = val;
+        document.getElementById('appRating').value = val;
+        
+        const buttons = document.querySelectorAll('.rating-btn');
+        buttons.forEach((btn, index) => {
+            if (index + 1 === val) {
+                btn.classList.add('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        });
+    }
+
+    // Handles validation verification rules
+    document.getElementById('appSurveyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const rating = document.getElementById('appRating').value;
+        const feedback = document.getElementById('feedbackText').value;
+        const alertDiv = document.getElementById('alert-msg');
+
+        // Validation for the 1-5 selection indicator
+        if (!rating) {
+            alertDiv.className = 'error';
+            alertDiv.textContent = 'Please select a performance speed score before submitting.';
+            alertDiv.style.display = 'block';
+            return;
+        }
+
+        // Word count limit calculation validation rule
+        const words = feedback.trim().split(/\s+/).filter(word => word.length > 0);
+        if (words.length < 15) {
+            alertDiv.className = 'error';
+            alertDiv.textContent = `Your review is too concise (${words.length}/15 words minimum required). Provide more technical detail.`;
+            alertDiv.style.display = 'block';
+            return;
+        }
+
+        // Task Success simulation response
+        alertDiv.className = 'success';
+        alertDiv.textContent = 'Task data successfully recorded! Verification points are processing to your wallet.';
+        alertDiv.style.display = 'block';
+        
+        // Return form interface structure back to baseline settings
+        document.getElementById('appSurveyForm').reset();
+        document.querySelectorAll('.rating-btn').forEach(btn => btn.classList.remove('selected'));
+        selectedRating = 0;
+    });
+</script>
+
+</body>
+</html>

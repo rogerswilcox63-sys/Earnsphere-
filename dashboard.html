@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Site Title for Google -->
+    <title>EarnSphere Hub - Earn Money Online in Nigeria</title>
+    
+    <!-- Favicon / Logo for Google -->
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="32x32">
+    <link rel="apple-touch-icon" href="/favicon.png"> <!-- For iPhone bookmarks -->
+
+    <!-- Tell Google your Site Name -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "EarnSphere Hub",
+      "url": "https://earnsphere.ng",
+      "logo": "https://earnsphere.ng/favicon.png"
+    }
+    </script>
+</head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>EarnSphere Nigeria - Dashboard</title>
@@ -591,7 +610,7 @@
   </div>
 
   <script>
-      // ============================================
+    // ============================================
     // FIREBASE CONFIG
     // ============================================
     const firebaseConfig = {
@@ -643,7 +662,7 @@
     let isProcessing = false;
 
     // ============================================
-    // SURVEY + SOCIAL DATABASE
+    // SURVEY + SOCIAL + APP DATABASE
     // ============================================
     const surveyDatabase = {
       "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
@@ -667,6 +686,11 @@
       { id:'soc_4', title:'Join Our Telegram', desc:'Join our Telegram community for exclusive updates and bonuses.', reward:150, badge:'Telegram', badgeClass:'badge-social', link:'https://t.me/earnspherehub' },
       { id:'soc_5', title:'Tweet About Us', desc:'Tweet about EarnSphere and tag us for a chance to earn extra rewards.', reward:220, badge:'Twitter', badgeClass:'badge-social', link:'https://twitter.com/earnsphere' },
       { id:'soc_6', title:'Subscribe to Newsletter', desc:'Subscribe to our weekly newsletter for exclusive earning opportunities.', reward:180, badge:'Email', badgeClass:'badge-social', link:'https://earnspherehub.name.ng/newsletter' }
+    ];
+
+    // Added the App Testing Assignment database entry
+    const appTestingTasks = [
+      { id:'app_01', title:'Test Garena Free Fire', desc:'Download the app via Palmstore, write a short performance verification evaluation, and submit task tracking.', reward:450, badge:'Palmstore', badgeClass:'badge-app', link:'app-testing-survey.html' }
     ];
 
     // ============================================
@@ -783,7 +807,6 @@
         if (doc.exists) {
           const dbData = doc.data();
           
-          // Cross-reference data paths cleanly: combine array matches so data isn't deleted
           const mergedData = {
             balance: Math.max(dbData.balance || 0, localData?.balance || 0),
             lifetimeTotal: Math.max(dbData.lifetimeTotal || 0, localData?.lifetimeTotal || 0),
@@ -808,8 +831,11 @@
 
       const surveyList = document.getElementById('surveyList');
       const socialTaskList = document.getElementById('socialTaskList');
+      const appTestingList = document.getElementById('appTestingList'); // UI element connector matching dashboard panels
+      
       if (surveyList) surveyList.innerHTML = '';
       if (socialTaskList) socialTaskList.innerHTML = '';
+      if (appTestingList) appTestingList.innerHTML = '';
 
       const todaysSurveyIds = getTodaysSurveys();
 
@@ -855,6 +881,27 @@
         `;
       }
 
+      // Render the App Testing list segment
+      if (appTestingList) {
+        appTestingTasks.forEach(task => {
+          const appCompleted = isTaskCompleted(task.id);
+          appTestingList.innerHTML += `
+            <div class="offer-card">
+              <div class="offer-title">${task.title}</div>
+              <div class="offer-desc">${task.desc}</div>
+              <span class="badge ${task.badgeClass}">${task.badge}</span>
+              <div class="offer-reward">₦${task.reward}</div>
+              <button class="start-btn" onclick="startAppTesting('${task.id}')" ${appCompleted ? 'disabled' : ''}>
+                ${appCompleted ? '✅ Completed' : '🎮 Test App'}
+              </button>
+              <div class="reset-timer">
+                <i class="fas fa-sync-alt"></i> ${appCompleted ? '✅ Completed' : 'Available Now'}
+              </div>
+            </div>
+          `;
+        });
+      }
+
       updateResetTimers();
     }
 
@@ -864,6 +911,15 @@
         return;
       }
       window.open(`survey.html?id=${surveyId}`, '_blank');
+    }
+
+    // Open target location wrapper for the new assignment script tracking frame
+    function startAppTesting(taskId) {
+      if (isTaskCompleted(taskId)) {
+        showToast('You already completed this task!');
+        return;
+      }
+      window.open(`survey.html?id=${taskId}`, '_blank');
     }
 
     async function completeSocialTask(taskId, reward, link, taskHour) {
@@ -1147,7 +1203,6 @@
     // AUTH HANDLER
     // ============================================
     function setupAuth() {
-      // 1. Process inbound parameters IMMEDIATELY to prevent early sync overwriting
       const urlParams = new URLSearchParams(window.location.search);
       const completedSurvey = urlParams.get('completed');
       const rewardAmount = parseFloat(urlParams.get('reward'));
@@ -1164,12 +1219,10 @@
           userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
           userData.completedTaskIds.push(completedSurvey);
           
-          // Securely write directly to local memory so refreshing can't break it
           localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
         }
       }
 
-      // Render the current balance immediately layout elements don't show old numbers
       updateInterfaceValues();
       renderTasks();
 
@@ -1195,14 +1248,12 @@
         const userEl = document.getElementById('userName');
         if (userEl) userEl.innerText = `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}`;
 
-        // Force write back up to cloud immediately if we processed a survey payout
         if (completedSurvey && !isNaN(rewardAmount)) {
           await saveUserDataToFirebase();
-          showToast(`🎉 Survey completed! +₦${rewardAmount} added to your wallet!`);
+          showToast(`🎉 Task completed! +₦${rewardAmount} added to your wallet!`);
           window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // Fetch cloud data and merge securely
         const syncedData = await loadUserDataFromFirebase(user);
         if (syncedData) {
           userData = syncedData;
@@ -1228,6 +1279,3 @@
       setInterval(() => { if (userData) renderTasks(); }, 60000);
     });
   </script>
-
-</body>
-</html>
