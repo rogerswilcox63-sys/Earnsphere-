@@ -1,153 +1,370 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- ========== FAVICON + SEO SETUP ========== -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnSphere - Money Tips & Guides</title>
+    
+    <style>
+        :root {
+            --primary-color: #0052cc; /* EarnSphere Hub Blue */
+            --dark-color: #003d99;    /* Darker Blue Accent */
+            --light-bg: #f4f7fc;      /* Soft Light Blue/Gray Background */
+            --text-color: #1e293b;    /* Deep Charcoal for Text */
+        }
 
-<!-- LINK TO YOUR SEPARATE CSS FILE -->
-<link rel="stylesheet" href="style.css">
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-<!-- Schema.org for Google Search -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "EarnSphere Hub",
-  "url": "https://earnspherehub.name.ng",
-  "logo": "https://earnspherehub.name.ng",
-  "description": "Earn money online in Nigeria by completing simple mobile tasks and surveys with fast bank payouts."
-}
-</script>
-<!-- ========================================== -->
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Header & Navigation */
+        header {
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 82, 204, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        /* Hamburger Menu (Three Hyphens) */
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 26px;
+            height: 18px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+        }
+
+        .menu-toggle span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        /* Nav Links Menu */
+        .nav-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px;
+            list-style: none;
+        }
+
+        .nav-menu.active {
+            display: block;
+        }
+
+        .nav-menu li {
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: 600;
+            display: block;
+            padding: 10px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary-color);
+            background-color: rgba(0, 82, 204, 0.05);
+        }
+
+        .nav-menu .btn-dashboard {
+            background-color: var(--primary-color);
+            color: #ffffff;
+        }
+
+        .nav-menu .btn-dashboard:hover {
+            background-color: var(--dark-color);
+            color: #ffffff;
+        }
+
+        /* Desktop Navigation Styles */
+        @media (min-width: 768px) {
+            .menu-toggle {
+                display: none;
+            }
+            .nav-menu {
+                display: flex;
+                position: static;
+                width: auto;
+                box-shadow: none;
+                padding: 0;
+            }
+            .nav-menu li {
+                margin: 0 8px;
+            }
+            .nav-menu a {
+                font-size: 15px;
+                padding: 8px 16px;
+            }
+        }
+
+        /* Main Content Grid */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Promotional Feature Banner Section */
+        .promo-banner-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 30px auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 82, 204, 0.15);
+            border: 1px solid rgba(0, 82, 204, 0.1);
+        }
+
+        .promo-banner-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .section-title {
+            text-align: center;
+            margin: 50px 0 30px 0;
+            color: var(--dark-color);
+            font-size: 1.8rem;
+            position: relative;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        @media (min-width: 768px) {
+            .blog-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .blog-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .blog-card {
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 82, 204, 0.04), 0 1px 3px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(0, 82, 204, 0.08);
+        }
+
+        .blog-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 82, 204, 0.08);
+        }
+
+        /* Blog Card Feature Image placeholder styling */
+        .blog-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            border-bottom: 1px solid rgba(0, 82, 204, 0.08);
+            background-color: #e2e8f0;
+        }
+
+        .blog-content {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .blog-date {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .blog-title {
+            font-size: 19px;
+            margin-bottom: 12px;
+            color: var(--text-color);
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .blog-excerpt {
+            color: #475569;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            font-size: 15px;
+        }
+
+        .read-more {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            font-size: 15px;
+            transition: color 0.2s ease;
+        }
+
+        .read-more:hover {
+            color: var(--dark-color);
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            padding: 40px 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .footer-links {
+            margin-bottom: 25px;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            margin: 0 12px;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- PROFESSIONAL STICKY NAVBAR -->
-    <nav class="navbar">
-        <div class="container nav-container" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
-            <!-- FIXED LOGO HTML WITH INLINE BUFFER TO PREVENT OVERLAPPING -->
-            <div class="brand-logo" style="flex-shrink: 0; display: flex; align-items: center;">
-                <a href="index.html" class="logo-link" style="display: inline-block; vertical-align: middle;">
-                    <img src="/logo.png" 
-                         alt="EarnSphere Hub - Earn Money Online in Nigeria" 
-                         width="220" 
-                         style="max-width: 100%; height: auto; display: block;">
-                </a>
-            </div>
-            <div class="nav-links">
-                <a href="index.html" class="active">Home</a>
-                <a href="#tasks">How It Works</a>
-                <a href="#proof">Payouts</a>
-                <a href="login.html">Login</a>
-                <a href="register.html" style="color: #2563eb; font-weight: 600;">Register</a>
-            </div>
-        </div>
-    </nav>
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">EarnSphere</a>
+            
+            <button class="menu-toggle" id="mobile-menu-btn" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
 
-    <!-- CLEAN HERO ENTRY SECTION -->
-    <header class="hero">
-        <div class="container">
-            <h1>Turn Your Spare Time into Real Cash</h1>
-            <p>Join thousands of Nigerians getting paid daily for completing simple social media and survey tasks from their mobile phones.</p>
-            <a href="register.html" class="btn-primary">Start Earning Now - It's Free</a>
+            <ul class="nav-menu" id="nav-menu-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+                <li><a href="dashboard.html" class="btn-dashboard">Access Dashboard</a></li>
+            </ul>
         </div>
     </header>
 
-    <!-- CLEAN 3-STEP EXPLANATION WORKFLOW -->
-    <section class="steps-section" id="tasks">
-        <div class="container">
-            <h2 class="section-title">Start Earning in 3 Simple Steps</h2>
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-num">1</div>
-                    <h3>Create Free Account</h3>
-                    <p>Sign up securely with just your email and phone number. No hidden activation charges.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-num">2</div>
-                    <h3>Complete Daily Tasks</h3>
-                    <p>Choose simple actions like reviewing local apps, liking social pages, or engaging with content panels.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-num">3</div>
-                    <h3>Withdraw Directly</h3>
-                    <p>Request payouts seamlessly starting from ₦1,000 directly into any verified Nigerian bank account.</p>
-                </div>
-            </div>
+    <main>
+        <div class="promo-banner-container">
+            <img src="banner.png" alt="EarnSphere Nigeria - Register and Earn ₦950.00 Instantly" class="promo-banner-img">
         </div>
-    </section>
 
-    <!-- LIVE PAYMENT PROOF CARDS BLOCK -->
-    <section class="proof-section" id="proof">
-        <div class="container">
-            <h2 class="section-title">Recent Community Payouts</h2>
-            <div class="proof-grid">
-                <div class="proof-card">
-                    <div class="proof-user">Chidi O. (Opay)</div>
-                    <div class="proof-amount">₦1,450.00</div>
-                    <div class="proof-date">Paid: Just now</div>
+        <h2 class="section-title">Latest Insights & Money Guides</h2>
+        
+        <div class="blog-grid">
+            <article class="blog-card">
+                <div class="blog-image"></div>
+                <div class="blog-content">
+                    <div class="blog-date">June 25, 2026</div>
+                    <h2 class="blog-title">5 Legit Ways to Make Extra Money Online in Nigeria 2026</h2>
+                    <p class="blog-excerpt">Looking for side hustles that actually pay? We break down 5 proven methods Nigerians are using to earn online, from freelancing to micro-tasks. No investment needed to start...</p>
+                    <a href="making-money-nigeria.html" class="read-more">Read More &rarr;</a>
                 </div>
-                <div class="proof-card">
-                    <div class="proof-user">Blessing A. (GTBank)</div>
-                    <div class="proof-amount">₦2,100.00</div>
-                    <div class="proof-date">Paid: 35 mins ago</div>
+            </article>
+
+            <article class="blog-card">
+                <div class="blog-image"></div>
+                <div class="blog-content">
+                    <div class="blog-date">June 20, 2026</div>
+                    <h2 class="blog-title">How EarnSphere Rewards Work: Complete Guide</h2>
+                    <p class="blog-excerpt">New to EarnSphere? Learn how our reward system works, how points convert to Naira, and tips to maximize your earnings. We also explain withdrawal timelines and requirements...</p>
+                    <a href="earnsphere-rewards-guide.html" class="read-more">Read More &rarr;</a>
                 </div>
-                <div class="proof-card">
-                    <div class="proof-user">Tunde J. (Palmpay)</div>
-                    <div class="proof-amount">₦1,050.00</div>
-                    <div class="proof-date">Paid: 2 hours ago</div>
+            </article>
+
+            <article class="blog-card">
+                <div class="blog-image"></div>
+                <div class="blog-content">
+                    <div class="blog-date">June 15, 2026</div>
+                    <h2 class="blog-title">Saving Money in Nigeria: 7 Practical Tips That Work</h2>
+                    <p class="blog-excerpt">Inflation is high, but you can still save. From cutting data costs to bulk buying strategies, here are 7 money-saving tips every Nigerian should know in 2026...</p>
+                    <a href="saving-money-tips.html" class="read-more">Read More &rarr;</a>
                 </div>
-                <div class="proof-card">
-                    <div class="proof-user">Amina K. (Access Bank)</div>
-                    <div class="proof-amount">₦3,400.00</div>
-                    <div class="proof-date">Paid: Today</div>
-                </div>
-            </div>
+            </article>
         </div>
-    </section>
+    </main>
 
-    <!-- COMPLIANT FOOTER WITH BALANCED DOMAIN REFERENCES -->
     <footer>
-        <div class="container footer-grid">
-            <div class="footer-about">
-                <h3>EarnSphere Hub</h3>
-                <p>An open, community-first micro-task space built to connect digital platforms with organic user engagement across Nigeria.</p>
-            </div>
-            <div class="footer-links">
-                <h3>Support & Contact</h3>
-                <ul>
-                    <li>Email: <a href="mailto:earnsphere.helpdesk@gmail.com" style="color: #ffffff;">earnsphere.helpdesk@gmail.com</a></li>
-                    <li>Community: <a href="#" target="_blank">Join Telegram Group</a></li>
-                    <li>Updates: <a href="#" target="_blank">WhatsApp Channel</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h3>Legal Policies</h3>
-                <ul>
-                    <li><a href="privacy.html">Privacy Policy</a></li>
-                    <li><a href="terms.html">Terms of Service</a></li>
-                </ul>
-            </div>
+        <div class="footer-links">
+            <a href="privacy.html">Privacy Policy</a> | 
+            <a href="about.html">About Us</a> | 
+            <a href="contact.html">Contact Support</a>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 earnspherehub.name.ng. All rights reserved.</p>
-        </div>
+        <p>&copy; 2026 EarnSphere. All rights reserved.</p>
     </footer>
 
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js", { scope: "/" })
-    .then((reg) => {
-      console.log("SW registered:", reg.scope);
-    })
-    .catch((err) => {
-      console.error("SW failed:", err);
-    });
-}
-</script>
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const navMenu = document.getElementById('nav-menu-list');
+
+        menuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
