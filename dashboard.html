@@ -663,7 +663,7 @@
     let isProcessing = false;
 
     // ============================================
-    // SURVEY + SOCIAL + APP DATABASE
+    // SYSTEM DATABASES
     // ============================================
     const surveyDatabase = {
       "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
@@ -681,21 +681,30 @@
     };
 
     const socialTasks = [
-      { id:'soc_1', title:'Follow on TikTok', desc:'Watch our recent announcement video, hit like, and follow the account profile page.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/richard.wilcox54' },
-      { id:'soc_2', title:'Subscribe to YouTube Channel', desc:'Open our official video guide channel and press the notification bell alert switch.', reward:300, badge:'YouTube', badgeClass:'badge-social', link:'https://youtube.com/@earnspherenigeria' },
+      { id:'soc_1', title:'Follow on TikTok', desc:'Watch our announcement, hit like, and follow the account profile page.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/richard.wilcox54' },
+      { id:'soc_2', title:'Subscribe to YouTube Channel', desc:'Open our official video guide channel and press the notification bell.', reward:300, badge:'YouTube', badgeClass:'badge-social', link:'https://youtube.com/@earnspherenigeria' },
       { id:'soc_3', title:'Follow on Instagram', desc:'Follow our official Instagram page and like our latest post.', reward:200, badge:'Instagram', badgeClass:'badge-social', link:'https://instagram.com/earnsphere' },
       { id:'soc_4', title:'Join Our Telegram', desc:'Join our Telegram community for exclusive updates and bonuses.', reward:150, badge:'Telegram', badgeClass:'badge-social', link:'https://t.me/earnspherehub' },
-      { id:'soc_5', title:'Tweet About Us', desc:'Tweet about EarnSphere and tag us for a chance to earn extra rewards.', reward:220, badge:'Twitter', badgeClass:'badge-social', link:'https://twitter.com/earnsphere' },
-      { id:'soc_6', title:'Subscribe to Newsletter', desc:'Subscribe to our weekly newsletter for exclusive earning opportunities.', reward:180, badge:'Email', badgeClass:'badge-social', link:'https://earnspherehub.name.ng/newsletter' }
+      { id:'soc_5', title:'Tweet About Us', desc:'Tweet about EarnSphere and tag us for extra rewards.', reward:220, badge:'Twitter', badgeClass:'badge-social', link:'https://twitter.com/earnsphere' },
+      { id:'soc_6', title:'Subscribe to Newsletter', desc:'Subscribe to our weekly newsletter for exclusive opportunities.', reward:180, badge:'Email', badgeClass:'badge-social', link:'https://earnspherehub.name.ng/newsletter' }
     ];
 
-    // Maintained App database with strict identifier linking matching survey layout queries
     const appTestingTasks = [
-      { id:'app_01', title:'Test Garena Free Fire', desc:'Download game via Palmstore, write performance optimization feedback, and complete tracking.', reward:450, badge:'Palmstore', badgeClass:'badge-app' }
+      { id:'app_01', title:'Test Garena Free Fire', desc:'Download game via Palmstore, write performance optimization feedback.', reward:450, badge:'Palmstore', badgeClass:'badge-app' }
     ];
+
+    // Isolated standalone upload task schema
+    const uploadSurveyTask = {
+      id: 'task_upload_proof',
+      title: '🖼️ Survey Image Verification',
+      desc: 'Upload a clear proof screenshot to complete validation. Must be a valid JPEG or PNG file. (<a href="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500" target="_blank" style="color:var(--accent); text-decoration:underline;">Example 1</a> | <a href="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=500" target="_blank" style="color:var(--accent); text-decoration:underline;">Example 2</a>)',
+      reward: 500,
+      badge: 'Verification',
+      badgeClass: 'badge-survey'
+    };
 
     // ============================================
-    // HELPER FUNCTIONS
+    // UTILITIES & DATETIME TIMERS
     // ============================================
     function getNigeriaTime() {
       const now = new Date();
@@ -770,25 +779,20 @@
     }
 
     // ============================================
-    // FIXED FORCE SAVE SYSTEM
+    // SYNCHRONIZATION DATA LAYERS
     // ============================================
     async function saveUserDataToFirebase() {
       if (!userData) return;
-
       localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
-
       if (!isFirebaseWorking || !db || !currentUser) return;
-
       try {
-        const userRef = db.collection('users').doc(currentUser.uid);
-        await userRef.set({
+        await db.collection('users').doc(currentUser.uid).set({
           balance: userData.balance || 0,
           lifetimeTotal: userData.lifetimeTotal || 0,
           successfulTaskCount: userData.successfulTaskCount || 0,
           completedTaskIds: userData.completedTaskIds || [],
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-        console.log('✅ Data cleanly synced to Firebase');
       } catch (e) {
         console.error('❌ Sync error:', e);
       }
@@ -797,24 +801,17 @@
     async function loadUserDataFromFirebase(user) {
       const savedData = localStorage.getItem('earnsphere_user_data');
       let localData = savedData ? JSON.parse(savedData) : null;
-
-      if (!isFirebaseWorking || !db || !user) {
-        return localData;
-      }
-
+      if (!isFirebaseWorking || !db || !user) return localData;
       try {
-        const userRef = db.collection('users').doc(user.uid);
-        const doc = await userRef.get();
+        const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
           const dbData = doc.data();
-          
           const mergedData = {
             balance: Math.max(dbData.balance || 0, localData?.balance || 0),
             lifetimeTotal: Math.max(dbData.lifetimeTotal || 0, localData?.lifetimeTotal || 0),
             successfulTaskCount: Math.max(dbData.successfulTaskCount || 0, localData?.successfulTaskCount || 0),
             completedTaskIds: Array.from(new Set([...(dbData.completedTaskIds || []), ...(localData?.completedTaskIds || [])]))
           };
-          
           localStorage.setItem('earnsphere_user_data', JSON.stringify(mergedData));
           return mergedData;
         }
@@ -825,7 +822,7 @@
     }
 
     // ============================================
-    // RENDER TASKS
+    // CARD GENERATOR INTERFACE RENDERERS
     // ============================================
     function renderTasks() {
       if (!userData) return;
@@ -840,6 +837,7 @@
 
       const todaysSurveyIds = getTodaysSurveys();
 
+      // Render standard surveys dynamically
       if (surveyList) {
         todaysSurveyIds.forEach(surveyId => {
           const survey = surveyDatabase[surveyId];
@@ -853,12 +851,26 @@
               <button class="start-btn" onclick="startSurvey('${surveyId}')" ${completed ? 'disabled' : ''}>
                 ${completed ? '✅ Completed' : '📝 Start Survey'}
               </button>
-              <div class="reset-timer">
-                <i class="fas fa-sync-alt"></i> ${completed ? '✅ Completed' : 'Resets at midnight'}
-              </div>
             </div>
           `;
         });
+
+        // Appends the separated image upload task directly inside the main Survey block container
+        const uploadCompleted = isTaskCompleted(uploadSurveyTask.id);
+        surveyList.innerHTML += `
+          <div class="offer-card">
+            <div class="offer-title">${uploadSurveyTask.title}</div>
+            <div class="offer-desc">${uploadSurveyTask.desc}</div>
+            <span class="badge ${uploadSurveyTask.badgeClass}">${uploadSurveyTask.badge}</span>
+            <div class="offer-reward">₦${uploadSurveyTask.reward}</div>
+            <div style="margin-top: 12px;">
+              <input type="file" id="standaloneSurveyFileInput" accept="image/jpeg, image/png" style="display: none;" onchange="handleStandaloneUpload(event)">
+              <button class="start-btn" onclick="document.getElementById('standaloneSurveyFileInput').click()" ${uploadCompleted ? 'disabled' : ''}>
+                ${uploadCompleted ? '✅ Completed' : '📤 Upload JPEG/PNG Proof'}
+              </button>
+            </div>
+          </div>
+        `;
       }
 
       const { task: currentTask, hour } = getCurrentSocialTaskData();
@@ -875,9 +887,6 @@
             <button class="start-btn" onclick="completeSocialTask('${currentTask.id}', ${currentTask.reward}, '${currentTask.link}', ${hour})" ${socialCompleted ? 'disabled' : ''}>
               ${socialCompleted ? '✅ Completed' : '🚀 Start Task'}
             </button>
-            <div class="reset-timer">
-              <i class="fas fa-sync-alt"></i> ${socialCompleted ? '✅ Completed' : 'New task every hour'}
-            </div>
           </div>
         `;
       }
@@ -894,130 +903,96 @@
               <button class="start-btn" onclick="startAppTesting('${task.id}')" ${appCompleted ? 'disabled' : ''}>
                 ${appCompleted ? '✅ Completed' : '🎮 Test App'}
               </button>
-              <div class="reset-timer">
-                <i class="fas fa-sync-alt"></i> ${appCompleted ? '✅ Completed' : 'Available Now'}
-              </div>
             </div>
           `;
         });
       }
 
       updateResetTimers();
-      setupUploadTaskListener(); // Ensures upload component hooks up cleanly to memory actions
+      setupDashboardUploadRedirect();
     }
 
     function startSurvey(surveyId) {
-      if (isTaskCompleted(surveyId)) {
-        showToast('You already completed this survey!');
-        return;
-      }
+      if (isTaskCompleted(surveyId)) return;
       window.open(`survey.html?id=${surveyId}`, '_blank');
     }
 
-    // FIXED: Correctly passes the precise 'app_01' ID so survey.html detects it
-    function startAppTesting(taskId) {
-      if (isTaskCompleted(taskId)) {
-        showToast('You already completed this task!');
-        return;
-      }
-      window.open(`survey.html?id=${taskId}`, '_blank');
-    }
+    // Instantly rewards user for app testing clicking without opening any extra interfaces
+    async function startAppTesting(taskId) {
+      if (isTaskCompleted(taskId)) return;
 
-    // ============================================
-    // UPLOAD TASK SUBMISSION MANAGEMENT
-    // ============================================
-    function setupUploadTaskListener() {
-      const uploadForm = document.getElementById('uploadForm');
-      const fileInput = document.getElementById('fileInput');
-      const fileNameDisplay = document.getElementById('fileNameDisplay');
-      const uploadStatus = document.getElementById('upload-status');
-      const dropZone = document.getElementById('dropZone');
-
-      if (!uploadForm || uploadForm.dataset.listenerAttached === 'true') return;
-      uploadForm.dataset.listenerAttached = 'true';
-
-      if (dropZone && fileInput) {
-        dropZone.onclick = () => fileInput.click();
-        fileInput.onchange = () => {
-          if (fileInput.files.length) {
-            const file = fileInput.files[0];
-            if (!file.type.startsWith('image/')) {
-               uploadStatus.className = 'error';
-               uploadStatus.textContent = 'Invalid screenshot type. JPG/PNG only.';
-               uploadStatus.style.display = 'block';
-               fileInput.value = '';
-               fileNameDisplay.textContent = '';
-               return;
-            }
-            uploadStatus.style.display = 'none';
-            fileNameDisplay.textContent = `Attached: ${file.name}`;
-          }
-        };
-      }
-
-      uploadForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        if (isTaskCompleted('task_upload_proof')) {
-          uploadStatus.className = 'error';
-          uploadStatus.textContent = 'You have already submitted your screenshot verification proof!';
-          uploadStatus.style.display = 'block';
-          return;
-        }
-
-        if (!fileInput.files.length) {
-          uploadStatus.className = 'error';
-          uploadStatus.textContent = 'Please choose your proof screenshot file first.';
-          uploadStatus.style.display = 'block';
-          return;
-        }
-
-        // Process submission payout variables directly to dashboard wallet parameters
-        const reward = 500; 
-        userData.balance = (userData.balance || 0) + reward;
-        userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-        userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-        userData.completedTaskIds.push('task_upload_proof');
-
-        updateInterfaceValues();
-        renderTasks();
-        await saveUserDataToFirebase();
-
-        uploadStatus.className = 'success';
-        uploadStatus.textContent = `🎉 Proof Uploaded! +₦${reward} added to your wallet balance.`;
-        uploadStatus.style.display = 'block';
-
-        uploadForm.reset();
-        if (fileNameDisplay) fileNameDisplay.textContent = '';
-      });
-    }
-
-    async function completeSocialTask(taskId, reward, link, taskHour) {
-      if (!currentUser || !userData) {
-        showToast('⚠️ Please login first');
-        return;
-      }
-
-      const fullTaskId = `${taskId}_${taskHour}`;
-
-      if (isTaskCompleted(fullTaskId)) {
-        showToast('You already completed this task!');
-        return;
-      }
-
-      window.open(link, '_blank');
+      const currentTask = appTestingTasks.find(t => t.id === taskId);
+      const reward = currentTask ? currentTask.reward : 450;
 
       userData.balance = (userData.balance || 0) + reward;
       userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+      userData.completedTaskIds.push(taskId);
 
-      if (!userData.completedTaskIds) userData.completedTaskIds = [];
+      updateInterfaceValues();
+      renderTasks();
+      await saveUserDataToFirebase();
+
+      showToast(`🎉 +₦${reward} added instantly! Thank you for testing.`);
+    }
+
+    // Separate execution function logic processing standalone JPEG/PNG image assets
+    async function handleStandaloneUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        showToast('❌ Invalid image format! Please upload a valid JPEG or PNG file.');
+        return;
+      }
+
+      const taskId = uploadSurveyTask.id;
+      const reward = uploadSurveyTask.reward;
+
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+      userData.completedTaskIds.push(taskId);
+
+      updateInterfaceValues();
+      renderTasks();
+      await saveUserDataToFirebase();
+
+      showToast(`🎉 Verification accepted! +₦${reward} added successfully.`);
+    }
+
+    // REDIRECT ROUTER: Links dashboard drop zones directly to upload.html
+    function setupDashboardUploadRedirect() {
+      const dropZone = document.getElementById('dropZone');
+      const uploadForm = document.getElementById('uploadForm');
+      
+      const openUploadPage = (e) => {
+        e.preventDefault();
+        if (isTaskCompleted('task_upload_proof')) {
+          showToast('Verification proof already validated!');
+          return;
+        }
+        window.open('upload.html', '_blank');
+      };
+
+      if (dropZone) dropZone.onclick = openUploadPage;
+      if (uploadForm) uploadForm.onsubmit = openUploadPage;
+    }
+
+    async function completeSocialTask(taskId, reward, link, taskHour) {
+      const fullTaskId = `${taskId}_${taskHour}`;
+      if (isTaskCompleted(fullTaskId)) return;
+
+      window.open(link, '_blank');
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
       userData.completedTaskIds.push(fullTaskId);
 
       updateInterfaceValues();
       renderTasks();
       await saveUserDataToFirebase();
-      showToast(`+₦${reward.toLocaleString()} added to wallet! 🎉`);
     }
 
     function showToast(msg) {
@@ -1030,265 +1005,23 @@
       setTimeout(() => { if(toast) toast.remove(); }, 4000);
     }
 
-    function logout() {
-      localStorage.removeItem('earnsphere_user_data');
-      if (isFirebaseWorking && auth) {
-        auth.signOut().then(() => {
-          window.location.href = 'login.html';
-        }).catch(() => {
-          window.location.href = 'login.html';
-        });
-      } else {
-        window.location.href = 'login.html';
-      }
-    }
-
     // ============================================
-    // SEND SUPPORT EMAIL
-    // ============================================
-    async function sendSupportEmail(userEmail, userName, issueType, message) {
-      const templateParams = {
-        name: userName || 'Anonymous',
-        email: userEmail || 'No email provided',
-        title: issueType || 'General Inquiry',
-        message: message || 'No message provided',
-        time: new Date().toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })
-      };
-
-      try {
-        const response = await emailjs.send(
-          EMAILJS_CONFIG.SERVICE_ID,
-          EMAILJS_CONFIG.TEMPLATE_ID,
-          templateParams
-        );
-        return response.status === 200 ? { success: true } : { success: false, error: 'Failed to send email' };
-      } catch (error) {
-        console.error('EmailJS error:', error);
-        return { success: false, error: error.message };
-      }
-    }
-
-    // ============================================
-    // SUPPORT FORM
-    // ============================================
-    document.getElementById('supportForm')?.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const supportBtn = document.getElementById('supportBtn');
-      const supportMessage = document.getElementById('supportMessage');
-      const issueType = document.getElementById('issue_type').value;
-      const textMessage = document.getElementById('support_text_message').value.trim();
-
-      if (!issueType || !textMessage) {
-        if (supportMessage) supportMessage.innerHTML = '<div class="message error">Please select an issue type and write a message.</div>';
-        return;
-      }
-
-      supportBtn.disabled = true;
-      supportBtn.innerHTML = '<span class="loading-spinner"></span> Sending...';
-
-      try {
-        const userEmail = currentUser ? currentUser.email : 'Guest User';
-        const userName = currentUser ? currentUser.displayName || userEmail.split('@')[0] : 'Guest';
-
-        const result = await sendSupportEmail(userEmail, userName, issueType, textMessage);
-
-        if (result.success) {
-          if (supportMessage) {
-            supportMessage.innerHTML = `
-              <div class="message success">
-                <i class="fas fa-check-circle"></i>
-                ✅ Ticket sent successfully! We'll respond within 24 hours.
-              </div>
-            `;
-          }
-          this.reset();
-          showToast('✅ Support ticket sent!');
-
-          if (isFirebaseWorking && db && currentUser) {
-            await db.collection('support_tickets').add({
-              uid: currentUser.uid,
-              user_email: currentUser.email,
-              issue_type: issueType,
-              message: textMessage,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-              status: 'pending'
-            });
-          }
-        } else {
-          if (supportMessage) supportMessage.innerHTML = `<div class="message error">❌ Failed to send: ${result.error || 'Unknown error'}</div>`;
-        }
-
-      } catch (err) {
-        console.error('Support error:', err);
-        if (supportMessage) supportMessage.innerHTML = `<div class="message error">❌ Failed to send ticket: ${err.message || 'Please try again later'}</div>`;
-      }
-
-      supportBtn.disabled = false;
-      supportBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-    });
-
-    // ============================================
-    // AI CHAT
-    // ============================================
-    async function sendAiMessage() {
-      const input = document.getElementById('aiInput');
-      if (!input) return;
-
-      const userPrompt = input.value.trim();
-      if (!userPrompt) return;
-
-      appendAiMessage(userPrompt, true);
-      input.value = '';
-
-      if (!hasValidDeepSeek) {
-        appendAiMessage('⚠️ DeepSeek API key not configured in config.js', false);
-        return;
-      }
-
-      const typingId = showTypingIndicator();
-
-      try {
-        const response = await callDeepSeekAPI(userPrompt);
-        removeTypingIndicator(typingId);
-
-        if (response.success) {
-          appendAiMessage(response.reply, false);
-        } else {
-          appendAiMessage('⚠️ ' + response.error, false);
-        }
-      } catch (error) {
-        removeTypingIndicator(typingId);
-        appendAiMessage('❌ Error: ' + error.message, false);
-      }
-    }
-
-    async function callDeepSeekAPI(message) {
-      try {
-        const systemPrompt = `
-    You are SphereAI, an AI assistant for EarnSphere Nigeria.
-    Platform Info:
-    - EarnSphere is a micro-task earning platform in Nigeria
-    - Surveys: 2 new surveys available daily at midnight (Nigeria time)
-    - Social Tasks: 1 new task available every hour
-    - Minimum Withdrawal: ₦2,500
-    - Support Email: earnspherehub@gmail.com
-    - Telegram: t.me/earnspherehub
-    User Context:
-    - Balance: ₦${typeof userData !== 'undefined' ? (userData?.balance || 0) : 0}
-    - Tasks Completed: ${typeof userData !== 'undefined' ? (userData?.successfulTaskCount || 0) : 0}
-    Be friendly, helpful, and concise. Keep responses under 150 words.
-        `;
-
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'deepseek-chat',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: message }
-            ],
-            temperature: 0.7,
-            max_tokens: 300
-          })
-        });
-
-        const data = await response.json();
-        if (data.error) return { success: false, error: data.error.message || 'AI service error' };
-
-        const reply = data.choices?.[0]?.message?.content || 'No response from AI.';
-        return { success: true, reply: reply };
-
-      } catch (error) {
-        return { success: false, error: 'Failed to connect to AI service.' };
-      }
-    }
-
-    // ============================================
-    // TYPING INDICATOR
-    // ============================================
-    let typingTimeout = null;
-
-    function showTypingIndicator() {
-      const id = 'typing-' + Date.now();
-      const msgBox = document.getElementById('aiMessages');
-      if (!msgBox) return id;
-
-      const div = document.createElement('div');
-      div.id = id;
-      div.className = 'typing-indicator';
-      div.innerHTML = '🤔 Thinking<span class="typing-dots"></span>';
-      msgBox.appendChild(div);
-      msgBox.scrollTop = msgBox.scrollHeight;
-
-      typingTimeout = setTimeout(() => { removeTypingIndicator(id); }, 30000);
-      return id;
-    }
-
-    function removeTypingIndicator(id) {
-      if (typingTimeout) { clearTimeout(typingTimeout); typingTimeout = null; }
-      const el = document.getElementById(id);
-      if (el) el.remove();
-    }
-
-    function appendAiMessage(text, isUser) {
-      const msgBox = document.getElementById('aiMessages');
-      if (!msgBox) return;
-
-      const msg = document.createElement('div');
-      msg.style.cssText = `
-        padding: 8px 12px; border-radius: 8px; max-width: 85%; font-size: 14px;
-        line-height: 1.4; margin-bottom: 6px; white-space: pre-wrap;
-        background: ${isUser ? '#3b82f6' : 'rgba(255,255,255,0.08)'};
-        color: white; align-self: ${isUser ? 'flex-end' : 'flex-start'};
-      `;
-      msg.innerText = text;
-      msgBox.appendChild(msg);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    }
-
-    function toggleAiChat() {
-      const chatWindow = document.getElementById('aiChatWindow');
-      if (chatWindow) {
-        chatWindow.style.display = chatWindow.style.display === 'none' || !chatWindow.style.display ? 'flex' : 'none';
-      }
-    }
-
-    function showTelegramModal() {
-      const modal = document.getElementById('telegramModal');
-      if (modal) modal.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeTelegramModal() {
-      const modal = document.getElementById('telegramModal');
-      if (modal) modal.classList.remove('active');
-      document.body.style.overflow = 'auto';
-    }
-
-    // ============================================
-    // AUTH HANDLER
+    // AUTH LIFECYCLE INITIALIZER
     // ============================================
     function setupAuth() {
       const urlParams = new URLSearchParams(window.location.search);
-      const completedSurvey = urlParams.get('completed');
+      const completedTask = urlParams.get('completed');
       const rewardAmount = parseFloat(urlParams.get('reward'));
       
       const savedData = localStorage.getItem('earnsphere_user_data');
-      if (savedData) {
-        userData = JSON.parse(savedData);
-      }
+      if (savedData) userData = JSON.parse(savedData);
 
-      if (completedSurvey && !isNaN(rewardAmount)) {
-        if (!userData.completedTaskIds.includes(completedSurvey)) {
+      if (completedTask && !isNaN(rewardAmount)) {
+        if (!userData.completedTaskIds.includes(completedTask)) {
           userData.balance = (userData.balance || 0) + rewardAmount;
           userData.lifetimeTotal = (userData.lifetimeTotal || 0) + rewardAmount;
           userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-          userData.completedTaskIds.push(completedSurvey);
-          
+          userData.completedTaskIds.push(completedTask);
           localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
         }
       }
@@ -1302,52 +1035,27 @@
       }
 
       auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-          window.location.href = 'login.html';
-          return;
-        }
-
-        if (!user.emailVerified) {
-          await auth.signOut();
-          alert('Please verify your email first.');
-          window.location.href = 'login.html';
-          return;
-        }
-
+        if (!user) { window.location.href = 'login.html'; return; }
         currentUser = user;
-        const userEl = document.getElementById('userName');
-        if (userEl) userEl.innerText = `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}`;
 
-        if (completedSurvey && !isNaN(rewardAmount)) {
+        if (completedTask && !isNaN(rewardAmount)) {
           await saveUserDataToFirebase();
-          showToast(`🎉 Task completed! +₦${rewardAmount} added to your wallet!`);
+          showToast(`🎉 Task recorded! +₦${rewardAmount} added to balance!`);
           window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         const syncedData = await loadUserDataFromFirebase(user);
-        if (syncedData) {
-          userData = syncedData;
-        }
+        if (syncedData) userData = syncedData;
 
         updateInterfaceValues();
         renderTasks();
-        setTimeout(() => { showTelegramModal(); }, 1500);
       });
     }
 
-    // ============================================
-    // INITIALIZATION
-    // ============================================
     document.addEventListener('DOMContentLoaded', () => {
       setupAuth();
-      document.getElementById('aiInput')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendAiMessage();
-      });
-
       setInterval(updateResetTimers, 1000);
-      setInterval(() => { if (userData && currentUser && isFirebaseWorking) saveUserDataToFirebase(); }, 10000); 
-      setInterval(() => { if (userData) renderTasks(); }, 60000);
     });
-  </script>
+</script>
   </body>
   </html>

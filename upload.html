@@ -1,230 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EarnSphere - Submit Task Proof</title>
-    <style>
-        :root {
-            --primary-color: #0052cc;
-            --dark-color: #003d99;
-            --light-bg: #f4f7fc;
-            --text-color: #1e293b;
-            --border-color: #cbd5e1;
-            --success-color: #166534;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EarnSphere - Upload Survey Verification</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --success: #10b981;
+      --error: #ef4444;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        body {
-            background-color: var(--light-bg);
-            color: var(--text-color);
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
 
-        .upload-card {
-            background: #ffffff;
-            max-width: 500px;
-            width: 100%;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 82, 204, 0.06);
-            border: 1px solid rgba(0, 82, 204, 0.08);
-        }
+    .upload-container {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 500px;
+      padding: 30px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
 
-        .upload-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
 
-        .upload-header h1 {
-            color: var(--dark-color);
-            font-size: 22px;
-            margin-bottom: 8px;
-        }
+    .header h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
 
-        .upload-header p {
-            color: #64748b;
-            font-size: 14px;
-        }
+    .header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
 
-        /* Drag & Drop Area Box */
-        .drop-zone {
-            width: 100%;
-            height: 200px;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            border: 2px dashed var(--primary-color);
-            border-radius: 8px;
-            background-color: rgba(0, 82, 204, 0.02);
-            cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
-            margin-bottom: 20px;
-        }
+    .examples-box {
+      background-color: rgba(59, 130, 246, 0.05);
+      border: 1px dashed rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 0.85rem;
+    }
 
-        .drop-zone--over {
-            border-style: solid;
-            background-color: rgba(0, 82, 204, 0.08);
-        }
+    .examples-box a {
+      color: var(--accent);
+      text-decoration: underline;
+      margin: 0 5px;
+    }
 
-        .drop-zone__input {
-            display: none;
-        }
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background-color: rgba(15, 23, 42, 0.2);
+    }
 
-        .drop-zone__prompt {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background-color: rgba(59, 130, 246, 0.05);
+    }
 
-        .drop-zone__file-name {
-            margin-top: 10px;
-            font-size: 13px;
-            color: #475569;
-            word-break: break-all;
-        }
+    .drop-zone i {
+      font-size: 2.5rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
 
-        .submit-btn {
-            width: 100%;
-            background-color: #22c55e; /* Green matching submission workflow */
-            color: #ffffff;
-            border: none;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    .drop-zone p {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
 
-        .submit-btn:hover {
-            background-color: #16a34a;
-        }
+    .drop-zone span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
 
-        #upload-status {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 6px;
-            display: none;
-            text-align: center;
-            font-weight: 600;
-            font-size: 14px;
-        }
+    /* Fixed Image Preview Container Style Layout */
+    .file-preview {
+      display: none;
+      margin-top: 20px;
+      padding: 12px;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      align-items: center;
+      gap: 12px;
+    }
 
-        .success { background: #dcfce7; color: var(--success-color); border: 1px solid #bbf7d0; }
-        .error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-    </style>
+    .preview-thumbnail {
+      width: 50px;
+      height: 50px;
+      border-radius: 4px;
+      object-fit: cover;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+    }
+
+    .file-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .file-details span {
+      font-size: 0.85rem;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .file-preview i {
+      color: var(--error);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 1.1rem;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background-color: var(--accent);
+      color: var(--text-main);
+      border: none;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 24px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .submit-btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .submit-btn:disabled {
+      background-color: var(--border-color);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #334155;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      font-size: 0.9rem;
+      z-index: 9999;
+      animation: fadeInOut 4s forwards;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, 20px); }
+      10% { opacity: 1; transform: translate(-50%, 0); }
+      90% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, -20px); }
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
 
-<div class="upload-card">
-    <div class="upload-header">
-        <h1>Upload Proof of Task</h1>
-        <p>Upload a screenshot of your app gameplay level or installation verification page.</p>
+  <div class="upload-container">
+    <div class="header">
+      <h2>Upload Verification Proof</h2>
+      <p>Submit your screenshot validation asset below to claim rewards</p>
     </div>
 
-    <form id="uploadForm">
-        <div class="drop-zone" id="dropZone">
-            <span class="drop-zone__prompt">Click to browse or drop screenshot here</span>
-            <span class="drop-zone__file-name" id="fileNameDisplay"></span>
-            <input type="file" name="taskScreenshot" id="fileInput" class="drop-zone__input" accept="image/png, image/jpeg" required>
+    <div class="examples-box">
+      Before uploading, view our templates:
+      <a href="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500" target="_blank">Example 1</a> | 
+      <a href="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=500" target="_blank">Example 2</a>
+    </div>
+
+    <form id="uploadSubmissionForm">
+      <input type="file" id="fileInput" accept="image/jpeg, image/png" style="display: none;">
+      
+      <div class="drop-zone" id="dropZoneContainer">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Drag & drop your screenshot file here</p>
+        <span>or click to browse local files</span>
+        <br><br>
+        <span>Accepted Formats: JPEG, PNG (Max 5MB)</span>
+      </div>
+
+      <div class="file-preview" id="filePreviewContainer">
+        <img id="imagePreviewThumbnail" class="preview-thumbnail" src="" alt="Proof Thumbnail">
+        <div class="file-details">
+          <span id="fileNameDisplay">filename.png</span>
         </div>
+        <i class="fas fa-trash-alt" id="removeFileIcon"></i>
+      </div>
 
-        <button type="submit" class="submit-btn">Upload Screenshot & Verify</button>
+      <button type="submit" class="submit-btn" id="submitBtn" disabled>Submit Asset Proof</button>
     </form>
+  </div>
 
-    <div id="upload-status"></div>
-</div>
+  <script>
+    // ============================================
+    // FIREBASE INITIALIZATION
+    // ============================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+      authDomain: "earnspherehub-742e9.firebaseapp.com",
+      projectId: "earnspherehub-742e9",
+      storageBucket: "earnspherehub-742e9.firebasestorage.app",
+      messagingSenderId: "173538573377",
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0",
+      measurementId: "G-3ZXY33620J"
+    };
 
-<script>
-    const dropZone = document.getElementById('dropZone');
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser = null;
+    let selectedFile = null;
+    const TASK_ID = 'task_upload_proof';
+    const REWARD_AMOUNT = 500;
+
+    // Elements
+    const dropZone = document.getElementById('dropZoneContainer');
     const fileInput = document.getElementById('fileInput');
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
-    const uploadStatus = document.getElementById('upload-status');
+    const previewContainer = document.getElementById('filePreviewContainer');
+    const thumbnailImg = document.getElementById('imagePreviewThumbnail');
+    const nameDisplay = document.getElementById('fileNameDisplay');
+    const removeIcon = document.getElementById('removeFileIcon');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadForm = document.getElementById('uploadSubmissionForm');
 
-    // Click trigger to browse local storage directory
-    dropZone.addEventListener('click', () => fileInput.click());
-
-    // Update prompt display text on file selection changes
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files.length) {
-            updateFileInfo(fileInput.files[0]);
-        }
+    auth.onAuthStateChanged((user) => {
+      if (user) currentUser = user;
+      else currentUser = { uid: 'guest' };
     });
 
-    // Drag over element boundary detection wrapper rules
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('drop-zone--over');
-    });
-
-    ['dragleave', 'dragend'].forEach(type => {
-        dropZone.addEventListener(type, () => {
-            dropZone.classList.remove('drop-zone--over');
-        });
-    });
-
-    // Capture file parameters dropped directly into layout zone
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('drop-zone--over');
-
-        if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files;
-            updateFileInfo(e.dataTransfer.files[0]);
-        }
-    });
-
-    function updateFileInfo(file) {
-        // Enforce basic filter rules to restrict inputs to image objects
-        if (!file.type.startsWith('image/')) {
-            uploadStatus.className = 'error';
-            uploadStatus.textContent = 'Invalid file extension type. Please submit a JPG or PNG screenshot.';
-            uploadStatus.style.display = 'block';
-            fileInput.value = '';
-            fileNameDisplay.textContent = '';
-            return;
-        }
-        
-        // Output clean file descriptor feedback parameters into display window
-        uploadStatus.style.display = 'none';
-        fileNameDisplay.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+    function showToast(msg) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => { if(toast) toast.remove(); }, 4000);
     }
 
-    // Capture submit events
-    document.getElementById('uploadForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    // Handles validation and creates local image URLs to attach into preview slots
+    function validateAndProcessFile(file) {
+      if (!file) return;
 
-        if (!fileInput.files.length) {
-            uploadStatus.className = 'error';
-            uploadStatus.textContent = 'Please select a screenshot file first.';
-            uploadStatus.style.display = 'block';
-            return;
-        }
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        showToast('❌ Invalid format! Please upload a valid JPEG or PNG file.');
+        resetFileSelection();
+        return;
+      }
 
-        // Action workflow script visualization confirmation update
-        uploadStatus.className = 'success';
-        uploadStatus.textContent = 'Screenshot file recorded! Reward validation pending manual verification review.';
-        uploadStatus.style.display = 'block';
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('❌ File too large! Maximum limit size is 5MB.');
+        resetFileSelection();
+        return;
+      }
 
-        // Clear layout storage containers back to default values
-        document.getElementById('uploadForm').reset();
-        fileNameDisplay.textContent = '';
+      selectedFile = file;
+      nameDisplay.innerText = file.name;
+
+      // Generate localized data url stream mapping for dynamic frontend matching
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        thumbnailImg.src = e.target.result;
+        previewContainer.style.display = 'flex';
+      }
+      reader.readAsDataURL(file);
+
+      submitBtn.disabled = false;
+    }
+
+    function resetFileSelection() {
+      selectedFile = null;
+      fileInput.value = '';
+      thumbnailImg.src = '';
+      previewContainer.style.display = 'none';
+      submitBtn.disabled = true;
+    }
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', (e) => {
+      validateAndProcessFile(e.target.files[0]);
     });
-</script>
 
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      validateAndProcessFile(e.dataTransfer.files[0]);
+    });
+
+    removeIcon.addEventListener('click', () => {
+      resetFileSelection();
+    });
+
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!selectedFile) return;
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Processing Verification...";
+
+      const savedData = localStorage.getItem('earnsphere_user_data');
+      let userData = savedData ? JSON.parse(savedData) : { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [] };
+
+      if (userData.completedTaskIds.includes(TASK_ID)) {
+        showToast('ℹ️ You have already claimed verification rewards for this task.');
+        setTimeout(() => { window.close(); }, 2000);
+        return;
+      }
+
+      userData.balance = (userData.balance || 0) + REWARD_AMOUNT;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + REWARD_AMOUNT;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+      userData.completedTaskIds.push(TASK_ID);
+
+      localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
+
+      if (db && currentUser && currentUser.uid !== 'guest') {
+        try {
+          await db.collection('users').doc(currentUser.uid).set({
+            balance: userData.balance,
+            lifetimeTotal: userData.lifetimeTotal,
+            successfulTaskCount: userData.successfulTaskCount,
+            completedTaskIds: userData.completedTaskIds,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        } catch (error) {
+          console.warn('Firebase document save sync postponed:', error);
+        }
+      }
+
+      showToast(`🎉 Verification successful! ₦${REWARD_AMOUNT} recorded into account balance.`);
+      
+      setTimeout(() => {
+        if (window.opener) {
+          try {
+            window.opener.location.reload();
+          } catch(err) {}
+        }
+        window.close();
+      }, 2500);
+    });
+  </script>
 </body>
 </html>
