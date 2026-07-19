@@ -689,9 +689,9 @@
       { id:'soc_6', title:'Subscribe to Newsletter', desc:'Subscribe to our weekly newsletter for exclusive earning opportunities.', reward:180, badge:'Email', badgeClass:'badge-social', link:'https://earnspherehub.name.ng/newsletter' }
     ];
 
-    // Added the App Testing Assignment database entry
+    // Maintained App database with strict identifier linking matching survey layout queries
     const appTestingTasks = [
-      { id:'app_01', title:'Test Garena Free Fire', desc:'Download the app via Palmstore, write a short performance verification evaluation, and submit task tracking.', reward:450, badge:'Palmstore', badgeClass:'badge-app', link:'app-testing-survey.html' }
+      { id:'app_01', title:'Test Garena Free Fire', desc:'Download game via Palmstore, write performance optimization feedback, and complete tracking.', reward:450, badge:'Palmstore', badgeClass:'badge-app' }
     ];
 
     // ============================================
@@ -832,7 +832,7 @@
 
       const surveyList = document.getElementById('surveyList');
       const socialTaskList = document.getElementById('socialTaskList');
-      const appTestingList = document.getElementById('appTestingList'); // UI element connector matching dashboard panels
+      const appTestingList = document.getElementById('appTestingList');
       
       if (surveyList) surveyList.innerHTML = '';
       if (socialTaskList) socialTaskList.innerHTML = '';
@@ -882,7 +882,6 @@
         `;
       }
 
-      // Render the App Testing list segment
       if (appTestingList) {
         appTestingTasks.forEach(task => {
           const appCompleted = isTaskCompleted(task.id);
@@ -904,6 +903,7 @@
       }
 
       updateResetTimers();
+      setupUploadTaskListener(); // Ensures upload component hooks up cleanly to memory actions
     }
 
     function startSurvey(surveyId) {
@@ -914,13 +914,82 @@
       window.open(`survey.html?id=${surveyId}`, '_blank');
     }
 
-    // Open target location wrapper for the new assignment script tracking frame
+    // FIXED: Correctly passes the precise 'app_01' ID so survey.html detects it
     function startAppTesting(taskId) {
       if (isTaskCompleted(taskId)) {
         showToast('You already completed this task!');
         return;
       }
       window.open(`survey.html?id=${taskId}`, '_blank');
+    }
+
+    // ============================================
+    // UPLOAD TASK SUBMISSION MANAGEMENT
+    // ============================================
+    function setupUploadTaskListener() {
+      const uploadForm = document.getElementById('uploadForm');
+      const fileInput = document.getElementById('fileInput');
+      const fileNameDisplay = document.getElementById('fileNameDisplay');
+      const uploadStatus = document.getElementById('upload-status');
+      const dropZone = document.getElementById('dropZone');
+
+      if (!uploadForm || uploadForm.dataset.listenerAttached === 'true') return;
+      uploadForm.dataset.listenerAttached = 'true';
+
+      if (dropZone && fileInput) {
+        dropZone.onclick = () => fileInput.click();
+        fileInput.onchange = () => {
+          if (fileInput.files.length) {
+            const file = fileInput.files[0];
+            if (!file.type.startsWith('image/')) {
+               uploadStatus.className = 'error';
+               uploadStatus.textContent = 'Invalid screenshot type. JPG/PNG only.';
+               uploadStatus.style.display = 'block';
+               fileInput.value = '';
+               fileNameDisplay.textContent = '';
+               return;
+            }
+            uploadStatus.style.display = 'none';
+            fileNameDisplay.textContent = `Attached: ${file.name}`;
+          }
+        };
+      }
+
+      uploadForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        if (isTaskCompleted('task_upload_proof')) {
+          uploadStatus.className = 'error';
+          uploadStatus.textContent = 'You have already submitted your screenshot verification proof!';
+          uploadStatus.style.display = 'block';
+          return;
+        }
+
+        if (!fileInput.files.length) {
+          uploadStatus.className = 'error';
+          uploadStatus.textContent = 'Please choose your proof screenshot file first.';
+          uploadStatus.style.display = 'block';
+          return;
+        }
+
+        // Process submission payout variables directly to dashboard wallet parameters
+        const reward = 500; 
+        userData.balance = (userData.balance || 0) + reward;
+        userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+        userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+        userData.completedTaskIds.push('task_upload_proof');
+
+        updateInterfaceValues();
+        renderTasks();
+        await saveUserDataToFirebase();
+
+        uploadStatus.className = 'success';
+        uploadStatus.textContent = `🎉 Proof Uploaded! +₦${reward} added to your wallet balance.`;
+        uploadStatus.style.display = 'block';
+
+        uploadForm.reset();
+        if (fileNameDisplay) fileNameDisplay.textContent = '';
+      });
     }
 
     async function completeSocialTask(taskId, reward, link, taskHour) {
@@ -1280,3 +1349,5 @@
       setInterval(() => { if (userData) renderTasks(); }, 60000);
     });
   </script>
+  </body>
+  </html>
