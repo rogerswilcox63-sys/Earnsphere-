@@ -509,6 +509,7 @@
       </div>
       <div class="offers-grid" id="socialTaskList"></div>
       <div id="appTestingList"></div>
+      <div id="uploadSurveylist"></div>
 
       <h2 class="section-title"><i class="fas fa-headset"></i> Contact Support</h2>
       <div class="withdraw-card">
@@ -914,7 +915,7 @@
 
     function startSurvey(surveyId) {
       if (isTaskCompleted(surveyId)) return;
-      window.open(`survey.html?id=${surveyId}`, '_blank');
+      window.open(`app-testing-survey.html', '_blank');
     }
 
     // Instantly rewards user for app testing clicking without opening any extra interfaces
