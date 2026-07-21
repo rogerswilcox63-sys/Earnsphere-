@@ -31,8 +31,8 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-// Use the classic gemini-pro model (widely available)
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+// Use a model that's definitely available from your list: gemini-2.5-flash
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 // ---- Health check ----
 app.get('/health', (req, res) => {
@@ -49,7 +49,7 @@ app.post('/api/grok', async (req, res) => {
 
   const sanitisedMessage = message.trim().slice(0, 2000);
 
-  // Combine system instruction and user message into one prompt
+  // Combine personality and user message into a single prompt
   const fullPrompt = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub. 
 You speak in a mix of English and Nigerian Pidgin English. You are encouraging, helpful, and slightly playful. 
 You help users with questions about earning money online, tasks, surveys, withdrawals, and daily motivation. 
