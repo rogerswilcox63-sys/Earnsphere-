@@ -1,404 +1,424 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EarnSphere - Upload Survey Verification</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload a Picture - EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    :root {
-      --bg-dark: #0f172a;
-      --card-bg: #1e293b;
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-      --success: #10b981;
-      --error: #ef4444;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
+    /* ===== FULL PAGE STYLES ===== */
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
+      font-family:'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height:100vh;
+      color:#f1f5f9;
+      padding:2rem;
     }
-
-    .upload-container {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      width: 100%;
-      max-width: 500px;
-      padding: 30px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    .container {
+      max-width:900px;
+      margin:0 auto;
+      background:rgba(30,41,59,.6);
+      backdrop-filter:blur(12px);
+      border-radius:1rem;
+      padding:2.5rem;
+      border:1px solid rgba(255,255,255,.1);
     }
-
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
+    /* ===== HEADER ===== */
+    .back-link {
+      color:#3b82f6;
+      text-decoration:none;
+      display:inline-block;
+      margin-bottom:1.5rem;
+      font-weight:600;
     }
-
-    .header h2 {
-      font-size: 1.5rem;
-      margin-bottom: 8px;
+    .back-link:hover { text-decoration:underline; }
+    h1 {
+      font-size:1.8rem;
+      margin-bottom:.5rem;
+      display:flex;
+      align-items:center;
+      gap:.5rem;
     }
-
-    .header p {
-      color: var(--text-muted);
-      font-size: 0.9rem;
+    h1 i { color:#f59e0b; }
+    .subtitle {
+      color:#94a3b8;
+      margin-bottom:1rem;
     }
-
-    .examples-box {
-      background-color: rgba(59, 130, 246, 0.05);
-      border: 1px dashed rgba(59, 130, 246, 0.3);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 20px;
-      text-align: center;
-      font-size: 0.85rem;
+    .reward-badge {
+      background:rgba(16,185,129,.2);
+      color:#10b981;
+      padding:.4rem 1rem;
+      border-radius:2rem;
+      font-size:.9rem;
+      display:inline-block;
+      margin:.5rem 0 1.5rem;
+      border:1px solid rgba(16,185,129,.2);
     }
-
-    .examples-box a {
-      color: var(--accent);
-      text-decoration: underline;
-      margin: 0 5px;
+    /* ===== HOW TO UPLOAD ===== */
+    .how-to-box {
+      background:rgba(245,158,11,.08);
+      border:1px solid rgba(245,158,11,.2);
+      border-radius:.75rem;
+      padding:1.2rem 1.5rem;
+      margin:1.5rem 0;
     }
-
-    .drop-zone {
-      border: 2px dashed var(--border-color);
-      border-radius: 8px;
-      padding: 40px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background-color: rgba(15, 23, 42, 0.2);
+    .how-to-box h3 {
+      color:#f59e0b;
+      font-size:1rem;
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      margin-bottom:.5rem;
     }
-
-    .drop-zone.drag-over {
-      border-color: var(--accent);
-      background-color: rgba(59, 130, 246, 0.05);
+    .how-to-box ul {
+      list-style:none;
+      padding:0;
+      margin:0;
     }
-
-    .drop-zone i {
-      font-size: 2.5rem;
-      color: var(--text-muted);
-      margin-bottom: 12px;
+    .how-to-box ul li {
+      padding:.3rem 0;
+      color:#cbd5e1;
+      font-size:.9rem;
+      display:flex;
+      align-items:center;
+      gap:.5rem;
     }
-
-    .drop-zone p {
-      font-size: 0.95rem;
-      margin-bottom: 4px;
+    .how-to-box ul li i {
+      color:#10b981;
+      font-size:.8rem;
     }
-
-    .drop-zone span {
-      font-size: 0.8rem;
-      color: var(--text-muted);
+    /* ===== EXAMPLE IMAGES (FREE FIRE THEMED) ===== */
+    .example-grid {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:1rem;
+      margin:1.5rem 0;
     }
-
-    /* Fixed Image Preview Container Style Layout */
-    .file-preview {
-      display: none;
-      margin-top: 20px;
-      padding: 12px;
-      background-color: var(--bg-dark);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      align-items: center;
-      gap: 12px;
+    .example-card {
+      background:rgba(15,23,42,.6);
+      border-radius:.75rem;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.05);
+      transition:transform 0.2s;
+      text-align:center;
     }
-
-    .preview-thumbnail {
-      width: 50px;
-      height: 50px;
-      border-radius: 4px;
-      object-fit: cover;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
+    .example-card:hover { transform:scale(1.02); }
+    .example-card img {
+      width:100%;
+      aspect-ratio:1/1;
+      object-fit:cover;
+      display:block;
     }
-
-    .file-details {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    .example-card .label {
+      padding:.5rem;
+      font-size:.75rem;
+      color:#94a3b8;
+      background:rgba(0,0,0,.4);
     }
-
-    .file-details span {
-      font-size: 0.85rem;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
+    .example-card .label i {
+      color:#f59e0b;
+      margin-right:4px;
     }
-
-    .file-preview i {
-      color: var(--error);
-      cursor: pointer;
-      padding: 4px;
-      font-size: 1.1rem;
+    /* ===== UPLOAD FORM ===== */
+    .form-group {
+      margin:1.5rem 0;
     }
-
-    .submit-btn {
-      width: 100%;
-      background-color: var(--accent);
-      color: var(--text-main);
-      border: none;
-      border-radius: 6px;
-      padding: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-top: 24px;
-      cursor: pointer;
-      transition: background-color 0.2s;
+    .form-group label {
+      display:block;
+      margin-bottom:.5rem;
+      color:#cbd5e1;
+      font-weight:600;
+      font-size:.95rem;
     }
-
-    .submit-btn:hover {
-      background-color: var(--accent-hover);
+    .form-control {
+      width:100%;
+      padding:.9rem 1.1rem;
+      background:rgba(15,23,42,.6);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:.75rem;
+      color:#f1f5f9;
+      font-size:1rem;
+      transition:border 0.3s;
     }
-
-    .submit-btn:disabled {
-      background-color: var(--border-color);
-      color: var(--text-muted);
-      cursor: not-allowed;
+    .form-control:focus {
+      outline:none;
+      border-color:#3b82f6;
     }
-
+    .form-control::file-selector-button {
+      background:linear-gradient(135deg, #3b82f6, #2563eb);
+      border:none;
+      color:#fff;
+      padding:.5rem 1.2rem;
+      border-radius:.5rem;
+      font-weight:600;
+      cursor:pointer;
+      margin-right:1rem;
+    }
+    .btn-primary {
+      background:linear-gradient(135deg, #10b981, #059669);
+      border:none;
+      color:#fff;
+      padding:1rem;
+      border-radius:.75rem;
+      font-size:1rem;
+      font-weight:700;
+      cursor:pointer;
+      width:100%;
+      transition:all 0.3s;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:.5rem;
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform:scale(1.02);
+      box-shadow:0 4px 20px rgba(16,185,129,.3);
+    }
+    .btn-primary:disabled {
+      opacity:0.5;
+      cursor:not-allowed;
+      transform:none;
+    }
+    .btn-secondary {
+      background:linear-gradient(135deg, #3b82f6, #2563eb);
+      border:none;
+      color:#fff;
+      padding:.8rem 1.5rem;
+      border-radius:.75rem;
+      font-size:.9rem;
+      font-weight:600;
+      cursor:pointer;
+      transition:all 0.3s;
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+    }
+    .btn-secondary:hover { transform:scale(1.02); }
+    /* ===== TOAST ===== */
     .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #334155;
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 30px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      font-size: 0.9rem;
-      z-index: 9999;
-      animation: fadeInOut 4s forwards;
+      background:rgba(30,41,59,.95);
+      padding:1rem 1.5rem;
+      border-radius:.5rem;
+      border:1px solid rgba(16,185,129,.3);
+      color:#fff;
+      animation:slideIn 0.3s ease;
+      box-shadow:0 4px 15px rgba(0,0,0,.3);
+      position:fixed;
+      top:20px;
+      right:20px;
+      z-index:9999;
+      max-width:90%;
     }
-
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translate(-50%, 20px); }
-      10% { opacity: 1; transform: translate(-50%, 0); }
-      90% { opacity: 1; transform: translate(-50%, 0); }
-      100% { opacity: 0; transform: translate(-50%, -20px); }
+    @keyframes slideIn {
+      from { transform:translateX(100%); opacity:0; }
+      to { transform:translateX(0); opacity:1; }
+    }
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .container { padding:1.5rem; }
+      .example-grid { grid-template-columns:repeat(2,1fr); }
+      h1 { font-size:1.4rem; }
+    }
+    @media (max-width: 480px) {
+      .example-grid { grid-template-columns:1fr; }
     }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
+  <div class="container">
+    <!-- Back Link -->
+    <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
 
-  <div class="upload-container">
-    <div class="header">
-      <h2>Upload Verification Proof</h2>
-      <p>Submit your screenshot validation asset below to claim rewards</p>
+    <!-- Header -->
+    <h1><i class="fas fa-image"></i> Upload a Picture</h1>
+    <p class="subtitle">Upload a clear picture of yourself, your game profile, or your hobby. Earn <strong style="color:#10b981;">₦200</strong> per successful upload!</p>
+    <div class="reward-badge"><i class="fas fa-coins"></i> Reward: ₦200 per day</div>
+
+    <!-- How to Upload -->
+    <div class="how-to-box">
+      <h3><i class="fas fa-info-circle"></i> How to Upload</h3>
+      <ul>
+        <li><i class="fas fa-check-circle"></i> Take a screenshot of your Free Fire profile or any clear picture</li>
+        <li><i class="fas fa-check-circle"></i> Make sure the image is clear and shows your UID or face</li>
+        <li><i class="fas fa-check-circle"></i> Upload using the button below and earn ₦200 instantly</li>
+      </ul>
     </div>
 
-    <div class="examples-box">
-      Before uploading, view our templates:
-      <a href="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500" target="_blank">Example 1</a> | 
-      <a href="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=500" target="_blank">Example 2</a>
+    <!-- Example Images (Free Fire Themed) -->
+    <h3 style="margin-bottom:0.5rem;"><i class="fas fa-gamepad" style="color:#f59e0b;"></i> Example Images</h3>
+    <p style="color:#94a3b8; font-size:.9rem; margin-bottom:1rem;">These are examples of what you can upload – Free Fire profiles, characters, weapons, and stats.</p>
+
+    <div class="example-grid">
+      <!-- Example 1: Free Fire Profile -->
+      <div class="example-card">
+        <img src="https://picsum.photos/id/1/200/200" alt="Free Fire Profile" loading="lazy" />
+        <div class="label"><i class="fas fa-user"></i> Free Fire Profile</div>
+      </div>
+      <!-- Example 2: Free Fire Character -->
+      <div class="example-card">
+        <img src="https://picsum.photos/id/2/200/200" alt="Free Fire Character" loading="lazy" />
+        <div class="label"><i class="fas fa-tshirt"></i> Character Skin</div>
+      </div>
+      <!-- Example 3: Free Fire Weapon -->
+      <div class="example-card">
+        <img src="https://picsum.photos/id/3/200/200" alt="Free Fire Weapon" loading="lazy" />
+        <div class="label"><i class="fas fa-crosshairs"></i> Weapon Upgrade</div>
+      </div>
+      <!-- Example 4: Free Fire Stats -->
+      <div class="example-card">
+        <img src="https://picsum.photos/id/4/200/200" alt="Free Fire Stats" loading="lazy" />
+        <div class="label"><i class="fas fa-chart-bar"></i> Game Stats</div>
+      </div>
     </div>
 
-    <form id="uploadSubmissionForm">
-      <input type="file" id="fileInput" accept="image/jpeg, image/png" style="display: none;">
-      
-      <div class="drop-zone" id="dropZoneContainer">
-        <i class="fas fa-cloud-upload-alt"></i>
-        <p>Drag & drop your screenshot file here</p>
-        <span>or click to browse local files</span>
-        <br><br>
-        <span>Accepted Formats: JPEG, PNG (Max 5MB)</span>
-      </div>
+    <!-- Upload Form -->
+    <div class="form-group">
+      <label for="uploadInput"><i class="fas fa-cloud-upload-alt" style="color:#3b82f6;"></i> Select an image to upload</label>
+      <input type="file" id="uploadInput" accept="image/*" class="form-control" />
+    </div>
 
-      <div class="file-preview" id="filePreviewContainer">
-        <img id="imagePreviewThumbnail" class="preview-thumbnail" src="" alt="Proof Thumbnail">
-        <div class="file-details">
-          <span id="fileNameDisplay">filename.png</span>
-        </div>
-        <i class="fas fa-trash-alt" id="removeFileIcon"></i>
-      </div>
+    <button class="btn-primary" id="uploadBtn" onclick="handleUpload()">
+      <i class="fas fa-upload"></i> Upload & Earn ₦200
+    </button>
 
-      <button type="submit" class="submit-btn" id="submitBtn" disabled>Submit Asset Proof</button>
-    </form>
+    <!-- Note -->
+    <p style="color:#64748b; font-size:.8rem; margin-top:1rem; text-align:center;">
+      <i class="fas fa-shield-alt" style="color:#10b981;"></i> Your uploads are private and only used to verify task completion.
+    </p>
   </div>
 
   <script>
-    // ============================================
-    // FIREBASE INITIALIZATION
-    // ============================================
+    // ============================================================
+    // FIREBASE CONFIG
+    // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
       projectId: "earnspherehub-742e9",
       storageBucket: "earnspherehub-742e9.firebasestorage.app",
       messagingSenderId: "173538573377",
-      appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-      measurementId: "G-3ZXY33620J"
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let currentUser = null;
-    let selectedFile = null;
-    const TASK_ID = 'task_upload_proof';
-    const REWARD_AMOUNT = 500;
+    // ============================================================
+    // GLOBALS
+    // ============================================================
+    let userData = {
+      balance: 0,
+      lifetimeTotal: 0,
+      successfulTaskCount: 0,
+      completedTasks: {}
+    };
 
-    // Elements
-    const dropZone = document.getElementById('dropZoneContainer');
-    const fileInput = document.getElementById('fileInput');
-    const previewContainer = document.getElementById('filePreviewContainer');
-    const thumbnailImg = document.getElementById('imagePreviewThumbnail');
-    const nameDisplay = document.getElementById('fileNameDisplay');
-    const removeIcon = document.getElementById('removeFileIcon');
-    const submitBtn = document.getElementById('submitBtn');
-    const uploadForm = document.getElementById('uploadSubmissionForm');
-
-    auth.onAuthStateChanged((user) => {
-      if (user) currentUser = user;
-      else currentUser = { uid: 'guest' };
-    });
-
+    // ============================================================
+    // HELPERS
+    // ============================================================
     function showToast(msg) {
-      const existing = document.querySelector('.toast');
-      if (existing) existing.remove();
       const toast = document.createElement('div');
       toast.className = 'toast';
       toast.innerHTML = msg;
       document.body.appendChild(toast);
-      setTimeout(() => { if(toast) toast.remove(); }, 4000);
+      setTimeout(() => { toast.remove(); }, 3500);
     }
 
-    // Handles validation and creates local image URLs to attach into preview slots
-    function validateAndProcessFile(file) {
-      if (!file) return;
+    function getTodayDateString() {
+      return new Date().toISOString().split('T')[0];
+    }
 
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-      if (!allowedTypes.includes(file.type)) {
-        showToast('❌ Invalid format! Please upload a valid JPEG or PNG file.');
-        resetFileSelection();
+    function isCompletedToday(taskId) {
+      if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
+      const completedDate = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
+      return completedDate === getTodayDateString();
+    }
+
+    async function loadUserData(uid) {
+      try {
+        const doc = await db.collection('users').doc(uid).get();
+        if (doc.exists) {
+          userData = doc.data();
+          const taskId = 'extra_upload';
+          if (isCompletedToday(taskId)) {
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-check-circle"></i> Completed Today';
+          }
+        }
+      } catch (e) {
+        console.error('Error loading user data:', e);
+      }
+    }
+
+    // ============================================================
+    // HANDLE UPLOAD
+    // ============================================================
+    async function handleUpload() {
+      const fileInput = document.getElementById('uploadInput');
+      const btn = document.getElementById('uploadBtn');
+
+      if (fileInput.files.length === 0) {
+        showToast('⚠️ Please select an image first.');
         return;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('❌ File too large! Maximum limit size is 5MB.');
-        resetFileSelection();
+      const user = auth.currentUser;
+      if (!user) {
+        showToast('⚠️ Please log in first.');
         return;
       }
 
-      selectedFile = file;
-      nameDisplay.innerText = file.name;
+      await loadUserData(user.uid);
 
-      // Generate localized data url stream mapping for dynamic frontend matching
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        thumbnailImg.src = e.target.result;
-        previewContainer.style.display = 'flex';
-      }
-      reader.readAsDataURL(file);
-
-      submitBtn.disabled = false;
-    }
-
-    function resetFileSelection() {
-      selectedFile = null;
-      fileInput.value = '';
-      thumbnailImg.src = '';
-      previewContainer.style.display = 'none';
-      submitBtn.disabled = true;
-    }
-
-    dropZone.addEventListener('click', () => fileInput.click());
-    
-    fileInput.addEventListener('change', (e) => {
-      validateAndProcessFile(e.target.files[0]);
-    });
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropZone.classList.add('drag-over');
-      }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
-      }, false);
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      validateAndProcessFile(e.dataTransfer.files[0]);
-    });
-
-    removeIcon.addEventListener('click', () => {
-      resetFileSelection();
-    });
-
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!selectedFile) return;
-
-      submitBtn.disabled = true;
-      submitBtn.innerText = "Processing Verification...";
-
-      const savedData = localStorage.getItem('earnsphere_user_data');
-      let userData = savedData ? JSON.parse(savedData) : { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [] };
-
-      if (userData.completedTaskIds.includes(TASK_ID)) {
-        showToast('ℹ️ You have already claimed verification rewards for this task.');
-        setTimeout(() => { window.close(); }, 2000);
+      const taskId = 'extra_upload';
+      if (isCompletedToday(taskId)) {
+        showToast('⚠️ You already uploaded a picture today! Come back tomorrow.');
         return;
       }
 
-      userData.balance = (userData.balance || 0) + REWARD_AMOUNT;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + REWARD_AMOUNT;
+      // Simulate upload
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Credit the user
+      if (!userData.completedTasks) userData.completedTasks = {};
+      userData.completedTasks[taskId] = Date.now();
+      const reward = 200;
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-      userData.completedTaskIds.push(TASK_ID);
 
-      localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
-
-      if (db && currentUser && currentUser.uid !== 'guest') {
-        try {
-          await db.collection('users').doc(currentUser.uid).set({
-            balance: userData.balance,
-            lifetimeTotal: userData.lifetimeTotal,
-            successfulTaskCount: userData.successfulTaskCount,
-            completedTaskIds: userData.completedTaskIds,
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
-        } catch (error) {
-          console.warn('Firebase document save sync postponed:', error);
-        }
+      try {
+        await db.collection('users').doc(user.uid).set(userData, { merge: true });
+        showToast('🎉 Image uploaded successfully! +₦200 earned!');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Completed Today';
+        fileInput.value = '';
+      } catch (e) {
+        console.error('Error saving:', e);
+        showToast('❌ Error saving. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-upload"></i> Upload & Earn ₦200';
       }
+    }
 
-      showToast(`🎉 Verification successful! ₦${REWARD_AMOUNT} recorded into account balance.`);
-      
-      setTimeout(() => {
-        if (window.opener) {
-          try {
-            window.opener.location.reload();
-          } catch(err) {}
-        }
-        window.close();
-      }, 2500);
+    // ============================================================
+    // AUTH STATE
+    // ============================================================
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        await loadUserData(user.uid);
+      } else {
+        document.getElementById('uploadBtn').disabled = true;
+        document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-lock"></i> Please Log In';
+      }
     });
   </script>
 </body>
