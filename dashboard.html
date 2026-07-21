@@ -11,6 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
+    /* ===== All styles (unchanged) ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -148,7 +149,7 @@
   </div>
 
   <script>
-    // FIREBASE CONFIG
+    // ===== FIREBASE =====
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -161,7 +162,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // GLOBALS
+    // ===== GLOBALS =====
     let currentUser = null;
     let userData = { displayName: '', balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [], lastDailyRewardDate: '' };
 
@@ -293,14 +294,11 @@
       showToast(`🎉 Reward of ₦${reward} credited!`);
     }
 
-    // ============================================================
-    // AI CHAT – calls Render backend
-    // ============================================================
+    // ===== AI CHAT (calls Render backend) =====
     const aiMessages = document.getElementById('aiMessages');
     const aiInput = document.getElementById('aiChatInput');
     const aiSendBtn = document.getElementById('aiSendBtn');
 
-    // Always use the live backend URL
     const API_BASE_URL = 'https://earnsphere-ai.onrender.com';
 
     function toggleAiChat() {
@@ -391,9 +389,7 @@
       }
     });
 
-    // ============================================================
-    // AUTH & INIT
-    // ============================================================
+    // ===== AUTH & INIT =====
     function logout() {
       auth.signOut().then(() => {
         localStorage.removeItem('earnsphere_user_data');
