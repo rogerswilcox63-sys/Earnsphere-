@@ -211,43 +211,6 @@
       to { transform: translateX(0); opacity: 1; }
     }
 
-    /* Modal Styling */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(12px);
-      z-index: 99999;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-overlay.active { display: flex; }
-    .telegram-modal {
-      background: linear-gradient(145deg, #1e293b, #0f172a);
-      border-radius: 24px;
-      padding: 32px 28px;
-      max-width: 420px;
-      width: 92%;
-      text-align: center;
-      border: 1px solid rgba(59,130,246,0.2);
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-      position: relative;
-    }
-    .telegram-btn {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 16px;
-      cursor: pointer;
-      text-decoration: none;
-      margin-bottom: 10px;
-    }
-    .telegram-btn.primary { background: linear-gradient(135deg, #0088cc, #006699); color: white; border: none; }
-    .telegram-btn.secondary { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
-
     #aiChatBtn {
       position:fixed; bottom:20px; right:20px; width:60px; height:60px;
       background: linear-gradient(135deg, #3b82f6, #10b981);
@@ -302,6 +265,7 @@
           <div class="stat-title">Tasks Completed</div>
           <div class="stat-value" id="successfulTaskCount">0</div>
         </div>
+        
         <div class="stat-card" style="display:flex; flex-direction:column; justify-content:center;">
           <div class="stat-title">Daily Check-in Bonus</div>
           <div style="font-size:1.1rem; font-weight:700; color:#f59e0b;">+₦100.00 Daily</div>
@@ -397,7 +361,6 @@
       "srv_02": { title: "Crypto Knowledge Check", category: "Finance", reward: 250, desc: "Your insights on digital assets" }
     };
 
-    // Social & YouTube Tasks List
     const socialTasks = [
       { id: 'yt_1', title: 'Subscribe to YouTube Channel', desc: 'Open our official YouTube channel and subscribe.', reward: 300, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
       { id: 'yt_2', title: 'Watch & Like YouTube Video', desc: 'Watch our video for at least 1 minute and leave a like.', reward: 200, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
@@ -423,6 +386,7 @@
       document.getElementById('lifetimeTotal').innerText = `₦${(userData.lifetimeTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
       document.getElementById('successfulTaskCount').innerText = userData.successfulTaskCount || 0;
 
+      // Handle Daily Reward Button State
       const rewardBtn = document.getElementById('dailyRewardBtn');
       const today = getTodayDateString();
       if (rewardBtn) {
@@ -436,6 +400,7 @@
       }
     }
 
+    // Daily Reward Claim Action
     async function claimDailyReward() {
       const today = getTodayDateString();
       if (userData.lastDailyRewardDate === today) return;
