@@ -1,73 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Information | EarnSphere Hub</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="earnsphere-logo.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us - EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter', sans-serif; background:linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; padding:2rem; }
+    .container { max-width:700px; margin:0 auto; background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:2.5rem; border:1px solid rgba(255,255,255,.1); }
+    .back-link { color:#3b82f6; text-decoration:none; display:inline-block; margin-bottom:1.5rem; font-weight:600; }
+    .back-link:hover { text-decoration:underline; }
+    h1 { font-size:1.8rem; margin-bottom:.5rem; display:flex; align-items:center; gap:.5rem; }
+    h1 i { color:#3b82f6; }
+    .subtitle { color:#94a3b8; margin-bottom:1.5rem; }
+    .form-group { margin-bottom:1.2rem; }
+    .form-group label { display:block; margin-bottom:.5rem; color:#cbd5e1; font-weight:600; font-size:.9rem; }
+    .form-control { width:100%; padding:.9rem 1.1rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:.75rem; color:#f1f5f9; font-size:1rem; transition:border 0.3s; }
+    .form-control:focus { outline:none; border-color:#3b82f6; }
+    .form-control option { background:#1e293b; }
+    textarea.form-control { resize:vertical; min-height:120px; }
+    .btn-primary { background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; color:#fff; padding:1rem; border-radius:.75rem; font-size:1rem; font-weight:700; cursor:pointer; width:100%; transition:all 0.3s; display:flex; align-items:center; justify-content:center; gap:.5rem; }
+    .btn-primary:hover:not(:disabled) { transform:scale(1.02); box-shadow:0 4px 20px rgba(59,130,246,.3); }
+    .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+    .contact-info { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; margin:1.5rem 0; }
+    .contact-item { background:rgba(15,23,42,.6); border-radius:.75rem; padding:1rem; text-align:center; border:1px solid rgba(255,255,255,.05); }
+    .contact-item i { font-size:1.5rem; margin-bottom:.3rem; display:block; }
+    .contact-item .label { font-size:.8rem; color:#94a3b8; }
+    .contact-item .value { font-size:.9rem; color:#f1f5f9; font-weight:600; }
+    .contact-item .value a { color:#f1f5f9; text-decoration:none; }
+    .contact-item .value a:hover { text-decoration:underline; }
+    .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
+    @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+    .divider { border:0; border-top:1px solid rgba(255,255,255,.05); margin:1.5rem 0; }
+    @media (max-width: 768px) { .container { padding:1.5rem; } h1 { font-size:1.4rem; } .contact-info { grid-template-columns:1fr; } }
+  </style>
 </head>
-<body class="dashboard-body">
+<body>
+  <div class="container">
+    <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    <h1><i class="fas fa-envelope"></i> Contact Us</h1>
+    <p class="subtitle">Have questions, feedback, or need support? We'd love to hear from you!</p>
 
-    <!-- COHESIVE NAVBAR DISPLAY -->
-    <nav class="navbar">
-        <div class="container nav-container">
-            <a href="index.html">
-                <img src="earnsphere-logo.png" alt="EarnSphere Hub" class="site-logo">
-            </a>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="contact.html" class="active">Contact</a>
-            </div>
+    <!-- Contact Info -->
+    <div class="contact-info">
+      <div class="contact-item">
+        <i class="fas fa-envelope" style="color:#3b82f6;"></i>
+        <div class="label">Email</div>
+        <div class="value">
+          <a href="mailto:earnspherenigeria@gmail.com">earnspherenigeria@gmail.com</a>
         </div>
-    </nav>
-
-    <!-- CONTACT CHANNELS CONTAINER -->
-    <main class="container" style="padding-top: 40px; max-width: 550px;">
-        <div class="dashboard-section">
-            <h2 style="margin-bottom: 10px;">📞 Connect with Us</h2>
-            <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 25px;">
-                Need help with your tasks, account access, or a pending payout? Reach out directly through any of our official channels below.
-            </p>
-
-            <!-- DIRECT CHANNEL CARD LINKS -->
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                
-                <!-- EMAIL HUB -->
-                <a href="mailto:earnsphere.helpdesk@gmail.com" style="display: block; background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; margin-top: 0;">
-                    <div style="font-weight: 600; color: #ffffff; font-size: 1rem; margin-bottom: 4px;">📩 Official Email Support</div>
-                    <div style="color: #38bdf8; font-size: 0.9rem; word-break: break-all;">earnsphere.helpdesk@gmail.com</div>
-                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px;">Average response window: Within 24 operational hours.</div>
-                </a>
-
-                <!-- TELEGRAM CORE COMMUNITIES -->
-                <a href="#" target="_blank" style="display: block; background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; margin-top: 0;">
-                    <div style="font-weight: 600; color: #ffffff; font-size: 1rem; margin-bottom: 4px;">✈️ Telegram Community Group</div>
-                    <div style="color: #38bdf8; font-size: 0.9rem;">Join EarnSphere Telegram Channel</div>
-                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px;">Connect with other members and see real-time payment proofs.</div>
-                </a>
-
-                <!-- WHATSAPP BROADCAST NODE -->
-                <a href="#" target="_blank" style="display: block; background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; margin-top: 0;">
-                    <div style="font-weight: 600; color: #ffffff; font-size: 1rem; margin-bottom: 4px;">💬 WhatsApp Official Channel</div>
-                    <div style="color: #38bdf8; font-size: 0.9rem;">Follow WhatsApp Updates</div>
-                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px;">Get instant alerts on high-paying surveys and daily tasks.</div>
-                </a>
-
-            </div>
+      </div>
+      <div class="contact-item">
+        <i class="fab fa-whatsapp" style="color:#25D366;"></i>
+        <div class="label">WhatsApp</div>
+        <div class="value">
+          <a href="https://wa.me/2347012814071" target="_blank">07012814071</a>
         </div>
+      </div>
+    </div>
 
-        <!-- OPERATIONAL DISCLAIMER -->
-        <div style="text-align: center; margin-top: 25px;">
-            <p style="font-size: 0.8rem; color: #64748b;">
-                ⚠️ <strong>Security Reminder:</strong> EarnSphere Hub administrators will never ask for your account password or banking PIN codes.
-            </p>
-            <p style="margin-top: 20px;">
-                <a href="index.html" style="color: #38bdf8; font-size: 0.9rem; font-weight: 500;">← Back to Homepage</a>
-            </p>
-        </div>
-    </main>
+    <hr class="divider" />
 
+    <!-- Contact Form -->
+    <form id="contactForm">
+      <div class="form-group">
+        <label for="contactName"><i class="fas fa-user"></i> Your Name</label>
+        <input type="text" id="contactName" class="form-control" placeholder="Enter your name" required />
+      </div>
+      <div class="form-group">
+        <label for="contactEmail"><i class="fas fa-envelope"></i> Your Email</label>
+        <input type="email" id="contactEmail" class="form-control" placeholder="Enter your email" required />
+      </div>
+      <div class="form-group">
+        <label for="contactSubject"><i class="fas fa-tag"></i> Subject</label>
+        <select id="contactSubject" class="form-control" required>
+          <option value="" disabled selected>Select a subject</option>
+          <option value="General Inquiry">General Inquiry</option>
+          <option value="Payment Issue">Payment Issue</option>
+          <option value="Technical Problem">Technical Problem</option>
+          <option value="Account Support">Account Support</option>
+          <option value="Advertising">Advertising / Partnership</option>
+          <option value="Feedback">Feedback</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="contactMessage"><i class="fas fa-comment"></i> Message</label>
+        <textarea id="contactMessage" class="form-control" placeholder="Describe your issue or question in detail..." required></textarea>
+      </div>
+      <button type="submit" class="btn-primary" id="contactBtn"><i class="fas fa-paper-plane"></i> Send Message</button>
+    </form>
+
+    <p style="color:#64748b; font-size:.8rem; text-align:center; margin-top:1rem;">
+      <i class="fas fa-clock" style="color:#f59e0b;"></i> We typically respond within 24-48 hours.
+    </p>
+  </div>
+
+  <script>
+    // ============================================================
+    // FIREBASE
+    // ============================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+      authDomain: "earnspherehub-742e9.firebaseapp.com",
+      projectId: "earnspherehub-742e9",
+      storageBucket: "earnspherehub-742e9.firebasestorage.app",
+      messagingSenderId: "173538573377",
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3500);
+    }
+
+    document.getElementById('contactForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('contactBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+      const data = {
+        name: document.getElementById('contactName').value.trim(),
+        email: document.getElementById('contactEmail').value.trim(),
+        subject: document.getElementById('contactSubject').value,
+        message: document.getElementById('contactMessage').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        await db.collection('messages').add(data);
+        showToast('✅ Message sent successfully! We\'ll get back to you soon.');
+        document.getElementById('contactForm').reset();
+      } catch (error) {
+        console.error('Error sending message:', error);
+        showToast('❌ Failed to send. Please try again.');
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+    });
+  </script>
 </body>
 </html>

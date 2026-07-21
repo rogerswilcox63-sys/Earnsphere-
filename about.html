@@ -1,35 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us | EarnSphere Hub</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="earnsphere-logo.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Us - EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter', sans-serif; background:linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; padding:2rem; }
+    .container { max-width:800px; margin:0 auto; background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:2.5rem; border:1px solid rgba(255,255,255,.1); }
+    .back-link { color:#3b82f6; text-decoration:none; display:inline-block; margin-bottom:1.5rem; font-weight:600; }
+    .back-link:hover { text-decoration:underline; }
+    h1 { font-size:1.8rem; margin-bottom:.5rem; display:flex; align-items:center; gap:.5rem; }
+    h1 i { color:#10b981; }
+    .tagline { color:#10b981; font-size:1rem; margin-bottom:1.5rem; font-weight:600; }
+    h2 { font-size:1.2rem; color:#3b82f6; margin:1.5rem 0 .5rem; }
+    p, li { color:#cbd5e1; line-height:1.7; margin-bottom:.5rem; }
+    ul { padding-left:1.5rem; margin:.5rem 0 1rem; }
+    ul li { margin-bottom:.3rem; }
+    .highlight { color:#f59e0b; font-weight:600; }
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin:1.5rem 0; }
+    .stat-item { background:rgba(15,23,42,.6); border-radius:.75rem; padding:1.2rem; text-align:center; border:1px solid rgba(255,255,255,.05); }
+    .stat-item .number { font-size:2rem; font-weight:800; color:#10b981; }
+    .stat-item .label { font-size:.8rem; color:#94a3b8; margin-top:.2rem; }
+    .divider { border:0; border-top:1px solid rgba(255,255,255,.05); margin:1.5rem 0; }
+    .contact-links a { color:#3b82f6; text-decoration:none; }
+    .contact-links a:hover { text-decoration:underline; }
+    @media (max-width: 768px) { .container { padding:1.5rem; } h1 { font-size:1.4rem; } .stats-grid { grid-template-columns:1fr; } }
+  </style>
 </head>
-<body class="dashboard-body">
-    <nav class="navbar">
-        <div class="container nav-container">
-            <a href="index.html"><img src="earnsphere-logo.png" alt="EarnSphere Hub" class="site-logo"></a>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="about.html" class="active">About</a>
-                <a href="contact.html">Contact</a>
-            </div>
-        </div>
-    </nav>
-    <main class="container" style="padding-top: 40px; max-width: 700px;">
-        <div class="dashboard-section">
-            <h2>📖 Who We Are</h2>
-            <p style="color: #cbd5e1; margin-bottom: 15px;">EarnSphere Hub is an open, community-first micro-task space designed to bridge the gap between digital growth platforms and organic user engagement across Nigeria.</p>
-            <p style="color: #cbd5e1; margin-bottom: 15px;">Our prototype network empowers students, side-hustlers, and everyday smartphone users to monetize small fragments of their spare time by interacting with verified local digital apps, opinion panels, and basic social media workflows.</p>
-            <h3 style="color: #ffffff; margin: 20px 0 10px 0; font-size: 1.1rem;">🎯 Our Core Commitments</h3>
-            <ul style="margin-bottom: 25px;">
-                <li><strong>Transparent Ledger:</strong> No hidden registration tiers or mandatory upgrade paywalls.</li>
-                <li><strong>Accessible Boundaries:</strong> Low ₦1,000 threshold cashouts tailored directly for local Nigerian digital banking systems.</li>
-                <li><strong>Data Protection:</strong> Absolute isolation of personal data clusters from third-party advertising harvesters.</li>
-            </ul>
-        </div>
-    </main>
+<body>
+  <div class="container">
+    <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    <h1><i class="fas fa-info-circle"></i> About EarnSphere</h1>
+    <p class="tagline">🇳🇬 Nigeria's #1 Earning Platform</p>
+
+    <p>Welcome to <span class="highlight">EarnSphere</span> – the ultimate platform where Nigerians earn real money online by completing simple tasks, surveys, and micro-jobs.</p>
+
+    <hr class="divider" />
+
+    <h2>Our Mission</h2>
+    <p>To empower Nigerians to earn extra income from the comfort of their homes through a transparent, reliable, and user-friendly platform. We believe everyone deserves the opportunity to earn, regardless of their background or location.</p>
+
+    <h2>What We Offer</h2>
+    <ul>
+      <li><strong>✅ Surveys:</strong> Share your opinion and get paid (₦150 – ₦300 per survey).</li>
+      <li><strong>📱 App Downloads:</strong> Install apps and earn quick rewards.</li>
+      <li><strong>📷 Upload Tasks:</strong> Upload pictures and earn ₦200 daily.</li>
+      <li><strong>🎬 Watch Ads:</strong> Watch short ads and earn ₦50 instantly.</li>
+      <li><strong>📊 Daily Polls & Quizzes:</strong> Answer questions and earn ₦100 – ₦150.</li>
+      <li><strong>🎁 Coupons:</strong> Redeem exclusive coupons for bonus rewards.</li>
+    </ul>
+
+    <h2>Why Join EarnSphere?</h2>
+    <ul>
+      <li><strong>💰 Real Payouts:</strong> Earn real Nigerian Naira (₦).</li>
+      <li><strong>⚡ Instant Rewards:</strong> Get credited immediately after completing tasks.</li>
+      <li><strong>📱 Mobile Friendly:</strong> Works perfectly on any device.</li>
+      <li><strong>🔒 Secure:</strong> Your data is safe with Firebase security.</li>
+      <li><strong>🇳🇬 Nigerian Focused:</strong> Tailored specifically for Nigerian users.</li>
+    </ul>
+
+    <hr class="divider" />
+
+    <h2>Our Community</h2>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="number">10,000+</div>
+        <div class="label">Active Users</div>
+      </div>
+      <div class="stat-item">
+        <div class="number">₦50M+</div>
+        <div class="label">Total Earned</div>
+      </div>
+      <div class="stat-item">
+        <div class="number">100K+</div>
+        <div class="label">Tasks Completed</div>
+      </div>
+    </div>
+
+    <h2>Get in Touch</h2>
+    <p>Have questions or feedback? Reach out to us:</p>
+    <ul class="contact-links">
+      <li><strong>Email:</strong> <a href="mailto:earnspherenigeria@gmail.com">earnspherenigeria@gmail.com</a></li>
+      <li><strong>WhatsApp:</strong> <a href="https://wa.me/2347012814071" target="_blank">07012814071</a></li>
+      <li><strong>Website:</strong> <a href="https://earnspherehub.name.ng" target="_blank">earnspherehub.name.ng</a></li>
+    </ul>
+  </div>
 </body>
 </html>
