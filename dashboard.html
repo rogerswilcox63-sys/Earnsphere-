@@ -11,7 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
-    /* ===== All styles (unchanged) ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -27,17 +26,18 @@
     .dashboard-container { max-width:1200px; margin:2rem auto; padding:0 1.5rem; width:100%; }
     .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; }
     .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
-    .stat-card, .offer-card, .withdraw-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); transition:transform 0.2s; }
+    .stat-card, .offer-card, .withdraw-card, .coupon-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); transition:transform 0.2s; }
     .stat-card:hover, .offer-card:hover { transform:translateY(-2px); }
     .stat-title { font-size:.85rem; color:#94a3b8; margin-bottom:.5rem; }
     .stat-value { font-size:1.8rem; font-weight:800; color:#10b981; }
     .offer-title { font-weight:700; margin-bottom:.5rem; font-size:1.1rem; }
     .offer-desc { font-size:.9rem; color:#cbd5e1; margin-bottom:1rem; }
     .offer-reward { color:#10b981; font-weight:700; margin-bottom:1rem; font-size:1.1rem; }
-    .start-btn, .support-btn, .reward-btn { width:100%; background:linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border:none; padding:1rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.3s; }
+    .start-btn, .support-btn, .reward-btn, .coupon-btn { width:100%; background:linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border:none; padding:1rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.3s; }
     .reward-btn { background:linear-gradient(135deg, #f59e0b, #d97706); margin-top:1rem; }
-    .reward-btn:hover:not(:disabled), .start-btn:hover:not(:disabled), .support-btn:hover:not(:disabled) { transform:scale(1.02); box-shadow:0 4px 15px rgba(59,130,246,.3); }
-    .start-btn:disabled, .support-btn:disabled, .reward-btn:disabled { background:#334155; cursor:not-allowed; opacity:0.7; }
+    .coupon-btn { background:linear-gradient(135deg, #10b981, #059669); margin-top:0.5rem; }
+    .reward-btn:hover:not(:disabled), .start-btn:hover:not(:disabled), .support-btn:hover:not(:disabled), .coupon-btn:hover:not(:disabled) { transform:scale(1.02); box-shadow:0 4px 15px rgba(59,130,246,.3); }
+    .start-btn:disabled, .support-btn:disabled, .reward-btn:disabled, .coupon-btn:disabled { background:#334155; cursor:not-allowed; opacity:0.7; }
     .badge { display:inline-block; padding:.25rem .75rem; border-radius:.25rem; font-size:.8rem; margin:.5rem 0; }
     .badge-survey { background:rgba(59,130,246,.2); color:#3b82f6; }
     .badge-social { background:rgba(139,92,246,.2); color:#8b5cf6; }
@@ -115,6 +115,31 @@
         </div>
       </div>
 
+      <!-- ===== COUPON CODE SECTION ===== -->
+      <h2 class="section-title"><i class="fas fa-ticket-alt"></i> Coupon Code</h2>
+      <div class="stats-grid">
+        <div class="coupon-card" style="grid-column: span 1;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <i class="fas fa-gift" style="font-size:1.5rem; color:#10b981;"></i>
+            <div>
+              <div style="font-weight:700;">Redeem Coupon</div>
+              <div style="font-size:0.8rem; color:#94a3b8;">Get ₦1,000 bonus with valid coupon code</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input type="text" id="couponInput" class="form-control" placeholder="Enter coupon code..." style="flex:1; min-width:150px;" />
+            <button class="coupon-btn" id="couponBtn" onclick="redeemCoupon()" style="flex:0 0 auto; padding:0.9rem 2rem;">
+              <i class="fas fa-check-circle"></i> Redeem
+            </button>
+          </div>
+          <div style="margin-top:10px; font-size:0.8rem; color:#64748b;">
+            <i class="fab fa-whatsapp" style="color:#25D366;"></i> 
+            Get coupon codes from our WhatsApp group/channel
+          </div>
+          <div id="couponMessage" style="margin-top:8px; font-size:0.9rem; font-weight:600;"></div>
+        </div>
+      </div>
+
       <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers</h2>
       <div id="surveyResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;"><i class="fas fa-clock"></i> New surveys available daily at midnight</div>
       <div class="offers-grid" id="surveyList"></div>
@@ -162,9 +187,27 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // ===== COUPON CODES (Hardcoded – add/remove as you like) =====
+    const validCoupons = [
+      "WHATSAPP1000",
+      "TELEGRAM500",
+      "YOUTUBE2000",
+      "FREEMONEY",
+      "WELCOMEBONUS",
+      "EARNSPHERE"
+    ];
+
     // ===== GLOBALS =====
     let currentUser = null;
-    let userData = { displayName: '', balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [], lastDailyRewardDate: '' };
+    let userData = {
+      displayName: '',
+      balance: 0,
+      lifetimeTotal: 0,
+      successfulTaskCount: 0,
+      completedTaskIds: [],
+      lastDailyRewardDate: '',
+      redeemedCoupons: []  // Track which coupons this user already used
+    };
 
     const surveyDatabase = {
       "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
@@ -226,6 +269,52 @@
       setTimeout(() => { toast.remove(); }, 3500);
     }
 
+    // ===== COUPON REDEEM FUNCTION =====
+    async function redeemCoupon() {
+      const input = document.getElementById('couponInput');
+      const messageDiv = document.getElementById('couponMessage');
+      const couponCode = input.value.trim().toUpperCase();
+
+      if (!couponCode) {
+        messageDiv.style.color = '#ef4444';
+        messageDiv.innerHTML = '⚠️ Please enter a coupon code.';
+        return;
+      }
+
+      // Check if code is valid (hardcoded list)
+      if (!validCoupons.includes(couponCode)) {
+        messageDiv.style.color = '#ef4444';
+        messageDiv.innerHTML = '❌ Invalid coupon code. Please check and try again.';
+        return;
+      }
+
+      // Check if user already used this coupon
+      if (userData.redeemedCoupons && userData.redeemedCoupons.includes(couponCode)) {
+        messageDiv.style.color = '#f59e0b';
+        messageDiv.innerHTML = '⚠️ You have already redeemed this coupon!';
+        return;
+      }
+
+      // ✅ Valid coupon – add ₦1,000 to wallet
+      userData.balance = (userData.balance || 0) + 1000;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + 1000;
+      
+      // Track this coupon as used by this user
+      if (!userData.redeemedCoupons) {
+        userData.redeemedCoupons = [];
+      }
+      userData.redeemedCoupons.push(couponCode);
+
+      updateInterfaceValues();
+      await saveUserData();
+
+      messageDiv.style.color = '#10b981';
+      messageDiv.innerHTML = '🎉 Coupon redeemed! +₦1,000 added to your wallet!';
+      input.value = '';
+      showToast('🎉 Coupon redeemed! +₦1,000 added!');
+    }
+
+    // ===== DAILY REWARD =====
     async function claimDailyReward() {
       const today = getTodayDateString();
       if (userData.lastDailyRewardDate === today) return;
@@ -237,6 +326,7 @@
       showToast('🎉 +₦100.00 Daily Bonus claimed!');
     }
 
+    // ===== TASKS =====
     function renderTasks() {
       const surveyList = document.getElementById('surveyList');
       const socialTaskList = document.getElementById('socialTaskList');
@@ -294,11 +384,10 @@
       showToast(`🎉 Reward of ₦${reward} credited!`);
     }
 
-    // ===== AI CHAT (calls Render backend) =====
+    // ===== AI CHAT =====
     const aiMessages = document.getElementById('aiMessages');
     const aiInput = document.getElementById('aiChatInput');
     const aiSendBtn = document.getElementById('aiSendBtn');
-
     const API_BASE_URL = 'https://earnsphere-ai.onrender.com';
 
     function toggleAiChat() {
