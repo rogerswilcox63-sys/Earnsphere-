@@ -643,15 +643,82 @@
     }
 
     // ============================================
-    // DEEPSEEK
+    // GEMINI AI CONFIGURATION
     // ============================================
-    let DEEPSEEK_API_KEY = null;
-    let hasValidDeepSeek = false;
+    let GEMINI_API_KEY = null;
+    let hasValidGemini = false;
 
-    if (typeof CONFIG !== 'undefined' && CONFIG.DEEPSEEK_API_KEY) {
-      DEEPSEEK_API_KEY = CONFIG.DEEPSEEK_API_KEY;
-      hasValidDeepSeek = DEEPSEEK_API_KEY && DEEPSEEK_API_KEY !== '' && DEEPSEEK_API_KEY !== 'YOUR_DEEPSEEK_API_KEY_HERE';
-      if (hasValidDeepSeek) console.log('✅ DeepSeek AI configured');
+    // You can set your API key here or load from CONFIG
+    // Get your API key from: https://makersuite.google.com/app/apikey
+    const GEMINI_CONFIG = {
+      API_KEY: 'YOUR_GEMINI_API_KEY_HERE', // Replace with your actual Gemini API key
+      MODEL: 'gemini-pro', // or 'gemini-1.5-pro', 'gemini-1.5-flash'
+      API_URL: 'https://generativelanguage.googleapis.com/v1beta/models'
+    };
+
+    // Check if API key is configured
+    if (GEMINI_CONFIG.API_KEY && GEMINI_CONFIG.API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
+      GEMINI_API_KEY = GEMINI_CONFIG.API_KEY;
+      hasValidGemini = true;
+      console.log('✅ Gemini AI configured');
+    } else if (typeof CONFIG !== 'undefined' && CONFIG.GEMINI_API_KEY) {
+      GEMINI_API_KEY = CONFIG.GEMINI_API_KEY;
+      hasValidGemini = GEMINI_API_KEY && GEMINI_API_KEY !== '';
+      if (hasValidGemini) console.log('✅ Gemini AI configured from CONFIG');
+    }
+
+    // ============================================
+    // GEMINI AI HELPER FUNCTIONS
+    // ============================================
+    async function callGeminiAPI(prompt, model = GEMINI_CONFIG.MODEL) {
+      if (!hasValidGemini || !GEMINI_API_KEY) {
+        console.warn('⚠️ Gemini API key not configured');
+        return null;
+      }
+
+      try {
+        const response = await fetch(
+          `${GEMINI_CONFIG.API_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: prompt }]
+              }]
+            })
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Gemini API Error:', errorData);
+          return null;
+        }
+
+        const data = await response.json();
+        if (data.candidates && data.candidates.length > 0) {
+          return data.candidates[0].content.parts[0].text;
+        }
+        return null;
+      } catch (error) {
+        console.error('Gemini API call failed:', error);
+        return null;
+      }
+    }
+
+    // Example usage function for Gemini
+    async function getGeminiResponse(prompt) {
+      const response = await callGeminiAPI(prompt);
+      if (response) {
+        console.log('Gemini Response:', response);
+        return response;
+      } else {
+        console.warn('Failed to get response from Gemini');
+        return null;
+      }
     }
 
     // ============================================
@@ -692,16 +759,6 @@
     const appTestingTasks = [
       { id:'app_01', title:'Test Garena Free Fire', desc:'Download game via Palmstore, write performance optimization feedback.', reward:450, badge:'Palmstore', badgeClass:'badge-app' }
     ];
-
-    // Isolated standalone upload task schema
-    const uploadSurveyTask = {
-      id: 'task_upload_proof',
-      title: '🖼️ Survey Image Verification',
-      desc: 'Upload a clear proof screenshot to complete validation. Must be a valid JPEG or PNG file. (<a href="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500" target="_blank" style="color:var(--accent); text-decoration:underline;">Example 1</a> | <a href="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=500" target="_blank" style="color:var(--accent); text-decoration:underline;">Example 2</a>)',
-      reward: 500,
-      badge: 'Verification',
-      badgeClass: 'badge-survey'
-    };
 
     // ============================================
     // UTILITIES & DATETIME TIMERS
@@ -837,7 +894,6 @@
 
       const todaysSurveyIds = getTodaysSurveys();
 
-      // Render standard surveys dynamically
       if (surveyList) {
         todaysSurveyIds.forEach(surveyId => {
           const survey = surveyDatabase[surveyId];
@@ -854,23 +910,6 @@
             </div>
           `;
         });
-
-        // Appends the separated image upload task directly inside the main Survey block container
-        const uploadCompleted = isTaskCompleted(uploadSurveyTask.id);
-        surveyList.innerHTML += `
-          <div class="offer-card">
-            <div class="offer-title">${uploadSurveyTask.title}</div>
-            <div class="offer-desc">${uploadSurveyTask.desc}</div>
-            <span class="badge ${uploadSurveyTask.badgeClass}">${uploadSurveyTask.badge}</span>
-            <div class="offer-reward">₦${uploadSurveyTask.reward}</div>
-            <div style="margin-top: 12px;">
-              <input type="file" id="standaloneSurveyFileInput" accept="image/jpeg, image/png" style="display: none;" onchange="handleStandaloneUpload(event)">
-              <button class="start-btn" onclick="document.getElementById('standaloneSurveyFileInput').click()" ${uploadCompleted ? 'disabled' : ''}>
-                ${uploadCompleted ? '✅ Completed' : '📤 Upload JPEG/PNG Proof'}
-              </button>
-            </div>
-          </div>
-        `;
       }
 
       const { task: currentTask, hour } = getCurrentSocialTaskData();
@@ -914,10 +953,9 @@
 
     function startSurvey(surveyId) {
       if (isTaskCompleted(surveyId)) return;
-      window.open(`app-testing-survey.html', '_blank');
+      window.open(`survey.html?id=${surveyId}`, '_blank');
     }
 
-    // Instantly rewards user for app testing clicking without opening any extra interfaces
     async function startAppTesting(taskId) {
       if (isTaskCompleted(taskId)) return;
 
@@ -936,33 +974,6 @@
       showToast(`🎉 +₦${reward} added instantly! Thank you for testing.`);
     }
 
-    // Separate execution function logic processing standalone JPEG/PNG image assets
-    async function handleStandaloneUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-      if (!allowedTypes.includes(file.type)) {
-        showToast('❌ Invalid image format! Please upload a valid JPEG or PNG file.');
-        return;
-      }
-
-      const taskId = uploadSurveyTask.id;
-      const reward = uploadSurveyTask.reward;
-
-      userData.balance = (userData.balance || 0) + reward;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-      userData.completedTaskIds.push(taskId);
-
-      updateInterfaceValues();
-      renderTasks();
-      await saveUserDataToFirebase();
-
-      showToast(`🎉 Verification accepted! +₦${reward} added successfully.`);
-    }
-
-    // REDIRECT ROUTER: Links dashboard drop zones directly to upload.html
     function setupDashboardUploadRedirect() {
       const dropZone = document.getElementById('dropZone');
       const uploadForm = document.getElementById('uploadForm');
