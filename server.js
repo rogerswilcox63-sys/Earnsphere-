@@ -31,8 +31,8 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-// Use gemini-1.0-pro (more widely available)
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent';
+// Use the classic gemini-pro model (widely available)
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 // ---- Health check ----
 app.get('/health', (req, res) => {
@@ -49,21 +49,18 @@ app.post('/api/grok', async (req, res) => {
 
   const sanitisedMessage = message.trim().slice(0, 2000);
 
-  // System instruction (personality)
-  const systemInstruction = `
-You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub. 
+  // Combine system instruction and user message into one prompt
+  const fullPrompt = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub. 
 You speak in a mix of English and Nigerian Pidgin English. You are encouraging, helpful, and slightly playful. 
 You help users with questions about earning money online, tasks, surveys, withdrawals, and daily motivation. 
 Keep responses concise (max 2-3 short paragraphs). Always end with an uplifting note.
-`;
+
+User: ${sanitisedMessage}`;
 
   const payload = {
-    system_instruction: {
-      parts: [{ text: systemInstruction }]
-    },
     contents: [
       {
-        parts: [{ text: sanitisedMessage }]
+        parts: [{ text: fullPrompt }]
       }
     ],
     generationConfig: {
@@ -78,7 +75,7 @@ Keep responses concise (max 2-3 short paragraphs). Always end with an uplifting 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY   // new key format
+        'x-goog-api-key': GEMINI_API_KEY
       },
       body: JSON.stringify(payload)
     });
