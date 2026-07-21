@@ -31,8 +31,8 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-// Use a model that's definitely available from your list: gemini-2.5-flash
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+// Use a stable, widely available model: gemini-2.0-flash
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // ---- Health check ----
 app.get('/health', (req, res) => {
