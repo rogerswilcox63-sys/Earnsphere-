@@ -648,11 +648,9 @@
     let GEMINI_API_KEY = null;
     let hasValidGemini = false;
 
-    // You can set your API key here or load from CONFIG
-    // Get your API key from: https://makersuite.google.com/app/apikey
     const GEMINI_CONFIG = {
       API_KEY: 'YOUR_GEMINI_API_KEY_HERE', // Replace with your actual Gemini API key
-      MODEL: 'gemini-pro', // or 'gemini-1.5-pro', 'gemini-1.5-flash'
+      MODEL: 'gemini-1.5-flash', // Updated to current stable model
       API_URL: 'https://generativelanguage.googleapis.com/v1beta/models'
     };
 
@@ -709,7 +707,6 @@
       }
     }
 
-    // Example usage function for Gemini
     async function getGeminiResponse(prompt) {
       const response = await callGeminiAPI(prompt);
       if (response) {
@@ -759,6 +756,16 @@
     const appTestingTasks = [
       { id:'app_01', title:'Test Garena Free Fire', desc:'Download game via Palmstore, write performance optimization feedback.', reward:450, badge:'Palmstore', badgeClass:'badge-app' }
     ];
+
+    // Standalone Upload Survey Task Definition
+    const uploadSurveyTask = {
+      id: 'task_upload_proof',
+      title: '🖼️ Survey Image Verification',
+      desc: 'Upload a clear proof screenshot to complete validation. Must be a valid JPEG or PNG file. (<a href="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500" target="_blank" style="color:var(--accent); text-decoration:underline;">Example 1</a> | <a href="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=500" target="_blank" style="color:var(--accent); text-decoration:underline;">Example 2</a>)',
+      reward: 500,
+      badge: 'Verification',
+      badgeClass: 'badge-survey'
+    };
 
     // ============================================
     // UTILITIES & DATETIME TIMERS
@@ -910,6 +917,23 @@
             </div>
           `;
         });
+
+        // Appends the upload verification task directly into surveyList
+        const uploadCompleted = isTaskCompleted(uploadSurveyTask.id);
+        surveyList.innerHTML += `
+          <div class="offer-card">
+            <div class="offer-title">${uploadSurveyTask.title}</div>
+            <div class="offer-desc">${uploadSurveyTask.desc}</div>
+            <span class="badge ${uploadSurveyTask.badgeClass}">${uploadSurveyTask.badge}</span>
+            <div class="offer-reward">₦${uploadSurveyTask.reward}</div>
+            <div style="margin-top: 12px;">
+              <input type="file" id="standaloneSurveyFileInput" accept="image/jpeg, image/png" style="display: none;" onchange="handleStandaloneUpload(event)">
+              <button class="start-btn" onclick="document.getElementById('standaloneSurveyFileInput').click()" ${uploadCompleted ? 'disabled' : ''}>
+                ${uploadCompleted ? '✅ Completed' : '📤 Upload JPEG/PNG Proof'}
+              </button>
+            </div>
+          </div>
+        `;
       }
 
       const { task: currentTask, hour } = getCurrentSocialTaskData();
@@ -972,6 +996,32 @@
       await saveUserDataToFirebase();
 
       showToast(`🎉 +₦${reward} added instantly! Thank you for testing.`);
+    }
+
+    // Handles proof uploads directly from the standalone button
+    async function handleStandaloneUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        showToast('❌ Invalid format! Please upload a valid JPEG or PNG file.');
+        return;
+      }
+
+      const taskId = uploadSurveyTask.id;
+      const reward = uploadSurveyTask.reward;
+
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+      userData.completedTaskIds.push(taskId);
+
+      updateInterfaceValues();
+      renderTasks();
+      await saveUserDataToFirebase();
+
+      showToast(`🎉 Verification accepted! +₦${reward} added successfully.`);
     }
 
     function setupDashboardUploadRedirect() {
