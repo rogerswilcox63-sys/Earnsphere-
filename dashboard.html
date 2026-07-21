@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>EarnSphere Nigeria - Dashboard</title>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724"
-     crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google AdSense Script -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724" crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -88,6 +88,57 @@
       .offers-grid { grid-template-columns:1fr; }
       #aiChatWindow { width:300px; height:400px; right:10px; bottom:80px; }
     }
+    /* ===== Countdown timer highlight ===== */
+    .timer-countdown {
+      font-weight:700;
+      color:#f59e0b;
+      background:rgba(245,158,11,.1);
+      padding:.3rem .8rem;
+      border-radius:2rem;
+      display:inline-block;
+      border:1px solid rgba(245,158,11,.2);
+    }
+    .no-tasks-msg {
+      text-align:center;
+      color:#94a3b8;
+      padding:2rem;
+      font-style:italic;
+      background:rgba(15,23,42,.3);
+      border-radius:1rem;
+    }
+    /* ===== AD CONTAINER – hidden until ads appear ===== */
+    .ad-container {
+      display: none; /* HIDDEN BY DEFAULT – shows when AdSense serves ads */
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      background: rgba(255,255,255,0.02);
+      border-radius: 0.5rem;
+      border: 1px dashed rgba(255,255,255,0.05);
+      text-align: center;
+      min-height: 60px;
+    }
+    .ad-container ins {
+      margin: 0 auto;
+    }
+    /* Show ad container when it has content */
+    .ad-container:not(:empty) {
+      display: block !important;
+    }
+    /* Small note for users */
+    .task-hint {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: center;
+      margin: 1rem 0 0.5rem;
+      padding: 0.5rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .task-hint i {
+      color: #f59e0b;
+      margin-right: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -121,14 +172,19 @@
           <button class="reward-btn" id="dailyRewardBtn" onclick="claimDailyReward()"><i class="fas fa-gift"></i> Claim Daily Reward</button>
         </div>
       </div>
-      <ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-5803688718527724"
-     data-ad-slot="YOUR_AD_SLOT_ID"
-     data-ad-format="auto"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+
+      <!-- ===== ADSENSE BANNER AD #1 (HIDDEN UNTIL ADS SHOW) ===== -->
+      <div class="ad-container" id="adContainer1">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-5803688718527724"
+             data-ad-slot="2561139179"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
 
       <!-- Coupon -->
       <h2 class="section-title"><i class="fas fa-ticket-alt"></i> Coupon Code</h2>
@@ -154,33 +210,46 @@
         </div>
       </div>
 
-      <!-- Surveys -->
-      <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers (10 per day)</h2>
-      <div id="surveyResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> Resets daily at midnight
+      <!-- Surveys (daily) -->
+      <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers</h2>
+      <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> <span id="surveyCountdown">Resets daily at midnight</span>
       </div>
       <div class="offers-grid" id="surveyList"></div>
 
-      <!-- App Downloads -->
+      <!-- App Downloads (daily) -->
       <h2 class="section-title"><i class="fas fa-download"></i> App Download Tasks</h2>
-      <div id="appResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> Resets daily at midnight
+      <div id="appResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> <span id="appCountdown">Resets daily at midnight</span>
       </div>
       <div class="offers-grid" id="appTaskList"></div>
 
-      <!-- Social -->
+      <!-- Social (2‑hour) -->
       <h2 class="section-title"><i class="fas fa-share-alt"></i> Social & YouTube Tasks</h2>
-      <div id="socialResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> Resets every 2 hours
+      <div id="socialResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> <span id="socialCountdown">Resets every 2 hours</span>
       </div>
       <div class="offers-grid" id="socialTaskList"></div>
 
-      <!-- More Earning Tasks (now with links to dedicated pages) -->
+      <!-- Extra Tasks (daily) -->
       <h2 class="section-title"><i class="fas fa-star"></i> More Earning Tasks</h2>
-      <div id="extraResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> Resets daily at midnight
+      <div id="extraResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> <span id="extraCountdown">Resets daily at midnight</span>
       </div>
       <div class="offers-grid" id="extraTaskList"></div>
+
+      <!-- ===== ADSENSE BANNER AD #2 (HIDDEN UNTIL ADS SHOW) ===== -->
+      <div class="ad-container" id="adContainer2">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-5803688718527724"
+             data-ad-slot="2561139179"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
 
       <!-- Support -->
       <h2 class="section-title"><i class="fas fa-headset"></i> Contact Support</h2>
@@ -253,19 +322,19 @@
     };
 
     // ============================================================
-    // TASKS DEFINITIONS
+    // TASK DEFINITIONS
     // ============================================================
     const surveyTasks = [
-      { id: 'srv_01', title: 'Social Media Usage', category: 'Tech', reward: 150, desc: 'Tell us about your screen time habits', reset: 'daily', link: 'survey.html' },
-      { id: 'srv_02', title: 'Crypto Knowledge Check', category: 'Finance', reward: 250, desc: 'Your insights on digital assets', reset: 'daily', link: 'survey.html' },
-      { id: 'srv_03', title: 'Nollywood Movie Preferences', category: 'Entertainment', reward: 200, desc: 'Tell us your favourite Nollywood actors and movies.', reset: 'daily', link: 'survey.html' },
-      { id: 'srv_04', title: 'Nigerian Food Culture', category: 'Lifestyle', reward: 180, desc: 'What are your favourite Nigerian dishes and recipes?', reset: 'daily', link: 'survey.html' },
-      { id: 'srv_05', title: 'Music Streaming Habits', category: 'Entertainment', reward: 220, desc: 'How do you listen to music? Share your streaming habits.', reset: 'daily', link: 'survey.html' },
-      { id: 'srv_06', title: 'Online Shopping Behavior', category: 'E-commerce', reward: 250, desc: 'Share your experience with online shopping in Nigeria.', reset: 'daily', link: 'survey.html' },
-      { id: 'srv_07', title: 'Football & Sports Passion', category: 'Sports', reward: 200, desc: 'Tell us about your favourite teams and how you follow sports.', reset: 'daily', link: 'survey.html' },
-      { id: 'srv_08', title: 'Education & Career Goals', category: 'Education', reward: 300, desc: 'Share your educational background and career aspirations.', reset: 'daily', link: 'survey.html' },
-      { id: 'srv_09', title: 'Travel & Tourism Preferences', category: 'Lifestyle', reward: 180, desc: 'Where do you want to travel? Share your dream destinations.', reset: 'daily', link: 'survey.html' },
-      { id: 'srv_10', title: 'Smartphone Usage Patterns', category: 'Tech', reward: 250, desc: 'How do you use your smartphone daily? Share your habits.', reset: 'daily', link: 'survey.html' }
+      { id: 'srv_01', title: 'Social Media Usage', category: 'Tech', reward: 150, desc: 'Tell us about your screen time habits', reset: 'daily' },
+      { id: 'srv_02', title: 'Crypto Knowledge Check', category: 'Finance', reward: 250, desc: 'Your insights on digital assets', reset: 'daily' },
+      { id: 'srv_03', title: 'Nollywood Movie Preferences', category: 'Entertainment', reward: 200, desc: 'Tell us your favourite Nollywood actors and movies.', reset: 'daily' },
+      { id: 'srv_04', title: 'Nigerian Food Culture', category: 'Lifestyle', reward: 180, desc: 'What are your favourite Nigerian dishes and recipes?', reset: 'daily' },
+      { id: 'srv_05', title: 'Music Streaming Habits', category: 'Entertainment', reward: 220, desc: 'How do you listen to music? Share your streaming habits.', reset: 'daily' },
+      { id: 'srv_06', title: 'Online Shopping Behavior', category: 'E-commerce', reward: 250, desc: 'Share your experience with online shopping in Nigeria.', reset: 'daily' },
+      { id: 'srv_07', title: 'Football & Sports Passion', category: 'Sports', reward: 200, desc: 'Tell us about your favourite teams and how you follow sports.', reset: 'daily' },
+      { id: 'srv_08', title: 'Education & Career Goals', category: 'Education', reward: 300, desc: 'Share your educational background and career aspirations.', reset: 'daily' },
+      { id: 'srv_09', title: 'Travel & Tourism Preferences', category: 'Lifestyle', reward: 180, desc: 'Where do you want to travel? Share your dream destinations.', reset: 'daily' },
+      { id: 'srv_10', title: 'Smartphone Usage Patterns', category: 'Tech', reward: 250, desc: 'How do you use your smartphone daily? Share your habits.', reset: 'daily' }
     ];
 
     const appTasks = [
@@ -284,7 +353,6 @@
       { id: 'soc_5', title: 'Share Our Page', desc: 'Share our website link on your social media.', reward: 220, badge: 'Social', badgeClass: 'badge-social', link: 'https://earnspherehub.name.ng', reset: '2hours' }
     ];
 
-    // Extra tasks now link to dedicated pages (no modals)
     const extraTasks = [
       { id: 'extra_upload', title: '📷 Upload a Picture', desc: 'Upload a picture and earn ₦200.', reward: 200, badge: 'Upload', badgeClass: 'badge-upload', reset: 'daily', page: 'upload.html' },
       { id: 'extra_poll', title: '📊 Daily Poll', desc: 'Answer our daily poll and earn ₦100.', reward: 100, badge: 'Poll', badgeClass: 'badge-poll', reset: 'daily', page: 'poll.html' },
@@ -296,8 +364,7 @@
     // HELPERS
     // ============================================================
     function getTodayDateString() {
-      const now = new Date();
-      return now.toISOString().split('T')[0];
+      return new Date().toISOString().split('T')[0];
     }
 
     function isTaskCompleted(taskId, resetInterval) {
@@ -312,6 +379,41 @@
         return (now - completedAt) < twoHours;
       }
       return false;
+    }
+
+    // ---- Timer calculations ----
+    function getTimeToMidnight() {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      return midnight.getTime() - now.getTime();
+    }
+
+    function getTimeToNextEvenHour() {
+      const now = new Date();
+      const hour = now.getHours();
+      const nextEvenHour = (Math.floor(hour / 2) * 2) + 2;
+      const target = new Date(now);
+      if (nextEvenHour >= 24) {
+        target.setDate(target.getDate() + 1);
+        target.setHours(0, 0, 0, 0);
+      } else {
+        target.setHours(nextEvenHour, 0, 0, 0);
+      }
+      return target.getTime() - now.getTime();
+    }
+
+    function formatTime(ms) {
+      if (ms <= 0) return 'Resets now';
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      let parts = [];
+      if (h > 0) parts.push(h + 'h');
+      if (m > 0) parts.push(m + 'm');
+      parts.push(s + 's');
+      return parts.join(' ');
     }
 
     function updateInterfaceValues() {
@@ -449,25 +551,30 @@
     // RENDER TASKS
     // ============================================================
     function renderTasks() {
-      renderTaskList('surveyList', surveyTasks);
-      renderTaskList('appTaskList', appTasks);
-      renderTaskList('socialTaskList', socialTasks);
-      renderExtraTaskList('extraTaskList', extraTasks);
+      renderTaskList('surveyList', surveyTasks, 'daily', 'survey');
+      renderTaskList('appTaskList', appTasks, 'daily', 'app');
+      renderTaskList('socialTaskList', socialTasks, '2hours', 'social');
+      renderExtraTaskList('extraTaskList', extraTasks, 'daily');
     }
 
-    function renderTaskList(containerId, tasks) {
+    function renderTaskList(containerId, tasks, resetType, sectionName) {
       const container = document.getElementById(containerId);
       if (!container) return;
       container.innerHTML = '';
-      tasks.forEach(task => {
-        const completed = isTaskCompleted(task.id, task.reset);
+      const available = tasks.filter(task => !isTaskCompleted(task.id, resetType));
+      if (available.length === 0) {
+        container.innerHTML = `<div class="no-tasks-msg">🎯 All tasks completed${resetType === 'daily' ? ' for today' : ' for this 2‑hour window'}! Check back later.</div>`;
+        return;
+      }
+      available.forEach(task => {
+        const completed = isTaskCompleted(task.id, resetType);
         container.innerHTML += `
           <div class="offer-card">
             <div class="offer-title">${task.title}</div>
             <p class="offer-desc">${task.desc}</p>
             ${task.badge ? `<span class="badge ${task.badgeClass}">${task.badge}</span>` : ''}
             <div class="offer-reward">₦${task.reward}</div>
-            <button class="start-btn" onclick="completeTask('${task.id}', ${task.reward}, '${task.link || '#'}', '${task.reset}')" ${completed ? 'disabled' : ''}>
+            <button class="start-btn" onclick="completeTask('${task.id}', ${task.reward}, '${task.link || '#'}', '${resetType}')" ${completed ? 'disabled' : ''}>
               ${completed ? '✅ Completed' : '🚀 Start Task'}
             </button>
           </div>
@@ -475,13 +582,17 @@
       });
     }
 
-    // Extra tasks now link to pages instead of opening modals
-    function renderExtraTaskList(containerId, tasks) {
+    function renderExtraTaskList(containerId, tasks, resetType) {
       const container = document.getElementById(containerId);
       if (!container) return;
       container.innerHTML = '';
-      tasks.forEach(task => {
-        const completed = isTaskCompleted(task.id, task.reset);
+      const available = tasks.filter(task => !isTaskCompleted(task.id, resetType));
+      if (available.length === 0) {
+        container.innerHTML = `<div class="no-tasks-msg">🎯 All tasks completed for today! Check back tomorrow.</div>`;
+        return;
+      }
+      available.forEach(task => {
+        const completed = isTaskCompleted(task.id, resetType);
         const pageLink = task.page || '#';
         container.innerHTML += `
           <div class="offer-card">
@@ -498,7 +609,7 @@
     }
 
     // ============================================================
-    // COMPLETE TASK (for regular tasks)
+    // COMPLETE TASK
     // ============================================================
     async function completeTask(taskId, reward, link, resetInterval) {
       if (isTaskCompleted(taskId, resetInterval)) return;
@@ -515,6 +626,25 @@
       renderTasks();
       await saveUserData();
       showToast(`🎉 +₦${reward} earned!`);
+    }
+
+    // ============================================================
+    // COUNTDOWN TIMERS
+    // ============================================================
+    function updateTimers() {
+      const dailyMs = getTimeToMidnight();
+      const dailyStr = dailyMs <= 0 ? 'Resets now' : `Resets in ${formatTime(dailyMs)}`;
+      document.getElementById('surveyCountdown').textContent = dailyStr;
+      document.getElementById('appCountdown').textContent = dailyStr;
+      document.getElementById('extraCountdown').textContent = dailyStr;
+
+      const socialMs = getTimeToNextEvenHour();
+      const socialStr = socialMs <= 0 ? 'Resets now' : `Resets in ${formatTime(socialMs)}`;
+      document.getElementById('socialCountdown').textContent = socialStr;
+
+      if (dailyMs < 1000 || socialMs < 1000) {
+        setTimeout(() => { renderTasks(); }, 500);
+      }
     }
 
     // ============================================================
@@ -626,6 +756,11 @@
 
       updateInterfaceValues();
       renderTasks();
+      updateTimers();
+
+      setInterval(() => {
+        updateTimers();
+      }, 1000);
 
       auth.onAuthStateChanged(async (user) => {
         if (user) {
