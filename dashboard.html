@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
-    /* (styles unchanged – omitted for brevity, but include all previous styles) */
+    /* ===== All styles (unchanged) ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -124,7 +124,7 @@
             <i class="fas fa-gift" style="font-size:1.5rem; color:#10b981;"></i>
             <div>
               <div style="font-weight:700;">Redeem Coupon</div>
-              <div style="font-size:0.8rem; color:#94a3b8;">Get ₦1,000 bonus – first come, first served!</div>
+              <div style="font-size:0.8rem; color:#94a3b8;">Get ₦500 – ₦5,000 bonus – first come, first served!</div>
             </div>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -188,15 +188,17 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ===== COUPON CODES (Hardcoded – add/remove as needed) =====
-    const validCoupons = [
-      "WHATSAPP1000",
-      "TELEGRAM500",
-      "YOUTUBE2000",
-      "FREEMONEY",
-      "WELCOMEBONUS",
-      "EARNSPHERE"
-    ];
+    // ===== COUPON CODES WITH REWARD AMOUNTS (₦500 – ₦5,000) =====
+    const couponRewards = {
+      "WHATSAPP1000": 1000,
+      "TELEGRAM500": 500,
+      "YOUTUBE2000": 2000,
+      "FREEMONEY": 3000,
+      "WELCOMEBONUS": 5000,
+      "EARNSPHERE": 750,
+      "BONUS1500": 1500,
+      "VIP2500": 2500
+    };
 
     // ===== GLOBALS =====
     let currentUser = null;
@@ -207,7 +209,7 @@
       successfulTaskCount: 0,
       completedTaskIds: [],
       lastDailyRewardDate: '',
-      redeemedCoupons: []  // local cache of coupons this user has used
+      redeemedCoupons: []
     };
 
     const surveyDatabase = {
@@ -270,7 +272,7 @@
       setTimeout(() => { toast.remove(); }, 3500);
     }
 
-    // ===== GLOBALLY SINGLE‑USE COUPON REDEEM =====
+    // ===== GLOBALLY SINGLE‑USE COUPON REDEEM WITH VARIABLE REWARDS =====
     async function redeemCoupon() {
       const input = document.getElementById('couponInput');
       const messageDiv = document.getElementById('couponMessage');
@@ -288,12 +290,14 @@
         return;
       }
 
-      // Check if the code is in our valid list
-      if (!validCoupons.includes(couponCode)) {
+      // Check if the code exists and get its reward amount
+      if (!couponRewards.hasOwnProperty(couponCode)) {
         messageDiv.style.color = '#ef4444';
         messageDiv.innerHTML = '❌ Invalid coupon code. Please check and try again.';
         return;
       }
+
+      const rewardAmount = couponRewards[couponCode];
 
       // Check Firestore to see if this coupon has already been used globally
       try {
@@ -306,15 +310,13 @@
           return;
         }
 
-        // If we reach here, the coupon is unused globally
-        // Check if this user already redeemed it (local check)
         if (userData.redeemedCoupons && userData.redeemedCoupons.includes(couponCode)) {
           messageDiv.style.color = '#f59e0b';
           messageDiv.innerHTML = '⚠️ You have already redeemed this coupon.';
           return;
         }
 
-        // Mark coupon as used in Firestore (atomic transaction to avoid race conditions)
+        // Mark coupon as used in Firestore (atomic transaction)
         await db.runTransaction(async (transaction) => {
           const doc = await transaction.get(docRef);
           if (doc.exists && doc.data().used === true) {
@@ -323,13 +325,14 @@
           transaction.set(docRef, {
             used: true,
             usedBy: currentUser.uid,
+            reward: rewardAmount,
             redeemedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         });
 
-        // Credit the user
-        userData.balance = (userData.balance || 0) + 1000;
-        userData.lifetimeTotal = (userData.lifetimeTotal || 0) + 1000;
+        // Credit the user with the specific reward amount
+        userData.balance = (userData.balance || 0) + rewardAmount;
+        userData.lifetimeTotal = (userData.lifetimeTotal || 0) + rewardAmount;
         if (!userData.redeemedCoupons) userData.redeemedCoupons = [];
         userData.redeemedCoupons.push(couponCode);
 
@@ -337,9 +340,9 @@
         await saveUserData();
 
         messageDiv.style.color = '#10b981';
-        messageDiv.innerHTML = '🎉 Coupon redeemed! +₦1,000 added to your wallet!';
+        messageDiv.innerHTML = `🎉 Coupon redeemed! +₦${rewardAmount.toLocaleString()} added to your wallet!`;
         input.value = '';
-        showToast('🎉 Coupon redeemed! +₦1,000 added!');
+        showToast(`🎉 Coupon redeemed! +₦${rewardAmount.toLocaleString()} added!`);
 
       } catch (error) {
         console.error('Coupon redeem error:', error);
