@@ -1,234 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>EarnSphere Hub - Earn Money Online in Nigeria</title>
-    
-    <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="32x32">
-    <link rel="apple-touch-icon" href="/favicon.png">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "EarnSphere Hub",
-      "url": "https://earnsphere.ng",
-      "logo": "https://earnsphere.ng/favicon.png"
-    }
-    </script>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>EarnSphere Nigeria - Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-
-  <script src="config.js"></script>
-
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family:'Inter', sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-      background-attachment: fixed;
-      min-height: 100vh;
-      color:#f1f5f9;
-      display:flex;
-      flex-direction:column;
-    }
-    body::before {
-      content:'';
-      position:fixed;
-      inset:0;
-      background:
-        radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%);
-      pointer-events:none;
-      z-index:0;
-    }
+    body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
+    body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
     #app { position:relative; z-index:1; flex:1; }
-    .navbar {
-      background: rgba(30,41,59,.7);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 4px 12px rgba(0,0,0,.3);
-      padding: 1rem 2rem;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:1rem;
-      border-bottom:1px solid rgba(255,255,255,.1);
-    }
+    .navbar { background:rgba(30,41,59,.7); backdrop-filter:blur(12px); box-shadow:0 4px 12px rgba(0,0,0,.3); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:1px solid rgba(255,255,255,.1); }
     .nav-links { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
-    .nav-links a {
-      text-decoration:none;
-      color:#cbd5e1;
-      font-weight:500;
-      padding:.5rem 1rem;
-      border-radius:.5rem;
-      transition: all 0.3s;
-    }
-    .nav-links a:hover, .nav-links a.active {
-      color:#3b82f6;
-      background: rgba(59,130,246,.15);
-    }
-    .logo {
-      font-size:1.6rem;
-      font-weight:800;
-      background: linear-gradient(135deg, #3b82f6, #10b981);
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-    }
+    .nav-links a { text-decoration:none; color:#cbd5e1; font-weight:500; padding:.5rem 1rem; border-radius:.5rem; transition:all 0.3s; }
+    .nav-links a:hover, .nav-links a.active { color:#3b82f6; background:rgba(59,130,246,.15); }
+    .logo { font-size:1.6rem; font-weight:800; background:linear-gradient(135deg, #3b82f6, #10b981); -webkit-background-clip:text; background-clip:text; color:transparent; }
     .user-greeting { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
-    .logout-btn {
-      background: rgba(59,130,246,.2);
-      border:1px solid rgba(59,130,246,.3);
-      padding:.5rem 1rem;
-      border-radius:2rem;
-      font-weight:500;
-      color:#3b82f6;
-      cursor:pointer;
-      transition: all 0.3s;
-    }
-    .logout-btn:hover { background: rgba(59,130,246,.3); }
+    .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:.5rem 1rem; border-radius:2rem; font-weight:500; color:#3b82f6; cursor:pointer; transition:all 0.3s; }
+    .logout-btn:hover { background:rgba(59,130,246,.3); }
     .dashboard-container { max-width:1200px; margin:2rem auto; padding:0 1.5rem; width:100%; }
-    .section-title {
-      font-size:1.4rem;
-      font-weight:700;
-      margin:2rem 0 1.5rem;
-      display:flex;
-      align-items:center;
-      gap:.6rem;
-    }
-    .stats-grid, .offers-grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-      gap:1.5rem;
-    }
-    .stat-card, .offer-card, .withdraw-card {
-      background: rgba(30,41,59,.6);
-      backdrop-filter: blur(12px);
-      border-radius:1rem;
-      padding:1.5rem;
-      border:1px solid rgba(255,255,255,.1);
-      transition: transform 0.2s;
-    }
-    .stat-card:hover, .offer-card:hover { transform: translateY(-2px); }
+    .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; }
+    .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
+    .stat-card, .offer-card, .withdraw-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); transition:transform 0.2s; }
+    .stat-card:hover, .offer-card:hover { transform:translateY(-2px); }
     .stat-title { font-size:.85rem; color:#94a3b8; margin-bottom:.5rem; }
     .stat-value { font-size:1.8rem; font-weight:800; color:#10b981; }
     .offer-title { font-weight:700; margin-bottom:.5rem; font-size:1.1rem; }
     .offer-desc { font-size:.9rem; color:#cbd5e1; margin-bottom:1rem; }
     .offer-reward { color:#10b981; font-weight:700; margin-bottom:1rem; font-size:1.1rem; }
-    .start-btn, .support-btn, .reward-btn {
-      width:100%;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color:#fff;
-      border:none;
-      padding:1rem;
-      border-radius:10px;
-      font-size:1rem;
-      font-weight:700;
-      cursor:pointer;
-      transition: all 0.3s;
-    }
-    .reward-btn {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      margin-top: 1rem;
-    }
-    .reward-btn:hover:not(:disabled) {
-      transform: scale(1.02);
-      box-shadow: 0 4px 15px rgba(245,158,11,.3);
-    }
-    .start-btn:hover:not(:disabled), .support-btn:hover:not(:disabled) {
-      transform: scale(1.02);
-      box-shadow: 0 4px 15px rgba(59,130,246,.3);
-    }
-    .start-btn:disabled, .support-btn:disabled, .reward-btn:disabled { 
-      background:#334155; 
-      cursor:not-allowed; 
-      opacity:0.7; 
-    }
-    .badge {
-      display:inline-block;
-      padding:.25rem .75rem;
-      border-radius:.25rem;
-      font-size:.8rem;
-      margin:.5rem 0;
-    }
-    .badge-survey { background: rgba(59,130,246,.2); color:#3b82f6; }
-    .badge-social { background: rgba(139,92,246,.2); color:#8b5cf6; }
-    .badge-youtube { background: rgba(239,68,68,.2); color:#ef4444; }
-
+    .start-btn, .support-btn, .reward-btn { width:100%; background:linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border:none; padding:1rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.3s; }
+    .reward-btn { background:linear-gradient(135deg, #f59e0b, #d97706); margin-top:1rem; }
+    .reward-btn:hover:not(:disabled), .start-btn:hover:not(:disabled), .support-btn:hover:not(:disabled) { transform:scale(1.02); box-shadow:0 4px 15px rgba(59,130,246,.3); }
+    .start-btn:disabled, .support-btn:disabled, .reward-btn:disabled { background:#334155; cursor:not-allowed; opacity:0.7; }
+    .badge { display:inline-block; padding:.25rem .75rem; border-radius:.25rem; font-size:.8rem; margin:.5rem 0; }
+    .badge-survey { background:rgba(59,130,246,.2); color:#3b82f6; }
+    .badge-social { background:rgba(139,92,246,.2); color:#8b5cf6; }
+    .badge-youtube { background:rgba(239,68,68,.2); color:#ef4444; }
     .form-group { margin-bottom:1.2rem; }
     .form-group label { display:block; margin-bottom:.6rem; color:#cbd5e1; font-weight:500; font-size:.9rem; }
-    .form-control {
-      width:100%;
-      padding:.9rem 1.1rem;
-      background: rgba(15,23,42,.6);
-      border:1px solid rgba(255,255,255,.1);
-      border-radius:.75rem;
-      color:#f1f5f9;
-      font-size:1rem;
-      transition: border 0.3s;
-    }
+    .form-control { width:100%; padding:.9rem 1.1rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:.75rem; color:#f1f5f9; font-size:1rem; transition:border 0.3s; }
     .form-control:focus { outline:none; border-color:#3b82f6; }
     .form-control option { background:#1e293b; }
-    .footer {
-      background: rgba(15,23,42,.8);
-      padding:2rem;
-      margin-top:auto;
-      text-align:center;
-      border-top:1px solid rgba(255,255,255,.1);
-      font-size:.9rem;
-      color:#64748b;
-    }
+    .footer { background:rgba(15,23,42,.8); padding:2rem; margin-top:auto; text-align:center; border-top:1px solid rgba(255,255,255,.1); font-size:.9rem; color:#64748b; }
     .footer a { color:#64748b; text-decoration:none; margin:0 0.5rem; }
     .footer a:hover { color:#3b82f6; }
-    .toast {
-      background: rgba(30,41,59,.95);
-      padding:1rem 1.5rem;
-      border-radius:.5rem;
-      margin-bottom:.5rem;
-      border:1px solid rgba(16,185,129,.3);
-      color:#fff;
-      animation: slideIn 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,.3);
-      position:fixed;
-      top:20px;
-      right:20px;
-      z-index:9999;
-      max-width: 90%;
-    }
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
+    .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; margin-bottom:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
+    @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
 
-    #aiChatBtn {
-      position:fixed; bottom:20px; right:20px; width:60px; height:60px;
-      background: linear-gradient(135deg, #3b82f6, #10b981);
-      border-radius:50%; display:flex; align-items:center; justify-content:center;
-      color:white; font-size:24px; cursor:pointer; z-index:10000;
-    }
-    #aiChatWindow {
-      position:fixed; bottom:90px; right:20px; width:320px; height:400px;
-      background:#1e293b; border:1px solid rgba(255,255,255,.1);
-      border-radius:12px; display:none; flex-direction:column;
-      box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden;
-    }
+    /* AI Chat */
+    #aiChatBtn { position:fixed; bottom:20px; right:20px; width:60px; height:60px; background:linear-gradient(135deg, #3b82f6, #10b981); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; cursor:pointer; z-index:10000; box-shadow:0 4px 20px rgba(59,130,246,.4); transition:transform 0.2s; }
+    #aiChatBtn:hover { transform:scale(1.05); }
+    #aiChatWindow { position:fixed; bottom:90px; right:20px; width:340px; height:460px; background:#1e293b; border:1px solid rgba(255,255,255,.1); border-radius:12px; display:none; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden; }
+    #aiChatHeader { background:linear-gradient(to right, #3b82f6, #10b981); padding:12px 16px; color:white; font-weight:bold; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+    #aiChatHeader span i { margin-right:6px; }
+    #aiChatHeader .close-btn { cursor:pointer; font-size:1.2rem; opacity:0.8; transition:0.2s; }
+    #aiChatHeader .close-btn:hover { opacity:1; }
+    #aiMessages { flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:14px; background:rgba(0,0,0,.2); }
+    .ai-msg { max-width:85%; padding:8px 14px; border-radius:12px; word-wrap:break-word; line-height:1.5; }
+    .ai-msg.user { align-self:flex-end; background:#3b82f6; color:#fff; border-bottom-right-radius:4px; }
+    .ai-msg.bot { align-self:flex-start; background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:4px; }
+    .ai-msg.bot .msg-time { font-size:0.65rem; color:#94a3b8; margin-top:4px; display:block; }
+    .ai-msg.typing { align-self:flex-start; background:rgba(255,255,255,0.05); color:#94a3b8; font-style:italic; padding:8px 16px; }
+    #aiChatInputArea { display:flex; padding:10px 12px; gap:8px; background:rgba(15,23,42,.8); border-top:1px solid rgba(255,255,255,.08); flex-shrink:0; }
+    #aiChatInput { flex:1; background:rgba(30,41,59,.6); border:1px solid rgba(255,255,255,.15); border-radius:20px; padding:8px 16px; color:#f1f5f9; font-size:14px; outline:none; transition:border 0.2s; }
+    #aiChatInput:focus { border-color:#3b82f6; }
+    #aiChatInput::placeholder { color:#64748b; }
+    #aiSendBtn { background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; color:#fff; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; transition:0.2s; display:flex; align-items:center; justify-content:center; }
+    #aiSendBtn:hover { transform:scale(1.05); box-shadow:0 0 15px rgba(59,130,246,.4); }
+    #aiSendBtn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
     @media (max-width: 768px) {
       .navbar { padding:1rem; }
       .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
       .dashboard-container { padding:0 1rem; }
       .offers-grid { grid-template-columns:1fr; }
+      #aiChatWindow { width:300px; height:400px; right:10px; bottom:80px; }
     }
   </style>
 </head>
@@ -253,58 +104,30 @@
     <div class="dashboard-container">
       <h2 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Overview</h2>
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-title">Wallet Balance</div>
-          <div class="stat-value" id="walletBalance">₦0.00</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-title">Total Earned</div>
-          <div class="stat-value" id="lifetimeTotal">₦0.00</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-title">Tasks Completed</div>
-          <div class="stat-value" id="successfulTaskCount">0</div>
-        </div>
-        
+        <div class="stat-card"><div class="stat-title">Wallet Balance</div><div class="stat-value" id="walletBalance">₦0.00</div></div>
+        <div class="stat-card"><div class="stat-title">Total Earned</div><div class="stat-value" id="lifetimeTotal">₦0.00</div></div>
+        <div class="stat-card"><div class="stat-title">Tasks Completed</div><div class="stat-value" id="successfulTaskCount">0</div></div>
         <div class="stat-card" style="display:flex; flex-direction:column; justify-content:center;">
           <div class="stat-title">Daily Check-in Bonus</div>
           <div style="font-size:1.1rem; font-weight:700; color:#f59e0b;">+₦100.00 Daily</div>
-          <button class="reward-btn" id="dailyRewardBtn" onclick="claimDailyReward()">
-            <i class="fas fa-gift"></i> Claim Daily Reward
-          </button>
+          <button class="reward-btn" id="dailyRewardBtn" onclick="claimDailyReward()"><i class="fas fa-gift"></i> Claim Daily Reward</button>
         </div>
       </div>
 
       <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers</h2>
-      <div id="surveyResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> New surveys available daily at midnight
-      </div>
+      <div id="surveyResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;"><i class="fas fa-clock"></i> New surveys available daily at midnight</div>
       <div class="offers-grid" id="surveyList"></div>
 
       <h2 class="section-title"><i class="fas fa-tasks"></i> Social & YouTube Micro-Tasks</h2>
-      <div id="socialResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> New tasks added regularly
-      </div>
+      <div id="socialResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;"><i class="fas fa-clock"></i> New tasks added regularly</div>
       <div class="offers-grid" id="socialTaskList"></div>
 
       <h2 class="section-title"><i class="fas fa-headset"></i> Contact Support</h2>
       <div class="withdraw-card">
         <div id="supportMessage"></div>
         <form id="supportForm">
-          <div class="form-group">
-            <label>Issue Type</label>
-            <select id="issue_type" class="form-control" required>
-              <option value="" disabled selected>Select issue</option>
-              <option value="Payment Not Received">Payment Not Received</option>
-              <option value="Task Not Credited">Task Not Credited</option>
-              <option value="Account Problem">Account Problem</option>
-              <option value="General Inquiry">General Inquiry</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Your Message</label>
-            <textarea id="support_text_message" class="form-control" rows="3" placeholder="Describe your issue in detail..." required></textarea>
-          </div>
+          <div class="form-group"><label>Issue Type</label><select id="issue_type" class="form-control" required><option value="" disabled selected>Select issue</option><option value="Payment Not Received">Payment Not Received</option><option value="Task Not Credited">Task Not Credited</option><option value="Account Problem">Account Problem</option><option value="General Inquiry">General Inquiry</option></select></div>
+          <div class="form-group"><label>Your Message</label><textarea id="support_text_message" class="form-control" rows="3" placeholder="Describe your issue in detail..." required></textarea></div>
           <button type="submit" class="support-btn" id="supportBtn"><i class="fas fa-paper-plane"></i> Send Message</button>
         </form>
       </div>
@@ -312,31 +135,20 @@
   </div>
 
   <footer class="footer">
-    <p>
-      <a href="privacy-policy.html">Privacy Policy</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-    </p>
+    <p><a href="privacy-policy.html">Privacy Policy</a> <a href="about.html">About</a> <a href="contact.html">Contact</a></p>
     <p style="margin-top:1rem; font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
+  <!-- AI Chat -->
   <div id="aiChatBtn" onclick="toggleAiChat()"><i class="fas fa-robot"></i></div>
   <div id="aiChatWindow">
-    <div style="background:linear-gradient(to right, #3b82f6, #10b981); padding:12px 15px; color:white; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
-      <span><i class="fas fa-brain"></i> SphereAI Assistant</span>
-      <i class="fas fa-times" onclick="toggleAiChat()" style="cursor:pointer;"></i>
-    </div>
-    <div id="aiMessages" style="flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:14px;">
-      <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; max-width: 85%; color: #cbd5e1;">
-        Hello! I'm SphereAI. How can I help you today?
-      </div>
-    </div>
+    <div id="aiChatHeader"><span><i class="fas fa-brain"></i> SphereAI Assistant</span><span class="close-btn" onclick="toggleAiChat()"><i class="fas fa-times"></i></span></div>
+    <div id="aiMessages"><div class="ai-msg bot">👋 How you dey? I'm SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.<span class="msg-time">Just now</span></div></div>
+    <div id="aiChatInputArea"><input type="text" id="aiChatInput" placeholder="Type your message..." autocomplete="off" /><button id="aiSendBtn" onclick="sendAiMessage()"><i class="fas fa-paper-plane"></i></button></div>
   </div>
 
   <script>
-    // ============================================
     // FIREBASE CONFIG
-    // ============================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -345,14 +157,11 @@
       messagingSenderId: "173538573377",
       appId: "1:173538573377:web:6d8c748376afcb9096dac0"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ============================================
-    // GLOBAL VARIABLES & TASKS DATABASE
-    // ============================================
+    // GLOBALS
     let currentUser = null;
     let userData = { displayName: '', balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTaskIds: [], lastDailyRewardDate: '' };
 
@@ -360,7 +169,6 @@
       "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
       "srv_02": { title: "Crypto Knowledge Check", category: "Finance", reward: 250, desc: "Your insights on digital assets" }
     };
-
     const socialTasks = [
       { id: 'yt_1', title: 'Subscribe to YouTube Channel', desc: 'Open our official YouTube channel and subscribe.', reward: 300, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
       { id: 'yt_2', title: 'Watch & Like YouTube Video', desc: 'Watch our video for at least 1 minute and leave a like.', reward: 200, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
@@ -381,12 +189,10 @@
 
     function updateInterfaceValues() {
       if (!userData) return;
-
       document.getElementById('walletBalance').innerText = `₦${(userData.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
       document.getElementById('lifetimeTotal').innerText = `₦${(userData.lifetimeTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
       document.getElementById('successfulTaskCount').innerText = userData.successfulTaskCount || 0;
 
-      // Handle Daily Reward Button State
       const rewardBtn = document.getElementById('dailyRewardBtn');
       const today = getTodayDateString();
       if (rewardBtn) {
@@ -400,20 +206,6 @@
       }
     }
 
-    // Daily Reward Claim Action
-    async function claimDailyReward() {
-      const today = getTodayDateString();
-      if (userData.lastDailyRewardDate === today) return;
-
-      userData.balance = (userData.balance || 0) + 100;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + 100;
-      userData.lastDailyRewardDate = today;
-
-      updateInterfaceValues();
-      await saveUserData();
-      showToast('🎉 +₦100.00 Daily Bonus claimed!');
-    }
-
     async function saveUserData() {
       localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
       if (currentUser) {
@@ -423,6 +215,25 @@
           console.error("Error saving data:", e);
         }
       }
+    }
+
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3500);
+    }
+
+    async function claimDailyReward() {
+      const today = getTodayDateString();
+      if (userData.lastDailyRewardDate === today) return;
+      userData.balance = (userData.balance || 0) + 100;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + 100;
+      userData.lastDailyRewardDate = today;
+      updateInterfaceValues();
+      await saveUserData();
+      showToast('🎉 +₦100.00 Daily Bonus claimed!');
     }
 
     function renderTasks() {
@@ -469,35 +280,120 @@
 
     async function completeTask(taskId, reward, link) {
       if (isTaskCompleted(taskId)) return;
-
       if (link && link !== '#') {
         window.open(link, '_blank');
       }
-
       userData.balance = (userData.balance || 0) + reward;
       userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
       userData.completedTaskIds.push(taskId);
-
       updateInterfaceValues();
       renderTasks();
       await saveUserData();
       showToast(`🎉 Reward of ₦${reward} credited!`);
     }
 
-    function showToast(msg) {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = msg;
-      document.body.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 3500);
-    }
+    // ============================================================
+    // AI CHAT – calls Render backend
+    // ============================================================
+    const aiMessages = document.getElementById('aiMessages');
+    const aiInput = document.getElementById('aiChatInput');
+    const aiSendBtn = document.getElementById('aiSendBtn');
+
+    // Always use the live backend URL
+    const API_BASE_URL = 'https://earnsphere-ai.onrender.com';
 
     function toggleAiChat() {
-      const windowEl = document.getElementById('aiChatWindow');
-      windowEl.style.display = windowEl.style.display === 'flex' ? 'none' : 'flex';
+      const win = document.getElementById('aiChatWindow');
+      win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+      if (win.style.display === 'flex') {
+        aiInput.focus();
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+      }
     }
 
+    function addAiMessage(text, sender = 'bot', isTyping = false) {
+      const div = document.createElement('div');
+      div.className = `ai-msg ${sender}`;
+      if (isTyping) {
+        div.classList.add('typing');
+        div.textContent = text;
+      } else {
+        div.innerHTML = text;
+        if (sender === 'bot') {
+          const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const timeSpan = document.createElement('span');
+          timeSpan.className = 'msg-time';
+          timeSpan.textContent = time;
+          div.appendChild(timeSpan);
+        }
+      }
+      aiMessages.appendChild(div);
+      aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const last = aiMessages.lastElementChild;
+      if (last && last.classList.contains('typing')) {
+        last.remove();
+      }
+    }
+
+    async function sendAiMessage() {
+      const text = aiInput.value.trim();
+      if (!text) return;
+
+      aiInput.disabled = true;
+      aiSendBtn.disabled = true;
+
+      addAiMessage(text, 'user');
+      aiInput.value = '';
+
+      addAiMessage('SphereAI is thinking...', 'bot', true);
+
+      try {
+        const reply = await callBackendProxy(text);
+        removeTypingIndicator();
+        addAiMessage(reply, 'bot');
+      } catch (error) {
+        removeTypingIndicator();
+        const friendlyError = `😅 Oops! My brain no dey work right now. ${error.message || 'Try again later.'} No wahala, I go soon reset.`;
+        addAiMessage(friendlyError, 'bot');
+      } finally {
+        aiInput.disabled = false;
+        aiSendBtn.disabled = false;
+        aiInput.focus();
+      }
+    }
+
+    async function callBackendProxy(userMessage) {
+      const endpoint = `${API_BASE_URL}/api/grok`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Server error (${response.status}): ${errText}`);
+      }
+
+      const data = await response.json();
+      return data.reply || "I no get response o, but I dey try!";
+    }
+
+    aiInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendAiMessage();
+      }
+    });
+
+    // ============================================================
+    // AUTH & INIT
+    // ============================================================
     function logout() {
       auth.signOut().then(() => {
         localStorage.removeItem('earnsphere_user_data');
