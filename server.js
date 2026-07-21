@@ -31,8 +31,8 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-// Gemini endpoint (without key in URL)
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+// Use gemini-1.0-pro (more widely available)
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent';
 
 // ---- Health check ----
 app.get('/health', (req, res) => {
@@ -74,12 +74,11 @@ Keep responses concise (max 2-3 short paragraphs). Always end with an uplifting 
   };
 
   try {
-    // Send the API key in the header (new format)
     const response = await fetch(GEMINI_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY   // <-- KEY SENT HERE
+        'x-goog-api-key': GEMINI_API_KEY   // new key format
       },
       body: JSON.stringify(payload)
     });
