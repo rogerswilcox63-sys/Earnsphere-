@@ -11,6 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
+    /* (styles unchanged – omitted for brevity, but include all previous styles) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -123,7 +124,7 @@
             <i class="fas fa-gift" style="font-size:1.5rem; color:#10b981;"></i>
             <div>
               <div style="font-weight:700;">Redeem Coupon</div>
-              <div style="font-size:0.8rem; color:#94a3b8;">Get ₦1,000 bonus with valid coupon code</div>
+              <div style="font-size:0.8rem; color:#94a3b8;">Get ₦1,000 bonus – first come, first served!</div>
             </div>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -187,7 +188,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ===== COUPON CODES (Hardcoded – add/remove as you like) =====
+    // ===== COUPON CODES (Hardcoded – add/remove as needed) =====
     const validCoupons = [
       "WHATSAPP1000",
       "TELEGRAM500",
@@ -206,7 +207,7 @@
       successfulTaskCount: 0,
       completedTaskIds: [],
       lastDailyRewardDate: '',
-      redeemedCoupons: []  // Track which coupons this user already used
+      redeemedCoupons: []  // local cache of coupons this user has used
     };
 
     const surveyDatabase = {
@@ -269,11 +270,17 @@
       setTimeout(() => { toast.remove(); }, 3500);
     }
 
-    // ===== COUPON REDEEM FUNCTION =====
+    // ===== GLOBALLY SINGLE‑USE COUPON REDEEM =====
     async function redeemCoupon() {
       const input = document.getElementById('couponInput');
       const messageDiv = document.getElementById('couponMessage');
       const couponCode = input.value.trim().toUpperCase();
+
+      if (!currentUser) {
+        messageDiv.style.color = '#ef4444';
+        messageDiv.innerHTML = '⚠️ Please log in to redeem a coupon.';
+        return;
+      }
 
       if (!couponCode) {
         messageDiv.style.color = '#ef4444';
@@ -281,37 +288,64 @@
         return;
       }
 
-      // Check if code is valid (hardcoded list)
+      // Check if the code is in our valid list
       if (!validCoupons.includes(couponCode)) {
         messageDiv.style.color = '#ef4444';
         messageDiv.innerHTML = '❌ Invalid coupon code. Please check and try again.';
         return;
       }
 
-      // Check if user already used this coupon
-      if (userData.redeemedCoupons && userData.redeemedCoupons.includes(couponCode)) {
-        messageDiv.style.color = '#f59e0b';
-        messageDiv.innerHTML = '⚠️ You have already redeemed this coupon!';
-        return;
+      // Check Firestore to see if this coupon has already been used globally
+      try {
+        const docRef = db.collection('coupon_usage').doc(couponCode);
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists && docSnap.data().used === true) {
+          messageDiv.style.color = '#f59e0b';
+          messageDiv.innerHTML = '⚠️ This coupon has already been redeemed by another user.';
+          return;
+        }
+
+        // If we reach here, the coupon is unused globally
+        // Check if this user already redeemed it (local check)
+        if (userData.redeemedCoupons && userData.redeemedCoupons.includes(couponCode)) {
+          messageDiv.style.color = '#f59e0b';
+          messageDiv.innerHTML = '⚠️ You have already redeemed this coupon.';
+          return;
+        }
+
+        // Mark coupon as used in Firestore (atomic transaction to avoid race conditions)
+        await db.runTransaction(async (transaction) => {
+          const doc = await transaction.get(docRef);
+          if (doc.exists && doc.data().used === true) {
+            throw new Error('Coupon already used by someone else.');
+          }
+          transaction.set(docRef, {
+            used: true,
+            usedBy: currentUser.uid,
+            redeemedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+
+        // Credit the user
+        userData.balance = (userData.balance || 0) + 1000;
+        userData.lifetimeTotal = (userData.lifetimeTotal || 0) + 1000;
+        if (!userData.redeemedCoupons) userData.redeemedCoupons = [];
+        userData.redeemedCoupons.push(couponCode);
+
+        updateInterfaceValues();
+        await saveUserData();
+
+        messageDiv.style.color = '#10b981';
+        messageDiv.innerHTML = '🎉 Coupon redeemed! +₦1,000 added to your wallet!';
+        input.value = '';
+        showToast('🎉 Coupon redeemed! +₦1,000 added!');
+
+      } catch (error) {
+        console.error('Coupon redeem error:', error);
+        messageDiv.style.color = '#ef4444';
+        messageDiv.innerHTML = '❌ Error redeeming coupon. Please try again.';
       }
-
-      // ✅ Valid coupon – add ₦1,000 to wallet
-      userData.balance = (userData.balance || 0) + 1000;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + 1000;
-      
-      // Track this coupon as used by this user
-      if (!userData.redeemedCoupons) {
-        userData.redeemedCoupons = [];
-      }
-      userData.redeemedCoupons.push(couponCode);
-
-      updateInterfaceValues();
-      await saveUserData();
-
-      messageDiv.style.color = '#10b981';
-      messageDiv.innerHTML = '🎉 Coupon redeemed! +₦1,000 added to your wallet!';
-      input.value = '';
-      showToast('🎉 Coupon redeemed! +₦1,000 added!');
     }
 
     // ===== DAILY REWARD =====
