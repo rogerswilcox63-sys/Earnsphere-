@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>EarnSphere Nigeria - Dashboard</title>
+  script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724"
+     crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -11,7 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
-    /* ===== All styles (unchanged) ===== */
+    /* ===== RESET & BASE ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -43,6 +45,12 @@
     .badge-survey { background:rgba(59,130,246,.2); color:#3b82f6; }
     .badge-social { background:rgba(139,92,246,.2); color:#8b5cf6; }
     .badge-youtube { background:rgba(239,68,68,.2); color:#ef4444; }
+    .badge-download { background:rgba(16,185,129,.2); color:#10b981; }
+    .badge-twitter { background:rgba(29,161,242,.2); color:#1da1f2; }
+    .badge-upload { background:rgba(245,158,11,.2); color:#f59e0b; }
+    .badge-ad { background:rgba(236,72,153,.2); color:#ec4899; }
+    .badge-poll { background:rgba(168,85,247,.2); color:#a855f7; }
+    .badge-quiz { background:rgba(251,146,60,.2); color:#fb923c; }
     .form-group { margin-bottom:1.2rem; }
     .form-group label { display:block; margin-bottom:.6rem; color:#cbd5e1; font-weight:500; font-size:.9rem; }
     .form-control { width:100%; padding:.9rem 1.1rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:.75rem; color:#f1f5f9; font-size:1rem; transition:border 0.3s; }
@@ -53,8 +61,6 @@
     .footer a:hover { color:#3b82f6; }
     .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; margin-bottom:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
     @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
-
-    /* AI Chat */
     #aiChatBtn { position:fixed; bottom:20px; right:20px; width:60px; height:60px; background:linear-gradient(135deg, #3b82f6, #10b981); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; cursor:pointer; z-index:10000; box-shadow:0 4px 20px rgba(59,130,246,.4); transition:transform 0.2s; }
     #aiChatBtn:hover { transform:scale(1.05); }
     #aiChatWindow { position:fixed; bottom:90px; right:20px; width:340px; height:460px; background:#1e293b; border:1px solid rgba(255,255,255,.1); border-radius:12px; display:none; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden; }
@@ -75,7 +81,6 @@
     #aiSendBtn { background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; color:#fff; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; transition:0.2s; display:flex; align-items:center; justify-content:center; }
     #aiSendBtn:hover { transform:scale(1.05); box-shadow:0 0 15px rgba(59,130,246,.4); }
     #aiSendBtn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-
     @media (max-width: 768px) {
       .navbar { padding:1rem; }
       .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
@@ -104,6 +109,7 @@
     </div>
 
     <div class="dashboard-container">
+      <!-- Stats -->
       <h2 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Overview</h2>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-title">Wallet Balance</div><div class="stat-value" id="walletBalance">₦0.00</div></div>
@@ -115,8 +121,16 @@
           <button class="reward-btn" id="dailyRewardBtn" onclick="claimDailyReward()"><i class="fas fa-gift"></i> Claim Daily Reward</button>
         </div>
       </div>
+      <ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-5803688718527724"
+     data-ad-slot="YOUR_AD_SLOT_ID"
+     data-ad-format="auto"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
 
-      <!-- ===== COUPON CODE SECTION ===== -->
+      <!-- Coupon -->
       <h2 class="section-title"><i class="fas fa-ticket-alt"></i> Coupon Code</h2>
       <div class="stats-grid">
         <div class="coupon-card" style="grid-column: span 1;">
@@ -124,7 +138,7 @@
             <i class="fas fa-gift" style="font-size:1.5rem; color:#10b981;"></i>
             <div>
               <div style="font-weight:700;">Redeem Coupon</div>
-              <div style="font-size:0.8rem; color:#94a3b8;">Get ₦500 – ₦5,000 bonus – first come, first served!</div>
+              <div style="font-size:0.8rem; color:#94a3b8;">Get ₦500 – ₦5,000 – first come, first served!</div>
             </div>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -134,21 +148,41 @@
             </button>
           </div>
           <div style="margin-top:10px; font-size:0.8rem; color:#64748b;">
-            <i class="fab fa-whatsapp" style="color:#25D366;"></i> 
-            Get coupon codes from our WhatsApp group/channel
+            <i class="fab fa-whatsapp" style="color:#25D366;"></i> Get codes from WhatsApp
           </div>
           <div id="couponMessage" style="margin-top:8px; font-size:0.9rem; font-weight:600;"></div>
         </div>
       </div>
 
-      <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers</h2>
-      <div id="surveyResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;"><i class="fas fa-clock"></i> New surveys available daily at midnight</div>
+      <!-- Surveys -->
+      <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers (10 per day)</h2>
+      <div id="surveyResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> Resets daily at midnight
+      </div>
       <div class="offers-grid" id="surveyList"></div>
 
-      <h2 class="section-title"><i class="fas fa-tasks"></i> Social & YouTube Micro-Tasks</h2>
-      <div id="socialResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;"><i class="fas fa-clock"></i> New tasks added regularly</div>
+      <!-- App Downloads -->
+      <h2 class="section-title"><i class="fas fa-download"></i> App Download Tasks</h2>
+      <div id="appResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> Resets daily at midnight
+      </div>
+      <div class="offers-grid" id="appTaskList"></div>
+
+      <!-- Social -->
+      <h2 class="section-title"><i class="fas fa-share-alt"></i> Social & YouTube Tasks</h2>
+      <div id="socialResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> Resets every 2 hours
+      </div>
       <div class="offers-grid" id="socialTaskList"></div>
 
+      <!-- More Earning Tasks (now with links to dedicated pages) -->
+      <h2 class="section-title"><i class="fas fa-star"></i> More Earning Tasks</h2>
+      <div id="extraResetTimer" style="text-align:center;color:#64748b;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-clock"></i> Resets daily at midnight
+      </div>
+      <div class="offers-grid" id="extraTaskList"></div>
+
+      <!-- Support -->
       <h2 class="section-title"><i class="fas fa-headset"></i> Contact Support</h2>
       <div class="withdraw-card">
         <div id="supportMessage"></div>
@@ -175,7 +209,9 @@
   </div>
 
   <script>
-    // ===== FIREBASE =====
+    // ============================================================
+    // FIREBASE
+    // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -188,7 +224,9 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ===== COUPON CODES WITH REWARD AMOUNTS (₦500 – ₦5,000) =====
+    // ============================================================
+    // COUPON REWARDS
+    // ============================================================
     const couponRewards = {
       "WHATSAPP1000": 1000,
       "TELEGRAM500": 500,
@@ -200,38 +238,80 @@
       "VIP2500": 2500
     };
 
-    // ===== GLOBALS =====
+    // ============================================================
+    // GLOBALS
+    // ============================================================
     let currentUser = null;
     let userData = {
       displayName: '',
       balance: 0,
       lifetimeTotal: 0,
       successfulTaskCount: 0,
-      completedTaskIds: [],
+      completedTasks: {},
       lastDailyRewardDate: '',
       redeemedCoupons: []
     };
 
-    const surveyDatabase = {
-      "srv_01": { title: "Social Media Usage", category: "Tech", reward: 150, desc: "Tell us about your screen time habits" },
-      "srv_02": { title: "Crypto Knowledge Check", category: "Finance", reward: 250, desc: "Your insights on digital assets" }
-    };
-    const socialTasks = [
-      { id: 'yt_1', title: 'Subscribe to YouTube Channel', desc: 'Open our official YouTube channel and subscribe.', reward: 300, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
-      { id: 'yt_2', title: 'Watch & Like YouTube Video', desc: 'Watch our video for at least 1 minute and leave a like.', reward: 200, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
-      { id: 'yt_3', title: 'Comment on YouTube Video', desc: 'Leave a helpful comment under our pinned video.', reward: 150, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
-      { id: 'soc_1', title: 'Follow on TikTok', desc: 'Follow our account and like the latest post.', reward: 250, badge: 'TikTok', badgeClass: 'badge-social', link: 'https://tiktok.com/' },
-      { id: 'soc_2', title: 'Follow on Instagram', desc: 'Follow our official Instagram page.', reward: 200, badge: 'Instagram', badgeClass: 'badge-social', link: 'https://instagram.com/' },
-      { id: 'soc_3', title: 'Join Our Telegram', desc: 'Join our community channel for updates.', reward: 150, badge: 'Telegram', badgeClass: 'badge-social', link: 'https://t.me/' }
+    // ============================================================
+    // TASKS DEFINITIONS
+    // ============================================================
+    const surveyTasks = [
+      { id: 'srv_01', title: 'Social Media Usage', category: 'Tech', reward: 150, desc: 'Tell us about your screen time habits', reset: 'daily', link: 'survey.html' },
+      { id: 'srv_02', title: 'Crypto Knowledge Check', category: 'Finance', reward: 250, desc: 'Your insights on digital assets', reset: 'daily', link: 'survey.html' },
+      { id: 'srv_03', title: 'Nollywood Movie Preferences', category: 'Entertainment', reward: 200, desc: 'Tell us your favourite Nollywood actors and movies.', reset: 'daily', link: 'survey.html' },
+      { id: 'srv_04', title: 'Nigerian Food Culture', category: 'Lifestyle', reward: 180, desc: 'What are your favourite Nigerian dishes and recipes?', reset: 'daily', link: 'survey.html' },
+      { id: 'srv_05', title: 'Music Streaming Habits', category: 'Entertainment', reward: 220, desc: 'How do you listen to music? Share your streaming habits.', reset: 'daily', link: 'survey.html' },
+      { id: 'srv_06', title: 'Online Shopping Behavior', category: 'E-commerce', reward: 250, desc: 'Share your experience with online shopping in Nigeria.', reset: 'daily', link: 'survey.html' },
+      { id: 'srv_07', title: 'Football & Sports Passion', category: 'Sports', reward: 200, desc: 'Tell us about your favourite teams and how you follow sports.', reset: 'daily', link: 'survey.html' },
+      { id: 'srv_08', title: 'Education & Career Goals', category: 'Education', reward: 300, desc: 'Share your educational background and career aspirations.', reset: 'daily', link: 'survey.html' },
+      { id: 'srv_09', title: 'Travel & Tourism Preferences', category: 'Lifestyle', reward: 180, desc: 'Where do you want to travel? Share your dream destinations.', reset: 'daily', link: 'survey.html' },
+      { id: 'srv_10', title: 'Smartphone Usage Patterns', category: 'Tech', reward: 250, desc: 'How do you use your smartphone daily? Share your habits.', reset: 'daily', link: 'survey.html' }
     ];
 
+    const appTasks = [
+      { id: 'app_01', title: 'Download Grok', desc: 'Download and install the Grok AI app from the Play Store.', reward: 400, badge: 'Download', badgeClass: 'badge-download', link: 'https://play.google.com/store/apps/details?id=ai.x.grok', reset: 'daily' },
+      { id: 'app_02', title: 'Download DeepSeek', desc: 'Download and install the DeepSeek AI app from the Play Store.', reward: 350, badge: 'Download', badgeClass: 'badge-download', link: 'https://play.google.com/store/apps/details?id=com.deepseek.chat', reset: 'daily' }
+    ];
+
+    const socialTasks = [
+      { id: 'yt_1', title: 'Subscribe to YouTube', desc: 'Subscribe to our YouTube channel.', reward: 300, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria', reset: '2hours' },
+      { id: 'yt_2', title: 'Watch & Like YouTube', desc: 'Watch our video for 1 min and like.', reward: 200, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria', reset: '2hours' },
+      { id: 'yt_3', title: 'Comment on YouTube', desc: 'Leave a helpful comment on our pinned video.', reward: 150, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria', reset: '2hours' },
+      { id: 'soc_1', title: 'Follow on TikTok', desc: 'Follow our TikTok and like the latest post.', reward: 250, badge: 'TikTok', badgeClass: 'badge-social', link: 'https://tiktok.com/', reset: '2hours' },
+      { id: 'soc_2', title: 'Follow on Instagram', desc: 'Follow our official Instagram page.', reward: 200, badge: 'Instagram', badgeClass: 'badge-social', link: 'https://instagram.com/', reset: '2hours' },
+      { id: 'soc_3', title: 'Join Our Telegram', desc: 'Join our community channel for updates.', reward: 150, badge: 'Telegram', badgeClass: 'badge-social', link: 'https://t.me/', reset: '2hours' },
+      { id: 'soc_4', title: 'Follow on Twitter', desc: 'Follow our official Twitter/X account.', reward: 180, badge: 'Twitter', badgeClass: 'badge-twitter', link: 'https://twitter.com/', reset: '2hours' },
+      { id: 'soc_5', title: 'Share Our Page', desc: 'Share our website link on your social media.', reward: 220, badge: 'Social', badgeClass: 'badge-social', link: 'https://earnspherehub.name.ng', reset: '2hours' }
+    ];
+
+    // Extra tasks now link to dedicated pages (no modals)
+    const extraTasks = [
+      { id: 'extra_upload', title: '📷 Upload a Picture', desc: 'Upload a picture and earn ₦200.', reward: 200, badge: 'Upload', badgeClass: 'badge-upload', reset: 'daily', page: 'upload.html' },
+      { id: 'extra_poll', title: '📊 Daily Poll', desc: 'Answer our daily poll and earn ₦100.', reward: 100, badge: 'Poll', badgeClass: 'badge-poll', reset: 'daily', page: 'poll.html' },
+      { id: 'extra_quiz', title: '❓ Quick Quiz', desc: 'Answer a quiz question and earn ₦150.', reward: 150, badge: 'Quiz', badgeClass: 'badge-quiz', reset: 'daily', page: 'quiz.html' },
+      { id: 'extra_ad', title: '🎬 Watch an Ad', desc: 'Watch a short ad and earn ₦50.', reward: 50, badge: 'Ad', badgeClass: 'badge-ad', reset: 'daily', page: 'ad.html' }
+    ];
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
     function getTodayDateString() {
       const now = new Date();
       return now.toISOString().split('T')[0];
     }
 
-    function isTaskCompleted(taskId) {
-      return userData && userData.completedTaskIds && userData.completedTaskIds.includes(taskId);
+    function isTaskCompleted(taskId, resetInterval) {
+      if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
+      const completedAt = userData.completedTasks[taskId];
+      const now = Date.now();
+      if (resetInterval === 'daily') {
+        const completedDate = new Date(completedAt).toISOString().split('T')[0];
+        return completedDate === getTodayDateString();
+      } else if (resetInterval === '2hours') {
+        const twoHours = 2 * 60 * 60 * 1000;
+        return (now - completedAt) < twoHours;
+      }
+      return false;
     }
 
     function updateInterfaceValues() {
@@ -272,7 +352,9 @@
       setTimeout(() => { toast.remove(); }, 3500);
     }
 
-    // ===== GLOBALLY SINGLE‑USE COUPON REDEEM WITH VARIABLE REWARDS =====
+    // ============================================================
+    // COUPON REDEEM
+    // ============================================================
     async function redeemCoupon() {
       const input = document.getElementById('couponInput');
       const messageDiv = document.getElementById('couponMessage');
@@ -280,47 +362,41 @@
 
       if (!currentUser) {
         messageDiv.style.color = '#ef4444';
-        messageDiv.innerHTML = '⚠️ Please log in to redeem a coupon.';
+        messageDiv.innerHTML = '⚠️ Please log in.';
         return;
       }
-
       if (!couponCode) {
         messageDiv.style.color = '#ef4444';
-        messageDiv.innerHTML = '⚠️ Please enter a coupon code.';
+        messageDiv.innerHTML = '⚠️ Enter a code.';
         return;
       }
-
-      // Check if the code exists and get its reward amount
       if (!couponRewards.hasOwnProperty(couponCode)) {
         messageDiv.style.color = '#ef4444';
-        messageDiv.innerHTML = '❌ Invalid coupon code. Please check and try again.';
+        messageDiv.innerHTML = '❌ Invalid code.';
         return;
       }
 
       const rewardAmount = couponRewards[couponCode];
 
-      // Check Firestore to see if this coupon has already been used globally
       try {
         const docRef = db.collection('coupon_usage').doc(couponCode);
         const docSnap = await docRef.get();
 
         if (docSnap.exists && docSnap.data().used === true) {
           messageDiv.style.color = '#f59e0b';
-          messageDiv.innerHTML = '⚠️ This coupon has already been redeemed by another user.';
+          messageDiv.innerHTML = '⚠️ Already redeemed by someone.';
           return;
         }
-
         if (userData.redeemedCoupons && userData.redeemedCoupons.includes(couponCode)) {
           messageDiv.style.color = '#f59e0b';
-          messageDiv.innerHTML = '⚠️ You have already redeemed this coupon.';
+          messageDiv.innerHTML = '⚠️ You already used this.';
           return;
         }
 
-        // Mark coupon as used in Firestore (atomic transaction)
         await db.runTransaction(async (transaction) => {
           const doc = await transaction.get(docRef);
           if (doc.exists && doc.data().used === true) {
-            throw new Error('Coupon already used by someone else.');
+            throw new Error('Coupon already used.');
           }
           transaction.set(docRef, {
             used: true,
@@ -330,7 +406,6 @@
           });
         });
 
-        // Credit the user with the specific reward amount
         userData.balance = (userData.balance || 0) + rewardAmount;
         userData.lifetimeTotal = (userData.lifetimeTotal || 0) + rewardAmount;
         if (!userData.redeemedCoupons) userData.redeemedCoupons = [];
@@ -340,18 +415,25 @@
         await saveUserData();
 
         messageDiv.style.color = '#10b981';
-        messageDiv.innerHTML = `🎉 Coupon redeemed! +₦${rewardAmount.toLocaleString()} added to your wallet!`;
+        messageDiv.innerHTML = `🎉 +₦${rewardAmount.toLocaleString()} added!`;
         input.value = '';
-        showToast(`🎉 Coupon redeemed! +₦${rewardAmount.toLocaleString()} added!`);
+        showToast(`🎉 Coupon redeemed! +₦${rewardAmount.toLocaleString()}`);
 
       } catch (error) {
-        console.error('Coupon redeem error:', error);
-        messageDiv.style.color = '#ef4444';
-        messageDiv.innerHTML = '❌ Error redeeming coupon. Please try again.';
+        console.error('Coupon error:', error);
+        if (error.message === 'Coupon already used.') {
+          messageDiv.style.color = '#f59e0b';
+          messageDiv.innerHTML = '⚠️ This coupon was just taken.';
+        } else {
+          messageDiv.style.color = '#ef4444';
+          messageDiv.innerHTML = '❌ Error. Please try again.';
+        }
       }
     }
 
-    // ===== DAILY REWARD =====
+    // ============================================================
+    // DAILY REWARD
+    // ============================================================
     async function claimDailyReward() {
       const today = getTodayDateString();
       if (userData.lastDailyRewardDate === today) return;
@@ -360,68 +442,84 @@
       userData.lastDailyRewardDate = today;
       updateInterfaceValues();
       await saveUserData();
-      showToast('🎉 +₦100.00 Daily Bonus claimed!');
+      showToast('🎉 +₦100 Daily Bonus!');
     }
 
-    // ===== TASKS =====
+    // ============================================================
+    // RENDER TASKS
+    // ============================================================
     function renderTasks() {
-      const surveyList = document.getElementById('surveyList');
-      const socialTaskList = document.getElementById('socialTaskList');
-
-      if (surveyList) {
-        surveyList.innerHTML = '';
-        Object.keys(surveyDatabase).forEach(id => {
-          const survey = surveyDatabase[id];
-          const completed = isTaskCompleted(id);
-          surveyList.innerHTML += `
-            <div class="offer-card">
-              <div class="offer-title">${survey.title}</div>
-              <p class="offer-desc">${survey.desc}</p>
-              <span class="badge badge-survey">${survey.category}</span>
-              <div class="offer-reward">₦${survey.reward}</div>
-              <button class="start-btn" onclick="completeTask('${id}', ${survey.reward}, '#')" ${completed ? 'disabled' : ''}>
-                ${completed ? '✅ Completed' : '📝 Start Survey'}
-              </button>
-            </div>
-          `;
-        });
-      }
-
-      if (socialTaskList) {
-        socialTaskList.innerHTML = '';
-        socialTasks.forEach(task => {
-          const completed = isTaskCompleted(task.id);
-          socialTaskList.innerHTML += `
-            <div class="offer-card">
-              <div class="offer-title">${task.title}</div>
-              <div class="offer-desc">${task.desc}</div>
-              <span class="badge ${task.badgeClass}">${task.badge}</span>
-              <div class="offer-reward">₦${task.reward}</div>
-              <button class="start-btn" onclick="completeTask('${task.id}', ${task.reward}, '${task.link}')" ${completed ? 'disabled' : ''}>
-                ${completed ? '✅ Completed' : '🚀 Start Task'}
-              </button>
-            </div>
-          `;
-        });
-      }
+      renderTaskList('surveyList', surveyTasks);
+      renderTaskList('appTaskList', appTasks);
+      renderTaskList('socialTaskList', socialTasks);
+      renderExtraTaskList('extraTaskList', extraTasks);
     }
 
-    async function completeTask(taskId, reward, link) {
-      if (isTaskCompleted(taskId)) return;
+    function renderTaskList(containerId, tasks) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+      tasks.forEach(task => {
+        const completed = isTaskCompleted(task.id, task.reset);
+        container.innerHTML += `
+          <div class="offer-card">
+            <div class="offer-title">${task.title}</div>
+            <p class="offer-desc">${task.desc}</p>
+            ${task.badge ? `<span class="badge ${task.badgeClass}">${task.badge}</span>` : ''}
+            <div class="offer-reward">₦${task.reward}</div>
+            <button class="start-btn" onclick="completeTask('${task.id}', ${task.reward}, '${task.link || '#'}', '${task.reset}')" ${completed ? 'disabled' : ''}>
+              ${completed ? '✅ Completed' : '🚀 Start Task'}
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    // Extra tasks now link to pages instead of opening modals
+    function renderExtraTaskList(containerId, tasks) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+      tasks.forEach(task => {
+        const completed = isTaskCompleted(task.id, task.reset);
+        const pageLink = task.page || '#';
+        container.innerHTML += `
+          <div class="offer-card">
+            <div class="offer-title">${task.title}</div>
+            <p class="offer-desc">${task.desc}</p>
+            ${task.badge ? `<span class="badge ${task.badgeClass}">${task.badge}</span>` : ''}
+            <div class="offer-reward">₦${task.reward}</div>
+            <a href="${pageLink}" class="start-btn" style="display:block; text-align:center; text-decoration:none; ${completed ? 'pointer-events:none; opacity:0.7;' : ''}">
+              ${completed ? '✅ Completed' : '🚀 Go to Task'}
+            </a>
+          </div>
+        `;
+      });
+    }
+
+    // ============================================================
+    // COMPLETE TASK (for regular tasks)
+    // ============================================================
+    async function completeTask(taskId, reward, link, resetInterval) {
+      if (isTaskCompleted(taskId, resetInterval)) return;
       if (link && link !== '#') {
         window.open(link, '_blank');
       }
+      if (!userData.completedTasks) userData.completedTasks = {};
+      userData.completedTasks[taskId] = Date.now();
       userData.balance = (userData.balance || 0) + reward;
       userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-      userData.completedTaskIds.push(taskId);
+
       updateInterfaceValues();
       renderTasks();
       await saveUserData();
-      showToast(`🎉 Reward of ₦${reward} credited!`);
+      showToast(`🎉 +₦${reward} earned!`);
     }
 
-    // ===== AI CHAT =====
+    // ============================================================
+    // AI CHAT
+    // ============================================================
     const aiMessages = document.getElementById('aiMessages');
     const aiInput = document.getElementById('aiChatInput');
     const aiSendBtn = document.getElementById('aiSendBtn');
@@ -492,18 +590,15 @@
 
     async function callBackendProxy(userMessage) {
       const endpoint = `${API_BASE_URL}/api/grok`;
-
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage })
       });
-
       if (!response.ok) {
         const errText = await response.text();
         throw new Error(`Server error (${response.status}): ${errText}`);
       }
-
       const data = await response.json();
       return data.reply || "I no get response o, but I dey try!";
     }
@@ -515,7 +610,9 @@
       }
     });
 
-    // ===== AUTH & INIT =====
+    // ============================================================
+    // AUTH & INIT
+    // ============================================================
     function logout() {
       auth.signOut().then(() => {
         localStorage.removeItem('earnsphere_user_data');
