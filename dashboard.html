@@ -6,14 +6,13 @@
   <title>EarnSphere Nigeria - Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google AdSense Script -->
+  <!-- AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724" crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
-    /* ===== RESET & BASE ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -27,7 +26,7 @@
     .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:.5rem 1rem; border-radius:2rem; font-weight:500; color:#3b82f6; cursor:pointer; transition:all 0.3s; }
     .logout-btn:hover { background:rgba(59,130,246,.3); }
     .dashboard-container { max-width:1200px; margin:2rem auto; padding:0 1.5rem; width:100%; }
-    .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; }
+    .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
     .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
     .stat-card, .offer-card, .withdraw-card, .coupon-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); transition:transform 0.2s; }
     .stat-card:hover, .offer-card:hover { transform:translateY(-2px); }
@@ -81,64 +80,33 @@
     #aiSendBtn { background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; color:#fff; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; transition:0.2s; display:flex; align-items:center; justify-content:center; }
     #aiSendBtn:hover { transform:scale(1.05); box-shadow:0 0 15px rgba(59,130,246,.4); }
     #aiSendBtn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-    @media (max-width: 768px) {
+    @media (max-width:768px) {
       .navbar { padding:1rem; }
       .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
       .dashboard-container { padding:0 1rem; }
       .offers-grid { grid-template-columns:1fr; }
       #aiChatWindow { width:300px; height:400px; right:10px; bottom:80px; }
     }
-    /* ===== Countdown timer highlight ===== */
-    .timer-countdown {
-      font-weight:700;
-      color:#f59e0b;
-      background:rgba(245,158,11,.1);
-      padding:.3rem .8rem;
-      border-radius:2rem;
-      display:inline-block;
-      border:1px solid rgba(245,158,11,.2);
+    .section-wrapper { margin-bottom:1.5rem; }
+    .section-wrapper.hidden { display:none !important; }
+    .ad-container { 
+      display: none; 
+      margin: 0.5rem 0; 
+      padding: 0.5rem; 
+      background: rgba(255,255,255,0.02); 
+      border-radius: 0.5rem; 
+      border: 1px dashed rgba(255,255,255,0.05); 
+      text-align: center; 
+      min-height: 0; 
+      overflow: hidden;
     }
-    .no-tasks-msg {
-      text-align:center;
-      color:#94a3b8;
-      padding:2rem;
-      font-style:italic;
-      background:rgba(15,23,42,.3);
-      border-radius:1rem;
+    .ad-container.has-ad { 
+      display: block !important; 
+      min-height: 60px; 
     }
-    /* ===== AD CONTAINER – hidden until ads appear ===== */
-    .ad-container {
-      display: none; /* HIDDEN BY DEFAULT – shows when AdSense serves ads */
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      background: rgba(255,255,255,0.02);
-      border-radius: 0.5rem;
-      border: 1px dashed rgba(255,255,255,0.05);
-      text-align: center;
-      min-height: 60px;
-    }
-    .ad-container ins {
-      margin: 0 auto;
-    }
-    /* Show ad container when it has content */
-    .ad-container:not(:empty) {
-      display: block !important;
-    }
-    /* Small note for users */
-    .task-hint {
-      font-size: 0.85rem;
-      color: #94a3b8;
-      text-align: center;
-      margin: 1rem 0 0.5rem;
-      padding: 0.5rem;
-      background: rgba(255,255,255,0.03);
-      border-radius: 0.5rem;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    .task-hint i {
-      color: #f59e0b;
-      margin-right: 0.5rem;
-    }
+    .ad-container ins { margin: 0 auto; }
+    .timer-label { font-weight:700; color:#f59e0b; background:rgba(245,158,11,.1); padding:.3rem .8rem; border-radius:2rem; display:inline-block; border:1px solid rgba(245,158,11,.2); }
+    .limit-badge { font-size:0.8rem; color:#94a3b8; font-weight:400; margin-left:0.5rem; }
   </style>
 </head>
 <body>
@@ -173,88 +141,68 @@
         </div>
       </div>
 
-      <!-- ===== ADSENSE BANNER AD #1 (HIDDEN UNTIL ADS SHOW) ===== -->
-      <div class="ad-container" id="adContainer1">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-5803688718527724"
-             data-ad-slot="2561139179"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-      </div>
+      <!-- Ad -->
+      <div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5803688718527724" data-ad-slot="2561139179" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
 
       <!-- Coupon -->
       <h2 class="section-title"><i class="fas fa-ticket-alt"></i> Coupon Code</h2>
       <div class="stats-grid">
-        <div class="coupon-card" style="grid-column: span 1;">
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-            <i class="fas fa-gift" style="font-size:1.5rem; color:#10b981;"></i>
-            <div>
-              <div style="font-weight:700;">Redeem Coupon</div>
-              <div style="font-size:0.8rem; color:#94a3b8;">Get ₦500 – ₦5,000 – first come, first served!</div>
-            </div>
+        <div class="coupon-card" style="grid-column:span 1;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <i class="fas fa-gift" style="font-size:1.5rem;color:#10b981;"></i>
+            <div><div style="font-weight:700;">Redeem Coupon</div><div style="font-size:0.8rem;color:#94a3b8;">Get ₦500 – ₦5,000 – first come, first served!</div></div>
           </div>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <input type="text" id="couponInput" class="form-control" placeholder="Enter coupon code..." style="flex:1; min-width:150px;" />
-            <button class="coupon-btn" id="couponBtn" onclick="redeemCoupon()" style="flex:0 0 auto; padding:0.9rem 2rem;">
-              <i class="fas fa-check-circle"></i> Redeem
-            </button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <input type="text" id="couponInput" class="form-control" placeholder="Enter coupon code..." style="flex:1;min-width:150px;" />
+            <button class="coupon-btn" id="couponBtn" onclick="redeemCoupon()" style="flex:0 0 auto;padding:0.9rem 2rem;"><i class="fas fa-check-circle"></i> Redeem</button>
           </div>
-          <div style="margin-top:10px; font-size:0.8rem; color:#64748b;">
-            <i class="fab fa-whatsapp" style="color:#25D366;"></i> Get codes from WhatsApp
-          </div>
-          <div id="couponMessage" style="margin-top:8px; font-size:0.9rem; font-weight:600;"></div>
+          <div style="margin-top:10px;font-size:0.8rem;color:#64748b;"><i class="fab fa-whatsapp" style="color:#25D366;"></i> Get codes from WhatsApp</div>
+          <div id="couponMessage" style="margin-top:8px;font-size:0.9rem;font-weight:600;"></div>
         </div>
       </div>
 
-      <!-- Surveys (daily) -->
-      <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers</h2>
-      <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> <span id="surveyCountdown">Resets daily at midnight</span>
+      <!-- SURVEYS (max 2/day) -->
+      <div class="section-wrapper" id="surveyWrapper">
+        <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers <span class="limit-badge">(max 2 per day)</span></h2>
+        <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+          <i class="fas fa-clock"></i> <span id="surveyCountdown">Resets daily at midnight</span>
+        </div>
+        <div class="offers-grid" id="surveyList"></div>
       </div>
-      <div class="offers-grid" id="surveyList"></div>
 
-      <!-- App Downloads (daily) -->
-      <h2 class="section-title"><i class="fas fa-download"></i> App Download Tasks</h2>
-      <div id="appResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> <span id="appCountdown">Resets daily at midnight</span>
+      <!-- APP DOWNLOADS (1/hour) -->
+      <div class="section-wrapper" id="appWrapper">
+        <h2 class="section-title"><i class="fas fa-download"></i> App Downloads <span class="limit-badge">(1 per hour)</span></h2>
+        <div id="appResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+          <i class="fas fa-clock"></i> <span id="appCountdown">Available now</span>
+        </div>
+        <div class="offers-grid" id="appTaskList"></div>
       </div>
-      <div class="offers-grid" id="appTaskList"></div>
 
-      <!-- Social (2‑hour) -->
-      <h2 class="section-title"><i class="fas fa-share-alt"></i> Social & YouTube Tasks</h2>
-      <div id="socialResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> <span id="socialCountdown">Resets every 2 hours</span>
+      <!-- SOCIAL (1/hour) -->
+      <div class="section-wrapper" id="socialWrapper">
+        <h2 class="section-title"><i class="fas fa-share-alt"></i> Social & YouTube <span class="limit-badge">(1 per hour)</span></h2>
+        <div id="socialResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+          <i class="fas fa-clock"></i> <span id="socialCountdown">Available now</span>
+        </div>
+        <div class="offers-grid" id="socialTaskList"></div>
       </div>
-      <div class="offers-grid" id="socialTaskList"></div>
 
-      <!-- Extra Tasks (daily) -->
-      <h2 class="section-title"><i class="fas fa-star"></i> More Earning Tasks</h2>
-      <div id="extraResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
-        <i class="fas fa-clock"></i> <span id="extraCountdown">Resets daily at midnight</span>
+      <!-- EXTRA (1/hour) -->
+      <div class="section-wrapper" id="extraWrapper">
+        <h2 class="section-title"><i class="fas fa-star"></i> More Earning Tasks <span class="limit-badge">(1 per hour)</span></h2>
+        <div id="extraResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+          <i class="fas fa-clock"></i> <span id="extraCountdown">Available now</span>
+        </div>
+        <div class="offers-grid" id="extraTaskList"></div>
       </div>
-      <div class="offers-grid" id="extraTaskList"></div>
 
-      <!-- ===== ADSENSE BANNER AD #2 (HIDDEN UNTIL ADS SHOW) ===== -->
-      <div class="ad-container" id="adContainer2">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-5803688718527724"
-             data-ad-slot="2561139179"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-      </div>
+      <!-- Ad -->
+      <div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5803688718527724" data-ad-slot="2561139179" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
 
       <!-- Support -->
       <h2 class="section-title"><i class="fas fa-headset"></i> Contact Support</h2>
       <div class="withdraw-card">
-        <div id="supportMessage"></div>
         <form id="supportForm">
           <div class="form-group"><label>Issue Type</label><select id="issue_type" class="form-control" required><option value="" disabled selected>Select issue</option><option value="Payment Not Received">Payment Not Received</option><option value="Task Not Credited">Task Not Credited</option><option value="Account Problem">Account Problem</option><option value="General Inquiry">General Inquiry</option></select></div>
           <div class="form-group"><label>Your Message</label><textarea id="support_text_message" class="form-control" rows="3" placeholder="Describe your issue in detail..." required></textarea></div>
@@ -266,14 +214,14 @@
 
   <footer class="footer">
     <p><a href="privacy-policy.html">Privacy Policy</a> <a href="about.html">About</a> <a href="contact.html">Contact</a></p>
-    <p style="margin-top:1rem; font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
+    <p style="margin-top:1rem;font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
   <!-- AI Chat -->
   <div id="aiChatBtn" onclick="toggleAiChat()"><i class="fas fa-robot"></i></div>
   <div id="aiChatWindow">
     <div id="aiChatHeader"><span><i class="fas fa-brain"></i> SphereAI Assistant</span><span class="close-btn" onclick="toggleAiChat()"><i class="fas fa-times"></i></span></div>
-    <div id="aiMessages"><div class="ai-msg bot">👋 How you dey? I'm SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.<span class="msg-time">Just now</span></div></div>
+    <div id="aiMessages"><div class="ai-msg bot">👋 How you dey? I'm SphereAI...<span class="msg-time">Just now</span></div></div>
     <div id="aiChatInputArea"><input type="text" id="aiChatInput" placeholder="Type your message..." autocomplete="off" /><button id="aiSendBtn" onclick="sendAiMessage()"><i class="fas fa-paper-plane"></i></button></div>
   </div>
 
@@ -297,14 +245,14 @@
     // COUPON REWARDS
     // ============================================================
     const couponRewards = {
-      "WHATSAPP1000": 1000,
-      "TELEGRAM500": 500,
-      "YOUTUBE2000": 2000,
-      "FREEMONEY": 3000,
-      "WELCOMEBONUS": 5000,
-      "EARNSPHERE": 750,
-      "BONUS1500": 1500,
-      "VIP2500": 2500
+      "WHATSAPP1000":1000,
+      "TELEGRAM500":500,
+      "YOUTUBE2000":2000,
+      "FREEMONEY":3000,
+      "WELCOMEBONUS":5000,
+      "EARNSPHERE":750,
+      "BONUS1500":1500,
+      "VIP2500":2500
     };
 
     // ============================================================
@@ -318,46 +266,49 @@
       successfulTaskCount: 0,
       completedTasks: {},
       lastDailyRewardDate: '',
-      redeemedCoupons: []
+      redeemedCoupons: [],
+      socialLastCompleted: 0,
+      appLastCompleted: 0,
+      extraLastCompleted: 0
     };
 
     // ============================================================
-    // TASK DEFINITIONS
+    // TASKS DEFINITIONS
     // ============================================================
     const surveyTasks = [
-      { id: 'srv_01', title: 'Social Media Usage', category: 'Tech', reward: 150, desc: 'Tell us about your screen time habits', reset: 'daily' },
-      { id: 'srv_02', title: 'Crypto Knowledge Check', category: 'Finance', reward: 250, desc: 'Your insights on digital assets', reset: 'daily' },
-      { id: 'srv_03', title: 'Nollywood Movie Preferences', category: 'Entertainment', reward: 200, desc: 'Tell us your favourite Nollywood actors and movies.', reset: 'daily' },
-      { id: 'srv_04', title: 'Nigerian Food Culture', category: 'Lifestyle', reward: 180, desc: 'What are your favourite Nigerian dishes and recipes?', reset: 'daily' },
-      { id: 'srv_05', title: 'Music Streaming Habits', category: 'Entertainment', reward: 220, desc: 'How do you listen to music? Share your streaming habits.', reset: 'daily' },
-      { id: 'srv_06', title: 'Online Shopping Behavior', category: 'E-commerce', reward: 250, desc: 'Share your experience with online shopping in Nigeria.', reset: 'daily' },
-      { id: 'srv_07', title: 'Football & Sports Passion', category: 'Sports', reward: 200, desc: 'Tell us about your favourite teams and how you follow sports.', reset: 'daily' },
-      { id: 'srv_08', title: 'Education & Career Goals', category: 'Education', reward: 300, desc: 'Share your educational background and career aspirations.', reset: 'daily' },
-      { id: 'srv_09', title: 'Travel & Tourism Preferences', category: 'Lifestyle', reward: 180, desc: 'Where do you want to travel? Share your dream destinations.', reset: 'daily' },
-      { id: 'srv_10', title: 'Smartphone Usage Patterns', category: 'Tech', reward: 250, desc: 'How do you use your smartphone daily? Share your habits.', reset: 'daily' }
+      { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits' },
+      { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets' },
+      { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200, desc:'Tell us your favourite Nollywood actors and movies.' },
+      { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180, desc:'What are your favourite Nigerian dishes and recipes?' },
+      { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220, desc:'How do you listen to music? Share your streaming habits.' },
+      { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.' },
+      { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.' },
+      { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.' },
+      { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.' },
+      { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.' }
     ];
 
     const appTasks = [
-      { id: 'app_01', title: 'Download Grok', desc: 'Download and install the Grok AI app from the Play Store.', reward: 400, badge: 'Download', badgeClass: 'badge-download', link: 'https://play.google.com/store/apps/details?id=ai.x.grok', reset: 'daily' },
-      { id: 'app_02', title: 'Download DeepSeek', desc: 'Download and install the DeepSeek AI app from the Play Store.', reward: 350, badge: 'Download', badgeClass: 'badge-download', link: 'https://play.google.com/store/apps/details?id=com.deepseek.chat', reset: 'daily' }
+      { id:'app_01', title:'Download Grok', desc:'Download and install the Grok AI app from the Play Store.', reward:400, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=ai.x.grok' },
+      { id:'app_02', title:'Download DeepSeek', desc:'Download and install the DeepSeek AI app from the Play Store.', reward:350, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=com.deepseek.chat' }
     ];
 
     const socialTasks = [
-      { id: 'yt_1', title: 'Subscribe to YouTube', desc: 'Subscribe to our YouTube channel.', reward: 300, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria', reset: '2hours' },
-      { id: 'yt_2', title: 'Watch & Like YouTube', desc: 'Watch our video for 1 min and like.', reward: 200, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria', reset: '2hours' },
-      { id: 'yt_3', title: 'Comment on YouTube', desc: 'Leave a helpful comment on our pinned video.', reward: 150, badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria', reset: '2hours' },
-      { id: 'soc_1', title: 'Follow on TikTok', desc: 'Follow our TikTok and like the latest post.', reward: 250, badge: 'TikTok', badgeClass: 'badge-social', link: 'https://tiktok.com/', reset: '2hours' },
-      { id: 'soc_2', title: 'Follow on Instagram', desc: 'Follow our official Instagram page.', reward: 200, badge: 'Instagram', badgeClass: 'badge-social', link: 'https://instagram.com/', reset: '2hours' },
-      { id: 'soc_3', title: 'Join Our Telegram', desc: 'Join our community channel for updates.', reward: 150, badge: 'Telegram', badgeClass: 'badge-social', link: 'https://t.me/', reset: '2hours' },
-      { id: 'soc_4', title: 'Follow on Twitter', desc: 'Follow our official Twitter/X account.', reward: 180, badge: 'Twitter', badgeClass: 'badge-twitter', link: 'https://twitter.com/', reset: '2hours' },
-      { id: 'soc_5', title: 'Share Our Page', desc: 'Share our website link on your social media.', reward: 220, badge: 'Social', badgeClass: 'badge-social', link: 'https://earnspherehub.name.ng', reset: '2hours' }
+      { id:'yt_1', title:'Subscribe to YouTube', desc:'Subscribe to our YouTube channel.', reward:300, badge:'YouTube', badgeClass:'badge-youtube', link:'https://youtube.com/@earnspherenigeria' },
+      { id:'yt_2', title:'Watch & Like YouTube', desc:'Watch our video for 1 min and like.', reward:200, badge:'YouTube', badgeClass:'badge-youtube', link:'https://youtube.com/@earnspherenigeria' },
+      { id:'yt_3', title:'Comment on YouTube', desc:'Leave a helpful comment on our pinned video.', reward:150, badge:'YouTube', badgeClass:'badge-youtube', link:'https://youtube.com/@earnspherenigeria' },
+      { id:'soc_1', title:'Follow on TikTok', desc:'Follow our TikTok and like the latest post.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/' },
+      { id:'soc_2', title:'Follow on Instagram', desc:'Follow our official Instagram page.', reward:200, badge:'Instagram', badgeClass:'badge-social', link:'https://instagram.com/' },
+      { id:'soc_3', title:'Join Our Telegram', desc:'Join our community channel for updates.', reward:150, badge:'Telegram', badgeClass:'badge-social', link:'https://t.me/' },
+      { id:'soc_4', title:'Follow on Twitter', desc:'Follow our official Twitter/X account.', reward:180, badge:'Twitter', badgeClass:'badge-twitter', link:'https://twitter.com/' },
+      { id:'soc_5', title:'Share Our Page', desc:'Share our website link on your social media.', reward:220, badge:'Social', badgeClass:'badge-social', link:'https://earnspherehub.name.ng' }
     ];
 
     const extraTasks = [
-      { id: 'extra_upload', title: '📷 Upload a Picture', desc: 'Upload a picture and earn ₦200.', reward: 200, badge: 'Upload', badgeClass: 'badge-upload', reset: 'daily', page: 'upload.html' },
-      { id: 'extra_poll', title: '📊 Daily Poll', desc: 'Answer our daily poll and earn ₦100.', reward: 100, badge: 'Poll', badgeClass: 'badge-poll', reset: 'daily', page: 'poll.html' },
-      { id: 'extra_quiz', title: '❓ Quick Quiz', desc: 'Answer a quiz question and earn ₦150.', reward: 150, badge: 'Quiz', badgeClass: 'badge-quiz', reset: 'daily', page: 'quiz.html' },
-      { id: 'extra_ad', title: '🎬 Watch an Ad', desc: 'Watch a short ad and earn ₦50.', reward: 50, badge: 'Ad', badgeClass: 'badge-ad', reset: 'daily', page: 'ad.html' }
+      { id:'extra_upload', title:'📷 Upload a Picture', desc:'Upload a picture and earn ₦200.', reward:200, badge:'Upload', badgeClass:'badge-upload', page:'upload.html' },
+      { id:'extra_poll', title:'📊 Daily Poll', desc:'Answer our daily poll and earn ₦100.', reward:100, badge:'Poll', badgeClass:'badge-poll', page:'poll.html' },
+      { id:'extra_quiz', title:'❓ Quick Quiz', desc:'Answer a quiz question and earn ₦150.', reward:150, badge:'Quiz', badgeClass:'badge-quiz', page:'quiz.html' },
+      { id:'extra_ad', title:'🎬 Watch an Ad', desc:'Watch a short ad and earn ₦50.', reward:50, badge:'Ad', badgeClass:'badge-ad', page:'ad.html' }
     ];
 
     // ============================================================
@@ -367,44 +318,21 @@
       return new Date().toISOString().split('T')[0];
     }
 
-    function isTaskCompleted(taskId, resetInterval) {
+    function isTaskCompleted(taskId) {
       if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
-      const completedAt = userData.completedTasks[taskId];
-      const now = Date.now();
-      if (resetInterval === 'daily') {
-        const completedDate = new Date(completedAt).toISOString().split('T')[0];
-        return completedDate === getTodayDateString();
-      } else if (resetInterval === '2hours') {
-        const twoHours = 2 * 60 * 60 * 1000;
-        return (now - completedAt) < twoHours;
-      }
-      return false;
+      const completedDate = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
+      return completedDate === getTodayDateString();
     }
 
-    // ---- Timer calculations ----
     function getTimeToMidnight() {
       const now = new Date();
       const midnight = new Date(now);
-      midnight.setHours(24, 0, 0, 0);
+      midnight.setHours(24,0,0,0);
       return midnight.getTime() - now.getTime();
     }
 
-    function getTimeToNextEvenHour() {
-      const now = new Date();
-      const hour = now.getHours();
-      const nextEvenHour = (Math.floor(hour / 2) * 2) + 2;
-      const target = new Date(now);
-      if (nextEvenHour >= 24) {
-        target.setDate(target.getDate() + 1);
-        target.setHours(0, 0, 0, 0);
-      } else {
-        target.setHours(nextEvenHour, 0, 0, 0);
-      }
-      return target.getTime() - now.getTime();
-    }
-
     function formatTime(ms) {
-      if (ms <= 0) return 'Resets now';
+      if (ms <= 0) return 'Available';
       const totalSec = Math.floor(ms / 1000);
       const h = Math.floor(totalSec / 3600);
       const m = Math.floor((totalSec % 3600) / 60);
@@ -413,7 +341,20 @@
       if (h > 0) parts.push(h + 'h');
       if (m > 0) parts.push(m + 'm');
       parts.push(s + 's');
-      return parts.join(' ');
+      return 'Available in ' + parts.join(' ');
+    }
+
+    function getSurveyCountToday() {
+      let count = 0;
+      surveyTasks.forEach(task => {
+        if (isTaskCompleted(task.id)) count++;
+      });
+      return count;
+    }
+
+    function isCooldownActive(lastTimestamp) {
+      if (!lastTimestamp) return false;
+      return (Date.now() - lastTimestamp) < 3600000; // 1 hour
     }
 
     function updateInterfaceValues() {
@@ -423,8 +364,8 @@
       document.getElementById('successfulTaskCount').innerText = userData.successfulTaskCount || 0;
 
       const rewardBtn = document.getElementById('dailyRewardBtn');
-      const today = getTodayDateString();
       if (rewardBtn) {
+        const today = getTodayDateString();
         if (userData.lastDailyRewardDate === today) {
           rewardBtn.disabled = true;
           rewardBtn.innerHTML = '<i class="fas fa-check-circle"></i> Claimed Today';
@@ -440,9 +381,7 @@
       if (currentUser) {
         try {
           await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
-        } catch (e) {
-          console.error("Error saving data:", e);
-        }
+        } catch (e) { console.error("Error saving data:", e); }
       }
     }
 
@@ -455,6 +394,30 @@
     }
 
     // ============================================================
+    // ADSENSE - Only show ad container if a real ad loaded
+    // ============================================================
+    function checkAndShowAds() {
+      document.querySelectorAll('.ad-container').forEach(container => {
+        const ins = container.querySelector('ins.adsbygoogle');
+        
+        if (!ins) return;
+
+        // Wait a bit for AdSense to render
+        setTimeout(() => {
+          const hasIframe = ins.querySelector('iframe');
+          const hasHeight = ins.offsetHeight > 40;
+
+          if (hasIframe || hasHeight) {
+            container.classList.add('has-ad');
+          } else {
+            container.classList.remove('has-ad');
+            container.style.display = 'none';
+          }
+        }, 4500); // Wait 4.5 seconds for ad to load
+      });
+    }
+
+    // ============================================================
     // COUPON REDEEM
     // ============================================================
     async function redeemCoupon() {
@@ -462,21 +425,9 @@
       const messageDiv = document.getElementById('couponMessage');
       const couponCode = input.value.trim().toUpperCase();
 
-      if (!currentUser) {
-        messageDiv.style.color = '#ef4444';
-        messageDiv.innerHTML = '⚠️ Please log in.';
-        return;
-      }
-      if (!couponCode) {
-        messageDiv.style.color = '#ef4444';
-        messageDiv.innerHTML = '⚠️ Enter a code.';
-        return;
-      }
-      if (!couponRewards.hasOwnProperty(couponCode)) {
-        messageDiv.style.color = '#ef4444';
-        messageDiv.innerHTML = '❌ Invalid code.';
-        return;
-      }
+      if (!currentUser) { messageDiv.style.color='#ef4444'; messageDiv.innerHTML='⚠️ Please log in.'; return; }
+      if (!couponCode) { messageDiv.style.color='#ef4444'; messageDiv.innerHTML='⚠️ Enter a code.'; return; }
+      if (!couponRewards.hasOwnProperty(couponCode)) { messageDiv.style.color='#ef4444'; messageDiv.innerHTML='❌ Invalid code.'; return; }
 
       const rewardAmount = couponRewards[couponCode];
 
@@ -485,27 +436,20 @@
         const docSnap = await docRef.get();
 
         if (docSnap.exists && docSnap.data().used === true) {
-          messageDiv.style.color = '#f59e0b';
-          messageDiv.innerHTML = '⚠️ Already redeemed by someone.';
+          messageDiv.style.color='#f59e0b';
+          messageDiv.innerHTML='⚠️ Already redeemed by someone.';
           return;
         }
         if (userData.redeemedCoupons && userData.redeemedCoupons.includes(couponCode)) {
-          messageDiv.style.color = '#f59e0b';
-          messageDiv.innerHTML = '⚠️ You already used this.';
+          messageDiv.style.color='#f59e0b';
+          messageDiv.innerHTML='⚠️ You already used this.';
           return;
         }
 
         await db.runTransaction(async (transaction) => {
           const doc = await transaction.get(docRef);
-          if (doc.exists && doc.data().used === true) {
-            throw new Error('Coupon already used.');
-          }
-          transaction.set(docRef, {
-            used: true,
-            usedBy: currentUser.uid,
-            reward: rewardAmount,
-            redeemedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
+          if (doc.exists && doc.data().used === true) throw new Error('Coupon already used.');
+          transaction.set(docRef, { used: true, usedBy: currentUser.uid, reward: rewardAmount, redeemedAt: firebase.firestore.FieldValue.serverTimestamp() });
         });
 
         userData.balance = (userData.balance || 0) + rewardAmount;
@@ -515,20 +459,18 @@
 
         updateInterfaceValues();
         await saveUserData();
-
-        messageDiv.style.color = '#10b981';
+        messageDiv.style.color='#10b981';
         messageDiv.innerHTML = `🎉 +₦${rewardAmount.toLocaleString()} added!`;
         input.value = '';
         showToast(`🎉 Coupon redeemed! +₦${rewardAmount.toLocaleString()}`);
-
       } catch (error) {
         console.error('Coupon error:', error);
         if (error.message === 'Coupon already used.') {
-          messageDiv.style.color = '#f59e0b';
-          messageDiv.innerHTML = '⚠️ This coupon was just taken.';
+          messageDiv.style.color='#f59e0b';
+          messageDiv.innerHTML='⚠️ This coupon was just taken.';
         } else {
-          messageDiv.style.color = '#ef4444';
-          messageDiv.innerHTML = '❌ Error. Please try again.';
+          messageDiv.style.color='#ef4444';
+          messageDiv.innerHTML='❌ Error. Please try again.';
         }
       }
     }
@@ -551,104 +493,200 @@
     // RENDER TASKS
     // ============================================================
     function renderTasks() {
-      renderTaskList('surveyList', surveyTasks, 'daily', 'survey');
-      renderTaskList('appTaskList', appTasks, 'daily', 'app');
-      renderTaskList('socialTaskList', socialTasks, '2hours', 'social');
-      renderExtraTaskList('extraTaskList', extraTasks, 'daily');
-    }
+      // Surveys - always show section + timer, only show tasks or message
+      const surveyWrapper = document.getElementById('surveyWrapper');
+      const surveyContainer = document.getElementById('surveyList');
+      const surveyCount = getSurveyCountToday();
+      const surveysAvailable = surveyCount < 2;
+      const availableSurveys = surveyTasks.filter(task => !isTaskCompleted(task.id));
 
-    function renderTaskList(containerId, tasks, resetType, sectionName) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      container.innerHTML = '';
-      const available = tasks.filter(task => !isTaskCompleted(task.id, resetType));
-      if (available.length === 0) {
-        container.innerHTML = `<div class="no-tasks-msg">🎯 All tasks completed${resetType === 'daily' ? ' for today' : ' for this 2‑hour window'}! Check back later.</div>`;
-        return;
-      }
-      available.forEach(task => {
-        const completed = isTaskCompleted(task.id, resetType);
-        container.innerHTML += `
-          <div class="offer-card">
-            <div class="offer-title">${task.title}</div>
-            <p class="offer-desc">${task.desc}</p>
-            ${task.badge ? `<span class="badge ${task.badgeClass}">${task.badge}</span>` : ''}
-            <div class="offer-reward">₦${task.reward}</div>
-            <button class="start-btn" onclick="completeTask('${task.id}', ${task.reward}, '${task.link || '#'}', '${resetType}')" ${completed ? 'disabled' : ''}>
-              ${completed ? '✅ Completed' : '🚀 Start Task'}
-            </button>
+      surveyWrapper.classList.remove('hidden');
+      surveyContainer.innerHTML = '';
+
+      if (!surveysAvailable || availableSurveys.length === 0) {
+        // Show friendly message instead of hiding the whole section
+        surveyContainer.innerHTML = `
+          <div class="offer-card" style="grid-column: span 1; text-align: center; opacity: 0.8; border-style: dashed; border-color: rgba(148,163,184,0.3);">
+            <div style="margin: 1.2rem 0;">
+              <i class="fas fa-check-circle" style="font-size: 2rem; color: #10b981; margin-bottom: 0.6rem;"></i>
+              <p style="font-weight: 600; color: #e2e8f0; margin-bottom: 0.4rem;">You've completed today's survey limit (2/2).</p>
+              <p style="font-size: 0.9rem; color: #94a3b8;">New surveys will be available after midnight. Great job earning today!</p>
+            </div>
           </div>
         `;
-      });
+      } else {
+        availableSurveys.forEach(task => {
+          surveyContainer.innerHTML += `
+            <div class="offer-card">
+              <div class="offer-title">${task.title}</div>
+              <p class="offer-desc">${task.desc}</p>
+              <span class="badge badge-survey">${task.category}</span>
+              <div class="offer-reward">₦${task.reward}</div>
+              <button class="start-btn" onclick="completeSurveyTask('${task.id}', ${task.reward})">🚀 Start Survey</button>
+            </div>
+          `;
+        });
+      }
+
+      // App downloads, Social, Extra - use updated renderCategory (always shows header + timer)
+      renderCategory('appTaskList', 'appWrapper', appTasks, 'appLastCompleted', 'app');
+      renderCategory('socialTaskList', 'socialWrapper', socialTasks, 'socialLastCompleted', 'social');
+      renderCategory('extraTaskList', 'extraWrapper', extraTasks, 'extraLastCompleted', 'extra');
     }
 
-    function renderExtraTaskList(containerId, tasks, resetType) {
+    function renderCategory(containerId, wrapperId, tasks, lastKey, categoryKey) {
       const container = document.getElementById(containerId);
-      if (!container) return;
+      const wrapper = document.getElementById(wrapperId);
+      if (!container || !wrapper) return;
+
+      // Always keep the section visible so users can see the header + countdown timer
+      wrapper.classList.remove('hidden');
+
+      const lastTimestamp = userData[lastKey] || 0;
+      const inCooldown = isCooldownActive(lastTimestamp);
+
+      // Filter tasks not completed today
+      const available = tasks.filter(task => !isTaskCompleted(task.id));
+
       container.innerHTML = '';
-      const available = tasks.filter(task => !isTaskCompleted(task.id, resetType));
-      if (available.length === 0) {
-        container.innerHTML = `<div class="no-tasks-msg">🎯 All tasks completed for today! Check back tomorrow.</div>`;
-        return;
-      }
-      available.forEach(task => {
-        const completed = isTaskCompleted(task.id, resetType);
-        const pageLink = task.page || '#';
-        container.innerHTML += `
-          <div class="offer-card">
-            <div class="offer-title">${task.title}</div>
-            <p class="offer-desc">${task.desc}</p>
-            ${task.badge ? `<span class="badge ${task.badgeClass}">${task.badge}</span>` : ''}
-            <div class="offer-reward">₦${task.reward}</div>
-            <a href="${pageLink}" class="start-btn" style="display:block; text-align:center; text-decoration:none; ${completed ? 'pointer-events:none; opacity:0.7;' : ''}">
-              ${completed ? '✅ Completed' : '🚀 Go to Task'}
-            </a>
+
+      if (inCooldown) {
+        // Show cooldown notice (timer above is already counting down)
+        container.innerHTML = `
+          <div class="offer-card" style="grid-column: span 1; text-align: center; opacity: 0.75; border-style: dashed; border-color: rgba(245, 158, 11, 0.4);">
+            <div style="margin: 1.5rem 0 1.2rem;">
+              <i class="fas fa-hourglass-half" style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.6rem;"></i>
+              <p style="font-weight: 600; color: #e2e8f0; margin-bottom: 0.3rem;">Cooldown active — 1 task per hour</p>
+              <p style="font-size: 0.9rem; color: #94a3b8;">You've completed a task in this category recently.<br>Next task will appear automatically when the timer hits zero.</p>
+            </div>
           </div>
         `;
+        return;
+      }
+
+      if (available.length === 0) {
+        // All tasks done today
+        container.innerHTML = `
+          <div class="offer-card" style="grid-column: span 1; text-align: center; opacity: 0.75; border-style: dashed;">
+            <div style="margin: 1.5rem 0 1.2rem;">
+              <i class="fas fa-trophy" style="font-size: 2rem; color: #10b981; margin-bottom: 0.6rem;"></i>
+              <p style="font-weight: 600; color: #e2e8f0; margin-bottom: 0.3rem;">All tasks completed for today!</p>
+              <p style="font-size: 0.9rem; color: #94a3b8;">Excellent work! Check back tomorrow for fresh tasks in this category.</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // Render available task cards
+      available.forEach(task => {
+        if (categoryKey === 'extra') {
+          // Extra tasks are links to pages
+          container.innerHTML += `
+            <div class="offer-card">
+              <div class="offer-title">${task.title}</div>
+              <p class="offer-desc">${task.desc}</p>
+              <span class="badge ${task.badgeClass}">${task.badge}</span>
+              <div class="offer-reward">₦${task.reward}</div>
+              <a href="${task.page}" class="start-btn" style="display:block;text-align:center;text-decoration:none;">🚀 Go to Task</a>
+            </div>
+          `;
+        } else {
+          const link = task.link || '#';
+          container.innerHTML += `
+            <div class="offer-card">
+              <div class="offer-title">${task.title}</div>
+              <p class="offer-desc">${task.desc}</p>
+              ${task.badge ? `<span class="badge ${task.badgeClass}">${task.badge}</span>` : ''}
+              <div class="offer-reward">₦${task.reward}</div>
+              <button class="start-btn" onclick="completeCategoryTask('${task.id}', ${task.reward}, '${link}', '${lastKey}')">🚀 Start Task</button>
+            </div>
+          `;
+        }
       });
     }
 
     // ============================================================
-    // COMPLETE TASK
+    // COMPLETE TASKS
     // ============================================================
-    async function completeTask(taskId, reward, link, resetInterval) {
-      if (isTaskCompleted(taskId, resetInterval)) return;
-      if (link && link !== '#') {
-        window.open(link, '_blank');
+    async function completeSurveyTask(taskId, reward) {
+      if (isTaskCompleted(taskId)) {
+        showToast('⚠️ You already completed this survey.');
+        return;
       }
+      const surveyCount = getSurveyCountToday();
+      if (surveyCount >= 2) {
+        showToast('⚠️ You have reached the daily limit of 2 surveys.');
+        return;
+      }
+      // Simulate survey completion – open a dummy link or just complete
+      // In real implementation, you might open a survey form. For now, we just credit.
       if (!userData.completedTasks) userData.completedTasks = {};
       userData.completedTasks[taskId] = Date.now();
       userData.balance = (userData.balance || 0) + reward;
       userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-
       updateInterfaceValues();
-      renderTasks();
       await saveUserData();
-      showToast(`🎉 +₦${reward} earned!`);
+      renderTasks();
+      showToast(`🎉 Survey completed! +₦${reward} earned!`);
     }
 
-    // ============================================================
-    // COUNTDOWN TIMERS
-    // ============================================================
-    function updateTimers() {
-      const dailyMs = getTimeToMidnight();
-      const dailyStr = dailyMs <= 0 ? 'Resets now' : `Resets in ${formatTime(dailyMs)}`;
-      document.getElementById('surveyCountdown').textContent = dailyStr;
-      document.getElementById('appCountdown').textContent = dailyStr;
-      document.getElementById('extraCountdown').textContent = dailyStr;
-
-      const socialMs = getTimeToNextEvenHour();
-      const socialStr = socialMs <= 0 ? 'Resets now' : `Resets in ${formatTime(socialMs)}`;
-      document.getElementById('socialCountdown').textContent = socialStr;
-
-      if (dailyMs < 1000 || socialMs < 1000) {
-        setTimeout(() => { renderTasks(); }, 500);
+    async function completeCategoryTask(taskId, reward, link, lastKey) {
+      if (isTaskCompleted(taskId)) {
+        showToast('⚠️ You already completed this task today.');
+        return;
       }
+      // Check cooldown
+      const lastTimestamp = userData[lastKey] || 0;
+      if (isCooldownActive(lastTimestamp)) {
+        showToast('⏳ Please wait 1 hour before doing another task in this category.');
+        return;
+      }
+      // Open link
+      if (link && link !== '#') {
+        window.open(link, '_blank');
+      }
+      // Complete
+      if (!userData.completedTasks) userData.completedTasks = {};
+      userData.completedTasks[taskId] = Date.now();
+      userData[lastKey] = Date.now(); // update cooldown
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+      updateInterfaceValues();
+      await saveUserData();
+      renderTasks();
+      showToast(`🎉 Task completed! +₦${reward} earned!`);
     }
 
     // ============================================================
-    // AI CHAT
+    // COUNTDOWN UPDATES
+    // ============================================================
+    function updateCountdowns() {
+      // Daily section (surveys)
+      const dailyMs = getTimeToMidnight();
+      document.getElementById('surveyCountdown').textContent = dailyMs <= 0 ? 'Resets now' : `Resets in ${formatTime(dailyMs)}`;
+
+      // App downloads
+      const appMs = userData.appLastCompleted ? 3600000 - (Date.now() - userData.appLastCompleted) : 0;
+      document.getElementById('appCountdown').textContent = (appMs > 0) ? formatTime(appMs) : 'Available now';
+
+      // Social
+      const socialMs = userData.socialLastCompleted ? 3600000 - (Date.now() - userData.socialLastCompleted) : 0;
+      document.getElementById('socialCountdown').textContent = (socialMs > 0) ? formatTime(socialMs) : 'Available now';
+
+      // Extra
+      const extraMs = userData.extraLastCompleted ? 3600000 - (Date.now() - userData.extraLastCompleted) : 0;
+      document.getElementById('extraCountdown').textContent = (extraMs > 0) ? formatTime(extraMs) : 'Available now';
+
+      // Re-render tasks if cooldowns just expired or surveys limit changed
+      // We'll re-render every second if any timer is near zero
+      // Simpler: re-run renderTasks every 5 seconds
+    }
+
+    // ============================================================
+    // AI CHAT (unchanged)
     // ============================================================
     const aiMessages = document.getElementById('aiMessages');
     const aiInput = document.getElementById('aiChatInput');
@@ -686,23 +724,17 @@
 
     function removeTypingIndicator() {
       const last = aiMessages.lastElementChild;
-      if (last && last.classList.contains('typing')) {
-        last.remove();
-      }
+      if (last && last.classList.contains('typing')) last.remove();
     }
 
     async function sendAiMessage() {
       const text = aiInput.value.trim();
       if (!text) return;
-
       aiInput.disabled = true;
       aiSendBtn.disabled = true;
-
       addAiMessage(text, 'user');
       aiInput.value = '';
-
       addAiMessage('SphereAI is thinking...', 'bot', true);
-
       try {
         const reply = await callBackendProxy(text);
         removeTypingIndicator();
@@ -756,11 +788,20 @@
 
       updateInterfaceValues();
       renderTasks();
-      updateTimers();
+      updateCountdowns();
 
+      // Check and show ads only when they actually load (no large empty space)
+      checkAndShowAds();
+
+      // Refresh countdowns and tasks every second
       setInterval(() => {
-        updateTimers();
+        updateCountdowns();
       }, 1000);
+
+      // Also re-render tasks every 5 seconds
+      setInterval(() => {
+        renderTasks();
+      }, 5000);
 
       auth.onAuthStateChanged(async (user) => {
         if (user) {
@@ -772,6 +813,7 @@
           }
           updateInterfaceValues();
           renderTasks();
+          updateCountdowns();
         }
       });
     });
