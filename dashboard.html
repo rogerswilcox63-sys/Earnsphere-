@@ -6,40 +6,40 @@
   <title>EarnSphere Nigeria - Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724" crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
+    /* (styles unchanged – same as previous version) */
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
-    body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
+    body { font-family:'Inter', sans-serif; background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%); background-attachment:fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
+    body::before { content:''; position:fixed; inset:0; background:radial-gradient(circle at 20% 50%,rgba(59,130,246,.1) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(16,185,129,.1) 0%,transparent 50%); pointer-events:none; z-index:0; }
     #app { position:relative; z-index:1; flex:1; }
     .navbar { background:rgba(30,41,59,.7); backdrop-filter:blur(12px); box-shadow:0 4px 12px rgba(0,0,0,.3); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:1px solid rgba(255,255,255,.1); }
     .nav-links { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
-    .nav-links a { text-decoration:none; color:#cbd5e1; font-weight:500; padding:.5rem 1rem; border-radius:.5rem; transition:all 0.3s; }
+    .nav-links a { text-decoration:none; color:#cbd5e1; font-weight:500; padding:.5rem 1rem; border-radius:.5rem; transition:all .3s; }
     .nav-links a:hover, .nav-links a.active { color:#3b82f6; background:rgba(59,130,246,.15); }
-    .logo { font-size:1.6rem; font-weight:800; background:linear-gradient(135deg, #3b82f6, #10b981); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .logo { font-size:1.6rem; font-weight:800; background:linear-gradient(135deg,#3b82f6,#10b981); -webkit-background-clip:text; background-clip:text; color:transparent; }
     .user-greeting { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
-    .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:.5rem 1rem; border-radius:2rem; font-weight:500; color:#3b82f6; cursor:pointer; transition:all 0.3s; }
+    .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:.5rem 1rem; border-radius:2rem; font-weight:500; color:#3b82f6; cursor:pointer; transition:all .3s; }
     .logout-btn:hover { background:rgba(59,130,246,.3); }
     .dashboard-container { max-width:1200px; margin:2rem auto; padding:0 1.5rem; width:100%; }
     .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
-    .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
-    .stat-card, .offer-card, .withdraw-card, .coupon-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); transition:transform 0.2s; }
+    .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; }
+    .stat-card, .offer-card, .withdraw-card, .coupon-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); transition:transform .2s; }
     .stat-card:hover, .offer-card:hover { transform:translateY(-2px); }
     .stat-title { font-size:.85rem; color:#94a3b8; margin-bottom:.5rem; }
     .stat-value { font-size:1.8rem; font-weight:800; color:#10b981; }
     .offer-title { font-weight:700; margin-bottom:.5rem; font-size:1.1rem; }
     .offer-desc { font-size:.9rem; color:#cbd5e1; margin-bottom:1rem; }
     .offer-reward { color:#10b981; font-weight:700; margin-bottom:1rem; font-size:1.1rem; }
-    .start-btn, .support-btn, .reward-btn, .coupon-btn { width:100%; background:linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border:none; padding:1rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.3s; }
-    .reward-btn { background:linear-gradient(135deg, #f59e0b, #d97706); margin-top:1rem; }
-    .coupon-btn { background:linear-gradient(135deg, #10b981, #059669); margin-top:0.5rem; }
+    .start-btn, .support-btn, .reward-btn, .coupon-btn { width:100%; background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; border:none; padding:1rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all .3s; }
+    .reward-btn { background:linear-gradient(135deg,#f59e0b,#d97706); margin-top:1rem; }
+    .coupon-btn { background:linear-gradient(135deg,#10b981,#059669); margin-top:.5rem; }
     .reward-btn:hover:not(:disabled), .start-btn:hover:not(:disabled), .support-btn:hover:not(:disabled), .coupon-btn:hover:not(:disabled) { transform:scale(1.02); box-shadow:0 4px 15px rgba(59,130,246,.3); }
-    .start-btn:disabled, .support-btn:disabled, .reward-btn:disabled, .coupon-btn:disabled { background:#334155; cursor:not-allowed; opacity:0.7; }
+    .start-btn:disabled, .support-btn:disabled, .reward-btn:disabled, .coupon-btn:disabled { background:#334155; cursor:not-allowed; opacity:.7; }
     .badge { display:inline-block; padding:.25rem .75rem; border-radius:.25rem; font-size:.8rem; margin:.5rem 0; }
     .badge-survey { background:rgba(59,130,246,.2); color:#3b82f6; }
     .badge-social { background:rgba(139,92,246,.2); color:#8b5cf6; }
@@ -52,34 +52,34 @@
     .badge-quiz { background:rgba(251,146,60,.2); color:#fb923c; }
     .form-group { margin-bottom:1.2rem; }
     .form-group label { display:block; margin-bottom:.6rem; color:#cbd5e1; font-weight:500; font-size:.9rem; }
-    .form-control { width:100%; padding:.9rem 1.1rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:.75rem; color:#f1f5f9; font-size:1rem; transition:border 0.3s; }
+    .form-control { width:100%; padding:.9rem 1.1rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:.75rem; color:#f1f5f9; font-size:1rem; transition:border .3s; }
     .form-control:focus { outline:none; border-color:#3b82f6; }
     .form-control option { background:#1e293b; }
     .footer { background:rgba(15,23,42,.8); padding:2rem; margin-top:auto; text-align:center; border-top:1px solid rgba(255,255,255,.1); font-size:.9rem; color:#64748b; }
-    .footer a { color:#64748b; text-decoration:none; margin:0 0.5rem; }
+    .footer a { color:#64748b; text-decoration:none; margin:0 .5rem; }
     .footer a:hover { color:#3b82f6; }
-    .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; margin-bottom:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
+    .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; margin-bottom:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn .3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
     @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
-    #aiChatBtn { position:fixed; bottom:20px; right:20px; width:60px; height:60px; background:linear-gradient(135deg, #3b82f6, #10b981); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; cursor:pointer; z-index:10000; box-shadow:0 4px 20px rgba(59,130,246,.4); transition:transform 0.2s; }
+    #aiChatBtn { position:fixed; bottom:20px; right:20px; width:60px; height:60px; background:linear-gradient(135deg,#3b82f6,#10b981); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:24px; cursor:pointer; z-index:10000; box-shadow:0 4px 20px rgba(59,130,246,.4); transition:transform .2s; }
     #aiChatBtn:hover { transform:scale(1.05); }
     #aiChatWindow { position:fixed; bottom:90px; right:20px; width:340px; height:460px; background:#1e293b; border:1px solid rgba(255,255,255,.1); border-radius:12px; display:none; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden; }
-    #aiChatHeader { background:linear-gradient(to right, #3b82f6, #10b981); padding:12px 16px; color:white; font-weight:bold; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+    #aiChatHeader { background:linear-gradient(to right,#3b82f6,#10b981); padding:12px 16px; color:#fff; font-weight:700; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
     #aiChatHeader span i { margin-right:6px; }
-    #aiChatHeader .close-btn { cursor:pointer; font-size:1.2rem; opacity:0.8; transition:0.2s; }
+    #aiChatHeader .close-btn { cursor:pointer; font-size:1.2rem; opacity:.8; transition:.2s; }
     #aiChatHeader .close-btn:hover { opacity:1; }
     #aiMessages { flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:14px; background:rgba(0,0,0,.2); }
     .ai-msg { max-width:85%; padding:8px 14px; border-radius:12px; word-wrap:break-word; line-height:1.5; }
     .ai-msg.user { align-self:flex-end; background:#3b82f6; color:#fff; border-bottom-right-radius:4px; }
-    .ai-msg.bot { align-self:flex-start; background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:4px; }
-    .ai-msg.bot .msg-time { font-size:0.65rem; color:#94a3b8; margin-top:4px; display:block; }
-    .ai-msg.typing { align-self:flex-start; background:rgba(255,255,255,0.05); color:#94a3b8; font-style:italic; padding:8px 16px; }
+    .ai-msg.bot { align-self:flex-start; background:rgba(255,255,255,.08); color:#e2e8f0; border-bottom-left-radius:4px; }
+    .ai-msg.bot .msg-time { font-size:.65rem; color:#94a3b8; margin-top:4px; display:block; }
+    .ai-msg.typing { align-self:flex-start; background:rgba(255,255,255,.05); color:#94a3b8; font-style:italic; padding:8px 16px; }
     #aiChatInputArea { display:flex; padding:10px 12px; gap:8px; background:rgba(15,23,42,.8); border-top:1px solid rgba(255,255,255,.08); flex-shrink:0; }
-    #aiChatInput { flex:1; background:rgba(30,41,59,.6); border:1px solid rgba(255,255,255,.15); border-radius:20px; padding:8px 16px; color:#f1f5f9; font-size:14px; outline:none; transition:border 0.2s; }
+    #aiChatInput { flex:1; background:rgba(30,41,59,.6); border:1px solid rgba(255,255,255,.15); border-radius:20px; padding:8px 16px; color:#f1f5f9; font-size:14px; outline:none; transition:border .2s; }
     #aiChatInput:focus { border-color:#3b82f6; }
     #aiChatInput::placeholder { color:#64748b; }
-    #aiSendBtn { background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; color:#fff; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; transition:0.2s; display:flex; align-items:center; justify-content:center; }
+    #aiSendBtn { background:linear-gradient(135deg,#3b82f6,#2563eb); border:none; color:#fff; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; transition:.2s; display:flex; align-items:center; justify-content:center; }
     #aiSendBtn:hover { transform:scale(1.05); box-shadow:0 0 15px rgba(59,130,246,.4); }
-    #aiSendBtn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    #aiSendBtn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
     @media (max-width:768px) {
       .navbar { padding:1rem; }
       .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
@@ -89,24 +89,11 @@
     }
     .section-wrapper { margin-bottom:1.5rem; }
     .section-wrapper.hidden { display:none !important; }
-    .ad-container { 
-      display: none; 
-      margin: 0.5rem 0; 
-      padding: 0.5rem; 
-      background: rgba(255,255,255,0.02); 
-      border-radius: 0.5rem; 
-      border: 1px dashed rgba(255,255,255,0.05); 
-      text-align: center; 
-      min-height: 0; 
-      overflow: hidden;
-    }
-    .ad-container.has-ad { 
-      display: block !important; 
-      min-height: 60px; 
-    }
-    .ad-container ins { margin: 0 auto; }
+    .ad-container { display:none; margin:.5rem 0; padding:.5rem; background:rgba(255,255,255,.02); border-radius:.5rem; border:1px dashed rgba(255,255,255,.05); text-align:center; min-height:0; overflow:hidden; }
+    .ad-container.has-ad { display:block !important; min-height:60px; }
+    .ad-container ins { margin:0 auto; }
     .timer-label { font-weight:700; color:#f59e0b; background:rgba(245,158,11,.1); padding:.3rem .8rem; border-radius:2rem; display:inline-block; border:1px solid rgba(245,158,11,.2); }
-    .limit-badge { font-size:0.8rem; color:#94a3b8; font-weight:400; margin-left:0.5rem; }
+    .limit-badge { font-size:.8rem; color:#94a3b8; font-weight:400; margin-left:.5rem; }
   </style>
 </head>
 <body>
@@ -134,14 +121,14 @@
         <div class="stat-card"><div class="stat-title">Wallet Balance</div><div class="stat-value" id="walletBalance">₦0.00</div></div>
         <div class="stat-card"><div class="stat-title">Total Earned</div><div class="stat-value" id="lifetimeTotal">₦0.00</div></div>
         <div class="stat-card"><div class="stat-title">Tasks Completed</div><div class="stat-value" id="successfulTaskCount">0</div></div>
-        <div class="stat-card" style="display:flex; flex-direction:column; justify-content:center;">
+        <div class="stat-card" style="display:flex;flex-direction:column;justify-content:center;">
           <div class="stat-title">Daily Check-in Bonus</div>
-          <div style="font-size:1.1rem; font-weight:700; color:#f59e0b;">+₦100.00 Daily</div>
+          <div style="font-size:1.1rem;font-weight:700;color:#f59e0b;">+₦100.00 Daily</div>
           <button class="reward-btn" id="dailyRewardBtn" onclick="claimDailyReward()"><i class="fas fa-gift"></i> Claim Daily Reward</button>
         </div>
       </div>
 
-      <!-- Ad -->
+      <!-- Ad 1 -->
       <div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5803688718527724" data-ad-slot="2561139179" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
 
       <!-- Coupon -->
@@ -150,54 +137,54 @@
         <div class="coupon-card" style="grid-column:span 1;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
             <i class="fas fa-gift" style="font-size:1.5rem;color:#10b981;"></i>
-            <div><div style="font-weight:700;">Redeem Coupon</div><div style="font-size:0.8rem;color:#94a3b8;">Get ₦500 – ₦5,000 – first come, first served!</div></div>
+            <div><div style="font-weight:700;">Redeem Coupon</div><div style="font-size:.8rem;color:#94a3b8;">Get ₦500 – ₦5,000 – first come, first served!</div></div>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <input type="text" id="couponInput" class="form-control" placeholder="Enter coupon code..." style="flex:1;min-width:150px;" />
-            <button class="coupon-btn" id="couponBtn" onclick="redeemCoupon()" style="flex:0 0 auto;padding:0.9rem 2rem;"><i class="fas fa-check-circle"></i> Redeem</button>
+            <button class="coupon-btn" id="couponBtn" onclick="redeemCoupon()" style="flex:0 0 auto;padding:.9rem 2rem;"><i class="fas fa-check-circle"></i> Redeem</button>
           </div>
-          <div style="margin-top:10px;font-size:0.8rem;color:#64748b;"><i class="fab fa-whatsapp" style="color:#25D366;"></i> Get codes from WhatsApp</div>
-          <div id="couponMessage" style="margin-top:8px;font-size:0.9rem;font-weight:600;"></div>
+          <div style="margin-top:10px;font-size:.8rem;color:#64748b;"><i class="fab fa-whatsapp" style="color:#25D366;"></i> Get codes from WhatsApp</div>
+          <div id="couponMessage" style="margin-top:8px;font-size:.9rem;font-weight:600;"></div>
         </div>
       </div>
 
-      <!-- SURVEYS (max 2/day) -->
+      <!-- SURVEYS (max 2/day) – shows only up to 2 surveys -->
       <div class="section-wrapper" id="surveyWrapper">
         <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers <span class="limit-badge">(max 2 per day)</span></h2>
-        <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+        <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
           <i class="fas fa-clock"></i> <span id="surveyCountdown">Resets daily at midnight</span>
         </div>
         <div class="offers-grid" id="surveyList"></div>
       </div>
 
-      <!-- APP DOWNLOADS (1/hour) -->
+      <!-- APP DOWNLOADS (1/hour) – shows only 1 task -->
       <div class="section-wrapper" id="appWrapper">
         <h2 class="section-title"><i class="fas fa-download"></i> App Downloads <span class="limit-badge">(1 per hour)</span></h2>
-        <div id="appResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+        <div id="appResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
           <i class="fas fa-clock"></i> <span id="appCountdown">Available now</span>
         </div>
         <div class="offers-grid" id="appTaskList"></div>
       </div>
 
-      <!-- SOCIAL (1/hour) -->
+      <!-- SOCIAL (1/hour) – shows only 1 task -->
       <div class="section-wrapper" id="socialWrapper">
         <h2 class="section-title"><i class="fas fa-share-alt"></i> Social & YouTube <span class="limit-badge">(1 per hour)</span></h2>
-        <div id="socialResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+        <div id="socialResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
           <i class="fas fa-clock"></i> <span id="socialCountdown">Available now</span>
         </div>
         <div class="offers-grid" id="socialTaskList"></div>
       </div>
 
-      <!-- EXTRA (1/hour) -->
+      <!-- EXTRA (1/hour) – shows only 1 task -->
       <div class="section-wrapper" id="extraWrapper">
         <h2 class="section-title"><i class="fas fa-star"></i> More Earning Tasks <span class="limit-badge">(1 per hour)</span></h2>
-        <div id="extraResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:0.9rem;">
+        <div id="extraResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
           <i class="fas fa-clock"></i> <span id="extraCountdown">Available now</span>
         </div>
         <div class="offers-grid" id="extraTaskList"></div>
       </div>
 
-      <!-- Ad -->
+      <!-- Ad 2 -->
       <div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5803688718527724" data-ad-slot="2561139179" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
 
       <!-- Support -->
@@ -273,7 +260,7 @@
     };
 
     // ============================================================
-    // TASKS DEFINITIONS
+    // TASK DEFINITIONS (full lists)
     // ============================================================
     const surveyTasks = [
       { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits' },
@@ -332,7 +319,7 @@
     }
 
     function formatTime(ms) {
-      if (ms <= 0) return 'Available';
+      if (ms <= 0) return 'Available now';
       const totalSec = Math.floor(ms / 1000);
       const h = Math.floor(totalSec / 3600);
       const m = Math.floor((totalSec % 3600) / 60);
@@ -399,21 +386,17 @@
     function checkAndShowAds() {
       document.querySelectorAll('.ad-container').forEach(container => {
         const ins = container.querySelector('ins.adsbygoogle');
-        
         if (!ins) return;
-
-        // Wait a bit for AdSense to render
         setTimeout(() => {
           const hasIframe = ins.querySelector('iframe');
           const hasHeight = ins.offsetHeight > 40;
-
           if (hasIframe || hasHeight) {
             container.classList.add('has-ad');
           } else {
             container.classList.remove('has-ad');
             container.style.display = 'none';
           }
-        }, 4500); // Wait 4.5 seconds for ad to load
+        }, 4500);
       });
     }
 
@@ -490,32 +473,25 @@
     }
 
     // ============================================================
-    // RENDER TASKS
+    // RENDER TASKS – LIMIT TO SPECIFIED NUMBERS
     // ============================================================
     function renderTasks() {
-      // Surveys - always show section + timer, only show tasks or message
+      // --- Surveys: show up to 2 available surveys ---
       const surveyWrapper = document.getElementById('surveyWrapper');
       const surveyContainer = document.getElementById('surveyList');
       const surveyCount = getSurveyCountToday();
-      const surveysAvailable = surveyCount < 2;
       const availableSurveys = surveyTasks.filter(task => !isTaskCompleted(task.id));
-
-      surveyWrapper.classList.remove('hidden');
-      surveyContainer.innerHTML = '';
-
-      if (!surveysAvailable || availableSurveys.length === 0) {
-        // Show friendly message instead of hiding the whole section
-        surveyContainer.innerHTML = `
-          <div class="offer-card" style="grid-column: span 1; text-align: center; opacity: 0.8; border-style: dashed; border-color: rgba(148,163,184,0.3);">
-            <div style="margin: 1.2rem 0;">
-              <i class="fas fa-check-circle" style="font-size: 2rem; color: #10b981; margin-bottom: 0.6rem;"></i>
-              <p style="font-weight: 600; color: #e2e8f0; margin-bottom: 0.4rem;">You've completed today's survey limit (2/2).</p>
-              <p style="font-size: 0.9rem; color: #94a3b8;">New surveys will be available after midnight. Great job earning today!</p>
-            </div>
-          </div>
-        `;
+      
+      // If already completed 2 OR no available surveys left, hide section
+      if (surveyCount >= 2 || availableSurveys.length === 0) {
+        surveyWrapper.classList.add('hidden');
+        surveyContainer.innerHTML = '';
       } else {
-        availableSurveys.forEach(task => {
+        surveyWrapper.classList.remove('hidden');
+        // Show only up to 2 (we need to pick first 2 available)
+        const toShow = availableSurveys.slice(0, 2);
+        surveyContainer.innerHTML = '';
+        toShow.forEach(task => {
           surveyContainer.innerHTML += `
             <div class="offer-card">
               <div class="offer-title">${task.title}</div>
@@ -528,19 +504,20 @@
         });
       }
 
-      // App downloads, Social, Extra - use updated renderCategory (always shows header + timer)
-      renderCategory('appTaskList', 'appWrapper', appTasks, 'appLastCompleted', 'app');
-      renderCategory('socialTaskList', 'socialWrapper', socialTasks, 'socialLastCompleted', 'social');
-      renderCategory('extraTaskList', 'extraWrapper', extraTasks, 'extraLastCompleted', 'extra');
+      // --- App downloads: show 1 available task ---
+      renderLimitedCategory('appTaskList', 'appWrapper', appTasks, 'appLastCompleted', 'app', 1);
+      
+      // --- Social: show 1 available task ---
+      renderLimitedCategory('socialTaskList', 'socialWrapper', socialTasks, 'socialLastCompleted', 'social', 1);
+      
+      // --- Extra: show 1 available task ---
+      renderLimitedCategory('extraTaskList', 'extraWrapper', extraTasks, 'extraLastCompleted', 'extra', 1);
     }
 
-    function renderCategory(containerId, wrapperId, tasks, lastKey, categoryKey) {
+    function renderLimitedCategory(containerId, wrapperId, tasks, lastKey, categoryKey, limit) {
       const container = document.getElementById(containerId);
       const wrapper = document.getElementById(wrapperId);
       if (!container || !wrapper) return;
-
-      // Always keep the section visible so users can see the header + countdown timer
-      wrapper.classList.remove('hidden');
 
       const lastTimestamp = userData[lastKey] || 0;
       const inCooldown = isCooldownActive(lastTimestamp);
@@ -548,38 +525,18 @@
       // Filter tasks not completed today
       const available = tasks.filter(task => !isTaskCompleted(task.id));
 
+      // If cooldown active OR no available tasks, hide section
+      if (inCooldown || available.length === 0) {
+        wrapper.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+      }
+
+      wrapper.classList.remove('hidden');
+      // Show only the first 'limit' tasks
+      const toShow = available.slice(0, limit);
       container.innerHTML = '';
-
-      if (inCooldown) {
-        // Show cooldown notice (timer above is already counting down)
-        container.innerHTML = `
-          <div class="offer-card" style="grid-column: span 1; text-align: center; opacity: 0.75; border-style: dashed; border-color: rgba(245, 158, 11, 0.4);">
-            <div style="margin: 1.5rem 0 1.2rem;">
-              <i class="fas fa-hourglass-half" style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.6rem;"></i>
-              <p style="font-weight: 600; color: #e2e8f0; margin-bottom: 0.3rem;">Cooldown active — 1 task per hour</p>
-              <p style="font-size: 0.9rem; color: #94a3b8;">You've completed a task in this category recently.<br>Next task will appear automatically when the timer hits zero.</p>
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      if (available.length === 0) {
-        // All tasks done today
-        container.innerHTML = `
-          <div class="offer-card" style="grid-column: span 1; text-align: center; opacity: 0.75; border-style: dashed;">
-            <div style="margin: 1.5rem 0 1.2rem;">
-              <i class="fas fa-trophy" style="font-size: 2rem; color: #10b981; margin-bottom: 0.6rem;"></i>
-              <p style="font-weight: 600; color: #e2e8f0; margin-bottom: 0.3rem;">All tasks completed for today!</p>
-              <p style="font-size: 0.9rem; color: #94a3b8;">Excellent work! Check back tomorrow for fresh tasks in this category.</p>
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      // Render available task cards
-      available.forEach(task => {
+      toShow.forEach(task => {
         if (categoryKey === 'extra') {
           // Extra tasks are links to pages
           container.innerHTML += `
@@ -588,7 +545,7 @@
               <p class="offer-desc">${task.desc}</p>
               <span class="badge ${task.badgeClass}">${task.badge}</span>
               <div class="offer-reward">₦${task.reward}</div>
-              <a href="${task.page}" class="start-btn" style="display:block;text-align:center;text-decoration:none;">🚀 Go to Task</a>
+              <a href="${task.page}" class="start-btn" style="display:block;text-align:center;text-decoration:none;" target="_blank">🚀 Go to Task</a>
             </div>
           `;
         } else {
@@ -619,8 +576,8 @@
         showToast('⚠️ You have reached the daily limit of 2 surveys.');
         return;
       }
-      // Simulate survey completion – open a dummy link or just complete
-      // In real implementation, you might open a survey form. For now, we just credit.
+      // Simulate survey – you could open a survey link here if needed
+      // For now, just credit and mark complete
       if (!userData.completedTasks) userData.completedTasks = {};
       userData.completedTasks[taskId] = Date.now();
       userData.balance = (userData.balance || 0) + reward;
@@ -643,7 +600,7 @@
         showToast('⏳ Please wait 1 hour before doing another task in this category.');
         return;
       }
-      // Open link
+      // Open link in new window
       if (link && link !== '#') {
         window.open(link, '_blank');
       }
@@ -681,8 +638,7 @@
       document.getElementById('extraCountdown').textContent = (extraMs > 0) ? formatTime(extraMs) : 'Available now';
 
       // Re-render tasks if cooldowns just expired or surveys limit changed
-      // We'll re-render every second if any timer is near zero
-      // Simpler: re-run renderTasks every 5 seconds
+      // We'll re-run renderTasks every 5 seconds to catch changes from other devices
     }
 
     // ============================================================
@@ -790,15 +746,12 @@
       renderTasks();
       updateCountdowns();
 
-      // Check and show ads only when they actually load (no large empty space)
       checkAndShowAds();
 
-      // Refresh countdowns and tasks every second
       setInterval(() => {
         updateCountdowns();
       }, 1000);
 
-      // Also re-render tasks every 5 seconds
       setInterval(() => {
         renderTasks();
       }, 5000);
