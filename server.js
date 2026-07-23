@@ -25,14 +25,13 @@ app.use(cors({
 app.use(express.json({ limit: '10kb' }));
 
 // ---- Configuration ----
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-if (!GEMINI_API_KEY) {
-  console.error('❌ GEMINI_API_KEY is missing in .env file!');
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
+if (!DEEPSEEK_API_KEY) {
+  console.error('❌ DEEPSEEK_API_KEY is missing in .env file!');
   process.exit(1);
 }
 
-// Use a stable, widely available model: gemini-2.0-flash
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const DEEPSEEK_URL = 'https://api.deepseek.com/v1/chat/completions';
 
 // ---- Health check ----
 app.get('/health', (req, res) => {
@@ -49,33 +48,29 @@ app.post('/api/grok', async (req, res) => {
 
   const sanitisedMessage = message.trim().slice(0, 2000);
 
-  // Combine personality and user message into a single prompt
-  const fullPrompt = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub. 
+  const payload = {
+    model: 'deepseek-chat',
+    messages: [
+      {
+        role: 'system',
+        content: `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub. 
 You speak in a mix of English and Nigerian Pidgin English. You are encouraging, helpful, and slightly playful. 
 You help users with questions about earning money online, tasks, surveys, withdrawals, and daily motivation. 
-Keep responses concise (max 2-3 short paragraphs). Always end with an uplifting note.
-
-User: ${sanitisedMessage}`;
-
-  const payload = {
-    contents: [
-      {
-        parts: [{ text: fullPrompt }]
-      }
+Keep responses concise (max 2-3 short paragraphs). Always end with an uplifting note.`
+      },
+      { role: 'user', content: sanitisedMessage }
     ],
-    generationConfig: {
-      temperature: 0.8,
-      maxOutputTokens: 300,
-      topP: 0.9,
-    }
+    temperature: 0.8,
+    max_tokens: 300,
+    top_p: 0.9
   };
 
   try {
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch(DEEPSEEK_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify(payload)
     });
@@ -83,16 +78,13 @@ User: ${sanitisedMessage}`;
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Gemini API error:', data);
+      console.error('DeepSeek API error:', data);
       return res.status(response.status).json({
-        error: data.error?.message || 'Gemini API error'
+        error: data.error?.message || 'DeepSeek API error'
       });
     }
 
-    // Extract the reply
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text ||
-                  'I no get response o, but I dey try!';
-
+    const reply = data.choices?.[0]?.message?.content || 'I no get response o, but I dey try!';
     res.json({ reply });
 
   } catch (error) {
@@ -114,5 +106,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 EarnSphere AI backend running on port ${PORT}`);
   console.log(`📡 Health check: http://localhost:${PORT}/health`);
-  console.log(`🤖 Gemini proxy: http://localhost:${PORT}/api/grok`);
+  console.log(`🤖 DeepSeek proxy: http://localhost:${PORT}/api/grok`);
 });
