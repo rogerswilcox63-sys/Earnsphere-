@@ -6,14 +6,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ---- CORS ----
-const allowedOrigins = (process.env.FRONTEND_URLS || 'http://localhost:5500,http://127.0.0.1:5500')
-  .split(',')
-  .map(url => url.trim());
+// Only allow your live domain (no localhost)
+const allowedOrigins = ['https://earnspherehub.name.ng'];
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -27,7 +27,7 @@ app.use(express.json({ limit: '10kb' }));
 // ---- Configuration ----
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 if (!DEEPSEEK_API_KEY) {
-  console.error('❌ DEEPSEEK_API_KEY is missing in .env file!');
+  console.error('❌ DEEPSEEK_API_KEY is missing in environment!');
   process.exit(1);
 }
 
