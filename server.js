@@ -1,12 +1,13 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const fetch = require('node-fetch'); // npm i node-fetch@2
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ---- CORS ----
-const allowedOrigins = ['https://earnspherehub.name.ng'];
+const allowedOrigins = ['https://earnspherehub.name.ng', 'http://localhost:3000'];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -24,9 +25,16 @@ app.use(express.json({ limit: '50mb' }));
 
 // ---- Configuration ----
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET; // ADD THIS TO RENDER ENV
+const PAYSTACK_URL = 'https://api.paystack.co';
+
 if (!GROQ_API_KEY) {
   console.error('❌ GROQ_API_KEY is missing in environment!');
   process.exit(1);
+}
+
+if (!PAYSTACK_SECRET) {
+  console.warn('⚠️ PAYSTACK_SECRET is missing. Paystack endpoints will not work!');
 }
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -90,12 +98,9 @@ You help users with:
     // Use vision model
     const visionModel = 'llama-3.2-90b-vision-preview';
     const content = [
-      { type: 'text', text: systemMessage + '\n\nUser: ' + sanitisedMessage }
+      { type: 'text', text: systemMessage + '\n\nUser: ' + sanitisedMessage },
+      { type: 'image_url', image_url: { url: image } }
     ];
-    content.push({
-      type: 'image_url',
-      image_url: { url: image }
-    });
 
     payload = {
       model: visionModel,
@@ -109,7 +114,7 @@ You help users with:
     };
   } else {
     // ---- Use the NEW recommended text model ----
-    const textModel = 'openai/gpt-oss-120b'; // ← REPLACED with recommended model
+    const textModel = 'openai/gpt-oss-120b';
     payload = {
       model: textModel,
       messages: [
@@ -151,6 +156,57 @@ You help users with:
   }
 });
 
+// ==================================================
+// =============== PAYSTACK ENDPOINTS ===============
+// ==================================================
+
+// 1. GET ALL NIGERIAN BANKS
+app.get('/api/banks', async (req, res) => {
+  try {
+    const response = await fetch(`${PAYSTACK_URL}/bank`, {
+      headers: { 'Authorization': `Bearer ${PAYSTACK_SECRET}` }
+    });
+    const data = await response.json();
+    
+    if (!response.ok) {
+      return res.status(response.status).json({ status: false, message: data.message });
+    }
+    
+    // Sort A-Z
+    data.data.sort((a,b) => a.name.localeCompare(b.name));
+    res.json({ status: true, data: data.data });
+    
+  } catch (error) {
+    console.error('Paystack Banks Error:', error);
+    res.status(500).json({ status: false, message: 'Failed to fetch banks' });
+  }
+});
+
+// 2. RESOLVE ACCOUNT NAME
+app.get('/api/resolve-account', async (req, res) => {
+  const { account_number, bank_code } = req.query;
+
+  if (!account_number || !bank_code) {
+    return res.status(400).json({ status: false, message: 'Account number and bank code are required' });
+  }
+  if (account_number.length !== 10) {
+    return res.status(400).json({ status: false, message: 'Account number must be 10 digits' });
+  }
+
+  try {
+    const response = await fetch(`${PAYSTACK_URL}/bank/resolve?account_number=${account_number}&bank_code=${bank_code}`, {
+      headers: { 'Authorization': `Bearer ${PAYSTACK_SECRET}` }
+    });
+    const data = await response.json();
+    
+    res.status(response.status).json(data);
+    
+  } catch (error) {
+    console.error('Paystack Resolve Error:', error);
+    res.status(500).json({ status: false, message: 'Could not verify account' });
+  }
+});
+
 // ---- 404 & error handlers ----
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
@@ -162,7 +218,9 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 EarnSphere AI backend running on port ${PORT}`);
+  console.log(`🚀 EarnSphere backend running on port ${PORT}`);
   console.log(`📡 Health check: http://localhost:${PORT}/health`);
   console.log(`🤖 Groq proxy: http://localhost:${PORT}/api/grok`);
+  console.log(`🏦 Banks: http://localhost:${PORT}/api/banks`);
+  console.log(`🏦 Resolve: http://localhost:${PORT}/api/resolve-account`);
 });

@@ -22,83 +22,36 @@
     --error-red: #ef4444;
     --border-color: #24324f;
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-
-body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-    gap: 30px;
-}
-
-.container {
-    background: var(--bg-card);
-    width: 100%;
-    max-width: 480px;
-    border-radius: 16px;
-    padding: 32px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.1);
-    border: 1px solid var(--border-color);
-}
-
+body { background-color: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 30px; }
+.nav-links { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+.nav-links a { text-decoration: none; color: #cbd5e1; font-weight: 500; transition: 0.25s; padding: 0.5rem 1rem; border-radius: 0.5rem; }
+.nav-links a:hover, .nav-links a.active { color: #3b82f6; background: rgba(59, 130, 246, 0.15); }
+.container { background: var(--bg-card); width: 100%; max-width: 480px; border-radius: 16px; padding: 32px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.1); border: 1px solid var(--border-color); }
 header { text-align: center; margin-bottom: 28px; }
 header p { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-glow); font-weight: 700; }
 h1 { font-size: 1.75rem; font-weight: 600; }
-
-.balance-display {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+.balance-display { background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 16px; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; }
 .balance-display span:first-child { color: var(--text-muted); }
 .balance-display span:last-child { font-size: 1.25rem; font-weight: 700; }
-
 form > div { margin-bottom: 20px; }
 label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
-input, select {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 14px 16px;
-    color: var(--text-main);
-    font-size: 1rem;
-}
+input, select { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; color: var(--text-main); font-size: 1rem; }
 input:focus, select:focus { outline: none; border-color: var(--accent-glow); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
-
-#error-box {
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.87rem;
-    margin-bottom: 20px;
-    display: none;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid var(--error-red);
-    color: var(--error-red);
-}
-
-button[type="submit"] {
-    width: 100%;
-    background: var(--accent-glow);
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: 14px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-}
+#error-box { padding: 12px; border-radius: 8px; font-size: 0.87rem; margin-bottom: 20px; display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error-red); color: var(--error-red); }
+#success-box { padding: 12px; border-radius: 8px; font-size: 0.87rem; margin-bottom: 20px; display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-glow); color: var(--accent-glow); }
+button[type="submit"] { width: 100%; background: var(--accent-glow); color: #000; border: none; border-radius: 8px; padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s; }
+button[type="submit"]:hover { background: var(--accent-hover); }
 button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); cursor: not-allowed; }
+.loader { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--text-muted); border-top: 2px solid var(--accent-glow); border-radius: 50%; animation: spin 1s linear infinite; margin-left: 8px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
+
+    <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="withdraw.html" class="active">Withdraw</a>
+        <a href="profile.html">Profile</a>
+    </div>
 
     <div class="container">
         <div class="balance-display">
@@ -107,26 +60,25 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         </div>
 
         <div id="error-box"></div>
+        <div id="success-box"></div>
 
         <form id="withdrawal-form">
             <div>
                 <label for="withdraw-bank">Select Bank</label>
                 <select id="withdraw-bank" required>
-                    <option value="" disabled selected>Choose your bank</option>
-                    <option value="opay">OPay</option>
-                    <option value="gtbank">GTBank</option>
-                    <option value="access">Access Bank</option>
-                    <option value="firstbank">First Bank</option>
-                    <option value="zenith">Zenith Bank</option>
-                    <option value="kuda">Kuda Bank</option>
-                    <option value="moniepoint">Moniepoint</option>
-                    <option value="palmpay">PalmPay</option>
+                    <option value="" disabled selected>Loading banks...</option>
                 </select>
             </div>
 
             <div>
                 <label for="account-number">10-Digit Account Number</label>
                 <input type="text" id="account-number" placeholder="e.g. 0123456789" pattern="\d{10}" maxlength="10" required>
+                <span id="account-loader" class="loader" style="display:none;"></span>
+            </div>
+
+            <div>
+                <label for="account-name">Account Name</label>
+                <input type="text" id="account-name" placeholder="Auto-filled after entering account number" readonly required>
             </div>
 
             <div>
@@ -165,23 +117,93 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // CHANGE THIS TO YOUR RENDER URL
+    const BACKEND_URL = 'https://earnsphere-backend.onrender.com'; 
+
     const balanceEl = document.getElementById('user-balance');
     const withdrawForm = document.getElementById('withdrawal-form');
     const bankSelect = document.getElementById('withdraw-bank');
     const accountInput = document.getElementById('account-number');
+    const accountNameInput = document.getElementById('account-name');
     const amountInput = document.getElementById('withdraw-amount');
     const errorBox = document.getElementById('error-box');
+    const successBox = document.getElementById('success-box');
     const submitBtn = document.getElementById('submit-btn');
+    const accountLoader = document.getElementById('account-loader');
 
     let currentBalance = 0;
     const MIN_WITHDRAWAL = 20000;
+    let banks = [];
 
     const formatNaira = (value) => {
-        return new Intl.NumberFormat('en-NG', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(value);
+        return new Intl.NumberFormat('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
     };
+
+    // 1. LOAD ALL BANKS FROM RENDER SERVER
+    async function loadBanks() {
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/banks`);
+            const data = await res.json();
+            if(data.status){
+                banks = data.data;
+                bankSelect.innerHTML = '<option value="" disabled selected>Choose your bank</option>';
+                banks.forEach(bank => {
+                    const option = document.createElement('option');
+                    option.value = bank.code;
+                    option.textContent = bank.name;
+                    bankSelect.appendChild(option);
+                });
+            } else {
+                showError("Could not load banks");
+            }
+        } catch (error) {
+            showError("Server error. Could not load banks.");
+        }
+    }
+    loadBanks();
+
+    // 2. AUTO FETCH ACCOUNT NAME FROM RENDER SERVER
+    let fetchTimeout;
+    async function resolveAccountName() {
+        const accountNumber = accountInput.value;
+        const bankCode = bankSelect.value;
+        if (accountNumber.length !== 10 || !bankCode) return;
+
+        accountLoader.style.display = 'inline-block';
+        accountNameInput.value = 'Verifying...';
+        clearError();
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/resolve-account?account_number=${accountNumber}&bank_code=${bankCode}`);
+            const data = await res.json();
+            if (data.status) {
+                accountNameInput.value = data.data.account_name;
+                showSuccess(`Account verified: ${data.data.account_name}`);
+            } else {
+                accountNameInput.value = '';
+                showError(data.message || "Invalid account details");
+            }
+        } catch (error) {
+            accountNameInput.value = '';
+            showError("Could not verify account. Check internet.");
+        } finally {
+            accountLoader.style.display = 'none';
+        }
+    }
+
+    accountInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '');
+        clearTimeout(fetchTimeout);
+        if (e.target.value.length === 10 && bankSelect.value) {
+            fetchTimeout = setTimeout(resolveAccountName, 800);
+        } else {
+            accountNameInput.value = '';
+        }
+    });
+
+    bankSelect.addEventListener('change', () => {
+        if (accountInput.value.length === 10) resolveAccountName();
+    });
 
     // Live balance sync
     onAuthStateChanged(auth, (user) => {
@@ -203,7 +225,6 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         }
     });
 
-    // Real-time check as user types amount
     amountInput.addEventListener('input', () => {
         const requestedAmount = parseFloat(amountInput.value) || 0;
         if (requestedAmount > currentBalance && requestedAmount > 0) {
@@ -215,39 +236,22 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         }
     });
 
-    accountInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '');
-    });
-
     withdrawForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         clearError();
 
         const user = auth.currentUser;
-        const bankName = bankSelect.value;
+        const bankCode = bankSelect.value;
+        const bankName = bankSelect.options[bankSelect.selectedIndex].text;
         const accountNumber = accountInput.value;
+        const accountName = accountNameInput.value;
         const requestedAmount = parseFloat(amountInput.value);
 
-        if (!user) {
-            showError("Your session expired. Please login again.");
-            return;
-        }
-
-        if (accountNumber.length !== 10) {
-            showError("Account number must be exactly 10 digits.");
-            return;
-        }
-
-        if (requestedAmount < MIN_WITHDRAWAL) {
-            showError(`Minimum withdrawal is ₦${formatNaira(MIN_WITHDRAWAL)}.`);
-            return;
-        }
-
-        // CHECK 1: Client-side insufficient funds
-        if (requestedAmount > currentBalance) {
-            showError(`Insufficient funds. You tried to withdraw ₦${formatNaira(requestedAmount)} but your balance is ₦${formatNaira(currentBalance)}.`);
-            return;
-        }
+        if (!user) return showError("Your session expired. Please login again.");
+        if (accountNumber.length !== 10) return showError("Account number must be exactly 10 digits.");
+        if (!accountName) return showError("Please verify account name first.");
+        if (requestedAmount < MIN_WITHDRAWAL) return showError(`Minimum withdrawal is ₦${formatNaira(MIN_WITHDRAWAL)}.`);
+        if (requestedAmount > currentBalance) return showError(`Insufficient funds. Your balance is ₦${formatNaira(currentBalance)}.`);
 
         submitBtn.disabled = true;
         submitBtn.textContent = "Processing...";
@@ -256,36 +260,29 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
             const userDocRef = doc(db, "users", user.uid);
             const payoutLogRef = doc(collection(db, "payouts"));
 
-            // CHECK 2: Server-side transaction to prevent race conditions
             await runTransaction(db, async (transaction) => {
                 const userSnapshot = await transaction.get(userDocRef);
-                
-                if (!userSnapshot.exists()) {
-                    throw new Error("User profile not found.");
-                }
+                if (!userSnapshot.exists()) throw new Error("User profile not found.");
 
                 const serverSideBalance = userSnapshot.data().balance || 0;
-
-                // SERVER CHECK: Insufficient funds
-                if (requestedAmount > serverSideBalance) {
-                    throw new Error(`Insufficient funds. Current balance: ₦${formatNaira(serverSideBalance)}`);
-                }
+                if (requestedAmount > serverSideBalance) throw new Error(`Insufficient funds. Current balance: ₦${formatNaira(serverSideBalance)}`);
 
                 const newBalance = serverSideBalance - requestedAmount;
                 transaction.update(userDocRef, { balance: newBalance });
 
                 transaction.set(payoutLogRef, {
                     uid: user.uid,
-                    email: user.email || "anonymous@earnsphere.hub",
-                    bankCode: bankName,
+                    email: user.email,
+                    bankCode: bankCode,
+                    bankName: bankName,
+                    accountName: accountName,
                     nubanDestination: accountNumber,
                     amountNGN: requestedAmount,
                     status: "pending",
-                    timestamp: serverTimestamp()
+                    requestedAt: serverTimestamp()
                 });
             });
 
-            // Redirect to success page with data
             window.location.href = `withdraw-success.html?amount=${requestedAmount}&bank=${bankName}`;
 
         } catch (error) {
@@ -295,15 +292,9 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         }
     });
 
-    function showError(message) {
-        errorBox.textContent = message;
-        errorBox.style.display = 'block';
-    }
-
-    function clearError() {
-        errorBox.style.display = 'none';
-        errorBox.textContent = '';
-    }
+    function showError(message) { errorBox.textContent = message; errorBox.style.display = 'block'; successBox.style.display = 'none'; }
+    function showSuccess(message) { successBox.textContent = message; successBox.style.display = 'block'; errorBox.style.display = 'none'; }
+    function clearError() { errorBox.style.display = 'none'; successBox.style.display = 'none'; }
 
 </script>
 </body>
