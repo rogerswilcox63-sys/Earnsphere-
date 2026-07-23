@@ -20,7 +20,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json({ limit: '50mb' })); // large payloads for images
+app.use(express.json({ limit: '50mb' }));
 
 // ---- Configuration ----
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -79,7 +79,7 @@ You help users with:
 - Completing tasks and surveys
 - Withdrawals
 - Daily motivation
-- General questions about EarnSphere`
+- General questions about EarnSphere`;
 
   // ---- Determine if we have an image (vision) ----
   const hasImage = image && image.startsWith('data:image');
@@ -92,7 +92,6 @@ You help users with:
     const content = [
       { type: 'text', text: systemMessage + '\n\nUser: ' + sanitisedMessage }
     ];
-    // Add image
     content.push({
       type: 'image_url',
       image_url: { url: image }
@@ -109,8 +108,8 @@ You help users with:
       top_p: 0.9
     };
   } else {
-    // Use regular text model
-    const textModel = 'llama3-70b-8192';
+    // ---- Use the NEW recommended text model ----
+    const textModel = 'openai/gpt-oss-120b'; // ← REPLACED with recommended model
     payload = {
       model: textModel,
       messages: [
