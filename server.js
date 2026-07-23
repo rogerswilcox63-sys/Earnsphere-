@@ -20,7 +20,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '50mb' })); // large payloads for images
 
 // ---- Configuration ----
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -38,30 +38,91 @@ app.get('/health', (req, res) => {
 
 // ---- Main AI endpoint ----
 app.post('/api/grok', async (req, res) => {
-  const { message } = req.body;
+  const { message, history, image } = req.body;
 
-  if (!message || typeof message !== 'string' || message.trim().length === 0) {
-    return res.status(400).json({ error: 'Message is required and must be non‑empty.' });
+  if (!message && !image) {
+    return res.status(400).json({ error: 'Message or image is required.' });
   }
 
-  const sanitisedMessage = message.trim().slice(0, 2000);
+  const sanitisedMessage = (message || '').trim().slice(0, 2000);
 
-  const payload = {
-    model: 'llama-3.3-70b-versatile', // Free, fast, high-quality
-    messages: [
-      {
-        role: 'system',
-        content: `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub. 
-You speak in a mix of English and Nigerian Pidgin English. You are encouraging, helpful, and slightly playful. 
-You help users with questions about earning money online, tasks, surveys, withdrawals, and daily motivation. 
-Keep responses concise (max 2-3 short paragraphs). Always end with an uplifting note.`
-      },
-      { role: 'user', content: sanitisedMessage }
-    ],
-    temperature: 0.8,
-    max_tokens: 300,
-    top_p: 0.9
-  };
+  // Build conversation history (last 10 messages)
+  const historyMessages = (history || [])
+    .slice(-10)
+    .map(h => ({
+      role: h.role === 'user' ? 'user' : 'assistant',
+      content: h.text || ''
+    }));
+
+  // ---- Multilingual system prompt ----
+  const systemMessage = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub.
+
+You are fluent in multiple languages:
+- English
+- Nigerian Pidgin
+- Yoruba
+- Igbo
+- Hausa
+- and other Nigerian languages.
+
+**Important instructions:**
+1. Detect the language the user wrote in and reply in that same language.
+2. If the user writes in English, you can mix in a bit of Pidgin for friendliness, but keep it mostly English.
+3. If the user writes in Pidgin, reply in Pidgin.
+4. If the user writes in Yoruba, Igbo, or Hausa, reply in that language.
+5. Always be encouraging, helpful, and slightly playful.
+6. Keep responses concise (2-3 short paragraphs).
+7. Always end with an uplifting note.
+
+You help users with:
+- Earning money online
+- Completing tasks and surveys
+- Withdrawals
+- Daily motivation
+- General questions about EarnSphere`
+
+  // ---- Determine if we have an image (vision) ----
+  const hasImage = image && image.startsWith('data:image');
+
+  let payload;
+
+  if (hasImage) {
+    // Use vision model
+    const visionModel = 'llama-3.2-90b-vision-preview';
+    const content = [
+      { type: 'text', text: systemMessage + '\n\nUser: ' + sanitisedMessage }
+    ];
+    // Add image
+    content.push({
+      type: 'image_url',
+      image_url: { url: image }
+    });
+
+    payload = {
+      model: visionModel,
+      messages: [
+        ...historyMessages,
+        { role: 'user', content: content }
+      ],
+      temperature: 0.8,
+      max_tokens: 500,
+      top_p: 0.9
+    };
+  } else {
+    // Use regular text model
+    const textModel = 'llama3-70b-8192';
+    payload = {
+      model: textModel,
+      messages: [
+        { role: 'system', content: systemMessage },
+        ...historyMessages,
+        { role: 'user', content: sanitisedMessage || 'Hello!' }
+      ],
+      temperature: 0.8,
+      max_tokens: 300,
+      top_p: 0.9
+    };
+  }
 
   try {
     const response = await fetch(GROQ_URL, {

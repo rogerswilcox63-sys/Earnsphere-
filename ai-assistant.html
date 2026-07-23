@@ -9,6 +9,7 @@
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -34,19 +35,19 @@
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
-      padding: 0.8rem 2rem;
+      padding: 0.7rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 0.8rem;
+      gap: 0.6rem;
       border-bottom: 1px solid rgba(255,255,255,.08);
       position: relative;
       z-index: 10;
     }
     .nav-links {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.4rem;
       flex-wrap: wrap;
       align-items: center;
     }
@@ -54,9 +55,9 @@
       text-decoration: none;
       color: #cbd5e1;
       font-weight: 500;
-      padding: 0.4rem 0.9rem;
+      padding: 0.35rem 0.8rem;
       border-radius: 0.5rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       transition: all 0.3s;
     }
     .nav-links a:hover,
@@ -65,7 +66,7 @@
       background: rgba(59,130,246,.15);
     }
     .logo {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 800;
       background: linear-gradient(135deg, #3b82f6, #10b981);
       -webkit-background-clip: text;
@@ -76,22 +77,22 @@
     .user-greeting {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.8rem;
       flex-wrap: wrap;
     }
     .user-greeting span {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #94a3b8;
     }
     .logout-btn {
       background: rgba(59,130,246,.2);
       border: 1px solid rgba(59,130,246,.3);
-      padding: 0.4rem 1rem;
+      padding: 0.35rem 0.9rem;
       border-radius: 2rem;
       font-weight: 500;
       color: #3b82f6;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       transition: all 0.3s;
     }
     .logout-btn:hover { background: rgba(59,130,246,.3); }
@@ -101,51 +102,78 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      max-width: 900px;
-      margin: 1.5rem auto;
-      padding: 0 1.5rem;
+      max-width: 1000px;
+      margin: 1rem auto;
+      padding: 0 1.2rem;
       width: 100%;
       position: relative;
       z-index: 1;
-      height: calc(100vh - 90px);
+      height: calc(100vh - 80px);
     }
 
     .chat-header {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding-bottom: 1rem;
+      gap: 0.8rem;
+      padding-bottom: 0.8rem;
       border-bottom: 1px solid rgba(255,255,255,.06);
       flex-shrink: 0;
+      flex-wrap: wrap;
     }
     .chat-header .avatar {
-      width: 48px;
-      height: 48px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #3b82f6, #10b981);
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       color: #fff;
       flex-shrink: 0;
     }
-    .chat-header .info h1 { font-size: 1.2rem; font-weight: 700; }
-    .chat-header .info p { font-size: 0.8rem; color: #94a3b8; }
+    .chat-header .info h1 { font-size: 1.1rem; font-weight: 700; }
+    .chat-header .info p { font-size: 0.75rem; color: #94a3b8; }
     .chat-header .status {
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.8rem;
+      gap: 0.4rem;
+      font-size: 0.75rem;
       color: #10b981;
     }
     .chat-header .status .dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #10b981;
       animation: pulse 1.5s infinite;
+    }
+    .chat-header .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .chat-header .actions button {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-header .actions button:hover {
+      background: rgba(255,255,255,.12);
+      color: #f1f5f9;
+    }
+    .chat-header .actions button.danger:hover {
+      background: rgba(239,68,68,.2);
+      color: #ef4444;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
@@ -156,27 +184,28 @@
     .messages-wrapper {
       flex: 1;
       overflow-y: auto;
-      padding: 1.2rem 0.5rem 0.5rem 0.5rem;
+      padding: 0.8rem 0.3rem 0.3rem 0.3rem;
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
+      gap: 0.6rem;
       scroll-behavior: smooth;
     }
-    .messages-wrapper::-webkit-scrollbar { width: 5px; }
-    .messages-wrapper::-webkit-scrollbar-track { background: rgba(255,255,255,.03); border-radius: 10px; }
+    .messages-wrapper::-webkit-scrollbar { width: 4px; }
+    .messages-wrapper::-webkit-scrollbar-track { background: rgba(255,255,255,.02); border-radius: 10px; }
     .messages-wrapper::-webkit-scrollbar-thumb { background: rgba(59,130,246,.3); border-radius: 10px; }
 
     .msg {
-      max-width: 80%;
-      padding: 0.8rem 1.2rem;
-      border-radius: 16px;
-      line-height: 1.6;
-      font-size: 0.95rem;
+      max-width: 82%;
+      padding: 0.6rem 1rem;
+      border-radius: 14px;
+      line-height: 1.5;
+      font-size: 0.92rem;
       word-wrap: break-word;
       animation: fadeIn 0.3s ease;
+      position: relative;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .msg.user {
@@ -192,73 +221,122 @@
       border-bottom-left-radius: 4px;
     }
     .msg .time {
-      font-size: 0.65rem;
-      color: rgba(255,255,255,.5);
+      font-size: 0.6rem;
+      color: rgba(255,255,255,.4);
       display: block;
-      margin-top: 4px;
+      margin-top: 3px;
     }
-    .msg .attachment {
-      margin-top: 8px;
+    .msg.user .time { color: rgba(255,255,255,.5); }
+
+    /* Attachments inside messages */
+    .msg .attachments {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .msg .attachments .attach-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       background: rgba(0,0,0,.2);
-      padding: 6px 12px 6px 8px;
+      padding: 4px 10px 4px 6px;
       border-radius: 8px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       cursor: pointer;
       transition: background 0.2s;
-      max-width: 100%;
+      max-width: 200px;
     }
-    .msg .attachment:hover { background: rgba(0,0,0,.35); }
-    .msg .attachment img {
-      width: 40px;
-      height: 40px;
+    .msg .attachments .attach-item:hover { background: rgba(0,0,0,.35); }
+    .msg .attachments .attach-item img {
+      width: 32px;
+      height: 32px;
       object-fit: cover;
       border-radius: 4px;
       background: #1e293b;
     }
-    .msg .attachment i {
-      font-size: 1.5rem;
+    .msg .attachments .attach-item i {
+      font-size: 1.2rem;
       color: #94a3b8;
     }
-    .msg .attachment .name {
+    .msg .attachments .attach-item .name {
       flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .msg .attachment .size {
+    .msg .attachments .attach-item .size {
       color: #94a3b8;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
+    }
+
+    /* Video thumbnails */
+    .msg .attachments .attach-item video {
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #0f172a;
+    }
+
+    /* ----- TYPING INDICATOR ----- */
+    .typing-indicator {
+      align-self: flex-start;
+      background: rgba(255,255,255,.06);
+      padding: 8px 14px;
+      border-radius: 14px;
+      border-bottom-left-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      animation: fadeIn 0.3s ease;
+    }
+    .typing-indicator .dots {
+      display: flex;
+      gap: 3px;
+    }
+    .typing-indicator .dots span {
+      width: 5px;
+      height: 5px;
+      background: #94a3b8;
+      border-radius: 50%;
+      animation: bounce 1.4s infinite;
+    }
+    .typing-indicator .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator .dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
     }
 
     /* ----- INPUT AREA ----- */
     .input-area {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 0.8rem 0 1.2rem;
+      gap: 6px;
+      padding: 0.6rem 0 0.8rem;
       border-top: 1px solid rgba(255,255,255,.06);
       flex-shrink: 0;
     }
     .input-row {
       display: flex;
       align-items: flex-end;
-      gap: 10px;
+      gap: 8px;
     }
     .input-row textarea {
       flex: 1;
       background: rgba(15,23,42,.6);
       border: 1px solid rgba(255,255,255,.1);
       border-radius: 12px;
-      padding: 0.8rem 1rem;
+      padding: 0.6rem 0.9rem;
       color: #f1f5f9;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-family: 'Inter', sans-serif;
       resize: none;
-      min-height: 48px;
-      max-height: 150px;
+      min-height: 40px;
+      max-height: 120px;
       outline: none;
       transition: border 0.2s;
       line-height: 1.5;
@@ -270,15 +348,15 @@
       background: rgba(255,255,255,.05);
       border: 1px solid rgba(255,255,255,.08);
       border-radius: 50%;
-      width: 44px;
-      height: 44px;
+      width: 38px;
+      height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #94a3b8;
       cursor: pointer;
       transition: all 0.2s;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       flex-shrink: 0;
     }
     .input-row .btn-icon:hover {
@@ -299,92 +377,47 @@
       cursor: not-allowed;
       transform: none;
     }
+    .input-row .btn-icon.image-btn { color: #10b981; }
+    .input-row .btn-icon.image-btn:hover { background: rgba(16,185,129,.15); color: #10b981; }
+    .input-row .btn-icon.video-btn { color: #f59e0b; }
+    .input-row .btn-icon.video-btn:hover { background: rgba(245,158,11,.15); color: #f59e0b; }
 
-    /* Attachment preview area */
+    /* Attachment preview above input */
     .attachment-preview {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
       padding: 4px 0 0 0;
     }
     .attachment-preview .file-chip {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       background: rgba(255,255,255,.06);
-      padding: 4px 10px 4px 6px;
-      border-radius: 20px;
-      font-size: 0.8rem;
+      padding: 3px 8px 3px 5px;
+      border-radius: 16px;
+      font-size: 0.75rem;
       border: 1px solid rgba(255,255,255,.06);
     }
     .attachment-preview .file-chip img {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       object-fit: cover;
       border-radius: 4px;
     }
     .attachment-preview .file-chip i {
-      font-size: 1.2rem;
+      font-size: 1rem;
       color: #94a3b8;
     }
     .attachment-preview .file-chip .remove {
       cursor: pointer;
       color: #ef4444;
-      font-size: 0.8rem;
-      margin-left: 4px;
+      font-size: 0.75rem;
+      margin-left: 2px;
     }
     .attachment-preview .file-chip .remove:hover { color: #f87171; }
 
-    /* ----- TYPING INDICATOR ----- */
-    .typing-indicator {
-      align-self: flex-start;
-      background: rgba(255,255,255,.06);
-      padding: 10px 16px;
-      border-radius: 16px;
-      border-bottom-left-radius: 4px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #94a3b8;
-      font-size: 0.9rem;
-      animation: fadeIn 0.3s ease;
-    }
-    .typing-indicator .dots {
-      display: flex;
-      gap: 3px;
-    }
-    .typing-indicator .dots span {
-      width: 6px;
-      height: 6px;
-      background: #94a3b8;
-      border-radius: 50%;
-      animation: bounce 1.4s infinite;
-    }
-    .typing-indicator .dots span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator .dots span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-6px); }
-    }
-
-    /* ----- RESPONSIVE ----- */
-    @media (max-width: 768px) {
-      .navbar { padding: 0.6rem 1rem; }
-      .nav-links a { font-size: 0.8rem; padding: 0.3rem 0.6rem; }
-      .logo { font-size: 1.1rem; }
-      .chat-container { padding: 0 1rem; height: calc(100vh - 80px); }
-      .msg { max-width: 90%; font-size: 0.9rem; }
-      .input-row textarea { font-size: 0.9rem; }
-      .input-row .btn-icon { width: 40px; height: 40px; font-size: 1rem; }
-    }
-    @media (max-width: 480px) {
-      .chat-header .info h1 { font-size: 1rem; }
-      .chat-header .info p { font-size: 0.7rem; }
-      .chat-header .status { font-size: 0.7rem; }
-      .msg { padding: 0.6rem 1rem; }
-    }
-
-    /* Toast (for errors) */
+    /* ----- TOAST ----- */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -392,18 +425,37 @@
       transform: translateX(-50%);
       background: #ef4444;
       color: #fff;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-size: 0.9rem;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
       box-shadow: 0 8px 30px rgba(0,0,0,.4);
       z-index: 9999;
       opacity: 0;
       transition: opacity 0.3s ease;
       pointer-events: none;
+      max-width: 90%;
     }
     .toast.show {
       opacity: 1;
       pointer-events: auto;
+    }
+    .toast.success { background: #10b981; }
+
+    /* ----- RESPONSIVE ----- */
+    @media (max-width: 768px) {
+      .navbar { padding: 0.5rem 1rem; }
+      .nav-links a { font-size: 0.75rem; padding: 0.25rem 0.6rem; }
+      .logo { font-size: 1.1rem; }
+      .chat-container { padding: 0 0.8rem; height: calc(100vh - 70px); }
+      .msg { max-width: 90%; font-size: 0.85rem; padding: 0.5rem 0.8rem; }
+      .input-row textarea { font-size: 0.85rem; padding: 0.5rem 0.7rem; }
+      .input-row .btn-icon { width: 34px; height: 34px; font-size: 0.85rem; }
+      .chat-header .info h1 { font-size: 1rem; }
+    }
+    @media (max-width: 480px) {
+      .chat-header .info p { display: none; }
+      .chat-header .status { font-size: 0.65rem; }
+      .msg .attachments .attach-item { max-width: 140px; }
     }
   </style>
 </head>
@@ -433,48 +485,45 @@
       <div class="avatar"><i class="fas fa-brain"></i></div>
       <div class="info">
         <h1>SphereAI Assistant</h1>
-        <p>Your personal hustler helper – online</p>
+        <p>Remembers your conversation • Multilingual</p>
       </div>
       <div class="status">
         <span class="dot"></span> Active
+      </div>
+      <div class="actions">
+        <button onclick="clearChat()" class="danger" title="Clear chat history"><i class="fas fa-trash-alt"></i></button>
       </div>
     </div>
 
     <!-- MESSAGES -->
     <div class="messages-wrapper" id="messagesWrapper">
-      <!-- Initial bot message -->
-      <div class="msg bot">
-        👋 How you dey? I'm SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.
-        <span class="time">Just now</span>
+      <div id="loadingPlaceholder" style="text-align:center;color:#64748b;padding:2rem;font-size:0.9rem;">
+        <i class="fas fa-spinner fa-spin"></i> Loading your conversation...
       </div>
     </div>
 
     <!-- INPUT AREA -->
     <div class="input-area">
-      <!-- Attachment preview -->
       <div class="attachment-preview" id="attachmentPreview"></div>
-
       <div class="input-row">
-        <button class="btn-icon" id="attachBtn" title="Attach file">
-          <i class="fas fa-paperclip"></i>
-        </button>
+        <button class="btn-icon image-btn" id="imageBtn" title="Attach image (AI can see it)"><i class="fas fa-image"></i></button>
+        <button class="btn-icon video-btn" id="videoBtn" title="Attach video (shown in chat)"><i class="fas fa-video"></i></button>
         <textarea id="messageInput" rows="1" placeholder="Type your message..."></textarea>
-        <button class="btn-icon send" id="sendBtn">
-          <i class="fas fa-paper-plane"></i>
-        </button>
+        <button class="btn-icon send" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
       </div>
     </div>
   </div>
 
-  <!-- Hidden file input -->
-  <input type="file" id="fileInput" style="display:none" multiple accept="image/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx" />
+  <!-- Hidden file inputs -->
+  <input type="file" id="imageInput" style="display:none" accept="image/*" />
+  <input type="file" id="videoInput" style="display:none" accept="video/*" />
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
   <script>
     // ============================================================
-    // FIREBASE CONFIG (same as your app)
+    // FIREBASE
     // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
@@ -486,6 +535,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
     // ============================================================
     // DOM REFS
@@ -493,25 +543,33 @@
     const messagesWrapper = document.getElementById('messagesWrapper');
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
-    const attachBtn = document.getElementById('attachBtn');
-    const fileInput = document.getElementById('fileInput');
+    const imageBtn = document.getElementById('imageBtn');
+    const videoBtn = document.getElementById('videoBtn');
+    const imageInput = document.getElementById('imageInput');
+    const videoInput = document.getElementById('videoInput');
     const attachmentPreview = document.getElementById('attachmentPreview');
     const toast = document.getElementById('toast');
+    const loadingPlaceholder = document.getElementById('loadingPlaceholder');
 
     // ============================================================
     // STATE
     // ============================================================
     let currentUser = null;
-    let attachments = []; // each: { file, name, size, type, dataURL? (for image preview) }
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    const API_BASE_URL = 'https://earnsphere-ai.onrender.com'; // live backend
+    let currentConversationRef = null;
+    let attachments = [];
+    let chatHistory = []; // local cache
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+    const API_BASE_URL = 'https://earnsphere-ai.onrender.com';
+    let isSending = false;
+    let messagesLoaded = false;
 
     // ============================================================
     // HELPERS
     // ============================================================
     function showToast(msg, isError = true) {
       toast.textContent = msg;
-      toast.style.background = isError ? '#ef4444' : '#10b981';
+      toast.className = 'toast' + (isError ? '' : ' success');
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 4000);
     }
@@ -523,13 +581,28 @@
     }
 
     function getFileIcon(mimeType) {
-      if (mimeType.startsWith('image/')) return 'fa-image';
+      if (mimeType && mimeType.startsWith('image/')) return 'fa-image';
       if (mimeType === 'application/pdf') return 'fa-file-pdf';
-      if (mimeType.includes('word') || mimeType.includes('doc')) return 'fa-file-word';
-      if (mimeType.includes('excel') || mimeType.includes('sheet')) return 'fa-file-excel';
-      if (mimeType.includes('presentation') || mimeType.includes('ppt')) return 'fa-file-powerpoint';
-      if (mimeType.startsWith('text/')) return 'fa-file-alt';
+      if (mimeType && (mimeType.includes('word') || mimeType.includes('doc'))) return 'fa-file-word';
+      if (mimeType && (mimeType.includes('excel') || mimeType.includes('sheet'))) return 'fa-file-excel';
+      if (mimeType && (mimeType.includes('presentation') || mimeType.includes('ppt'))) return 'fa-file-powerpoint';
+      if (mimeType && mimeType.startsWith('video/')) return 'fa-file-video';
+      if (mimeType && mimeType.startsWith('text/')) return 'fa-file-alt';
       return 'fa-file';
+    }
+
+    function isImageType(mimeType) {
+      return mimeType && mimeType.startsWith('image/');
+    }
+
+    function isVideoType(mimeType) {
+      return mimeType && mimeType.startsWith('video/');
+    }
+
+    function getAttachmentType(mimeType) {
+      if (isImageType(mimeType)) return 'image';
+      if (isVideoType(mimeType)) return 'video';
+      return 'file';
     }
 
     // ============================================================
@@ -542,8 +615,10 @@
       }
       attachmentPreview.innerHTML = attachments.map((att, idx) => {
         let previewHtml = '';
-        if (att.dataURL) {
+        if (att.type && att.type.startsWith('image/')) {
           previewHtml = `<img src="${att.dataURL}" alt="${att.name}" />`;
+        } else if (att.type && att.type.startsWith('video/')) {
+          previewHtml = `<i class="fas fa-file-video" style="font-size:1.2rem;color:#f59e0b;"></i>`;
         } else {
           const icon = getFileIcon(att.type);
           previewHtml = `<i class="fas ${icon}"></i>`;
@@ -557,7 +632,6 @@
         `;
       }).join('');
 
-      // Remove handlers
       attachmentPreview.querySelectorAll('.remove').forEach(el => {
         el.addEventListener('click', (e) => {
           const idx = parseInt(el.dataset.index);
@@ -568,72 +642,158 @@
     }
 
     // ============================================================
-    // ADD MESSAGE TO CHAT
+    // ADD MESSAGE TO CHAT (DOM only, not Firestore)
     // ============================================================
-    function addMessage(text, sender = 'user', attachmentsList = null) {
+    function addMessageToDOM(text, sender = 'user', attachmentsList = null, timestamp = null) {
       const div = document.createElement('div');
       div.className = `msg ${sender}`;
 
       // Text
-      const textNode = document.createTextNode(text);
-      div.appendChild(textNode);
+      if (text) {
+        const textNode = document.createTextNode(text);
+        div.appendChild(textNode);
+      }
 
       // Attachments
       if (attachmentsList && attachmentsList.length > 0) {
+        const attachContainer = document.createElement('div');
+        attachContainer.className = 'attachments';
         attachmentsList.forEach(att => {
-          const attachDiv = document.createElement('div');
-          attachDiv.className = 'attachment';
+          const item = document.createElement('div');
+          item.className = 'attach-item';
 
-          if (att.dataURL) {
+          const attType = getAttachmentType(att.type);
+
+          if (attType === 'image') {
             const img = document.createElement('img');
-            img.src = att.dataURL;
+            img.src = att.dataURL || att.url || '';
             img.alt = att.name;
-            attachDiv.appendChild(img);
+            item.appendChild(img);
+            // Click to enlarge
+            item.addEventListener('click', () => {
+              window.open(img.src, '_blank');
+            });
+          } else if (attType === 'video') {
+            const video = document.createElement('video');
+            video.src = att.dataURL || att.url || '';
+            video.controls = true;
+            video.style.width = '120px';
+            video.style.height = '80px';
+            video.style.objectFit = 'cover';
+            video.style.borderRadius = '4px';
+            item.appendChild(video);
           } else {
             const icon = document.createElement('i');
             icon.className = `fas ${getFileIcon(att.type)}`;
-            attachDiv.appendChild(icon);
+            item.appendChild(icon);
           }
 
           const nameSpan = document.createElement('span');
           nameSpan.className = 'name';
           nameSpan.textContent = att.name;
-          attachDiv.appendChild(nameSpan);
+          item.appendChild(nameSpan);
 
           const sizeSpan = document.createElement('span');
           sizeSpan.className = 'size';
-          sizeSpan.textContent = formatFileSize(att.size);
-          attachDiv.appendChild(sizeSpan);
+          sizeSpan.textContent = formatFileSize(att.size || 0);
+          item.appendChild(sizeSpan);
 
-          // Click to download (or open in new tab)
-          attachDiv.addEventListener('click', () => {
+          // Click to download
+          item.addEventListener('click', () => {
             if (att.dataURL) {
               const a = document.createElement('a');
               a.href = att.dataURL;
               a.download = att.name;
               a.click();
-            } else if (att.file) {
-              // For non-image, create a download link
-              const a = document.createElement('a');
-              a.href = URL.createObjectURL(att.file);
-              a.download = att.name;
-              a.click();
-              setTimeout(() => URL.revokeObjectURL(a.href), 1000);
             }
           });
 
-          div.appendChild(attachDiv);
+          attachContainer.appendChild(item);
         });
+        div.appendChild(attachContainer);
       }
 
       // Time
       const time = document.createElement('span');
       time.className = 'time';
-      time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const ts = timestamp ? new Date(timestamp) : new Date();
+      time.textContent = ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       div.appendChild(time);
+
+      // Remove loading placeholder if present
+      const placeholder = document.getElementById('loadingPlaceholder');
+      if (placeholder) placeholder.remove();
 
       messagesWrapper.appendChild(div);
       messagesWrapper.scrollTop = messagesWrapper.scrollHeight;
+    }
+
+    // ============================================================
+    // LOAD CHAT HISTORY FROM FIRESTORE
+    // ============================================================
+    async function loadChatHistory() {
+      if (!currentUser) return;
+      try {
+        const docRef = db.collection('conversations').doc(currentUser.uid);
+        const doc = await docRef.get();
+        if (doc.exists) {
+          const data = doc.data();
+          chatHistory = data.messages || [];
+          // Display messages
+          if (chatHistory.length === 0) {
+            // No messages, show welcome
+            const welcome = {
+              role: 'bot',
+              text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
+              attachments: [],
+              timestamp: Date.now()
+            };
+            chatHistory.push(welcome);
+            addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+          } else {
+            chatHistory.forEach(msg => {
+              addMessageToDOM(msg.text, msg.role, msg.attachments || [], msg.timestamp);
+            });
+          }
+        } else {
+          // New user - add welcome message
+          const welcome = {
+            role: 'bot',
+            text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
+            attachments: [],
+            timestamp: Date.now()
+          };
+          chatHistory.push(welcome);
+          addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+          // Save to Firestore
+          await docRef.set({ messages: chatHistory });
+        }
+        messagesLoaded = true;
+      } catch (e) {
+        console.error('Error loading history:', e);
+        showToast('Could not load chat history. Please refresh.');
+      }
+    }
+
+    // ============================================================
+    // SAVE MESSAGE TO FIRESTORE
+    // ============================================================
+    async function saveMessageToFirestore(role, text, attachmentsList = null) {
+      if (!currentUser) return;
+      try {
+        const msg = {
+          role: role,
+          text: text || '',
+          attachments: attachmentsList || [],
+          timestamp: Date.now()
+        };
+        chatHistory.push(msg);
+        const docRef = db.collection('conversations').doc(currentUser.uid);
+        await docRef.set({ messages: chatHistory }, { merge: true });
+      } catch (e) {
+        console.error('Error saving message:', e);
+        showToast('Could not save message. Please try again.');
+      }
     }
 
     // ============================================================
@@ -664,30 +824,36 @@
     async function sendMessage() {
       const text = messageInput.value.trim();
       if (!text && attachments.length === 0) {
-        showToast('Please type a message or attach a file.', false);
+        showToast('Please type a message or attach something.', false);
         return;
       }
+      if (isSending) return;
+      isSending = true;
 
-      // Disable controls
       sendBtn.disabled = true;
       messageInput.disabled = true;
 
-      // Prepare attachments for display (copy)
+      // Prepare attachments for display and sending
       const attachCopy = attachments.map(a => ({
         name: a.name,
         size: a.size,
         type: a.type,
-        dataURL: a.dataURL || null,
-        file: a.file || null
+        dataURL: a.dataURL || null
       }));
 
-      // Add user message with attachments
-      const displayText = text || '📎 Attachment';
-      addMessage(displayText, 'user', attachCopy);
+      // Check if we have an image to send to AI
+      const imageAttachment = attachments.find(a => a.type && a.type.startsWith('image/'));
+      const imageData = imageAttachment ? imageAttachment.dataURL : null;
 
-      // Clear input and attachments
+      // Display user message
+      const displayText = text || (attachments.length > 0 ? '📎 Attached file' : '');
+      addMessageToDOM(displayText, 'user', attachCopy);
+      await saveMessageToFirestore('user', displayText, attachCopy);
+
+      // Clear input
       messageInput.value = '';
       messageInput.style.height = 'auto';
+      const sentAttachments = [...attachments];
       attachments = [];
       renderAttachmentPreview();
 
@@ -695,8 +861,18 @@
       showTyping();
 
       try {
-        // Build payload – we only send text (AI doesn't process files yet)
-        const payload = { message: text || 'I sent an attachment.' };
+        // Build history for context (last 10 messages)
+        const history = chatHistory.slice(-10).map(h => ({
+          role: h.role,
+          text: h.text || ''
+        }));
+
+        // Send to backend
+        const payload = {
+          message: text || 'I sent an attachment.',
+          history: history,
+          image: imageData || null
+        };
 
         const response = await fetch(`${API_BASE_URL}/api/grok`, {
           method: 'POST',
@@ -705,22 +881,32 @@
         });
 
         const data = await response.json();
-
         hideTyping();
 
         if (!response.ok) {
           const errMsg = data.error || `Server error (${response.status})`;
-          addMessage(`😅 Oops! My brain no dey work right now. ${errMsg} No wahala, I go soon reset.`, 'bot');
+          const reply = `😅 Oops! My brain no dey work right now. ${errMsg} No wahala, I go soon reset.`;
+          addMessageToDOM(reply, 'bot');
+          await saveMessageToFirestore('bot', reply);
           return;
         }
 
         const reply = data.reply || 'I no get response o, but I dey try!';
-        addMessage(reply, 'bot');
+        addMessageToDOM(reply, 'bot');
+        await saveMessageToFirestore('bot', reply);
+
+        // If the AI responded about an image, note it
+        if (imageData) {
+          // The AI already processed the image
+        }
 
       } catch (error) {
         hideTyping();
-        addMessage(`😅 Oops! My brain no dey work right now. ${error.message || 'Try again later.'} No wahala, I go soon reset.`, 'bot');
+        const reply = `😅 Oops! My brain no dey work right now. ${error.message || 'Try again later.'} No wahala, I go soon reset.`;
+        addMessageToDOM(reply, 'bot');
+        await saveMessageToFirestore('bot', reply);
       } finally {
+        isSending = false;
         sendBtn.disabled = false;
         messageInput.disabled = false;
         messageInput.focus();
@@ -728,58 +914,91 @@
     }
 
     // ============================================================
-    // FILE ATTACHMENT HANDLER
+    // HANDLE FILE ATTACHMENTS
     // ============================================================
-    function handleFiles(files) {
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf',
-        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-      ];
+    function handleFile(file, isImage = false, isVideo = false) {
+      const allowedImageTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/heic'];
+      const allowedVideoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
 
-      for (let file of files) {
-        if (!allowedTypes.includes(file.type)) {
-          showToast(`⚠️ File type not supported: ${file.type}`);
-          continue;
-        }
-        if (file.size > MAX_FILE_SIZE) {
-          showToast(`⚠️ File too large: ${file.name} (max 5MB)`);
-          continue;
-        }
-
-        // Create attachment object
-        const att = { file, name: file.name, size: file.size, type: file.type, dataURL: null };
-
-        // If image, generate a thumbnail preview
-        if (file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            att.dataURL = e.target.result;
-            renderAttachmentPreview(); // re-render to show image
-          };
-          reader.readAsDataURL(file);
-          // push immediately but will re-render when dataURL loads
-          attachments.push(att);
-          renderAttachmentPreview();
-        } else {
-          attachments.push(att);
-          renderAttachmentPreview();
-        }
+      if (isImage && !allowedImageTypes.includes(file.type)) {
+        showToast('⚠️ Please select a valid image (PNG, JPG, GIF, WEBP).');
+        return false;
+      }
+      if (isVideo && !allowedVideoTypes.includes(file.type)) {
+        showToast('⚠️ Please select a valid video (MP4, WEBM, OGG).');
+        return false;
       }
 
-      // Clear input
-      fileInput.value = '';
+      const maxSize = isVideo ? MAX_FILE_SIZE : MAX_IMAGE_SIZE;
+      if (file.size > maxSize) {
+        showToast(`⚠️ File too large: ${file.name} (max ${maxSize/1048576}MB)`);
+        return false;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataURL = e.target.result;
+        attachments.push({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          dataURL: dataURL
+        });
+        renderAttachmentPreview();
+      };
+      reader.readAsDataURL(file);
+      return true;
+    }
+
+    // ============================================================
+    // CLEAR CHAT HISTORY
+    // ============================================================
+    async function clearChat() {
+      if (!currentUser) return;
+      if (!confirm('Are you sure you want to clear your entire chat history? This cannot be undone.')) return;
+
+      try {
+        const docRef = db.collection('conversations').doc(currentUser.uid);
+        chatHistory = [];
+        await docRef.set({ messages: [] });
+        // Clear DOM
+        messagesWrapper.innerHTML = '';
+        // Add welcome message
+        const welcome = {
+          role: 'bot',
+          text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
+          attachments: [],
+          timestamp: Date.now()
+        };
+        chatHistory.push(welcome);
+        addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+        await docRef.set({ messages: chatHistory }, { merge: true });
+        showToast('Chat history cleared!', false);
+      } catch (e) {
+        console.error('Error clearing history:', e);
+        showToast('Could not clear history. Please try again.');
+      }
     }
 
     // ============================================================
     // EVENT LISTENERS
     // ============================================================
-    attachBtn.addEventListener('click', () => fileInput.click());
+    imageBtn.addEventListener('click', () => imageInput.click());
 
-    fileInput.addEventListener('change', (e) => {
+    imageInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
-        handleFiles(e.target.files);
+        handleFile(e.target.files[0], true, false);
       }
+      imageInput.value = '';
+    });
+
+    videoBtn.addEventListener('click', () => videoInput.click());
+
+    videoInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0], false, true);
+      }
+      videoInput.value = '';
     });
 
     sendBtn.addEventListener('click', sendMessage);
@@ -791,35 +1010,13 @@
       }
     });
 
-    // Auto-resize textarea
     messageInput.addEventListener('input', () => {
       messageInput.style.height = 'auto';
       messageInput.style.height = messageInput.scrollHeight + 'px';
     });
 
     // ============================================================
-    // AUTH
-    // ============================================================
-    function logout() {
-      auth.signOut().then(() => {
-        localStorage.removeItem('earnsphere_user_data');
-        window.location.href = 'login.html';
-      });
-    }
-
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('userName').textContent = user.displayName || user.email || 'User';
-        // show initial message
-        addMessage('👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.', 'bot');
-      } else {
-        window.location.href = 'login.html';
-      }
-    });
-
-    // ============================================================
-    // DRAG & DROP SUPPORT (optional)
+    // DRAG & DROP SUPPORT
     // ============================================================
     const chatContainer = document.querySelector('.chat-container');
     chatContainer.addEventListener('dragover', (e) => {
@@ -834,7 +1031,34 @@
       e.preventDefault();
       chatContainer.style.border = 'none';
       if (e.dataTransfer.files.length > 0) {
-        handleFiles(e.dataTransfer.files);
+        const file = e.dataTransfer.files[0];
+        if (file.type && file.type.startsWith('image/')) {
+          handleFile(file, true, false);
+        } else if (file.type && file.type.startsWith('video/')) {
+          handleFile(file, false, true);
+        } else {
+          showToast('⚠️ Only images and videos can be dropped.');
+        }
+      }
+    });
+
+    // ============================================================
+    // AUTH
+    // ============================================================
+    function logout() {
+      auth.signOut().then(() => {
+        localStorage.removeItem('earnsphere_user_data');
+        window.location.href = 'login.html';
+      });
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('userName').textContent = user.displayName || user.email || 'User';
+        await loadChatHistory();
+      } else {
+        window.location.href = 'login.html';
       }
     });
   </script>
