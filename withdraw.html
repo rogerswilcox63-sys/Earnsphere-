@@ -4,13 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EarnSphere Hub - Withdrawal</title>
-</head>
-<body>
-
-    <header>
-        <p>EarnSphere Hub</p>
-        <h1>EarnSphere Withdrawal</h1>
-    </header>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
 :root {
     --bg-dark: #0b0f19;
@@ -46,14 +40,22 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
 .loader { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--text-muted); border-top: 2px solid var(--accent-glow); border-radius: 50%; animation: spin 1s linear infinite; margin-left: 8px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
+</head>
+<body>
 
     <div class="nav-links">
         <a href="dashboard.html">Dashboard</a>
         <a href="withdraw.html" class="active">Withdraw</a>
         <a href="profile.html">Profile</a>
+        <a href="ai-assistant.html">AI Assistant</a>
     </div>
 
     <div class="container">
+        <header>
+            <p>EarnSphere Hub</p>
+            <h1>Withdraw Funds</h1>
+        </header>
+
         <div class="balance-display">
             <span>Your Balance</span>
             <span>₦<span id="user-balance">0.00</span></span>
@@ -105,20 +107,19 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
 
     const firebaseConfig = {
         apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-      authDomain: "earnspherehub-742e9.firebaseapp.com",
-      projectId: "earnspherehub-742e9",
-      storageBucket: "earnspherehub-742e9.firebasestorage.app",
-      messagingSenderId: "173538573377",
-      appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-      measurementId: "G-3ZXY33620J"
+        authDomain: "earnspherehub-742e9.firebaseapp.com",
+        projectId: "earnspherehub-742e9",
+        storageBucket: "earnspherehub-742e9.firebasestorage.app",
+        messagingSenderId: "173538573377",
+        appId: "1:173538573377:web:6d8c748376afcb9096dac0"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // CHANGE THIS TO YOUR RENDER URL
-    const BACKEND_URL = 'https://earnsphere-backend.onrender.com'; 
+    // ===== FIXED BACKEND URL =====
+    const BACKEND_URL = 'https://earnsphere-ai.onrender.com'; 
 
     const balanceEl = document.getElementById('user-balance');
     const withdrawForm = document.getElementById('withdrawal-form');
@@ -139,7 +140,7 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         return new Intl.NumberFormat('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
     };
 
-    // 1. LOAD ALL BANKS FROM RENDER SERVER
+    // 1. LOAD BANKS FROM RENDER
     async function loadBanks() {
         try {
             const res = await fetch(`${BACKEND_URL}/api/banks`);
@@ -162,7 +163,7 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
     }
     loadBanks();
 
-    // 2. AUTO FETCH ACCOUNT NAME FROM RENDER SERVER
+    // 2. RESOLVE ACCOUNT NAME
     let fetchTimeout;
     async function resolveAccountName() {
         const accountNumber = accountInput.value;
