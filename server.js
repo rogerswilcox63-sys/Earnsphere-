@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 // ---- CORS ----
 const allowedOrigins = [
   'https://earnspherehub.name.ng',
-  'http://localhost:3000'   // remove for production
+  'http://localhost:3000'
 ];
 
 app.use(cors({
@@ -61,19 +61,43 @@ app.post('/api/grok', async (req, res) => {
     return res.status(400).json({ error: 'Message or image is required.' });
   }
 
-  const sanitisedMessage = (message || '').trim().slice(0, 2000);
+  const sanitisedMessage = (message || '').trim().slice(0, 4000);
 
   const historyMessages = (history || [])
-    .slice(-10)
+    .slice(-15)
     .map(h => ({
       role: h.role === 'user' ? 'user' : 'assistant',
       content: h.text || ''
     }));
 
   const systemMessage = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub.
-You are fluent in multiple languages: English, Nigerian Pidgin, Yoruba, Igbo, Hausa, and others.
-Detect the user's language and reply in that same language.
-Always be encouraging, helpful, and slightly playful. Keep responses concise (2-3 paragraphs). End with an uplifting note.`;
+
+**ABOUT EARNSPHERE:**
+EarnSphere is a Nigerian rewards platform where users earn real money (₦) by completing tasks:
+- Surveys: 2 per day, rewards ₦150–₦300 each.
+- App Downloads: 1 per hour, rewards ₦350–₦400 each.
+- Social Tasks (YouTube, TikTok, Instagram, Telegram, Twitter, Share): 1 per hour, rewards ₦150–₦300 each.
+- Extra Tasks (Upload Picture, Daily Poll, Quick Quiz, Watch Ad): 1 per hour (combined), rewards ₦50–₦200 each.
+- Daily Check-in Bonus: ₦100 per day.
+- Coupons: ₦500–₦5,000 (single-use, first-come-first-served).
+- Minimum Withdrawal: ₦20,000 via bank transfer (users must verify their bank account).
+
+**KEY FACTS:**
+- Users earn by completing tasks; tasks reset daily or hourly.
+- The platform is secure; user data is stored in Firebase.
+- The AI Assistant (you) can help users with any question about earning, tasks, withdrawals, and motivation.
+- You can access external websites via the /api/fetch endpoint.
+
+**INSTRUCTIONS FOR YOU:**
+- Detect the user's language and reply in that same language (English, Pidgin, Yoruba, Igbo, Hausa, etc.).
+- Always be encouraging, helpful, and slightly playful.
+- Keep responses concise but informative (2-4 short paragraphs). You can provide longer explanations for complex topics.
+- Always end with an uplifting note.
+- If a user asks about a specific task, give clear, accurate details (rewards, limits, how to complete).
+- If the user shares their balance or task count, use that to give personalized advice.
+- When generating code, use clear formatting and explain it step by step.
+
+Now, assist the user with their questions about EarnSphere!`;
 
   const hasImage = image && image.startsWith('data:image');
   let payload;
@@ -90,7 +114,7 @@ Always be encouraging, helpful, and slightly playful. Keep responses concise (2-
         ]}
       ],
       temperature: 0.8,
-      max_tokens: 500,
+      max_tokens: 800,
       top_p: 0.9
     };
   } else {
@@ -103,7 +127,7 @@ Always be encouraging, helpful, and slightly playful. Keep responses concise (2-
         { role: 'user', content: sanitisedMessage || 'Hello!' }
       ],
       temperature: 0.8,
-      max_tokens: 300,
+      max_tokens: 800,
       top_p: 0.9
     };
   }
@@ -133,7 +157,7 @@ Always be encouraging, helpful, and slightly playful. Keep responses concise (2-
 });
 
 // ============================================================
-// PAYSTACK: GET NIGERIAN BANKS
+// PAYSTACK ENDPOINTS
 // ============================================================
 app.get('/api/banks', async (req, res) => {
   if (!PAYSTACK_SECRET) {
@@ -155,9 +179,6 @@ app.get('/api/banks', async (req, res) => {
   }
 });
 
-// ============================================================
-// PAYSTACK: RESOLVE ACCOUNT
-// ============================================================
 app.get('/api/resolve-account', async (req, res) => {
   const { account_number, bank_code } = req.query;
   if (!account_number || !bank_code) {
@@ -186,15 +207,13 @@ app.get('/api/resolve-account', async (req, res) => {
 });
 
 // ============================================================
-// IMAGE GENERATION (Pollinations.ai – free, no key)
+// IMAGE GENERATION (Pollinations.ai)
 // ============================================================
 app.post('/api/generate-image', async (req, res) => {
   const { prompt } = req.body;
-
   if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
     return res.status(400).json({ error: 'Prompt is required.' });
   }
-
   const sanitisedPrompt = prompt.trim().slice(0, 500);
   const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(sanitisedPrompt)}?width=512&height=512`;
 
@@ -212,7 +231,7 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 // ============================================================
-// VIDEO GENERATION (Hugging Face – needs API key)
+// VIDEO GENERATION (Hugging Face)
 // ============================================================
 app.post('/api/generate-video', async (req, res) => {
   const { prompt } = req.body;
@@ -248,7 +267,6 @@ app.post('/api/generate-video', async (req, res) => {
       });
     }
 
-    // Convert video to base64
     const buffer = await response.arrayBuffer();
     const base64 = Buffer.from(buffer).toString('base64');
     const dataURL = `data:video/mp4;base64,${base64}`;
@@ -262,6 +280,55 @@ app.post('/api/generate-video', async (req, res) => {
   } catch (error) {
     console.error('Video generation error:', error);
     res.status(500).json({ error: 'Video generation service unavailable.' });
+  }
+});
+
+// ============================================================
+// FETCH EXTERNAL SITE (for AI to "access sites")
+// ============================================================
+app.post('/api/fetch', async (req, res) => {
+  const { url } = req.body;
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ error: 'URL is required.' });
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      return res.status(400).json({ error: 'Only HTTP/HTTPS URLs are allowed.' });
+    }
+    const hostname = parsedUrl.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1' ||
+        hostname.startsWith('192.168.') || hostname.startsWith('10.') ||
+        hostname.startsWith('172.16.') || hostname.startsWith('172.17.') ||
+        hostname.startsWith('172.18.') || hostname.startsWith('172.19.') ||
+        hostname.startsWith('172.20.') || hostname.startsWith('172.21.') ||
+        hostname.startsWith('172.22.') || hostname.startsWith('172.23.') ||
+        hostname.startsWith('172.24.') || hostname.startsWith('172.25.') ||
+        hostname.startsWith('172.26.') || hostname.startsWith('172.27.') ||
+        hostname.startsWith('172.28.') || hostname.startsWith('172.29.') ||
+        hostname.startsWith('172.30.') || hostname.startsWith('172.31.') ||
+        hostname === '169.254.0.0' || hostname.endsWith('.local')) {
+      return res.status(403).json({ error: 'Access to internal addresses is not allowed.' });
+    }
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid URL format.' });
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'EarnSphere AI Assistant' },
+      timeout: 10000
+    });
+    if (!response.ok) {
+      return res.status(response.status).json({ error: `HTTP ${response.status}` });
+    }
+    const text = await response.text();
+    const truncated = text.slice(0, 50000);
+    res.json({ content: truncated });
+  } catch (error) {
+    console.error('Fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch the URL.' });
   }
 });
 
@@ -285,4 +352,5 @@ app.listen(PORT, () => {
   console.log(`🏦 Resolve: http://localhost:${PORT}/api/resolve-account`);
   console.log(`🖼️ Image gen: http://localhost:${PORT}/api/generate-image`);
   console.log(`🎬 Video gen: http://localhost:${PORT}/api/generate-video`);
+  console.log(`🌐 Fetch: http://localhost:${PORT}/api/fetch`);
 });
