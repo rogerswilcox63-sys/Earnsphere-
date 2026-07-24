@@ -103,7 +103,8 @@ Now, assist the user with their questions about EarnSphere!`;
   let payload;
 
   if (hasImage) {
-    const visionModel = 'llama-3.2-90b-vision-preview';
+    // Updated vision model (supports images)
+    const visionModel = 'llama-3.2-11b-vision-preview'; // ← changed from deprecated model
     payload = {
       model: visionModel,
       messages: [
@@ -115,7 +116,8 @@ Now, assist the user with their questions about EarnSphere!`;
       ],
       temperature: 0.8,
       max_tokens: 800,
-      top_p: 0.9
+      top_p: 0.9,
+      tool_choice: 'none' // prevent accidental tool calls
     };
   } else {
     const textModel = 'openai/gpt-oss-120b';
@@ -128,7 +130,8 @@ Now, assist the user with their questions about EarnSphere!`;
       ],
       temperature: 0.8,
       max_tokens: 800,
-      top_p: 0.9
+      top_p: 0.9,
+      tool_choice: 'none' // prevent accidental tool calls
     };
   }
 
@@ -157,7 +160,7 @@ Now, assist the user with their questions about EarnSphere!`;
 });
 
 // ============================================================
-// PAYSTACK ENDPOINTS
+// PAYSTACK ENDPOINTS (unchanged)
 // ============================================================
 app.get('/api/banks', async (req, res) => {
   if (!PAYSTACK_SECRET) {
@@ -231,8 +234,14 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 // ============================================================
-// VIDEO GENERATION (Hugging Face)
+// VIDEO GENERATION (Hugging Face – with fallback endpoints)
 // ============================================================
+const VIDEO_MODELS = [
+  'damo-vilab/text-to-video-ms-1.7b',
+  'ali-vilab/text-to-video-ms-1.7b',
+  'ModelScope/text-to-video-synthesis'
+];
+
 app.post('/api/generate-video', async (req, res) => {
   const { prompt } = req.body;
 
@@ -246,41 +255,65 @@ app.post('/api/generate-video', async (req, res) => {
 
   const sanitisedPrompt = prompt.trim().slice(0, 500);
 
-  try {
-    const response = await fetch(
-      'https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ inputs: sanitisedPrompt })
+  // Try each model until one works
+  for (const model of VIDEO_MODELS) {
+    const url = `https://api-inference.huggingface.co/models/${model}`;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ inputs: sanitisedPrompt }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error(`Hugging Face API error (${model}):`, error);
+          if (response.status === 503 && attempt === 0) {
+            // Model loading – wait and retry
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            continue;
+          }
+          // If model not found, try next model
+          if (response.status === 404) break;
+          return res.status(response.status).json({
+            error: error.error || 'Video generation failed'
+          });
+        }
+
+        // Success
+        const buffer = await response.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString('base64');
+        const dataURL = `data:video/mp4;base64,${base64}`;
+        return res.json({
+          status: true,
+          url: dataURL,
+          prompt: sanitisedPrompt
+        });
+
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          // Timeout – try next attempt
+          continue;
+        }
+        console.error(`Video generation error (${model}):`, error);
+        // Continue to next model
+        break;
       }
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('Hugging Face API error:', error);
-      return res.status(response.status).json({
-        error: error.error || 'Video generation failed'
-      });
     }
-
-    const buffer = await response.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
-    const dataURL = `data:video/mp4;base64,${base64}`;
-
-    res.json({
-      status: true,
-      url: dataURL,
-      prompt: sanitisedPrompt
-    });
-
-  } catch (error) {
-    console.error('Video generation error:', error);
-    res.status(500).json({ error: 'Video generation service unavailable.' });
   }
+
+  // If all models fail
+  res.status(500).json({ error: 'Video generation failed. Please try again later.' });
 });
 
 // ============================================================
