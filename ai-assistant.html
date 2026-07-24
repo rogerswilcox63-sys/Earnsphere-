@@ -10,7 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    /* (All styles are exactly as before – no changes needed) */
+    /* (all styles – same as before – kept in full for completeness) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.08) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -148,7 +148,7 @@
   </style>
 </head>
 <body>
-  <!-- NAVBAR (same as before) -->
+  <!-- NAVBAR -->
   <nav class="navbar">
     <div class="logo"><i class="fas fa-coins"></i> EarnSphere</div>
     <div class="nav-links">
@@ -354,7 +354,7 @@
       });
     }
 
-    // ===== ADD MESSAGE TO DOM (with image fallback) =====
+    // ===== ADD MESSAGE TO DOM =====
     function addMessageToDOM(text, sender = 'user', attachmentsList = null, timestamp = null, generated = null) {
       const div = document.createElement('div');
       div.className = `msg ${sender}`;
@@ -371,7 +371,6 @@
           const img = document.createElement('img');
           img.src = generated.url;
           img.alt = 'Generated Image';
-          // Fallback if image fails to load
           img.onerror = function() {
             this.style.display = 'none';
             const fallback = document.createElement('p');
@@ -480,13 +479,561 @@
       messagesWrapper.scrollTop = messagesWrapper.scrollHeight;
     }
 
-    // ===== SESSION FUNCTIONS (same as before – not repeating for brevity) =====
-    // (All session functions: createNewSession, saveMessageToSession, loadSession, deleteSession, clearAllHistory, loadSessionList, startNewChat, updateSessionTitle – these are unchanged from the full version. I'll include them in the final answer but for space I'll summarize.)
+    // ===== SESSION MANAGEMENT =====
+    async function createNewSession() {
+      if (!currentUser) return null;
+      const newDoc = {
+        userId: currentUser.uid,
+        title: 'New Chat',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        messages: []
+      };
+      const docRef = await db.collection(COLLECTION_NAME).add(newDoc);
+      return docRef.id;
+    }
 
-    // For the actual answer, I'll provide a complete file with all functions intact.
-    // Since the user needs the full file, I will give it.
+    async function saveMessageToSession(sessionId, role, text, attachmentsList = null, generated = null) {
+      if (!sessionId || !currentUser) return;
+      const msg = {
+        role: role,
+        text: text || '',
+        attachments: attachmentsList || [],
+        generated: generated || null,
+        timestamp: Date.now()
+      };
+      const docRef = db.collection(COLLECTION_NAME).doc(sessionId);
+      await docRef.update({
+        messages: firebase.firestore.FieldValue.arrayUnion(msg),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
 
-    // [IMPORTANT: The full script continues with all the session and generation functions exactly as in the previous version. I'm including them in the final code block below.]
+    async function loadSession(sessionId) {
+      if (!sessionId) return;
+      try {
+        const doc = await db.collection(COLLECTION_NAME).doc(sessionId).get();
+        if (!doc.exists) return;
+        const data = doc.data();
+        if (data.userId !== currentUser.uid) {
+          showToast('You do not have access to this session.');
+          return;
+        }
+        messagesWrapper.innerHTML = '';
+        const messages = data.messages || [];
+        currentSessionMessages = messages;
+        currentSessionId = sessionId;
+        if (messages.length === 0) {
+          const welcome = { role: 'bot', text: '👋 How you dey? I\'m SphereAI...', attachments: [], timestamp: Date.now() };
+          currentSessionMessages.push(welcome);
+          addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+          await saveMessageToSession(sessionId, 'bot', welcome.text, []);
+        } else {
+          messages.forEach(msg => {
+            const generated = msg.generated || null;
+            addMessageToDOM(msg.text, msg.role, msg.attachments || [], msg.timestamp, generated);
+          });
+        }
+      } catch (e) {
+        console.error('Error loading session:', e);
+        showToast('Could not load chat session.');
+      }
+    }
+
+    async function deleteSession(sessionId) {
+      if (!sessionId) return;
+      if (!confirm('Delete this chat session?')) return;
+      try {
+        await db.collection(COLLECTION_NAME).doc(sessionId).delete();
+        if (currentSessionId === sessionId) await startNewChat();
+        loadSessionList();
+        showToast('Session deleted.', false);
+      } catch (e) { showToast('Error deleting session.'); }
+    }
+
+    async function clearAllHistory() {
+      if (!confirm('Delete ALL chat history? This cannot be undone.')) return;
+      try {
+        const snapshot = await db.collection(COLLECTION_NAME)
+          .where('userId', '==', currentUser.uid)
+          .get();
+        const batch = db.batch();
+        snapshot.docs.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+        await startNewChat();
+        loadSessionList();
+        showToast('All chat history cleared.', false);
+      } catch (e) { showToast('Error clearing history.'); }
+    }
+
+    async function loadSessionList() {
+      if (!currentUser) return;
+      try {
+        const snapshot = await db.collection(COLLECTION_NAME)
+          .where('userId', '==', currentUser.uid)
+          .orderBy('updatedAt', 'desc')
+          .get();
+        if (snapshot.empty) {
+          sessionList.innerHTML = `<div class="empty-history">No chat sessions yet. Start a new chat!</div>`;
+          return;
+        }
+        let html = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const title = data.title || 'New Chat';
+          const date = data.updatedAt ? data.updatedAt.toDate().toLocaleString() : 'Just now';
+          const preview = data.messages && data.messages.length > 0 ?
+            (data.messages[0].text || '') : '';
+          html += `
+            <div class="session-item" data-id="${doc.id}">
+              <div class="title">${title}</div>
+              <div class="date">${date}</div>
+              <div class="preview">${preview.substring(0, 50)}${preview.length > 50 ? '…' : ''}</div>
+              <button class="delete-session" data-id="${doc.id}"><i class="fas fa-trash-alt"></i></button>
+            </div>
+          `;
+        });
+        sessionList.innerHTML = html;
+
+        sessionList.querySelectorAll('.session-item').forEach(el => {
+          el.addEventListener('click', (e) => {
+            if (e.target.closest('.delete-session')) return;
+            const id = el.dataset.id;
+            closeSidebarPanel();
+            loadSession(id);
+          });
+        });
+        sessionList.querySelectorAll('.delete-session').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            deleteSession(id);
+          });
+        });
+      } catch (e) {
+        console.error('Error loading session list:', e);
+        sessionList.innerHTML = `<div class="empty-history">Error loading sessions.</div>`;
+      }
+    }
+
+    async function startNewChat() {
+      messagesWrapper.innerHTML = '';
+      currentSessionMessages = [];
+      const newId = await createNewSession();
+      if (newId) {
+        currentSessionId = newId;
+        const welcome = {
+          role: 'bot',
+          text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
+          attachments: [],
+          timestamp: Date.now()
+        };
+        currentSessionMessages.push(welcome);
+        addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+        await saveMessageToSession(newId, 'bot', welcome.text, []);
+        await updateSessionTitle(newId, 'New Chat');
+      } else {
+        showToast('Could not create new chat session.');
+      }
+      closeSidebarPanel();
+    }
+
+    async function updateSessionTitle(sessionId, title) {
+      try {
+        await db.collection(COLLECTION_NAME).doc(sessionId).update({ title });
+      } catch (e) { /* ignore */ }
+    }
+
+    // ===== SEND MESSAGE =====
+    async function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text && attachments.length === 0) {
+        showToast('Please type a message or attach something.', false);
+        return;
+      }
+      if (isSending) return;
+      isSending = true;
+
+      sendBtn.disabled = true;
+      messageInput.disabled = true;
+
+      if (!currentSessionId) {
+        const newId = await createNewSession();
+        if (newId) {
+          currentSessionId = newId;
+          messagesWrapper.innerHTML = '';
+          currentSessionMessages = [];
+        } else {
+          showToast('Failed to create new session.');
+          isSending = false;
+          sendBtn.disabled = false;
+          messageInput.disabled = false;
+          return;
+        }
+      }
+
+      const attachCopy = attachments.map(a => ({
+        name: a.name,
+        size: a.size,
+        type: a.type,
+        dataURL: a.dataURL || null
+      }));
+
+      const imageAttachment = attachments.find(a => a.type && a.type.startsWith('image/'));
+      const imageData = imageAttachment ? imageAttachment.dataURL : null;
+
+      const displayText = text || (attachments.length > 0 ? '📎 Attached file' : '');
+      addMessageToDOM(displayText, 'user', attachCopy);
+      currentSessionMessages.push({ role: 'user', text: displayText, attachments: attachCopy, timestamp: Date.now() });
+      await saveMessageToSession(currentSessionId, 'user', displayText, attachCopy);
+
+      messageInput.value = '';
+      messageInput.style.height = 'auto';
+      attachments = [];
+      renderAttachmentPreview();
+
+      if (currentSessionMessages.length === 1) {
+        const title = getSessionTitle(currentSessionMessages);
+        await updateSessionTitle(currentSessionId, title);
+        loadSessionList();
+      }
+
+      showTyping();
+
+      try {
+        const history = currentSessionMessages.slice(-10).map(h => ({
+          role: h.role,
+          text: h.text || ''
+        }));
+
+        const payload = {
+          message: text || 'I sent an attachment.',
+          history: history,
+          image: imageData || null
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/grok`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        hideTyping();
+
+        if (!response.ok) {
+          const errMsg = data.error || `Server error (${response.status})`;
+          const reply = `😅 Oops! My brain no dey work right now. ${errMsg} No wahala, I go soon reset.`;
+          addMessageToDOM(reply, 'bot');
+          currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
+          await saveMessageToSession(currentSessionId, 'bot', reply, []);
+          return;
+        }
+
+        const reply = data.reply || 'I no get response o, but I dey try!';
+        addMessageToDOM(reply, 'bot');
+        currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
+        await saveMessageToSession(currentSessionId, 'bot', reply, []);
+
+      } catch (error) {
+        hideTyping();
+        const reply = `😅 Oops! My brain no dey work right now. ${error.message || 'Try again later.'} No wahala, I go soon reset.`;
+        addMessageToDOM(reply, 'bot');
+        currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
+        await saveMessageToSession(currentSessionId, 'bot', reply, []);
+      } finally {
+        isSending = false;
+        sendBtn.disabled = false;
+        messageInput.disabled = false;
+        messageInput.focus();
+      }
+    }
+
+    // ===== CLEAR CURRENT CHAT =====
+    async function clearCurrentChat() {
+      if (!confirm('Clear this chat session?')) return;
+      await startNewChat();
+      loadSessionList();
+    }
+
+    // ===== TYPING INDICATOR =====
+    function showTyping() {
+      const div = document.createElement('div');
+      div.className = 'typing-indicator';
+      div.id = 'typingIndicator';
+      div.innerHTML = `
+        SphereAI is thinking
+        <span class="dots">
+          <span></span><span></span><span></span>
+        </span>
+      `;
+      messagesWrapper.appendChild(div);
+      messagesWrapper.scrollTop = messagesWrapper.scrollHeight;
+    }
+
+    function hideTyping() {
+      const el = document.getElementById('typingIndicator');
+      if (el) el.remove();
+    }
+
+    // ===== SIDEBAR =====
+    function openSidebar() {
+      sidebar.classList.add('open');
+      overlay.classList.add('active');
+      loadSessionList();
+    }
+
+    function closeSidebarPanel() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    }
+
+    // ===== HANDLE FILE ATTACHMENTS =====
+    function handleFile(file, isImage = false, isVideo = false) {
+      const allowedImageTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/heic'];
+      const allowedVideoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+
+      if (isImage && !allowedImageTypes.includes(file.type)) {
+        showToast('⚠️ Please select a valid image (PNG, JPG, GIF, WEBP).');
+        return false;
+      }
+      if (isVideo && !allowedVideoTypes.includes(file.type)) {
+        showToast('⚠️ Please select a valid video (MP4, WEBM, OGG).');
+        return false;
+      }
+
+      const maxSize = isVideo ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showToast(`⚠️ File too large: ${file.name} (max ${maxSize/1048576}MB)`);
+        return false;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataURL = e.target.result;
+        attachments.push({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          dataURL: dataURL
+        });
+        renderAttachmentPreview();
+      };
+      reader.readAsDataURL(file);
+      return true;
+    }
+
+    // ===== GENERATION FUNCTIONS (call backend) =====
+    async function generateImage(prompt) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/generate-image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+        if (data.status && data.url) {
+          return { url: data.url, prompt: data.prompt };
+        } else {
+          throw new Error(data.error || 'Image generation failed');
+        }
+      } catch (e) {
+        console.error(e);
+        showToast('Image generation failed: ' + e.message);
+        return null;
+      }
+    }
+
+    async function generateVideo(prompt) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/generate-video`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+        if (data.status && data.url) {
+          return { url: data.url, prompt: data.prompt };
+        } else {
+          throw new Error(data.error || 'Video generation failed');
+        }
+      } catch (e) {
+        console.error(e);
+        showToast('Video generation failed: ' + e.message);
+        return null;
+      }
+    }
+
+    async function handleGenerate(mode) {
+      const prompt = genPromptInput.value.trim();
+      if (!prompt) {
+        showToast('Please enter a prompt.');
+        return;
+      }
+      genSubmit.disabled = true;
+      genSubmit.textContent = 'Generating...';
+
+      let result = null;
+      if (mode === 'image') {
+        result = await generateImage(prompt);
+      } else if (mode === 'video') {
+        result = await generateVideo(prompt);
+      }
+
+      genSubmit.disabled = false;
+      genSubmit.textContent = 'Generate';
+      if (result) {
+        genModal.style.display = 'none';
+        const displayText = mode === 'image' ? '🖼️ Generated image:' : '🎬 Generated video:';
+        addMessageToDOM(displayText, 'bot', [], Date.now(), { type: mode, url: result.url, prompt: result.prompt });
+        const msg = {
+          role: 'bot',
+          text: displayText,
+          attachments: [],
+          generated: { type: mode, url: result.url, prompt: result.prompt },
+          timestamp: Date.now()
+        };
+        currentSessionMessages.push(msg);
+        await saveMessageToSession(currentSessionId, 'bot', displayText, [], { type: mode, url: result.url, prompt: result.prompt });
+      }
+      genPromptInput.value = '';
+    }
+
+    // ===== EVENT LISTENERS =====
+    imageBtn.addEventListener('click', () => imageInput.click());
+    imageInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0], true, false);
+      }
+      imageInput.value = '';
+    });
+
+    videoBtn.addEventListener('click', () => videoInput.click());
+    videoInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0], false, true);
+      }
+      videoInput.value = '';
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    messageInput.addEventListener('input', () => {
+      messageInput.style.height = 'auto';
+      messageInput.style.height = messageInput.scrollHeight + 'px';
+    });
+
+    generateImageBtn.addEventListener('click', () => {
+      genMode = 'image';
+      genModalTitle.textContent = 'Generate Image';
+      genModalDesc.textContent = 'Enter a prompt to generate an image.';
+      genPromptInput.placeholder = 'e.g. A futuristic city in Nigeria';
+      genModal.style.display = 'flex';
+      genPromptInput.focus();
+    });
+
+    generateVideoBtn.addEventListener('click', () => {
+      genMode = 'video';
+      genModalTitle.textContent = 'Generate Video';
+      genModalDesc.textContent = 'Enter a prompt to generate a short video.';
+      genPromptInput.placeholder = 'e.g. A cat playing with a ball in a garden';
+      genModal.style.display = 'flex';
+      genPromptInput.focus();
+    });
+
+    genCancel.addEventListener('click', () => {
+      genModal.style.display = 'none';
+      genPromptInput.value = '';
+    });
+
+    genSubmit.addEventListener('click', () => {
+      handleGenerate(genMode);
+    });
+
+    genPromptInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleGenerate(genMode);
+      }
+    });
+
+    genModal.addEventListener('click', (e) => {
+      if (e.target === genModal) {
+        genModal.style.display = 'none';
+        genPromptInput.value = '';
+      }
+    });
+
+    historyBtn.addEventListener('click', openSidebar);
+    closeSidebar.addEventListener('click', closeSidebarPanel);
+    overlay.addEventListener('click', closeSidebarPanel);
+    newChatBtn.addEventListener('click', startNewChat);
+    clearBtn.addEventListener('click', clearCurrentChat);
+    clearAllHistoryBtn.addEventListener('click', clearAllHistory);
+
+    // Drag and drop
+    const chatContainer = document.querySelector('.chat-container');
+    chatContainer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      chatContainer.style.border = '2px dashed #3b82f6';
+    });
+    chatContainer.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      chatContainer.style.border = 'none';
+    });
+    chatContainer.addEventListener('drop', (e) => {
+      e.preventDefault();
+      chatContainer.style.border = 'none';
+      if (e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (file.type && file.type.startsWith('image/')) {
+          handleFile(file, true, false);
+        } else if (file.type && file.type.startsWith('video/')) {
+          handleFile(file, false, true);
+        } else {
+          showToast('⚠️ Only images and videos can be dropped.');
+        }
+      }
+    });
+
+    // ===== LOGOUT =====
+    function logout() {
+      auth.signOut().then(() => {
+        localStorage.removeItem('earnsphere_user_data');
+        window.location.href = 'login.html';
+      });
+    }
+
+    // ===== AUTH =====
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('userName').textContent = user.displayName || user.email || 'User';
+        try {
+          const snapshot = await db.collection(COLLECTION_NAME)
+            .where('userId', '==', user.uid)
+            .orderBy('updatedAt', 'desc')
+            .limit(1)
+            .get();
+          if (!snapshot.empty) {
+            const doc = snapshot.docs[0];
+            await loadSession(doc.id);
+          } else {
+            await startNewChat();
+          }
+        } catch (e) {
+          await startNewChat();
+        }
+        loadSessionList();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
   </script>
 </body>
 </html>
