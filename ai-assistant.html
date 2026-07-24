@@ -6,7 +6,6 @@
   <title>SphereAI - EarnSphere Nigeria</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -151,7 +150,7 @@
     }
     .chat-header .actions {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
     .chat-header .actions button {
       background: rgba(255,255,255,.06);
@@ -174,6 +173,13 @@
     .chat-header .actions button.danger:hover {
       background: rgba(239,68,68,.2);
       color: #ef4444;
+    }
+    .chat-header .actions button.primary {
+      background: rgba(16,185,129,.15);
+      color: #10b981;
+    }
+    .chat-header .actions button.primary:hover {
+      background: rgba(16,185,129,.25);
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
@@ -202,7 +208,6 @@
       font-size: 0.92rem;
       word-wrap: break-word;
       animation: fadeIn 0.3s ease;
-      position: relative;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
@@ -228,7 +233,6 @@
     }
     .msg.user .time { color: rgba(255,255,255,.5); }
 
-    /* Attachments inside messages */
     .msg .attachments {
       margin-top: 6px;
       display: flex;
@@ -269,8 +273,6 @@
       color: #94a3b8;
       font-size: 0.65rem;
     }
-
-    /* Video thumbnails */
     .msg .attachments .attach-item video {
       width: 120px;
       height: 80px;
@@ -279,7 +281,43 @@
       background: #0f172a;
     }
 
-    /* ----- TYPING INDICATOR ----- */
+    .msg .generated-image {
+      margin-top: 8px;
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .msg .generated-image img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .msg .generated-video {
+      margin-top: 8px;
+      max-width: 100%;
+    }
+    .msg .generated-video video {
+      width: 100%;
+      max-height: 300px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .msg .download-link {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    .msg .download-link:hover { text-decoration: underline; }
+    .msg .prompt-label {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    /* ----- TYPING ----- */
     .typing-indicator {
       align-self: flex-start;
       background: rgba(255,255,255,.06);
@@ -381,8 +419,11 @@
     .input-row .btn-icon.image-btn:hover { background: rgba(16,185,129,.15); color: #10b981; }
     .input-row .btn-icon.video-btn { color: #f59e0b; }
     .input-row .btn-icon.video-btn:hover { background: rgba(245,158,11,.15); color: #f59e0b; }
+    .input-row .btn-icon.generate-image { color: #a855f7; }
+    .input-row .btn-icon.generate-image:hover { background: rgba(168,85,247,.15); color: #a855f7; }
+    .input-row .btn-icon.generate-video { color: #ec4899; }
+    .input-row .btn-icon.generate-video:hover { background: rgba(236,72,153,.15); color: #ec4899; }
 
-    /* Attachment preview above input */
     .attachment-preview {
       display: flex;
       flex-wrap: wrap;
@@ -416,6 +457,179 @@
       margin-left: 2px;
     }
     .attachment-preview .file-chip .remove:hover { color: #f87171; }
+
+    /* ----- HISTORY SIDEBAR ----- */
+    .history-sidebar {
+      position: fixed;
+      top: 0;
+      left: -380px;
+      width: 340px;
+      height: 100%;
+      background: rgba(15,23,42,.95);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(255,255,255,.08);
+      transition: left 0.3s ease;
+      z-index: 999;
+      padding: 1.5rem 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .history-sidebar.open { left: 0; }
+    .history-sidebar .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .history-sidebar .sidebar-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .history-sidebar .sidebar-header button {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .history-sidebar .sidebar-header button:hover { color: #f1f5f9; }
+    .history-sidebar .session-item {
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.6rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .history-sidebar .session-item:hover {
+      background: rgba(255,255,255,.08);
+      border-color: rgba(59,130,246,.3);
+    }
+    .history-sidebar .session-item .title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .history-sidebar .session-item .date {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .history-sidebar .session-item .preview {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .history-sidebar .session-item .delete-session {
+      float: right;
+      color: #64748b;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .history-sidebar .session-item .delete-session:hover { color: #ef4444; }
+    .history-sidebar .empty-history {
+      text-align: center;
+      color: #94a3b8;
+      padding: 2rem 1rem;
+      font-size: 0.9rem;
+    }
+    .history-sidebar .clear-all {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .history-sidebar .clear-all button {
+      width: 100%;
+      padding: 0.6rem;
+      background: rgba(239,68,68,.15);
+      border: 1px solid rgba(239,68,68,.3);
+      border-radius: 8px;
+      color: #ef4444;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .history-sidebar .clear-all button:hover { background: rgba(239,68,68,.25); }
+
+    /* ----- OVERLAY ----- */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 998;
+      display: none;
+    }
+    .sidebar-overlay.active { display: block; }
+
+    /* ----- GENERATION MODAL ----- */
+    .gen-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .gen-modal-content {
+      background: #1e293b;
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 450px;
+      width: 90%;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .gen-modal-content h3 { margin-bottom: 0.5rem; }
+    .gen-modal-content p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1rem; }
+    .gen-modal-content input {
+      width: 100%;
+      background: rgba(15,23,42,.6);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      color: #f1f5f9;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .gen-modal-content input:focus { outline: none; border-color: #3b82f6; }
+    .gen-modal-content .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    .gen-modal-content .btn-row button {
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .gen-modal-content .btn-row .cancel {
+      background: rgba(255,255,255,.08);
+      color: #94a3b8;
+    }
+    .gen-modal-content .btn-row .cancel:hover { background: rgba(255,255,255,.15); }
+    .gen-modal-content .btn-row .generate {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+    }
+    .gen-modal-content .btn-row .generate:hover { transform: scale(1.02); }
+    .gen-modal-content .btn-row .generate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
 
     /* ----- TOAST ----- */
     .toast {
@@ -451,11 +665,13 @@
       .input-row textarea { font-size: 0.85rem; padding: 0.5rem 0.7rem; }
       .input-row .btn-icon { width: 34px; height: 34px; font-size: 0.85rem; }
       .chat-header .info h1 { font-size: 1rem; }
+      .history-sidebar { width: 280px; left: -320px; }
     }
     @media (max-width: 480px) {
       .chat-header .info p { display: none; }
       .chat-header .status { font-size: 0.65rem; }
       .msg .attachments .attach-item { max-width: 140px; }
+      .gen-modal-content { padding: 1.5rem; }
     }
   </style>
 </head>
@@ -485,13 +701,15 @@
       <div class="avatar"><i class="fas fa-brain"></i></div>
       <div class="info">
         <h1>SphereAI Assistant</h1>
-        <p>Remembers your conversation • Multilingual</p>
+        <p>Remembers your conversations</p>
       </div>
       <div class="status">
         <span class="dot"></span> Active
       </div>
       <div class="actions">
-        <button onclick="clearChat()" class="danger" title="Clear chat history"><i class="fas fa-trash-alt"></i></button>
+        <button class="primary" id="newChatBtn" title="New Chat"><i class="fas fa-plus"></i></button>
+        <button id="historyBtn" title="Chat History"><i class="fas fa-clock-rotate-left"></i></button>
+        <button class="danger" id="clearBtn" title="Clear current chat"><i class="fas fa-trash-alt"></i></button>
       </div>
     </div>
 
@@ -507,9 +725,41 @@
       <div class="attachment-preview" id="attachmentPreview"></div>
       <div class="input-row">
         <button class="btn-icon image-btn" id="imageBtn" title="Attach image (AI can see it)"><i class="fas fa-image"></i></button>
-        <button class="btn-icon video-btn" id="videoBtn" title="Attach video (shown in chat)"><i class="fas fa-video"></i></button>
+        <button class="btn-icon video-btn" id="videoBtn" title="Attach video"><i class="fas fa-video"></i></button>
+        <button class="btn-icon generate-image" id="generateImageBtn" title="Generate image from prompt"><i class="fas fa-palette"></i></button>
+        <button class="btn-icon generate-video" id="generateVideoBtn" title="Generate video from prompt"><i class="fas fa-film"></i></button>
         <textarea id="messageInput" rows="1" placeholder="Type your message..."></textarea>
         <button class="btn-icon send" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR OVERLAY -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- HISTORY SIDEBAR -->
+  <div class="history-sidebar" id="historySidebar">
+    <div class="sidebar-header">
+      <h3><i class="fas fa-clock-rotate-left"></i> Chat History</h3>
+      <button id="closeSidebar"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="sessionList">
+      <div class="empty-history">Loading sessions...</div>
+    </div>
+    <div class="clear-all">
+      <button id="clearAllHistory"><i class="fas fa-trash-alt"></i> Delete All History</button>
+    </div>
+  </div>
+
+  <!-- GENERATION MODAL -->
+  <div class="gen-modal-overlay" id="genModal">
+    <div class="gen-modal-content">
+      <h3 id="genModalTitle">Generate Image</h3>
+      <p id="genModalDesc">Enter a prompt to generate an image.</p>
+      <input type="text" id="genPromptInput" placeholder="e.g. A futuristic city in Nigeria" />
+      <div class="btn-row">
+        <button class="cancel" id="genCancel">Cancel</button>
+        <button class="generate" id="genSubmit">Generate</button>
       </div>
     </div>
   </div>
@@ -545,24 +795,41 @@
     const sendBtn = document.getElementById('sendBtn');
     const imageBtn = document.getElementById('imageBtn');
     const videoBtn = document.getElementById('videoBtn');
+    const generateImageBtn = document.getElementById('generateImageBtn');
+    const generateVideoBtn = document.getElementById('generateVideoBtn');
     const imageInput = document.getElementById('imageInput');
     const videoInput = document.getElementById('videoInput');
     const attachmentPreview = document.getElementById('attachmentPreview');
     const toast = document.getElementById('toast');
     const loadingPlaceholder = document.getElementById('loadingPlaceholder');
 
+    const historyBtn = document.getElementById('historyBtn');
+    const sidebar = document.getElementById('historySidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const sessionList = document.getElementById('sessionList');
+    const clearAllHistoryBtn = document.getElementById('clearAllHistory');
+    const newChatBtn = document.getElementById('newChatBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    const genModal = document.getElementById('genModal');
+    const genModalTitle = document.getElementById('genModalTitle');
+    const genModalDesc = document.getElementById('genModalDesc');
+    const genPromptInput = document.getElementById('genPromptInput');
+    const genCancel = document.getElementById('genCancel');
+    const genSubmit = document.getElementById('genSubmit');
+
     // ============================================================
     // STATE
     // ============================================================
     let currentUser = null;
-    let currentConversationRef = null;
     let attachments = [];
-    let chatHistory = []; // local cache
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-    const API_BASE_URL = 'https://earnsphere-ai.onrender.com';
+    let currentSessionId = null;
+    let currentSessionMessages = [];
     let isSending = false;
-    let messagesLoaded = false;
+    const API_BASE_URL = 'https://earnsphere-ai.onrender.com';
+    const COLLECTION_NAME = 'chat_history';
+    let genMode = 'image'; // 'image' or 'video'
 
     // ============================================================
     // HELPERS
@@ -591,18 +858,19 @@
       return 'fa-file';
     }
 
-    function isImageType(mimeType) {
-      return mimeType && mimeType.startsWith('image/');
-    }
-
-    function isVideoType(mimeType) {
-      return mimeType && mimeType.startsWith('video/');
-    }
-
+    function isImageType(mimeType) { return mimeType && mimeType.startsWith('image/'); }
+    function isVideoType(mimeType) { return mimeType && mimeType.startsWith('video/'); }
     function getAttachmentType(mimeType) {
       if (isImageType(mimeType)) return 'image';
       if (isVideoType(mimeType)) return 'video';
       return 'file';
+    }
+
+    function getSessionTitle(messages) {
+      if (!messages || messages.length === 0) return 'New Chat';
+      const first = messages[0];
+      const text = first.text || 'New Chat';
+      return text.length > 30 ? text.substring(0, 30) + '…' : text;
     }
 
     // ============================================================
@@ -642,37 +910,78 @@
     }
 
     // ============================================================
-    // ADD MESSAGE TO CHAT (DOM only, not Firestore)
+    // ADD MESSAGE TO DOM
     // ============================================================
-    function addMessageToDOM(text, sender = 'user', attachmentsList = null, timestamp = null) {
+    function addMessageToDOM(text, sender = 'user', attachmentsList = null, timestamp = null, generated = null) {
       const div = document.createElement('div');
       div.className = `msg ${sender}`;
 
-      // Text
       if (text) {
         const textNode = document.createTextNode(text);
         div.appendChild(textNode);
       }
 
-      // Attachments
+      // If generated content (image or video)
+      if (generated) {
+        if (generated.type === 'image') {
+          const container = document.createElement('div');
+          container.className = 'generated-image';
+          const img = document.createElement('img');
+          img.src = generated.url;
+          img.alt = 'Generated Image';
+          container.appendChild(img);
+          div.appendChild(container);
+          if (generated.prompt) {
+            const label = document.createElement('div');
+            label.className = 'prompt-label';
+            label.textContent = `📝 ${generated.prompt}`;
+            div.appendChild(label);
+          }
+          const download = document.createElement('a');
+          download.href = generated.url;
+          download.download = 'generated-image.png';
+          download.className = 'download-link';
+          download.textContent = '📥 Download Image';
+          div.appendChild(download);
+        } else if (generated.type === 'video') {
+          const container = document.createElement('div');
+          container.className = 'generated-video';
+          const video = document.createElement('video');
+          video.src = generated.url;
+          video.controls = true;
+          video.style.width = '100%';
+          video.style.maxHeight = '300px';
+          video.style.borderRadius = '8px';
+          container.appendChild(video);
+          div.appendChild(container);
+          if (generated.prompt) {
+            const label = document.createElement('div');
+            label.className = 'prompt-label';
+            label.textContent = `📝 ${generated.prompt}`;
+            div.appendChild(label);
+          }
+          const download = document.createElement('a');
+          download.href = generated.url;
+          download.download = 'generated-video.mp4';
+          download.className = 'download-link';
+          download.textContent = '📥 Download Video';
+          div.appendChild(download);
+        }
+      }
+
       if (attachmentsList && attachmentsList.length > 0) {
         const attachContainer = document.createElement('div');
         attachContainer.className = 'attachments';
         attachmentsList.forEach(att => {
           const item = document.createElement('div');
           item.className = 'attach-item';
-
           const attType = getAttachmentType(att.type);
-
           if (attType === 'image') {
             const img = document.createElement('img');
             img.src = att.dataURL || att.url || '';
             img.alt = att.name;
             item.appendChild(img);
-            // Click to enlarge
-            item.addEventListener('click', () => {
-              window.open(img.src, '_blank');
-            });
+            item.addEventListener('click', () => window.open(img.src, '_blank'));
           } else if (attType === 'video') {
             const video = document.createElement('video');
             video.src = att.dataURL || att.url || '';
@@ -687,18 +996,14 @@
             icon.className = `fas ${getFileIcon(att.type)}`;
             item.appendChild(icon);
           }
-
           const nameSpan = document.createElement('span');
           nameSpan.className = 'name';
           nameSpan.textContent = att.name;
           item.appendChild(nameSpan);
-
           const sizeSpan = document.createElement('span');
           sizeSpan.className = 'size';
           sizeSpan.textContent = formatFileSize(att.size || 0);
           item.appendChild(sizeSpan);
-
-          // Click to download
           item.addEventListener('click', () => {
             if (att.dataURL) {
               const a = document.createElement('a');
@@ -707,20 +1012,17 @@
               a.click();
             }
           });
-
           attachContainer.appendChild(item);
         });
         div.appendChild(attachContainer);
       }
 
-      // Time
       const time = document.createElement('span');
       time.className = 'time';
       const ts = timestamp ? new Date(timestamp) : new Date();
       time.textContent = ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       div.appendChild(time);
 
-      // Remove loading placeholder if present
       const placeholder = document.getElementById('loadingPlaceholder');
       if (placeholder) placeholder.remove();
 
@@ -729,75 +1031,294 @@
     }
 
     // ============================================================
-    // LOAD CHAT HISTORY FROM FIRESTORE
+    // SESSION MANAGEMENT (FIRESTORE)
     // ============================================================
-    async function loadChatHistory() {
+    async function createNewSession() {
+      if (!currentUser) return null;
+      const newDoc = {
+        userId: currentUser.uid,
+        title: 'New Chat',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        messages: []
+      };
+      const docRef = await db.collection(COLLECTION_NAME).add(newDoc);
+      return docRef.id;
+    }
+
+    async function saveMessageToSession(sessionId, role, text, attachmentsList = null, generated = null) {
+      if (!sessionId || !currentUser) return;
+      const msg = {
+        role: role,
+        text: text || '',
+        attachments: attachmentsList || [],
+        generated: generated || null,
+        timestamp: Date.now()
+      };
+      const docRef = db.collection(COLLECTION_NAME).doc(sessionId);
+      await docRef.update({
+        messages: firebase.firestore.FieldValue.arrayUnion(msg),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    async function loadSession(sessionId) {
+      if (!sessionId) return;
+      try {
+        const doc = await db.collection(COLLECTION_NAME).doc(sessionId).get();
+        if (!doc.exists) return;
+        const data = doc.data();
+        if (data.userId !== currentUser.uid) {
+          showToast('You do not have access to this session.');
+          return;
+        }
+        messagesWrapper.innerHTML = '';
+        const messages = data.messages || [];
+        currentSessionMessages = messages;
+        currentSessionId = sessionId;
+        if (messages.length === 0) {
+          const welcome = { role: 'bot', text: '👋 How you dey? I\'m SphereAI...', attachments: [], timestamp: Date.now() };
+          currentSessionMessages.push(welcome);
+          addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+          await saveMessageToSession(sessionId, 'bot', welcome.text, []);
+        } else {
+          messages.forEach(msg => {
+            const generated = msg.generated || null;
+            addMessageToDOM(msg.text, msg.role, msg.attachments || [], msg.timestamp, generated);
+          });
+        }
+      } catch (e) {
+        console.error('Error loading session:', e);
+        showToast('Could not load chat session.');
+      }
+    }
+
+    async function deleteSession(sessionId) {
+      if (!sessionId) return;
+      if (!confirm('Delete this chat session?')) return;
+      try {
+        await db.collection(COLLECTION_NAME).doc(sessionId).delete();
+        if (currentSessionId === sessionId) await startNewChat();
+        loadSessionList();
+        showToast('Session deleted.', false);
+      } catch (e) { showToast('Error deleting session.'); }
+    }
+
+    async function clearAllHistory() {
+      if (!confirm('Delete ALL chat history? This cannot be undone.')) return;
+      try {
+        const snapshot = await db.collection(COLLECTION_NAME)
+          .where('userId', '==', currentUser.uid)
+          .get();
+        const batch = db.batch();
+        snapshot.docs.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+        await startNewChat();
+        loadSessionList();
+        showToast('All chat history cleared.', false);
+      } catch (e) { showToast('Error clearing history.'); }
+    }
+
+    async function loadSessionList() {
       if (!currentUser) return;
       try {
-        const docRef = db.collection('conversations').doc(currentUser.uid);
-        const doc = await docRef.get();
-        if (doc.exists) {
-          const data = doc.data();
-          chatHistory = data.messages || [];
-          // Display messages
-          if (chatHistory.length === 0) {
-            // No messages, show welcome
-            const welcome = {
-              role: 'bot',
-              text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
-              attachments: [],
-              timestamp: Date.now()
-            };
-            chatHistory.push(welcome);
-            addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
-          } else {
-            chatHistory.forEach(msg => {
-              addMessageToDOM(msg.text, msg.role, msg.attachments || [], msg.timestamp);
-            });
-          }
-        } else {
-          // New user - add welcome message
-          const welcome = {
-            role: 'bot',
-            text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
-            attachments: [],
-            timestamp: Date.now()
-          };
-          chatHistory.push(welcome);
-          addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
-          // Save to Firestore
-          await docRef.set({ messages: chatHistory });
+        const snapshot = await db.collection(COLLECTION_NAME)
+          .where('userId', '==', currentUser.uid)
+          .orderBy('updatedAt', 'desc')
+          .get();
+        if (snapshot.empty) {
+          sessionList.innerHTML = `<div class="empty-history">No chat sessions yet. Start a new chat!</div>`;
+          return;
         }
-        messagesLoaded = true;
+        let html = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const title = data.title || 'New Chat';
+          const date = data.updatedAt ? data.updatedAt.toDate().toLocaleString() : 'Just now';
+          const preview = data.messages && data.messages.length > 0 ?
+            (data.messages[0].text || '') : '';
+          html += `
+            <div class="session-item" data-id="${doc.id}">
+              <div class="title">${title}</div>
+              <div class="date">${date}</div>
+              <div class="preview">${preview.substring(0, 50)}${preview.length > 50 ? '…' : ''}</div>
+              <button class="delete-session" data-id="${doc.id}"><i class="fas fa-trash-alt"></i></button>
+            </div>
+          `;
+        });
+        sessionList.innerHTML = html;
+
+        sessionList.querySelectorAll('.session-item').forEach(el => {
+          el.addEventListener('click', (e) => {
+            if (e.target.closest('.delete-session')) return;
+            const id = el.dataset.id;
+            closeSidebarPanel();
+            loadSession(id);
+          });
+        });
+        sessionList.querySelectorAll('.delete-session').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            deleteSession(id);
+          });
+        });
+
       } catch (e) {
-        console.error('Error loading history:', e);
-        showToast('Could not load chat history. Please refresh.');
+        console.error('Error loading session list:', e);
+        sessionList.innerHTML = `<div class="empty-history">Error loading sessions.</div>`;
       }
     }
 
     // ============================================================
-    // SAVE MESSAGE TO FIRESTORE
+    // START NEW CHAT
     // ============================================================
-    async function saveMessageToFirestore(role, text, attachmentsList = null) {
-      if (!currentUser) return;
-      try {
-        const msg = {
-          role: role,
-          text: text || '',
-          attachments: attachmentsList || [],
+    async function startNewChat() {
+      messagesWrapper.innerHTML = '';
+      currentSessionMessages = [];
+      const newId = await createNewSession();
+      if (newId) {
+        currentSessionId = newId;
+        const welcome = {
+          role: 'bot',
+          text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
+          attachments: [],
           timestamp: Date.now()
         };
-        chatHistory.push(msg);
-        const docRef = db.collection('conversations').doc(currentUser.uid);
-        await docRef.set({ messages: chatHistory }, { merge: true });
-      } catch (e) {
-        console.error('Error saving message:', e);
-        showToast('Could not save message. Please try again.');
+        currentSessionMessages.push(welcome);
+        addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+        await saveMessageToSession(newId, 'bot', welcome.text, []);
+        await updateSessionTitle(newId, 'New Chat');
+      } else {
+        showToast('Could not create new chat session.');
+      }
+      closeSidebarPanel();
+    }
+
+    async function updateSessionTitle(sessionId, title) {
+      try {
+        await db.collection(COLLECTION_NAME).doc(sessionId).update({ title });
+      } catch (e) { /* ignore */ }
+    }
+
+    // ============================================================
+    // SEND MESSAGE (MAIN LOGIC)
+    // ============================================================
+    async function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text && attachments.length === 0) {
+        showToast('Please type a message or attach something.', false);
+        return;
+      }
+      if (isSending) return;
+      isSending = true;
+
+      sendBtn.disabled = true;
+      messageInput.disabled = true;
+
+      if (!currentSessionId) {
+        const newId = await createNewSession();
+        if (newId) {
+          currentSessionId = newId;
+          messagesWrapper.innerHTML = '';
+          currentSessionMessages = [];
+        } else {
+          showToast('Failed to create new session.');
+          isSending = false;
+          sendBtn.disabled = false;
+          messageInput.disabled = false;
+          return;
+        }
+      }
+
+      const attachCopy = attachments.map(a => ({
+        name: a.name,
+        size: a.size,
+        type: a.type,
+        dataURL: a.dataURL || null
+      }));
+
+      const imageAttachment = attachments.find(a => a.type && a.type.startsWith('image/'));
+      const imageData = imageAttachment ? imageAttachment.dataURL : null;
+
+      const displayText = text || (attachments.length > 0 ? '📎 Attached file' : '');
+      addMessageToDOM(displayText, 'user', attachCopy);
+      currentSessionMessages.push({ role: 'user', text: displayText, attachments: attachCopy, timestamp: Date.now() });
+      await saveMessageToSession(currentSessionId, 'user', displayText, attachCopy);
+
+      messageInput.value = '';
+      messageInput.style.height = 'auto';
+      attachments = [];
+      renderAttachmentPreview();
+
+      if (currentSessionMessages.length === 1) {
+        const title = getSessionTitle(currentSessionMessages);
+        await updateSessionTitle(currentSessionId, title);
+        loadSessionList();
+      }
+
+      showTyping();
+
+      try {
+        const history = currentSessionMessages.slice(-10).map(h => ({
+          role: h.role,
+          text: h.text || ''
+        }));
+
+        const payload = {
+          message: text || 'I sent an attachment.',
+          history: history,
+          image: imageData || null
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/grok`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        hideTyping();
+
+        if (!response.ok) {
+          const errMsg = data.error || `Server error (${response.status})`;
+          const reply = `😅 Oops! My brain no dey work right now. ${errMsg} No wahala, I go soon reset.`;
+          addMessageToDOM(reply, 'bot');
+          currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
+          await saveMessageToSession(currentSessionId, 'bot', reply, []);
+          return;
+        }
+
+        const reply = data.reply || 'I no get response o, but I dey try!';
+        addMessageToDOM(reply, 'bot');
+        currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
+        await saveMessageToSession(currentSessionId, 'bot', reply, []);
+
+      } catch (error) {
+        hideTyping();
+        const reply = `😅 Oops! My brain no dey work right now. ${error.message || 'Try again later.'} No wahala, I go soon reset.`;
+        addMessageToDOM(reply, 'bot');
+        currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
+        await saveMessageToSession(currentSessionId, 'bot', reply, []);
+      } finally {
+        isSending = false;
+        sendBtn.disabled = false;
+        messageInput.disabled = false;
+        messageInput.focus();
       }
     }
 
     // ============================================================
-    // SHOW TYPING INDICATOR
+    // CLEAR CURRENT CHAT
+    // ============================================================
+    async function clearCurrentChat() {
+      if (!confirm('Clear this chat session?')) return;
+      await startNewChat();
+      loadSessionList();
+    }
+
+    // ============================================================
+    // TYPING INDICATOR
     // ============================================================
     function showTyping() {
       const div = document.createElement('div');
@@ -819,98 +1340,17 @@
     }
 
     // ============================================================
-    // SEND MESSAGE
+    // SIDEBAR TOGGLE
     // ============================================================
-    async function sendMessage() {
-      const text = messageInput.value.trim();
-      if (!text && attachments.length === 0) {
-        showToast('Please type a message or attach something.', false);
-        return;
-      }
-      if (isSending) return;
-      isSending = true;
+    function openSidebar() {
+      sidebar.classList.add('open');
+      overlay.classList.add('active');
+      loadSessionList();
+    }
 
-      sendBtn.disabled = true;
-      messageInput.disabled = true;
-
-      // Prepare attachments for display and sending
-      const attachCopy = attachments.map(a => ({
-        name: a.name,
-        size: a.size,
-        type: a.type,
-        dataURL: a.dataURL || null
-      }));
-
-      // Check if we have an image to send to AI
-      const imageAttachment = attachments.find(a => a.type && a.type.startsWith('image/'));
-      const imageData = imageAttachment ? imageAttachment.dataURL : null;
-
-      // Display user message
-      const displayText = text || (attachments.length > 0 ? '📎 Attached file' : '');
-      addMessageToDOM(displayText, 'user', attachCopy);
-      await saveMessageToFirestore('user', displayText, attachCopy);
-
-      // Clear input
-      messageInput.value = '';
-      messageInput.style.height = 'auto';
-      const sentAttachments = [...attachments];
-      attachments = [];
-      renderAttachmentPreview();
-
-      // Show typing
-      showTyping();
-
-      try {
-        // Build history for context (last 10 messages)
-        const history = chatHistory.slice(-10).map(h => ({
-          role: h.role,
-          text: h.text || ''
-        }));
-
-        // Send to backend
-        const payload = {
-          message: text || 'I sent an attachment.',
-          history: history,
-          image: imageData || null
-        };
-
-        const response = await fetch(`${API_BASE_URL}/api/grok`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-        hideTyping();
-
-        if (!response.ok) {
-          const errMsg = data.error || `Server error (${response.status})`;
-          const reply = `😅 Oops! My brain no dey work right now. ${errMsg} No wahala, I go soon reset.`;
-          addMessageToDOM(reply, 'bot');
-          await saveMessageToFirestore('bot', reply);
-          return;
-        }
-
-        const reply = data.reply || 'I no get response o, but I dey try!';
-        addMessageToDOM(reply, 'bot');
-        await saveMessageToFirestore('bot', reply);
-
-        // If the AI responded about an image, note it
-        if (imageData) {
-          // The AI already processed the image
-        }
-
-      } catch (error) {
-        hideTyping();
-        const reply = `😅 Oops! My brain no dey work right now. ${error.message || 'Try again later.'} No wahala, I go soon reset.`;
-        addMessageToDOM(reply, 'bot');
-        await saveMessageToFirestore('bot', reply);
-      } finally {
-        isSending = false;
-        sendBtn.disabled = false;
-        messageInput.disabled = false;
-        messageInput.focus();
-      }
+    function closeSidebarPanel() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
     }
 
     // ============================================================
@@ -929,7 +1369,7 @@
         return false;
       }
 
-      const maxSize = isVideo ? MAX_FILE_SIZE : MAX_IMAGE_SIZE;
+      const maxSize = isVideo ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
       if (file.size > maxSize) {
         showToast(`⚠️ File too large: ${file.name} (max ${maxSize/1048576}MB)`);
         return false;
@@ -951,40 +1391,90 @@
     }
 
     // ============================================================
-    // CLEAR CHAT HISTORY
+    // GENERATION FUNCTIONS (call backend)
     // ============================================================
-    async function clearChat() {
-      if (!currentUser) return;
-      if (!confirm('Are you sure you want to clear your entire chat history? This cannot be undone.')) return;
-
+    async function generateImage(prompt) {
       try {
-        const docRef = db.collection('conversations').doc(currentUser.uid);
-        chatHistory = [];
-        await docRef.set({ messages: [] });
-        // Clear DOM
-        messagesWrapper.innerHTML = '';
-        // Add welcome message
-        const welcome = {
+        const response = await fetch(`${API_BASE_URL}/api/generate-image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+        if (data.status && data.url) {
+          return { url: data.url, prompt: data.prompt };
+        } else {
+          throw new Error(data.error || 'Image generation failed');
+        }
+      } catch (e) {
+        console.error(e);
+        showToast('Image generation failed: ' + e.message);
+        return null;
+      }
+    }
+
+    async function generateVideo(prompt) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/generate-video`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+        if (data.status && data.url) {
+          return { url: data.url, prompt: data.prompt };
+        } else {
+          throw new Error(data.error || 'Video generation failed');
+        }
+      } catch (e) {
+        console.error(e);
+        showToast('Video generation failed: ' + e.message);
+        return null;
+      }
+    }
+
+    // ============================================================
+    // HANDLE GENERATION REQUEST
+    // ============================================================
+    async function handleGenerate(mode) {
+      const prompt = genPromptInput.value.trim();
+      if (!prompt) {
+        showToast('Please enter a prompt.');
+        return;
+      }
+      genSubmit.disabled = true;
+      genSubmit.textContent = 'Generating...';
+
+      let result = null;
+      if (mode === 'image') {
+        result = await generateImage(prompt);
+      } else if (mode === 'video') {
+        result = await generateVideo(prompt);
+      }
+
+      genSubmit.disabled = false;
+      genSubmit.textContent = 'Generate';
+      if (result) {
+        genModal.style.display = 'none';
+        const displayText = mode === 'image' ? '🖼️ Generated image:' : '🎬 Generated video:';
+        addMessageToDOM(displayText, 'bot', [], Date.now(), { type: mode, url: result.url, prompt: result.prompt });
+        const msg = {
           role: 'bot',
-          text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
+          text: displayText,
           attachments: [],
+          generated: { type: mode, url: result.url, prompt: result.prompt },
           timestamp: Date.now()
         };
-        chatHistory.push(welcome);
-        addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
-        await docRef.set({ messages: chatHistory }, { merge: true });
-        showToast('Chat history cleared!', false);
-      } catch (e) {
-        console.error('Error clearing history:', e);
-        showToast('Could not clear history. Please try again.');
+        currentSessionMessages.push(msg);
+        await saveMessageToSession(currentSessionId, 'bot', displayText, [], { type: mode, url: result.url, prompt: result.prompt });
       }
+      genPromptInput.value = '';
     }
 
     // ============================================================
     // EVENT LISTENERS
     // ============================================================
     imageBtn.addEventListener('click', () => imageInput.click());
-
     imageInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
         handleFile(e.target.files[0], true, false);
@@ -993,7 +1483,6 @@
     });
 
     videoBtn.addEventListener('click', () => videoInput.click());
-
     videoInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
         handleFile(e.target.files[0], false, true);
@@ -1002,22 +1491,68 @@
     });
 
     sendBtn.addEventListener('click', sendMessage);
-
     messageInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
       }
     });
-
     messageInput.addEventListener('input', () => {
       messageInput.style.height = 'auto';
       messageInput.style.height = messageInput.scrollHeight + 'px';
     });
 
-    // ============================================================
-    // DRAG & DROP SUPPORT
-    // ============================================================
+    // Generation buttons
+    generateImageBtn.addEventListener('click', () => {
+      genMode = 'image';
+      genModalTitle.textContent = 'Generate Image';
+      genModalDesc.textContent = 'Enter a prompt to generate an image.';
+      genPromptInput.placeholder = 'e.g. A futuristic city in Nigeria';
+      genModal.style.display = 'flex';
+      genPromptInput.focus();
+    });
+
+    generateVideoBtn.addEventListener('click', () => {
+      genMode = 'video';
+      genModalTitle.textContent = 'Generate Video';
+      genModalDesc.textContent = 'Enter a prompt to generate a short video.';
+      genPromptInput.placeholder = 'e.g. A cat playing with a ball in a garden';
+      genModal.style.display = 'flex';
+      genPromptInput.focus();
+    });
+
+    genCancel.addEventListener('click', () => {
+      genModal.style.display = 'none';
+      genPromptInput.value = '';
+    });
+
+    genSubmit.addEventListener('click', () => {
+      handleGenerate(genMode);
+    });
+
+    genPromptInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleGenerate(genMode);
+      }
+    });
+
+    genModal.addEventListener('click', (e) => {
+      if (e.target === genModal) {
+        genModal.style.display = 'none';
+        genPromptInput.value = '';
+      }
+    });
+
+    // Sidebar
+    historyBtn.addEventListener('click', openSidebar);
+    closeSidebar.addEventListener('click', closeSidebarPanel);
+    overlay.addEventListener('click', closeSidebarPanel);
+    newChatBtn.addEventListener('click', startNewChat);
+    clearBtn.addEventListener('click', clearCurrentChat);
+    clearAllHistoryBtn.addEventListener('click', clearAllHistory);
+
+    // Drag and drop
     const chatContainer = document.querySelector('.chat-container');
     chatContainer.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -1056,7 +1591,23 @@
       if (user) {
         currentUser = user;
         document.getElementById('userName').textContent = user.displayName || user.email || 'User';
-        await loadChatHistory();
+        // Load most recent session or create new
+        try {
+          const snapshot = await db.collection(COLLECTION_NAME)
+            .where('userId', '==', user.uid)
+            .orderBy('updatedAt', 'desc')
+            .limit(1)
+            .get();
+          if (!snapshot.empty) {
+            const doc = snapshot.docs[0];
+            await loadSession(doc.id);
+          } else {
+            await startNewChat();
+          }
+        } catch (e) {
+          await startNewChat();
+        }
+        loadSessionList();
       } else {
         window.location.href = 'login.html';
       }

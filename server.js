@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 // ---- CORS ----
 const allowedOrigins = [
   'https://earnspherehub.name.ng',
-  'http://localhost:3000'   // remove this for production
+  'http://localhost:3000'   // remove for production
 ];
 
 app.use(cors({
@@ -27,18 +27,22 @@ app.use(express.json({ limit: '50mb' }));
 
 // ---- Configuration ----
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET; // 👈 MUST add on Render
-const PAYSTACK_URL = 'https://api.paystack.co';
+const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET;
+const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
 if (!GROQ_API_KEY) {
   console.error('❌ GROQ_API_KEY is missing!');
   process.exit(1);
 }
 if (!PAYSTACK_SECRET) {
-  console.warn('⚠️ PAYSTACK_SECRET is missing – Paystack endpoints will not work.');
+  console.warn('⚠️ PAYSTACK_SECRET is missing. Paystack endpoints will not work.');
+}
+if (!HUGGINGFACE_API_KEY) {
+  console.warn('⚠️ HUGGINGFACE_API_KEY is missing. Video generation will not work.');
 }
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const PAYSTACK_URL = 'https://api.paystack.co';
 
 // ============================================================
 // HEALTH CHECK
@@ -48,10 +52,11 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================================
-// AI CHAT ENDPOINT (unchanged)
+// AI CHAT ENDPOINT (Groq)
 // ============================================================
 app.post('/api/grok', async (req, res) => {
   const { message, history, image } = req.body;
+
   if (!message && !image) {
     return res.status(400).json({ error: 'Message or image is required.' });
   }
@@ -128,20 +133,20 @@ Always be encouraging, helpful, and slightly playful. Keep responses concise (2-
 });
 
 // ============================================================
-// PAYSTACK: GET ALL NIGERIAN BANKS
+// PAYSTACK: GET NIGERIAN BANKS
 // ============================================================
 app.get('/api/banks', async (req, res) => {
+  if (!PAYSTACK_SECRET) {
+    return res.status(503).json({ status: false, message: 'Paystack not configured.' });
+  }
   try {
     const response = await fetch(`${PAYSTACK_URL}/bank`, {
       headers: { 'Authorization': `Bearer ${PAYSTACK_SECRET}` }
     });
     const data = await response.json();
-
     if (!response.ok) {
       return res.status(response.status).json({ status: false, message: data.message });
     }
-
-    // Sort banks alphabetically
     data.data.sort((a, b) => a.name.localeCompare(b.name));
     res.json({ status: true, data: data.data });
   } catch (error) {
@@ -151,7 +156,7 @@ app.get('/api/banks', async (req, res) => {
 });
 
 // ============================================================
-// PAYSTACK: RESOLVE ACCOUNT NUMBER
+// PAYSTACK: RESOLVE ACCOUNT
 // ============================================================
 app.get('/api/resolve-account', async (req, res) => {
   const { account_number, bank_code } = req.query;
@@ -160,6 +165,9 @@ app.get('/api/resolve-account', async (req, res) => {
   }
   if (account_number.length !== 10) {
     return res.status(400).json({ status: false, message: 'Account number must be 10 digits' });
+  }
+  if (!PAYSTACK_SECRET) {
+    return res.status(503).json({ status: false, message: 'Paystack not configured.' });
   }
 
   try {
@@ -174,6 +182,86 @@ app.get('/api/resolve-account', async (req, res) => {
   } catch (error) {
     console.error('Paystack Resolve Error:', error);
     res.status(500).json({ status: false, message: 'Could not verify account' });
+  }
+});
+
+// ============================================================
+// IMAGE GENERATION (Pollinations.ai – free, no key)
+// ============================================================
+app.post('/api/generate-image', async (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+    return res.status(400).json({ error: 'Prompt is required.' });
+  }
+
+  const sanitisedPrompt = prompt.trim().slice(0, 500);
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(sanitisedPrompt)}?width=512&height=512`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Image generation failed');
+    const buffer = await response.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
+    const dataURL = `data:image/png;base64,${base64}`;
+    res.json({ status: true, url: dataURL, prompt: sanitisedPrompt });
+  } catch (error) {
+    console.error('Image generation error:', error);
+    res.status(500).json({ error: 'Image generation failed.' });
+  }
+});
+
+// ============================================================
+// VIDEO GENERATION (Hugging Face – needs API key)
+// ============================================================
+app.post('/api/generate-video', async (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+    return res.status(400).json({ error: 'Prompt is required.' });
+  }
+
+  if (!HUGGINGFACE_API_KEY) {
+    return res.status(503).json({ error: 'Video generation is not configured. Please set HUGGINGFACE_API_KEY.' });
+  }
+
+  const sanitisedPrompt = prompt.trim().slice(0, 500);
+
+  try {
+    const response = await fetch(
+      'https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ inputs: sanitisedPrompt })
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Hugging Face API error:', error);
+      return res.status(response.status).json({
+        error: error.error || 'Video generation failed'
+      });
+    }
+
+    // Convert video to base64
+    const buffer = await response.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
+    const dataURL = `data:video/mp4;base64,${base64}`;
+
+    res.json({
+      status: true,
+      url: dataURL,
+      prompt: sanitisedPrompt
+    });
+
+  } catch (error) {
+    console.error('Video generation error:', error);
+    res.status(500).json({ error: 'Video generation service unavailable.' });
   }
 });
 
@@ -195,4 +283,6 @@ app.listen(PORT, () => {
   console.log(`🤖 AI: http://localhost:${PORT}/api/grok`);
   console.log(`🏦 Banks: http://localhost:${PORT}/api/banks`);
   console.log(`🏦 Resolve: http://localhost:${PORT}/api/resolve-account`);
+  console.log(`🖼️ Image gen: http://localhost:${PORT}/api/generate-image`);
+  console.log(`🎬 Video gen: http://localhost:${PORT}/api/generate-video`);
 });
