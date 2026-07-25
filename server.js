@@ -29,6 +29,7 @@ app.use(express.json({ limit: '50mb' }));
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET;
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
+const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 
 if (!GROQ_API_KEY) {
   console.error('❌ GROQ_API_KEY is missing!');
@@ -39,6 +40,9 @@ if (!PAYSTACK_SECRET) {
 }
 if (!HUGGINGFACE_API_KEY) {
   console.warn('⚠️ HUGGINGFACE_API_KEY is missing. Video generation will not work.');
+}
+if (!REPLICATE_API_TOKEN) {
+  console.warn('⚠️ REPLICATE_API_TOKEN is missing – no fallback for video.');
 }
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -103,8 +107,7 @@ Now, assist the user with their questions about EarnSphere!`;
   let payload;
 
   if (hasImage) {
-    // Updated vision model (supports images)
-    const visionModel = 'llama-3.2-11b-vision-preview'; // ← changed from deprecated model
+    const visionModel = 'llama-3.2-11b-vision-preview';
     payload = {
       model: visionModel,
       messages: [
@@ -117,7 +120,7 @@ Now, assist the user with their questions about EarnSphere!`;
       temperature: 0.8,
       max_tokens: 800,
       top_p: 0.9,
-      tool_choice: 'none' // prevent accidental tool calls
+      tool_choice: 'none'
     };
   } else {
     const textModel = 'openai/gpt-oss-120b';
@@ -131,7 +134,7 @@ Now, assist the user with their questions about EarnSphere!`;
       temperature: 0.8,
       max_tokens: 800,
       top_p: 0.9,
-      tool_choice: 'none' // prevent accidental tool calls
+      tool_choice: 'none'
     };
   }
 
@@ -160,7 +163,7 @@ Now, assist the user with their questions about EarnSphere!`;
 });
 
 // ============================================================
-// PAYSTACK ENDPOINTS (unchanged)
+// PAYSTACK ENDPOINTS
 // ============================================================
 app.get('/api/banks', async (req, res) => {
   if (!PAYSTACK_SECRET) {
@@ -234,7 +237,7 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 // ============================================================
-// VIDEO GENERATION (Hugging Face – with fallback endpoints)
+// VIDEO GENERATION (Hugging Face + Replicate fallback)
 // ============================================================
 const VIDEO_MODELS = [
   'damo-vilab/text-to-video-ms-1.7b',
@@ -242,20 +245,7 @@ const VIDEO_MODELS = [
   'ModelScope/text-to-video-synthesis'
 ];
 
-app.post('/api/generate-video', async (req, res) => {
-  const { prompt } = req.body;
-
-  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
-    return res.status(400).json({ error: 'Prompt is required.' });
-  }
-
-  if (!HUGGINGFACE_API_KEY) {
-    return res.status(503).json({ error: 'Video generation is not configured. Please set HUGGINGFACE_API_KEY.' });
-  }
-
-  const sanitisedPrompt = prompt.trim().slice(0, 500);
-
-  // Try each model until one works
+async function generateVideoHuggingFace(prompt) {
   for (const model of VIDEO_MODELS) {
     const url = `https://api-inference.huggingface.co/models/${model}`;
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -269,7 +259,7 @@ app.post('/api/generate-video', async (req, res) => {
             'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ inputs: sanitisedPrompt }),
+          body: JSON.stringify({ inputs: prompt }),
           signal: controller.signal
         });
 
@@ -279,45 +269,106 @@ app.post('/api/generate-video', async (req, res) => {
           const error = await response.json();
           console.error(`Hugging Face API error (${model}):`, error);
           if (response.status === 503 && attempt === 0) {
-            // Model loading – wait and retry
             await new Promise(resolve => setTimeout(resolve, 5000));
             continue;
           }
-          // If model not found, try next model
           if (response.status === 404) break;
-          return res.status(response.status).json({
-            error: error.error || 'Video generation failed'
-          });
+          throw new Error(error.error || 'Video generation failed');
         }
 
-        // Success
         const buffer = await response.arrayBuffer();
         const base64 = Buffer.from(buffer).toString('base64');
-        const dataURL = `data:video/mp4;base64,${base64}`;
-        return res.json({
-          status: true,
-          url: dataURL,
-          prompt: sanitisedPrompt
-        });
-
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          // Timeout – try next attempt
-          continue;
-        }
-        console.error(`Video generation error (${model}):`, error);
-        // Continue to next model
+        return `data:video/mp4;base64,${base64}`;
+      } catch (e) {
+        if (e.name === 'AbortError') continue;
+        console.error(`Error with model ${model}:`, e);
         break;
       }
     }
   }
+  return null;
+}
 
-  // If all models fail
-  res.status(500).json({ error: 'Video generation failed. Please try again later.' });
+async function generateVideoReplicate(prompt) {
+  if (!REPLICATE_API_TOKEN) return null;
+  try {
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${REPLICATE_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        version: 'stability-ai/stable-video-diffusion',
+        input: { prompt, frames: 14 }
+      })
+    });
+    const prediction = await response.json();
+    if (!response.ok) throw new Error(prediction.error || 'Replicate failed');
+
+    // Poll for completion
+    let url = prediction.urls.get;
+    for (let i = 0; i < 30; i++) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const poll = await fetch(url);
+      const status = await poll.json();
+      if (status.status === 'succeeded') {
+        const videoUrl = status.output;
+        const videoResp = await fetch(videoUrl);
+        const buffer = await videoResp.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString('base64');
+        return `data:video/mp4;base64,${base64}`;
+      } else if (status.status === 'failed') {
+        throw new Error('Replicate generation failed');
+      }
+    }
+    throw new Error('Timeout waiting for Replicate');
+  } catch (e) {
+    console.error('Replicate error:', e);
+    return null;
+  }
+}
+
+app.post('/api/generate-video', async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+    return res.status(400).json({ error: 'Prompt is required.' });
+  }
+
+  const sanitisedPrompt = prompt.trim().slice(0, 500);
+
+  // 1. Try Hugging Face
+  if (HUGGINGFACE_API_KEY) {
+    try {
+      const result = await generateVideoHuggingFace(sanitisedPrompt);
+      if (result) {
+        return res.json({ status: true, url: result, prompt: sanitisedPrompt });
+      }
+    } catch (e) {
+      console.error('Hugging Face video error:', e);
+    }
+  }
+
+  // 2. Fallback to Replicate
+  if (REPLICATE_API_TOKEN) {
+    try {
+      const result = await generateVideoReplicate(sanitisedPrompt);
+      if (result) {
+        return res.json({ status: true, url: result, prompt: sanitisedPrompt });
+      }
+    } catch (e) {
+      console.error('Replicate video error:', e);
+    }
+  }
+
+  // 3. All failed
+  res.status(503).json({ 
+    error: 'Video generation service unavailable. Please try again later or check your API keys.'
+  });
 });
 
 // ============================================================
-// FETCH EXTERNAL SITE (for AI to "access sites")
+// FETCH EXTERNAL SITE
 // ============================================================
 app.post('/api/fetch', async (req, res) => {
   const { url } = req.body;
