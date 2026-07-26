@@ -264,7 +264,7 @@
         </div>
       </div>
 
-      <!-- SURVEYS (max 2/day) -->
+      <!-- SURVEYS (max 2/day) – all go to survey.html -->
       <div class="section-wrapper" id="surveyWrapper">
         <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers <span class="limit-badge">(max 2 per day)</span></h2>
         <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
@@ -273,7 +273,7 @@
         <div class="offers-grid" id="surveyList"></div>
       </div>
 
-      <!-- APP DOWNLOADS (1/hour) -->
+      <!-- APP DOWNLOADS (1/hour) – includes Free Fire -->
       <div class="section-wrapper" id="appWrapper">
         <h2 class="section-title"><i class="fas fa-download"></i> App Downloads <span class="limit-badge">(1 per hour)</span></h2>
         <div id="appResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
@@ -378,22 +378,53 @@
     // ============================================================
     // TASK DEFINITIONS
     // ============================================================
+    // Surveys – all go to survey.html
     const surveyTasks = [
-      { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits' },
-      { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets' },
-      { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200, desc:'Tell us your favourite Nollywood actors and movies.' },
-      { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180, desc:'What are your favourite Nigerian dishes and recipes?' },
-      { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220, desc:'How do you listen to music? Share your streaming habits.' },
-      { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.' },
-      { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.' },
-      { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.' },
-      { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.' },
-      { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.' }
+      { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits', link:'https://earnspherehub.name.ng/survey.html' },
+      { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets', link:'https://earnspherehub.name.ng/survey.html' },
+      { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200, desc:'Tell us your favourite Nollywood actors and movies.', link:'https://earnspherehub.name.ng/survey.html' },
+      { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180, desc:'What are your favourite Nigerian dishes and recipes?', link:'https://earnspherehub.name.ng/survey.html' },
+      { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220, desc:'How do you listen to music? Share your streaming habits.', link:'https://earnspherehub.name.ng/survey.html' },
+      { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.', link:'https://earnspherehub.name.ng/survey.html' },
+      { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.', link:'https://earnspherehub.name.ng/survey.html' },
+      { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.', link:'https://earnspherehub.name.ng/survey.html' },
+      { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.', link:'https://earnspherehub.name.ng/survey.html' },
+      { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.', link:'https://earnspherehub.name.ng/survey.html' }
     ];
 
+    // App downloads – includes Free Fire
     const appTasks = [
-      { id:'app_01', title:'Download Grok', desc:'Download and install the Grok AI app from the Play Store.', reward:400, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=ai.x.grok' },
-      { id:'app_02', title:'Download DeepSeek', desc:'Download and install the DeepSeek AI app from the Play Store.', reward:350, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=com.deepseek.chat' }
+      { 
+        id:'app_01', 
+        title:'Download Grok', 
+        desc:'Download and install the Grok AI app from the Play Store.', 
+        reward:400, 
+        badge:'Download', 
+        badgeClass:'badge-download', 
+        link:'https://play.google.com/store/apps/details?id=ai.x.grok',
+        reset:'daily' 
+      },
+      { 
+        id:'app_02', 
+        title:'Download DeepSeek', 
+        desc:'Download and install the DeepSeek AI app from the Play Store.', 
+        reward:350, 
+        badge:'Download', 
+        badgeClass:'badge-download', 
+        link:'https://play.google.com/store/apps/details?id=com.deepseek.chat',
+        reset:'daily' 
+      },
+      // ===== NEW: Free Fire =====
+      { 
+        id:'app_03', 
+        title:'Download Free Fire', 
+        desc:'Download and install Free Fire – the popular survival shooter game.', 
+        reward:400, 
+        badge:'Download', 
+        badgeClass:'badge-download', 
+        link:'https://play.google.com/store/apps/details?id=com.dts.freefireth',
+        reset:'daily' 
+      }
     ];
 
     const socialTasks = [
@@ -402,7 +433,7 @@
       { id:'yt_3', title:'Comment on YouTube', desc:'Leave a helpful comment on our pinned video.', reward:150, badge:'YouTube', badgeClass:'badge-youtube', link:'https://youtube.com/@earnspherenigeria' },
       { id:'soc_1', title:'Follow on TikTok', desc:'Follow our TikTok and like the latest post.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/' },
       { id:'soc_2', title:'Follow on Instagram', desc:'Follow our official Instagram page.', reward:200, badge:'Instagram', badgeClass:'badge-social', link:'https://instagram.com/' },
-      { id:'soc_3', title:'Join Our Telegram', desc:'Join our community channel for updates.', reward:150, badge:'Telegram', badgeClass:'badge-social', link:'https://t.me/earnspherehub' }, // ← updated link
+      { id:'soc_3', title:'Join Our Telegram', desc:'Join our community channel for updates.', reward:150, badge:'Telegram', badgeClass:'badge-social', link:'https://t.me/earnspherehub' },
       { id:'soc_4', title:'Follow on Twitter', desc:'Follow our official Twitter/X account.', reward:180, badge:'Twitter', badgeClass:'badge-twitter', link:'https://twitter.com/' },
       { id:'soc_5', title:'Share Our Page', desc:'Share our website link on your social media.', reward:220, badge:'Social', badgeClass:'badge-social', link:'https://earnspherehub.name.ng' }
     ];
@@ -501,7 +532,6 @@
     // ============================================================
     function showTelegramPopup() {
       const modal = document.getElementById('telegramModal');
-      // Only show once per session
       if (sessionStorage.getItem('telegramPopupShown') === 'true') return;
       modal.classList.add('active');
       sessionStorage.setItem('telegramPopupShown', 'true');
@@ -698,6 +728,13 @@
         showToast('⚠️ You have reached the daily limit of 2 surveys.');
         return;
       }
+      
+      // Find the survey to get its link
+      const survey = surveyTasks.find(t => t.id === taskId);
+      if (survey && survey.link) {
+        window.open(survey.link, '_blank');
+      }
+      
       if (!userData.completedTasks) userData.completedTasks = {};
       userData.completedTasks[taskId] = Date.now();
       userData.balance = (userData.balance || 0) + reward;
@@ -875,7 +912,6 @@
       auth.onAuthStateChanged(async (user) => {
         if (user) {
           currentUser = user;
-          // ---- FIX: Load user display name ----
           const displayName = user.displayName || user.email || 'User';
           document.getElementById('userName').textContent = displayName;
 
@@ -888,10 +924,8 @@
           renderTasks();
           updateCountdowns();
 
-          // ---- Show Telegram popup (once per session) ----
           setTimeout(showTelegramPopup, 800);
         } else {
-          // Not logged in – redirect
           window.location.href = 'login.html';
         }
       });
