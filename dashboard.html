@@ -96,7 +96,6 @@
     .timer-label { font-weight:700; color:#f59e0b; background:rgba(245,158,11,.1); padding:.3rem .8rem; border-radius:2rem; display:inline-block; border:1px solid rgba(245,158,11,.2); }
     .limit-badge { font-size:.8rem; color:#94a3b8; font-weight:400; margin-left:.5rem; }
 
-    /* ===== TELEGRAM MODAL ===== */
     .telegram-modal {
       display: none;
       position: fixed;
@@ -107,9 +106,7 @@
       justify-content: center;
       backdrop-filter: blur(6px);
     }
-    .telegram-modal.active {
-      display: flex;
-    }
+    .telegram-modal.active { display: flex; }
     .telegram-modal-content {
       background: linear-gradient(145deg, #1e293b, #0f172a);
       border-radius: 1.5rem;
@@ -120,27 +117,10 @@
       box-shadow: 0 20px 60px rgba(0,0,0,.6);
       text-align: center;
     }
-    .telegram-modal-content .telegram-icon {
-      font-size: 4rem;
-      color: #26A5E4;
-      margin-bottom: 0.5rem;
-    }
-    .telegram-modal-content h2 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-    .telegram-modal-content p {
-      color: #94a3b8;
-      font-size: 0.95rem;
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
-    }
-    .telegram-modal-content .btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
+    .telegram-modal-content .telegram-icon { font-size: 4rem; color: #26A5E4; margin-bottom: 0.5rem; }
+    .telegram-modal-content h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .telegram-modal-content p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .telegram-modal-content .btn-group { display: flex; flex-direction: column; gap: 0.75rem; }
     .telegram-modal-content .btn-telegram {
       background: linear-gradient(135deg, #26A5E4, #1E8FC9);
       border: none;
@@ -157,10 +137,7 @@
       justify-content: center;
       gap: 0.6rem;
     }
-    .telegram-modal-content .btn-telegram:hover {
-      transform: scale(1.02);
-      box-shadow: 0 4px 20px rgba(38,165,228,.3);
-    }
+    .telegram-modal-content .btn-telegram:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(38,165,228,.3); }
     .telegram-modal-content .btn-later {
       background: rgba(255,255,255,.06);
       border: 1px solid rgba(255,255,255,.08);
@@ -172,10 +149,7 @@
       cursor: pointer;
       transition: all 0.3s;
     }
-    .telegram-modal-content .btn-later:hover {
-      background: rgba(255,255,255,.12);
-      color: #f1f5f9;
-    }
+    .telegram-modal-content .btn-later:hover { background: rgba(255,255,255,.12); color: #f1f5f9; }
   </style>
 </head>
 <body>
@@ -215,7 +189,6 @@
 
     <!-- DASHBOARD CONTENT -->
     <div class="dashboard-container">
-      <!-- Stats -->
       <h2 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Overview</h2>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-title">Wallet Balance</div><div class="stat-value" id="walletBalance">₦0.00</div></div>
@@ -248,7 +221,7 @@
         </div>
       </div>
 
-      <!-- AI Assistant Button Card -->
+      <!-- AI Assistant Card -->
       <h2 class="section-title"><i class="fas fa-robot"></i> AI Assistant</h2>
       <div class="stats-grid">
         <div class="ai-card" style="grid-column:span 1;">
@@ -345,18 +318,28 @@
     const db = firebase.firestore();
 
     // ============================================================
-    // COUPON REWARDS
+    // COUPON REWARDS – LOADED FROM FIRESTORE
     // ============================================================
-    const couponRewards = {
-      "WHATSAPP1000":1000,
-      "AFEIEVR":500,
-      "YOUTUBE2000":2000,
-      "FREEMONEY":3000,
-      "WELCOMEBONUS":5000,
-      "EARNSPHERE":750,
-      "BONUS1500":1500,
-      "VIP2500":2500
-    };
+    let couponRewards = {};
+
+    async function loadCouponsFromFirestore() {
+      try {
+        const snapshot = await db.collection('coupons').where('active', '==', true).get();
+        couponRewards = {};
+        if (!snapshot.empty) {
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            couponRewards[data.code] = data.reward;
+          });
+          console.log('✅ Coupons loaded:', couponRewards);
+        } else {
+          console.log('No active coupons found.');
+        }
+      } catch (e) {
+        console.error('Error loading coupons:', e);
+        couponRewards = {};
+      }
+    }
 
     // ============================================================
     // GLOBALS
@@ -378,7 +361,6 @@
     // ============================================================
     // TASK DEFINITIONS
     // ============================================================
-    // Surveys – all go to survey.html
     const surveyTasks = [
       { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits', link:'https://earnspherehub.name.ng/survey.html' },
       { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets', link:'https://earnspherehub.name.ng/survey.html' },
@@ -392,39 +374,10 @@
       { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.', link:'https://earnspherehub.name.ng/survey.html' }
     ];
 
-    // App downloads – includes Free Fire
     const appTasks = [
-      { 
-        id:'app_01', 
-        title:'Download Grok', 
-        desc:'Download and install the Grok AI app from the Play Store.', 
-        reward:400, 
-        badge:'Download', 
-        badgeClass:'badge-download', 
-        link:'https://play.google.com/store/apps/details?id=ai.x.grok',
-        reset:'daily' 
-      },
-      { 
-        id:'app_02', 
-        title:'Download DeepSeek', 
-        desc:'Download and install the DeepSeek AI app from the Play Store.', 
-        reward:350, 
-        badge:'Download', 
-        badgeClass:'badge-download', 
-        link:'https://play.google.com/store/apps/details?id=com.deepseek.chat',
-        reset:'daily' 
-      },
-      // ===== NEW: Free Fire =====
-      { 
-        id:'app_03', 
-        title:'Download Free Fire', 
-        desc:'Download and install Free Fire – the popular survival shooter game.', 
-        reward:400, 
-        badge:'Download', 
-        badgeClass:'badge-download', 
-        link:'https://play.google.com/store/apps/details?id=com.dts.freefireth',
-        reset:'daily' 
-      }
+      { id:'app_01', title:'Download Grok', desc:'Download and install the Grok AI app from the Play Store.', reward:400, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=ai.x.grok', reset:'daily' },
+      { id:'app_02', title:'Download DeepSeek', desc:'Download and install the DeepSeek AI app from the Play Store.', reward:350, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=com.deepseek.chat', reset:'daily' },
+      { id:'app_03', title:'Download Free Fire', desc:'Download and install Free Fire – the popular survival shooter game.', reward:400, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=com.dts.freefireth', reset:'daily' }
     ];
 
     const socialTasks = [
@@ -448,9 +401,7 @@
     // ============================================================
     // HELPERS
     // ============================================================
-    function getTodayDateString() {
-      return new Date().toISOString().split('T')[0];
-    }
+    function getTodayDateString() { return new Date().toISOString().split('T')[0]; }
 
     function isTaskCompleted(taskId) {
       if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
@@ -480,15 +431,13 @@
 
     function getSurveyCountToday() {
       let count = 0;
-      surveyTasks.forEach(task => {
-        if (isTaskCompleted(task.id)) count++;
-      });
+      surveyTasks.forEach(task => { if (isTaskCompleted(task.id)) count++; });
       return count;
     }
 
     function isCooldownActive(lastTimestamp) {
       if (!lastTimestamp) return false;
-      return (Date.now() - lastTimestamp) < 3600000; // 1 hour
+      return (Date.now() - lastTimestamp) < 3600000;
     }
 
     function updateInterfaceValues() {
@@ -562,16 +511,34 @@
     }
 
     // ============================================================
-    // COUPON REDEEM
+    // COUPON REDEEM – NOW USES DYNAMIC COUPONS
     // ============================================================
     async function redeemCoupon() {
       const input = document.getElementById('couponInput');
       const messageDiv = document.getElementById('couponMessage');
       const couponCode = input.value.trim().toUpperCase();
 
-      if (!currentUser) { messageDiv.style.color='#ef4444'; messageDiv.innerHTML='⚠️ Please log in.'; return; }
-      if (!couponCode) { messageDiv.style.color='#ef4444'; messageDiv.innerHTML='⚠️ Enter a code.'; return; }
-      if (!couponRewards.hasOwnProperty(couponCode)) { messageDiv.style.color='#ef4444'; messageDiv.innerHTML='❌ Invalid code.'; return; }
+      if (!currentUser) {
+        messageDiv.style.color='#ef4444';
+        messageDiv.innerHTML='⚠️ Please log in.';
+        return;
+      }
+      if (!couponCode) {
+        messageDiv.style.color='#ef4444';
+        messageDiv.innerHTML='⚠️ Enter a code.';
+        return;
+      }
+
+      // Ensure coupons are loaded
+      if (Object.keys(couponRewards).length === 0) {
+        await loadCouponsFromFirestore();
+      }
+
+      if (!couponRewards.hasOwnProperty(couponCode)) {
+        messageDiv.style.color='#ef4444';
+        messageDiv.innerHTML='❌ Invalid coupon code.';
+        return;
+      }
 
       const rewardAmount = couponRewards[couponCode];
 
@@ -593,7 +560,12 @@
         await db.runTransaction(async (transaction) => {
           const doc = await transaction.get(docRef);
           if (doc.exists && doc.data().used === true) throw new Error('Coupon already used.');
-          transaction.set(docRef, { used: true, usedBy: currentUser.uid, reward: rewardAmount, redeemedAt: firebase.firestore.FieldValue.serverTimestamp() });
+          transaction.set(docRef, {
+            used: true,
+            usedBy: currentUser.uid,
+            reward: rewardAmount,
+            redeemedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
         });
 
         userData.balance = (userData.balance || 0) + rewardAmount;
@@ -729,7 +701,6 @@
         return;
       }
       
-      // Find the survey to get its link
       const survey = surveyTasks.find(t => t.id === taskId);
       if (survey && survey.link) {
         window.open(survey.link, '_blank');
@@ -885,10 +856,7 @@
       });
     }
 
-    // --- TELEGRAM MODAL EVENT LISTENERS ---
-    document.getElementById('telegramJoinBtn').addEventListener('click', function(e) {
-      closeTelegramPopup();
-    });
+    document.getElementById('telegramJoinBtn').addEventListener('click', closeTelegramPopup);
     document.getElementById('telegramLaterBtn').addEventListener('click', closeTelegramPopup);
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -898,7 +866,6 @@
       updateInterfaceValues();
       renderTasks();
       updateCountdowns();
-
       checkAndShowAds();
 
       setInterval(() => {
@@ -920,6 +887,10 @@
             userData = doc.data();
             localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
           }
+          
+          // Load coupons from Firestore
+          await loadCouponsFromFirestore();
+
           updateInterfaceValues();
           renderTasks();
           updateCountdowns();
