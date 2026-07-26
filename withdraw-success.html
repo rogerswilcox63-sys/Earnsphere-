@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Withdrawal Successful - EarnSphere Hub</title>
+    <title>Withdrawal Status - EarnSphere Hub</title>
     <style>
         :root {
             --bg-dark: #0b0f19;
@@ -32,7 +32,7 @@
             padding: 20px;
         }
 
-       .success-card {
+        .success-card {
             background: var(--bg-card);
             width: 100%;
             max-width: 420px;
@@ -44,10 +44,9 @@
             animation: fadeInUp 0.5s ease;
         }
 
-       .success-icon {
+        .status-icon {
             width: 80px;
             height: 80px;
-            background: rgba(16, 185, 129, 0.1);
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -56,11 +55,28 @@
             border: 2px solid var(--accent-glow);
         }
 
-       .success-icon svg {
+        .status-icon svg {
             width: 40px;
             height: 40px;
             fill: var(--accent-glow);
         }
+
+        .status-icon.pending {
+            border-color: #f59e0b;
+        }
+        .status-icon.pending svg { fill: #f59e0b; }
+        .status-icon.approved {
+            border-color: #3b82f6;
+        }
+        .status-icon.approved svg { fill: #3b82f6; }
+        .status-icon.paid {
+            border-color: #10b981;
+        }
+        .status-icon.paid svg { fill: #10b981; }
+        .status-icon.rejected {
+            border-color: #ef4444;
+        }
+        .status-icon.rejected svg { fill: #ef4444; }
 
         h1 {
             font-size: 1.75rem;
@@ -69,13 +85,13 @@
             color: var(--text-main);
         }
 
-       .subtitle {
+        .subtitle {
             color: var(--text-muted);
             font-size: 0.95rem;
             margin-bottom: 24px;
         }
 
-       .details-box {
+        .details-box {
             background: rgba(0, 0, 0, 0.2);
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -84,45 +100,70 @@
             text-align: left;
         }
 
-       .detail-row {
+        .detail-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 12px;
             font-size: 0.9rem;
         }
 
-       .detail-row:last-child {
+        .detail-row:last-child {
             margin-bottom: 0;
         }
 
-       .detail-label {
+        .detail-label {
             color: var(--text-muted);
         }
 
-       .detail-value {
+        .detail-value {
             font-weight: 600;
             color: var(--text-main);
         }
 
-       .amount {
+        .amount {
             font-size: 1.25rem;
             color: var(--accent-glow);
         }
 
-       .info-note {
+        .status-badge {
+            padding: 0.25rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        .status-badge.approved {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        .status-badge.paid {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        .status-badge.rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .info-note {
             font-size: 0.85rem;
             color: var(--text-muted);
             margin-bottom: 24px;
             line-height: 1.5;
         }
 
-       .btn-group {
+        .btn-group {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
-       .btn-primary {
+        .btn-primary {
             width: 100%;
             background: var(--accent-glow);
             color: #000;
@@ -137,12 +178,12 @@
             transition: all 0.3s ease;
         }
 
-       .btn-primary:hover {
+        .btn-primary:hover {
             background: var(--accent-hover);
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
         }
 
-       .btn-secondary {
+        .btn-secondary {
             width: 100%;
             background: transparent;
             color: var(--text-main);
@@ -157,12 +198,12 @@
             transition: all 0.3s ease;
         }
 
-       .btn-secondary:hover {
+        .btn-secondary:hover {
             border-color: var(--accent-glow);
             color: var(--accent-glow);
         }
 
-       .btn-receipt {
+        .btn-receipt {
             width: 100%;
             background: linear-gradient(135deg, #10b981, #059669);
             color: #000;
@@ -173,11 +214,11 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-       }
+        }
 
-       .btn-receipt:hover {
+        .btn-receipt:hover {
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-       }
+        }
 
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
@@ -187,14 +228,14 @@
 </head>
 <body>
     <div class="success-card">
-        <div class="success-icon">
+        <div class="status-icon pending" id="statusIcon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v6l5.25 3.15L17 12.23l-4-2.37V7z"/>
             </svg>
         </div>
 
-        <h1>Withdrawal Successful!</h1>
-        <p class="subtitle">Your request has been submitted</p>
+        <h1 id="statusTitle">Processing</h1>
+        <p class="subtitle" id="statusSub">Your withdrawal request is being reviewed.</p>
 
         <div class="details-box">
             <div class="detail-row">
@@ -207,7 +248,7 @@
             </div>
             <div class="detail-row">
                 <span class="detail-label">Status</span>
-                <span class="detail-value" style="color: var(--accent-glow);">Processing</span>
+                <span class="detail-value" id="statusBadge"><span class="status-badge pending">Processing</span></span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">Reference</span>
@@ -219,7 +260,7 @@
             </div>
         </div>
 
-        <p class="info-note">
+        <p class="info-note" id="statusMessage">
             Funds will be credited to your account within 24 hours.
             You will receive a notification once completed.
         </p>
@@ -235,24 +276,64 @@
     <canvas id="receiptCanvas" width="400" height="650" style="display:none;"></canvas>
 
     <script>
-        let amount = "20000";
-        let bank = "opay";
-        let refNumber = "";
-        let currentDate = "";
-
-        // Get data from URL
+        // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        amount = urlParams.get('amount') || amount;
-        bank = urlParams.get('bank') || bank;
+        let amount = urlParams.get('amount') || '20000';
+        let bank = urlParams.get('bank') || 'opay';
+        let status = urlParams.get('status') || 'pending'; // default to pending
 
-        // Format amount to Naira
+        // Map status to display text and styles
+        const statusMap = {
+            pending: {
+                title: 'Processing',
+                subtitle: 'Your withdrawal request is being reviewed.',
+                icon: 'pending',
+                message: 'Funds will be credited to your account within 24 hours. You will receive a notification once completed.'
+            },
+            approved: {
+                title: 'Approved',
+                subtitle: 'Your withdrawal has been approved and will be processed shortly.',
+                icon: 'approved',
+                message: 'Your request has been approved by admin. You will receive the funds in your account within 24 hours.'
+            },
+            paid: {
+                title: 'Completed',
+                subtitle: 'Your withdrawal has been successfully processed!',
+                icon: 'paid',
+                message: 'Funds have been credited to your account. Check your bank statement for confirmation.'
+            },
+            rejected: {
+                title: 'Rejected',
+                subtitle: 'Your withdrawal request was rejected.',
+                icon: 'rejected',
+                message: 'Please contact support for more information about your request.'
+            }
+        };
+
+        // Get status data
+        const statusData = statusMap[status] || statusMap.pending;
+
+        // Update UI
+        document.getElementById('statusTitle').textContent = statusData.title;
+        document.getElementById('statusSub').textContent = statusData.subtitle;
+        document.getElementById('statusMessage').textContent = statusData.message;
+
+        // Set status icon class
+        const iconEl = document.getElementById('statusIcon');
+        iconEl.className = `status-icon ${statusData.icon}`;
+
+        // Set status badge
+        const badge = document.querySelector('#statusBadge .status-badge');
+        badge.textContent = statusData.title;
+        badge.className = `status-badge ${statusData.icon}`;
+
+        // Set amount and bank
         const formattedAmount = new Intl.NumberFormat('en-NG', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }).format(amount);
         document.getElementById('withdraw-amount').textContent = `₦${formattedAmount}`;
 
-        // Format bank name
         const bankNames = {
             'opay': 'OPay',
             'gtbank': 'GTBank',
@@ -265,21 +346,18 @@
             'uba': 'UBA',
             'union': 'Union Bank'
         };
-        const bankDisplay = bankNames[bank] || bank;
+        const bankDisplay = bankNames[bank.toLowerCase()] || bank;
         document.getElementById('withdraw-bank').textContent = bankDisplay;
 
-        // Generate random reference
-        refNumber = "ES" + Math.floor(Math.random() * 900000 + 100000);
+        // Generate reference
+        const refNumber = "ES" + Math.floor(Math.random() * 900000 + 100000);
         document.getElementById('random-ref').textContent = refNumber.replace("ES", "");
 
         // Set current date
-        currentDate = new Date().toLocaleString('en-NG', { 
-            dateStyle: 'medium', 
-            timeStyle: 'short' 
-        });
+        const currentDate = new Date().toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' });
         document.getElementById('current-date').textContent = currentDate;
 
-        // Function to generate and download receipt image
+        // Receipt download function
         function downloadReceipt() {
             const canvas = document.getElementById('receiptCanvas');
             const ctx = canvas.getContext('2d');
@@ -294,7 +372,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('EarnSphere Hub', canvas.width/2, 50);
 
-            // Success icon
+            // Icon
             ctx.fillStyle = '#10b981';
             ctx.beginPath();
             ctx.arc(canvas.width/2, 110, 35, 0, 2 * Math.PI);
@@ -306,7 +384,7 @@
             // Title
             ctx.fillStyle = '#f3f4f6';
             ctx.font = 'bold 20px Inter, sans-serif';
-            ctx.fillText('Transfer Successful', canvas.width/2, 170);
+            ctx.fillText(statusData.title, canvas.width/2, 170);
 
             // Amount
             ctx.font = 'bold 32px Inter, sans-serif';
@@ -322,7 +400,7 @@
             let y = 290;
             const details = [
                 ['Bank', bankDisplay],
-                ['Status', 'Processing'],
+                ['Status', statusData.title],
                 ['Reference', refNumber],
                 ['Date', currentDate],
                 ['Description', 'EarnSphere Withdrawal']
@@ -343,10 +421,9 @@
             ctx.fillStyle = '#9ca3af';
             ctx.font = '12px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('This is a system generated receipt', canvas.width/2, 580);
+            ctx.fillText('System generated receipt', canvas.width/2, 580);
             ctx.fillText('EarnSphere.ng', canvas.width/2, 600);
 
-            // Download
             const link = document.createElement('a');
             link.download = `EarnSphere_Receipt_${refNumber}.png`;
             link.href = canvas.toDataURL('image/png');
