@@ -129,7 +129,6 @@
   </style>
 </head>
 <body>
-  <!-- NAVBAR -->
   <nav class="navbar">
     <div class="logo"><i class="fas fa-coins"></i> EarnSphere</div>
     <div class="nav-links">
@@ -489,8 +488,14 @@
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         messages: []
       };
-      const docRef = await db.collection(COLLECTION_NAME).add(newDoc);
-      return docRef.id;
+      try {
+        const docRef = await db.collection(COLLECTION_NAME).add(newDoc);
+        return docRef.id;
+      } catch (e) {
+        console.error('Error creating session:', e);
+        showToast('Could not create new chat session.');
+        return null;
+      }
     }
 
     async function saveMessageToSession(sessionId, role, text, attachmentsList = null, generated = null) {
@@ -502,18 +507,26 @@
         generated: generated || null,
         timestamp: Date.now()
       };
-      const docRef = db.collection(COLLECTION_NAME).doc(sessionId);
-      await docRef.update({
-        messages: firebase.firestore.FieldValue.arrayUnion(msg),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      try {
+        const docRef = db.collection(COLLECTION_NAME).doc(sessionId);
+        await docRef.update({
+          messages: firebase.firestore.FieldValue.arrayUnion(msg),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (e) {
+        console.error('Error saving message:', e);
+        showToast('Could not save message.');
+      }
     }
 
     async function loadSession(sessionId) {
-      if (!sessionId) return;
+      if (!sessionId || !currentUser) return;
       try {
         const doc = await db.collection(COLLECTION_NAME).doc(sessionId).get();
-        if (!doc.exists) return;
+        if (!doc.exists) {
+          showToast('Session not found.');
+          return;
+        }
         const data = doc.data();
         if (data.userId !== currentUser.uid) {
           showToast('You do not have access to this session.');
@@ -530,8 +543,13 @@
           await saveMessageToSession(sessionId, 'bot', welcome.text, []);
         } else {
           messages.forEach(msg => {
-            const generated = msg.generated || null;
-            addMessageToDOM(msg.text, msg.role, msg.attachments || [], msg.timestamp, generated);
+            try {
+              const generated = msg.generated || null;
+              addMessageToDOM(msg.text || '', msg.role || 'bot', msg.attachments || [], msg.timestamp || Date.now(), generated);
+            } catch (e) {
+              console.warn('Error parsing message:', e);
+              // Skip malformed message
+            }
           });
         }
       } catch (e) {
@@ -545,13 +563,19 @@
       if (!confirm('Delete this chat session?')) return;
       try {
         await db.collection(COLLECTION_NAME).doc(sessionId).delete();
-        if (currentSessionId === sessionId) await startNewChat();
-        loadSessionList();
+        if (currentSessionId === sessionId) {
+          await startNewChat();
+        }
+        await loadSessionList();
         showToast('Session deleted.', false);
-      } catch (e) { showToast('Error deleting session.'); }
+      } catch (e) {
+        console.error('Error deleting session:', e);
+        showToast('Error deleting session.');
+      }
     }
 
     async function clearAllHistory() {
+      if (!currentUser) return;
       if (!confirm('Delete ALL chat history? This cannot be undone.')) return;
       try {
         const snapshot = await db.collection(COLLECTION_NAME)
@@ -561,9 +585,12 @@
         snapshot.docs.forEach(doc => batch.delete(doc.ref));
         await batch.commit();
         await startNewChat();
-        loadSessionList();
+        await loadSessionList();
         showToast('All chat history cleared.', false);
-      } catch (e) { showToast('Error clearing history.'); }
+      } catch (e) {
+        console.error('Error clearing history:', e);
+        showToast('Error clearing history.');
+      }
     }
 
     async function loadSessionList() {
@@ -581,7 +608,13 @@
         snapshot.forEach(doc => {
           const data = doc.data();
           const title = data.title || 'New Chat';
-          const date = data.updatedAt ? data.updatedAt.toDate().toLocaleString() : 'Just now';
+          let date = 'Just now';
+          if (data.updatedAt) {
+            try {
+              const d = data.updatedAt.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt);
+              date = d.toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch (e) { /* ignore */ }
+          }
           const preview = data.messages && data.messages.length > 0 ?
             (data.messages[0].text || '') : '';
           html += `
@@ -612,7 +645,7 @@
         });
       } catch (e) {
         console.error('Error loading session list:', e);
-        sessionList.innerHTML = `<div class="empty-history">Error loading sessions.</div>`;
+        sessionList.innerHTML = `<div class="empty-history">Error loading sessions. Please refresh.</div>`;
       }
     }
 
@@ -633,12 +666,23 @@
         await saveMessageToSession(newId, 'bot', welcome.text, []);
         await updateSessionTitle(newId, 'New Chat');
       } else {
-        showToast('Could not create new chat session.');
+        // Fallback: create a local session without Firestore
+        currentSessionId = 'local_' + Date.now();
+        const welcome = {
+          role: 'bot',
+          text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
+          attachments: [],
+          timestamp: Date.now()
+        };
+        currentSessionMessages.push(welcome);
+        addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+        showToast('⚠️ Using local mode. Messages will not be saved to history.', false);
       }
       closeSidebarPanel();
     }
 
     async function updateSessionTitle(sessionId, title) {
+      if (!sessionId || sessionId.startsWith('local_')) return;
       try {
         await db.collection(COLLECTION_NAME).doc(sessionId).update({ title });
       } catch (e) { /* ignore */ }
@@ -660,13 +704,8 @@
       messageInput.disabled = true;
 
       if (!currentSessionId) {
-        const newId = await createNewSession();
-        if (newId) {
-          currentSessionId = newId;
-          messagesWrapper.innerHTML = '';
-          currentSessionMessages = [];
-        } else {
-          showToast('Failed to create new session.');
+        await startNewChat();
+        if (!currentSessionId) {
           isSending = false;
           sendBtn.disabled = false;
           messageInput.disabled = false;
@@ -687,17 +726,19 @@
       const displayText = text || (attachments.length > 0 ? '📎 Attached file' : '');
       addMessageToDOM(displayText, 'user', attachCopy);
       currentSessionMessages.push({ role: 'user', text: displayText, attachments: attachCopy, timestamp: Date.now() });
-      await saveMessageToSession(currentSessionId, 'user', displayText, attachCopy);
+      if (!currentSessionId.startsWith('local_')) {
+        await saveMessageToSession(currentSessionId, 'user', displayText, attachCopy);
+      }
 
       messageInput.value = '';
       messageInput.style.height = 'auto';
       attachments = [];
       renderAttachmentPreview();
 
-      if (currentSessionMessages.length === 1) {
+      if (currentSessionMessages.length === 1 && !currentSessionId.startsWith('local_')) {
         const title = getSessionTitle(currentSessionMessages);
         await updateSessionTitle(currentSessionId, title);
-        loadSessionList();
+        await loadSessionList();
       }
 
       showTyping();
@@ -728,21 +769,27 @@
           const reply = `😅 Oops! My brain no dey work right now. ${errMsg} No wahala, I go soon reset.`;
           addMessageToDOM(reply, 'bot');
           currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
-          await saveMessageToSession(currentSessionId, 'bot', reply, []);
+          if (!currentSessionId.startsWith('local_')) {
+            await saveMessageToSession(currentSessionId, 'bot', reply, []);
+          }
           return;
         }
 
         const reply = data.reply || 'I no get response o, but I dey try!';
         addMessageToDOM(reply, 'bot');
         currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
-        await saveMessageToSession(currentSessionId, 'bot', reply, []);
+        if (!currentSessionId.startsWith('local_')) {
+          await saveMessageToSession(currentSessionId, 'bot', reply, []);
+        }
 
       } catch (error) {
         hideTyping();
         const reply = `😅 Oops! My brain no dey work right now. ${error.message || 'Try again later.'} No wahala, I go soon reset.`;
         addMessageToDOM(reply, 'bot');
         currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
-        await saveMessageToSession(currentSessionId, 'bot', reply, []);
+        if (!currentSessionId.startsWith('local_')) {
+          await saveMessageToSession(currentSessionId, 'bot', reply, []);
+        }
       } finally {
         isSending = false;
         sendBtn.disabled = false;
@@ -757,7 +804,9 @@
     async function clearCurrentChat() {
       if (!confirm('Clear this chat session?')) return;
       await startNewChat();
-      loadSessionList();
+      if (!currentSessionId.startsWith('local_')) {
+        await loadSessionList();
+      }
     }
 
     // ============================================================
@@ -926,9 +975,10 @@
             await startNewChat();
           }
         } catch (e) {
+          console.error('Error loading initial session:', e);
           await startNewChat();
         }
-        loadSessionList();
+        await loadSessionList();
       } else {
         window.location.href = 'login.html';
       }
