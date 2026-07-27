@@ -87,6 +87,17 @@
             font-size: 0.95rem;
             margin-top: 0.2rem;
         }
+        .header .filter-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            padding: 0.25rem 1rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            color: #10b981;
+            font-weight: 600;
+        }
         .header .user-badge {
             display: inline-flex;
             align-items: center;
@@ -604,6 +615,9 @@
                 <i class="fas fa-trophy"></i>
             </h1>
             <p class="sub">See where you stand among the community</p>
+            <div class="filter-badge">
+                <i class="fas fa-filter"></i> Showing users with balance ₦5,000 and above
+            </div>
             <div class="user-badge" id="userBadge">
                 <i class="fas fa-user-circle"></i>
                 <span id="userNameDisplay">Loading…</span>
@@ -681,7 +695,8 @@
         // GLOBALS
         // ============================================================
         let currentUser = null;
-        let allUsers = []; // array of user objects from Firestore
+        let allUsers = []; // all users from Firestore (before filtering)
+        let filteredUsers = []; // users with balance >= 5000
         let currentMetric = 'balance';
 
         const toast = document.getElementById('toast');
@@ -692,6 +707,19 @@
         const userRankDisplay = document.getElementById('userRankDisplay');
         const refreshBtn = document.getElementById('refreshBtn');
 
+        // ============================================================
+        // FILTER: Keep users with balance >= 5000
+        // ============================================================
+        function applyBalanceFilter(users) {
+            return users.filter(user => {
+                const balance = user.balance || 0;
+                return balance >= 5000;
+            });
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
         function showToast(msg, type = 'success') {
             toast.textContent = msg;
             toast.className = 'toast ' + type;
@@ -710,12 +738,10 @@
                 const users = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    // Use numeric fields with fallback to 0
                     const balance = parseFloat(data.balance) || 0;
                     const referralCount = parseInt(data.referralCount) || 0;
                     const surveysCompleted = parseInt(data.surveysCompleted) || 0;
                     const tasksCompleted = parseInt(data.tasksCompleted) || 0;
-                    // Display name: prefer displayName, then name, else 'Anonymous'
                     const displayName = data.displayName || data.name || 'Anonymous';
                     users.push({
                         uid: doc.id,
@@ -755,7 +781,7 @@
         }
 
         // ============================================================
-        // RENDER PODIUM (top 3)
+        // RENDER PODIUM (top 3 from filtered list)
         // ============================================================
         function renderPodium(sorted, metric) {
             const top3 = sorted.slice(0, 3);
@@ -764,7 +790,7 @@
 
             if (top3.length === 0) {
                 podiumContainer.innerHTML =
-                    `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-users-slash"></i><p>No users yet</p></div>`;
+                    `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-users-slash"></i><p>No users with balance ₦5,000 or more</p></div>`;
                 return;
             }
 
@@ -788,7 +814,7 @@
         }
 
         // ============================================================
-        // RENDER LIST (all users)
+        // RENDER LIST (all filtered users)
         // ============================================================
         function renderList(sorted, metric) {
             const metricLabels = {
@@ -801,7 +827,7 @@
 
             if (sorted.length === 0) {
                 listBody.innerHTML =
-                    `<div class="empty-state"><i class="fas fa-users-slash"></i><p>No users found</p></div>`;
+                    `<div class="empty-state"><i class="fas fa-users-slash"></i><p>No users found with balance ₦5,000 or more</p></div>`;
                 return;
             }
 
@@ -857,37 +883,33 @@
             try {
                 const users = await fetchUsers();
                 allUsers = users;
+                // Apply balance filter (>= 5000)
+                filteredUsers = applyBalanceFilter(allUsers);
 
-                // Ensure current user is in the list (they should be if they exist)
-                // If not, we don't add them artificially – they will not be ranked.
-                // But we still show their info from auth.
+                // Update currentUser info from auth (if available)
                 if (currentUser) {
-                    // Update display name from auth if not in list (or update)
                     const existing = allUsers.find(u => u.uid === currentUser.uid);
                     if (existing) {
                         currentUser.displayName = existing.displayName;
                     } else {
-                        // User exists in auth but not in Firestore – we'll show them with zero stats
-                        // but we don't add them to the list because they are not in the users collection.
-                        // We'll just show their name and rank as '--'
+                        // User exists in auth but not in Firestore – show as not ranked
                         userNameDisplay.textContent = currentUser.displayName || 'You';
                         userRankDisplay.textContent = '#--';
                     }
                 }
 
-                if (allUsers.length === 0) {
-                    // No users – show empty states
+                if (filteredUsers.length === 0) {
                     podiumContainer.innerHTML =
-                        `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-users-slash"></i><p>No users registered yet</p></div>`;
+                        `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-users-slash"></i><p>No users with balance ₦5,000 or more</p></div>`;
                     listBody.innerHTML =
-                        `<div class="empty-state"><i class="fas fa-users-slash"></i><p>Be the first to join!</p></div>`;
+                        `<div class="empty-state"><i class="fas fa-users-slash"></i><p>No users found in this range</p></div>`;
                     refreshBtn.disabled = false;
                     refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
                     return;
                 }
 
                 // Sort by current metric and render
-                const sorted = getSortedUsers(allUsers, currentMetric);
+                const sorted = getSortedUsers(filteredUsers, currentMetric);
                 renderPodium(sorted, currentMetric);
                 renderList(sorted, currentMetric);
 
@@ -908,8 +930,8 @@
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
                 currentMetric = this.dataset.metric;
-                if (allUsers.length) {
-                    const sorted = getSortedUsers(allUsers, currentMetric);
+                if (filteredUsers.length) {
+                    const sorted = getSortedUsers(filteredUsers, currentMetric);
                     renderPodium(sorted, currentMetric);
                     renderList(sorted, currentMetric);
                 } else {
@@ -936,10 +958,8 @@
                         uid: user.uid,
                         displayName: displayName
                     };
-                    // Now load rankings (will include this user if they exist in collection)
                     loadRankings();
                 }).catch(() => {
-                    // fallback
                     currentUser = {
                         uid: user.uid,
                         displayName: user.displayName || 'You',
@@ -947,16 +967,9 @@
                     loadRankings();
                 });
             } else {
-                // Not logged in, redirect to login
                 window.location.href = 'login.html';
             }
         });
-
-        // ============================================================
-        // INITIAL LOAD triggered by auth
-        // ============================================================
-        // The auth listener will call loadRankings.
     </script>
-
 </body>
 </html>
