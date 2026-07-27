@@ -70,7 +70,6 @@ app.post('/api/grok', async (req, res) => {
       content: h.text || ''
     }));
 
-  // ---- SYSTEM PROMPT WITH GENERATION TAGS ----
   const systemMessage = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub.
 
 **ABOUT EARNSPHERE:**
@@ -169,7 +168,7 @@ Now, assist the user with their questions about EarnSphere!`;
 });
 
 // ============================================================
-// PAYSTACK: GET NIGERIAN BANKS
+// PAYSTACK ENDPOINTS (unchanged)
 // ============================================================
 app.get('/api/banks', async (req, res) => {
   if (!PAYSTACK_SECRET) {
@@ -191,9 +190,6 @@ app.get('/api/banks', async (req, res) => {
   }
 });
 
-// ============================================================
-// PAYSTACK: RESOLVE ACCOUNT
-// ============================================================
 app.get('/api/resolve-account', async (req, res) => {
   const { account_number, bank_code } = req.query;
   if (!account_number || !bank_code) {
@@ -246,7 +242,7 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 // ============================================================
-// VIDEO GENERATION (RunwayML API)
+// VIDEO GENERATION (RunwayML API – corrected endpoints)
 // ============================================================
 app.post('/api/generate-video', async (req, res) => {
   const { prompt } = req.body;
@@ -262,8 +258,8 @@ app.post('/api/generate-video', async (req, res) => {
   const sanitisedPrompt = prompt.trim().slice(0, 500);
 
   try {
-    // 1. Submit the video generation job
-    const submitRes = await fetch('https://api.runwayml.com/v1/text_to_video', {
+    // 1. Submit the video generation job (correct endpoint)
+    const submitRes = await fetch('https://api.runwayml.com/v1/generate/text_to_video', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${RUNWAY_API_KEY}`,
@@ -284,15 +280,15 @@ app.post('/api/generate-video', async (req, res) => {
       });
     }
 
-    const jobId = job.id;
+    const jobId = job.id; // or job.task_id? The API returns an id.
 
-    // 2. Poll for completion (Runway jobs are async)
+    // 2. Poll for completion (correct status endpoint)
     let videoUrl = null;
     let attempts = 0;
-    const maxAttempts = 60; // 60 attempts * 3 seconds = 3 minutes max
+    const maxAttempts = 60; // 3 minutes max
 
     while (attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds
+      await new Promise(resolve => setTimeout(resolve, 3000)); // 3 seconds
 
       const statusRes = await fetch(`https://api.runwayml.com/v1/generations/${jobId}`, {
         headers: { 'Authorization': `Bearer ${RUNWAY_API_KEY}` }
