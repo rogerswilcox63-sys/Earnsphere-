@@ -28,8 +28,7 @@ app.use(express.json({ limit: '50mb' }));
 // ---- Configuration ----
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET;
-const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
-const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
+const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
 
 if (!GROQ_API_KEY) {
   console.error('❌ GROQ_API_KEY is missing!');
@@ -38,11 +37,8 @@ if (!GROQ_API_KEY) {
 if (!PAYSTACK_SECRET) {
   console.warn('⚠️ PAYSTACK_SECRET is missing. Paystack endpoints will not work.');
 }
-if (!HUGGINGFACE_API_KEY) {
-  console.warn('⚠️ HUGGINGFACE_API_KEY is missing. Video generation will not work.');
-}
-if (!REPLICATE_API_TOKEN) {
-  console.warn('⚠️ REPLICATE_API_TOKEN is missing – no fallback for video.');
+if (!RUNWAY_API_KEY) {
+  console.warn('⚠️ RUNWAY_API_KEY is missing. Video generation will not work.');
 }
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -74,6 +70,7 @@ app.post('/api/grok', async (req, res) => {
       content: h.text || ''
     }));
 
+  // ---- SYSTEM PROMPT WITH GENERATION TAGS ----
   const systemMessage = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub.
 
 **ABOUT EARNSPHERE:**
@@ -91,6 +88,15 @@ EarnSphere is a Nigerian rewards platform where users earn real money (₦) by c
 - The platform is secure; user data is stored in Firebase.
 - The AI Assistant (you) can help users with any question about earning, tasks, withdrawals, and motivation.
 - You can access external websites via the /api/fetch endpoint.
+
+**SPECIAL FEATURE – IMAGE & VIDEO GENERATION:**
+- If a user asks you to generate an image, respond with exactly this format: [IMAGE: the user's prompt]
+- If a user asks you to generate a video, respond with exactly this format: [VIDEO: the user's prompt]
+- Do not add any extra text before or after the tag.
+- The prompt should be a concise description (max 100 characters).
+- Example: User says "Generate an image of a dog" → you reply with "[IMAGE: a dog]"
+- Example: User says "Make a video of a car driving" → you reply with "[VIDEO: a car driving]"
+- If the user asks for something vague, ask them for a clearer description.
 
 **INSTRUCTIONS FOR YOU:**
 - Detect the user's language and reply in that same language (English, Pidgin, Yoruba, Igbo, Hausa, etc.).
@@ -163,7 +169,7 @@ Now, assist the user with their questions about EarnSphere!`;
 });
 
 // ============================================================
-// PAYSTACK ENDPOINTS
+// PAYSTACK: GET NIGERIAN BANKS
 // ============================================================
 app.get('/api/banks', async (req, res) => {
   if (!PAYSTACK_SECRET) {
@@ -185,6 +191,9 @@ app.get('/api/banks', async (req, res) => {
   }
 });
 
+// ============================================================
+// PAYSTACK: RESOLVE ACCOUNT
+// ============================================================
 app.get('/api/resolve-account', async (req, res) => {
   const { account_number, bank_code } = req.query;
   if (!account_number || !bank_code) {
@@ -213,7 +222,7 @@ app.get('/api/resolve-account', async (req, res) => {
 });
 
 // ============================================================
-// IMAGE GENERATION (Pollinations.ai)
+// IMAGE GENERATION (Pollinations.ai – free, no key)
 // ============================================================
 app.post('/api/generate-image', async (req, res) => {
   const { prompt } = req.body;
@@ -237,134 +246,94 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 // ============================================================
-// VIDEO GENERATION (Hugging Face + Replicate fallback)
+// VIDEO GENERATION (RunwayML API)
 // ============================================================
-const VIDEO_MODELS = [
-  'damo-vilab/text-to-video-ms-1.7b',
-  'ali-vilab/text-to-video-ms-1.7b',
-  'ModelScope/text-to-video-synthesis'
-];
-
-async function generateVideoHuggingFace(prompt) {
-  for (const model of VIDEO_MODELS) {
-    const url = `https://api-inference.huggingface.co/models/${model}`;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
-
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ inputs: prompt }),
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          const error = await response.json();
-          console.error(`Hugging Face API error (${model}):`, error);
-          if (response.status === 503 && attempt === 0) {
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            continue;
-          }
-          if (response.status === 404) break;
-          throw new Error(error.error || 'Video generation failed');
-        }
-
-        const buffer = await response.arrayBuffer();
-        const base64 = Buffer.from(buffer).toString('base64');
-        return `data:video/mp4;base64,${base64}`;
-      } catch (e) {
-        if (e.name === 'AbortError') continue;
-        console.error(`Error with model ${model}:`, e);
-        break;
-      }
-    }
-  }
-  return null;
-}
-
-async function generateVideoReplicate(prompt) {
-  if (!REPLICATE_API_TOKEN) return null;
-  try {
-    const response = await fetch('https://api.replicate.com/v1/predictions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${REPLICATE_API_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        version: 'stability-ai/stable-video-diffusion',
-        input: { prompt, frames: 14 }
-      })
-    });
-    const prediction = await response.json();
-    if (!response.ok) throw new Error(prediction.error || 'Replicate failed');
-
-    // Poll for completion
-    let url = prediction.urls.get;
-    for (let i = 0; i < 30; i++) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const poll = await fetch(url);
-      const status = await poll.json();
-      if (status.status === 'succeeded') {
-        const videoUrl = status.output;
-        const videoResp = await fetch(videoUrl);
-        const buffer = await videoResp.arrayBuffer();
-        const base64 = Buffer.from(buffer).toString('base64');
-        return `data:video/mp4;base64,${base64}`;
-      } else if (status.status === 'failed') {
-        throw new Error('Replicate generation failed');
-      }
-    }
-    throw new Error('Timeout waiting for Replicate');
-  } catch (e) {
-    console.error('Replicate error:', e);
-    return null;
-  }
-}
-
 app.post('/api/generate-video', async (req, res) => {
   const { prompt } = req.body;
+
   if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
     return res.status(400).json({ error: 'Prompt is required.' });
   }
 
+  if (!RUNWAY_API_KEY) {
+    return res.status(503).json({ error: 'Runway API key not configured. Please set RUNWAY_API_KEY.' });
+  }
+
   const sanitisedPrompt = prompt.trim().slice(0, 500);
 
-  // 1. Try Hugging Face
-  if (HUGGINGFACE_API_KEY) {
-    try {
-      const result = await generateVideoHuggingFace(sanitisedPrompt);
-      if (result) {
-        return res.json({ status: true, url: result, prompt: sanitisedPrompt });
-      }
-    } catch (e) {
-      console.error('Hugging Face video error:', e);
-    }
-  }
+  try {
+    // 1. Submit the video generation job
+    const submitRes = await fetch('https://api.runwayml.com/v1/text_to_video', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RUNWAY_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: sanitisedPrompt,
+        duration: 5, // seconds (minimum)
+        aspect_ratio: '16:9'
+      })
+    });
 
-  // 2. Fallback to Replicate
-  if (REPLICATE_API_TOKEN) {
-    try {
-      const result = await generateVideoReplicate(sanitisedPrompt);
-      if (result) {
-        return res.json({ status: true, url: result, prompt: sanitisedPrompt });
-      }
-    } catch (e) {
-      console.error('Replicate video error:', e);
+    const job = await submitRes.json();
+    if (!submitRes.ok) {
+      console.error('Runway submit error:', job);
+      return res.status(submitRes.status).json({
+        error: job.error || 'Failed to start video generation.'
+      });
     }
-  }
 
-  // 3. All failed
-  res.status(503).json({ 
-    error: 'Video generation service unavailable. Please try again later or check your API keys.'
-  });
+    const jobId = job.id;
+
+    // 2. Poll for completion (Runway jobs are async)
+    let videoUrl = null;
+    let attempts = 0;
+    const maxAttempts = 60; // 60 attempts * 3 seconds = 3 minutes max
+
+    while (attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds
+
+      const statusRes = await fetch(`https://api.runwayml.com/v1/generations/${jobId}`, {
+        headers: { 'Authorization': `Bearer ${RUNWAY_API_KEY}` }
+      });
+
+      const status = await statusRes.json();
+
+      if (status.status === 'completed') {
+        videoUrl = status.output;
+        break;
+      } else if (status.status === 'failed') {
+        throw new Error(status.error || 'Video generation failed');
+      }
+
+      attempts++;
+    }
+
+    if (!videoUrl) {
+      throw new Error('Timeout waiting for video generation. Please try again.');
+    }
+
+    // 3. Fetch the video and convert to base64
+    const videoResp = await fetch(videoUrl);
+    if (!videoResp.ok) throw new Error('Failed to download generated video');
+
+    const buffer = await videoResp.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
+    const dataURL = `data:video/mp4;base64,${base64}`;
+
+    res.json({
+      status: true,
+      url: dataURL,
+      prompt: sanitisedPrompt
+    });
+
+  } catch (error) {
+    console.error('Runway video error:', error);
+    res.status(500).json({
+      error: error.message || 'Video generation failed. Please try again.'
+    });
+  }
 });
 
 // ============================================================
