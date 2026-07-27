@@ -70,6 +70,7 @@ app.post('/api/grok', async (req, res) => {
       content: h.text || ''
     }));
 
+  // ---- SYSTEM PROMPT ----
   const systemMessage = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub.
 
 **ABOUT EARNSPHERE:**
@@ -112,7 +113,8 @@ Now, assist the user with their questions about EarnSphere!`;
   let payload;
 
   if (hasImage) {
-    const visionModel = 'llama-3.2-11b-vision-preview';
+    // Updated to a supported vision model
+    const visionModel = 'llama-3.2-90b-vision-preview';
     payload = {
       model: visionModel,
       messages: [
@@ -125,7 +127,7 @@ Now, assist the user with their questions about EarnSphere!`;
       temperature: 0.8,
       max_tokens: 800,
       top_p: 0.9,
-      tool_choice: 'none'
+      tool_choice: 'none' // Prevents tool call errors
     };
   } else {
     const textModel = 'openai/gpt-oss-120b';
@@ -139,7 +141,7 @@ Now, assist the user with their questions about EarnSphere!`;
       temperature: 0.8,
       max_tokens: 800,
       top_p: 0.9,
-      tool_choice: 'none'
+      tool_choice: 'none' // Prevents tool call errors
     };
   }
 
@@ -242,7 +244,7 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 // ============================================================
-// VIDEO GENERATION (RunwayML API – corrected endpoints)
+// VIDEO GENERATION (RunwayML API – corrected endpoint)
 // ============================================================
 app.post('/api/generate-video', async (req, res) => {
   const { prompt } = req.body;
@@ -258,7 +260,7 @@ app.post('/api/generate-video', async (req, res) => {
   const sanitisedPrompt = prompt.trim().slice(0, 500);
 
   try {
-    // 1. Submit the video generation job (correct endpoint)
+    // Correct endpoint for RunwayML text-to-video
     const submitRes = await fetch('https://api.runwayml.com/v1/generate/text_to_video', {
       method: 'POST',
       headers: {
@@ -267,7 +269,7 @@ app.post('/api/generate-video', async (req, res) => {
       },
       body: JSON.stringify({
         prompt: sanitisedPrompt,
-        duration: 5, // seconds (minimum)
+        duration: 5,
         aspect_ratio: '16:9'
       })
     });
@@ -280,15 +282,15 @@ app.post('/api/generate-video', async (req, res) => {
       });
     }
 
-    const jobId = job.id; // or job.task_id? The API returns an id.
+    const jobId = job.id;
 
-    // 2. Poll for completion (correct status endpoint)
+    // Poll for completion
     let videoUrl = null;
     let attempts = 0;
-    const maxAttempts = 60; // 3 minutes max
+    const maxAttempts = 60;
 
     while (attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 3000)); // 3 seconds
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       const statusRes = await fetch(`https://api.runwayml.com/v1/generations/${jobId}`, {
         headers: { 'Authorization': `Bearer ${RUNWAY_API_KEY}` }
@@ -310,7 +312,6 @@ app.post('/api/generate-video', async (req, res) => {
       throw new Error('Timeout waiting for video generation. Please try again.');
     }
 
-    // 3. Fetch the video and convert to base64
     const videoResp = await fetch(videoUrl);
     if (!videoResp.ok) throw new Error('Failed to download generated video');
 
