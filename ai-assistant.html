@@ -6,11 +6,13 @@
   <title>SphereAI - EarnSphere Nigeria</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- highlight.js for code syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    /* (All styles remain exactly as before – no changes needed) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.08) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -39,7 +41,6 @@
     .chat-header .actions button.primary:hover { background:rgba(16,185,129,.25); }
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
 
-    /* ---- Model Selector (added) ---- */
     .model-selector {
       margin-left: auto;
       margin-right: 0.5rem;
@@ -59,24 +60,119 @@
       cursor: pointer;
       outline: none;
     }
-    .model-selector select:focus {
-      border-color: #3b82f6;
-    }
-    .model-selector select option {
-      background: #1e293b;
-    }
+    .model-selector select:focus { border-color: #3b82f6; }
+    .model-selector select option { background: #1e293b; }
 
-    /* (rest of styles unchanged) */
     .messages-wrapper { flex:1; overflow-y:auto; padding:0.8rem 0.3rem 0.3rem; display:flex; flex-direction:column; gap:0.6rem; scroll-behavior:smooth; }
     .messages-wrapper::-webkit-scrollbar { width:4px; }
     .messages-wrapper::-webkit-scrollbar-track { background:rgba(255,255,255,.02); border-radius:10px; }
     .messages-wrapper::-webkit-scrollbar-thumb { background:rgba(59,130,246,.3); border-radius:10px; }
+
     .msg { max-width:82%; padding:0.6rem 1rem; border-radius:14px; line-height:1.5; font-size:0.92rem; word-wrap:break-word; animation:fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     .msg.user { align-self:flex-end; background:#3b82f6; color:#fff; border-bottom-right-radius:4px; }
     .msg.bot { align-self:flex-start; background:rgba(255,255,255,.08); color:#e2e8f0; border-bottom-left-radius:4px; }
     .msg .time { font-size:0.6rem; color:rgba(255,255,255,.4); display:block; margin-top:3px; }
     .msg.user .time { color:rgba(255,255,255,.5); }
+
+    /* ===== THINKING SECTION ===== */
+    .thinking-section {
+      margin: 4px 0 6px 0;
+      background: rgba(59,130,246,.08);
+      border-left: 3px solid #3b82f6;
+      border-radius: 0 6px 6px 0;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .thinking-section .thinking-toggle {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #3b82f6;
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 2px 0;
+    }
+    .thinking-section .thinking-toggle:hover { color: #60a5fa; }
+    .thinking-section .thinking-content {
+      display: none;
+      padding-top: 6px;
+      color: #cbd5e1;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .thinking-section .thinking-content.open { display: block; }
+    .thinking-section .thinking-content .think-label {
+      color: #94a3b8;
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    /* ===== CODE BLOCKS ===== */
+    .code-block-wrapper {
+      margin: 8px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #0d1117;
+      border: 1px solid rgba(255,255,255,.06);
+      position: relative;
+    }
+    .code-block-wrapper .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: rgba(255,255,255,.03);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      font-size: 0.7rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .code-block-wrapper .code-header .lang {
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .code-block-wrapper .code-header .copy-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .code-block-wrapper .code-header .copy-btn:hover {
+      background: rgba(255,255,255,.08);
+      color: #f1f5f9;
+    }
+    .code-block-wrapper .code-header .copy-btn.copied {
+      color: #10b981;
+    }
+    .code-block-wrapper pre {
+      margin: 0 !important;
+      padding: 12px 16px !important;
+      background: #0d1117 !important;
+      border-radius: 0 !important;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .code-block-wrapper pre code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      background: transparent !important;
+      padding: 0 !important;
+    }
+
     .msg .attachments { margin-top:6px; display:flex; flex-wrap:wrap; gap:6px; }
     .msg .attachments .attach-item { display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.2); padding:4px 10px 4px 6px; border-radius:8px; font-size:0.75rem; cursor:pointer; transition:background 0.2s; max-width:200px; }
     .msg .attachments .attach-item:hover { background:rgba(0,0,0,.35); }
@@ -92,12 +188,14 @@
     .msg .download-link { display:inline-block; margin-top:4px; font-size:0.8rem; color:#3b82f6; text-decoration:none; }
     .msg .download-link:hover { text-decoration:underline; }
     .msg .prompt-label { font-size:0.75rem; color:#94a3b8; margin-top:4px; }
+
     .typing-indicator { align-self:flex-start; background:rgba(255,255,255,.06); padding:8px 14px; border-radius:14px; border-bottom-left-radius:4px; display:flex; align-items:center; gap:8px; color:#94a3b8; font-size:0.85rem; animation:fadeIn 0.3s ease; }
     .typing-indicator .dots { display:flex; gap:3px; }
     .typing-indicator .dots span { width:5px; height:5px; background:#94a3b8; border-radius:50%; animation:bounce 1.4s infinite; }
     .typing-indicator .dots span:nth-child(2){animation-delay:0.2s}
     .typing-indicator .dots span:nth-child(3){animation-delay:0.4s}
     @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
     .input-area { display:flex; flex-direction:column; gap:6px; padding:0.6rem 0 0.8rem; border-top:1px solid rgba(255,255,255,.06); flex-shrink:0; }
     .input-row { display:flex; align-items:flex-end; gap:8px; }
     .input-row textarea { flex:1; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:0.6rem 0.9rem; color:#f1f5f9; font-size:0.92rem; font-family:'Inter',sans-serif; resize:none; min-height:40px; max-height:120px; outline:none; transition:border 0.2s; line-height:1.5; }
@@ -118,6 +216,7 @@
     .attachment-preview .file-chip i { font-size:1rem; color:#94a3b8; }
     .attachment-preview .file-chip .remove { cursor:pointer; color:#ef4444; font-size:0.75rem; margin-left:2px; }
     .attachment-preview .file-chip .remove:hover { color:#f87171; }
+
     .history-sidebar { position:fixed; top:0; left:-380px; width:340px; height:100%; background:rgba(15,23,42,.95); backdrop-filter:blur(20px); border-right:1px solid rgba(255,255,255,.08); transition:left 0.3s ease; z-index:999; padding:1.5rem 1rem; overflow-y:auto; display:flex; flex-direction:column; }
     .history-sidebar.open { left:0; }
     .history-sidebar .sidebar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:0.5rem; border-bottom:1px solid rgba(255,255,255,.06); }
@@ -140,6 +239,7 @@
     .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#ef4444; color:#fff; padding:10px 20px; border-radius:8px; font-size:0.85rem; box-shadow:0 8px 30px rgba(0,0,0,.4); z-index:9999; opacity:0; transition:opacity 0.3s ease; pointer-events:none; max-width:90%; }
     .toast.show { opacity:1; pointer-events:auto; }
     .toast.success { background:#10b981; }
+
     @media (max-width:768px) {
       .navbar { padding:0.5rem 1rem; }
       .nav-links a { font-size:0.75rem; padding:0.25rem 0.6rem; }
@@ -188,8 +288,6 @@
       <div class="status">
         <span class="dot"></span> Active
       </div>
-
-      <!-- ===== MODEL SELECTOR (added) ===== -->
       <div class="model-selector">
         <i class="fas fa-microchip" style="color:#3b82f6;"></i>
         <select id="modelSelector">
@@ -198,7 +296,6 @@
           <option value="qwen/qwen3.6-27b">🧠 Qwen 3.6 27B</option>
         </select>
       </div>
-
       <div class="actions">
         <button class="primary" id="newChatBtn" title="New Chat"><i class="fas fa-plus"></i></button>
         <button id="historyBtn" title="Chat History"><i class="fas fa-clock-rotate-left"></i></button>
@@ -291,19 +388,16 @@
     const COLLECTION_NAME = 'chat_history';
     const STORAGE_KEY = 'sphereai_selected_model';
 
-    // Load saved model from localStorage
     function loadSelectedModel() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved && modelSelector.querySelector(`option[value="${saved}"]`)) {
         modelSelector.value = saved;
       } else {
-        // Default to 120B
         modelSelector.value = 'openai/gpt-oss-120b';
         localStorage.setItem(STORAGE_KEY, 'openai/gpt-oss-120b');
       }
     }
 
-    // Save model selection
     modelSelector.addEventListener('change', () => {
       localStorage.setItem(STORAGE_KEY, modelSelector.value);
     });
@@ -443,40 +537,213 @@
     }
 
     // ============================================================
-    // ADD MESSAGE TO DOM
+    // PARSE THINKING AND CODE FROM AI RESPONSE
+    // ============================================================
+    function parseAIResponse(text) {
+      let thinking = null;
+      let content = text;
+
+      // Extract [THINK: ...] content
+      const thinkMatch = text.match(/\[THINK:\s*([\s\S]*?)\]/);
+      if (thinkMatch) {
+        thinking = thinkMatch[1].trim();
+        content = text.replace(/\[THINK:\s*[\s\S]*?\]/, '').trim();
+      }
+
+      // If content is empty, use a placeholder
+      if (!content) content = '✅ Done!';
+
+      return { thinking, content };
+    }
+
+    // ============================================================
+    // RENDER CODE BLOCKS WITH SYNTAX HIGHLIGHTING + COPY
+    // ============================================================
+    function renderCodeBlocks(text) {
+      // Find all code blocks with language: ```language ... ```
+      const codeBlockRegex = /```(\w+)?\s*([\s\S]*?)```/g;
+      let match;
+      let parts = [];
+      let lastIndex = 0;
+
+      while ((match = codeBlockRegex.exec(text)) !== null) {
+        // Add text before the code block
+        if (match.index > lastIndex) {
+          parts.push({ type: 'text', content: text.substring(lastIndex, match.index) });
+        }
+        const lang = match[1] || 'plaintext';
+        const code = match[2].trim();
+        parts.push({ type: 'code', language: lang, content: code });
+        lastIndex = match.index + match[0].length;
+      }
+
+      // Add remaining text
+      if (lastIndex < text.length) {
+        parts.push({ type: 'text', content: text.substring(lastIndex) });
+      }
+
+      return parts;
+    }
+
+    function createCodeBlockElement(language, code) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block-wrapper';
+
+      const header = document.createElement('div');
+      header.className = 'code-header';
+      const langSpan = document.createElement('span');
+      langSpan.className = 'lang';
+      langSpan.textContent = language || 'plaintext';
+      header.appendChild(langSpan);
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-btn';
+      copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(code).then(() => {
+          copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+          copyBtn.classList.add('copied');
+          setTimeout(() => {
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        }).catch(() => {
+          // Fallback
+          const textarea = document.createElement('textarea');
+          textarea.value = code;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          textarea.remove();
+          copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+          setTimeout(() => {
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+          }, 2000);
+        });
+      });
+      header.appendChild(copyBtn);
+      wrapper.appendChild(header);
+
+      const pre = document.createElement('pre');
+      const codeEl = document.createElement('code');
+      codeEl.className = `language-${language}`;
+      codeEl.textContent = code;
+      pre.appendChild(codeEl);
+      wrapper.appendChild(pre);
+
+      // Apply highlight.js
+      setTimeout(() => {
+        if (window.hljs) {
+          window.hljs.highlightElement(codeEl);
+        }
+      }, 10);
+
+      return wrapper;
+    }
+
+    // ============================================================
+    // ADD MESSAGE TO DOM (with thinking + code blocks)
     // ============================================================
     function addMessageToDOM(text, sender = 'user', attachmentsList = null, timestamp = null, generated = null) {
       const div = document.createElement('div');
       div.className = `msg ${sender}`;
 
-      const imageMatch = text.match(/\[IMAGE:\s*(.*?)\]/);
-      const videoMatch = text.match(/\[VIDEO:\s*(.*?)\]/);
+      // For user messages, just show text
+      if (sender === 'user') {
+        const textNode = document.createTextNode(text);
+        div.appendChild(textNode);
+      } else {
+        // For bot messages, parse thinking and code blocks
+        // First check for generation tags
+        const imageMatch = text.match(/\[IMAGE:\s*(.*?)\]/);
+        const videoMatch = text.match(/\[VIDEO:\s*(.*?)\]/);
 
-      let displayText = text;
-      let generationPrompt = null;
-      let generationType = null;
+        let displayText = text;
+        let generationPrompt = null;
+        let generationType = null;
 
-      if (imageMatch) {
-        generationPrompt = imageMatch[1].trim();
-        generationType = 'image';
-        displayText = displayText.replace(/\[IMAGE:.*?\]/, '').trim();
-        if (!displayText) displayText = '🖼️ Generating image...';
-      } else if (videoMatch) {
-        generationPrompt = videoMatch[1].trim();
-        generationType = 'video';
-        displayText = displayText.replace(/\[VIDEO:.*?\]/, '').trim();
-        if (!displayText) displayText = '🎬 Generating video...';
+        if (imageMatch) {
+          generationPrompt = imageMatch[1].trim();
+          generationType = 'image';
+          displayText = displayText.replace(/\[IMAGE:.*?\]/, '').trim();
+          if (!displayText) displayText = '🖼️ Generating image...';
+        } else if (videoMatch) {
+          generationPrompt = videoMatch[1].trim();
+          generationType = 'video';
+          displayText = displayText.replace(/\[VIDEO:.*?\]/, '').trim();
+          if (!displayText) displayText = '🎬 Generating video...';
+        }
+
+        // Parse thinking
+        const { thinking, content } = parseAIResponse(displayText);
+
+        // Add thinking section if present
+        if (thinking) {
+          const thinkDiv = document.createElement('div');
+          thinkDiv.className = 'thinking-section';
+
+          const toggle = document.createElement('div');
+          toggle.className = 'thinking-toggle';
+          toggle.innerHTML = '<i class="fas fa-brain"></i> Show thinking process';
+          toggle.addEventListener('click', () => {
+            const contentEl = toggle.nextElementSibling;
+            if (contentEl) {
+              contentEl.classList.toggle('open');
+              toggle.innerHTML = contentEl.classList.contains('open') 
+                ? '<i class="fas fa-brain"></i> Hide thinking process' 
+                : '<i class="fas fa-brain"></i> Show thinking process';
+            }
+          });
+          thinkDiv.appendChild(toggle);
+
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'thinking-content';
+          const label = document.createElement('div');
+          label.className = 'think-label';
+          label.textContent = '🧠 Reasoning';
+          contentDiv.appendChild(label);
+          const textNode = document.createTextNode(thinking);
+          contentDiv.appendChild(textNode);
+          thinkDiv.appendChild(contentDiv);
+
+          div.appendChild(thinkDiv);
+        }
+
+        // Render the main content with code blocks
+        if (content) {
+          const parts = renderCodeBlocks(content);
+          const container = document.createElement('div');
+          
+          parts.forEach(part => {
+            if (part.type === 'text') {
+              if (part.content.trim()) {
+                const textNode = document.createTextNode(part.content);
+                container.appendChild(textNode);
+              }
+            } else if (part.type === 'code') {
+              const codeBlock = createCodeBlockElement(part.language, part.content);
+              container.appendChild(codeBlock);
+            }
+          });
+
+          // If no parts, just add the text
+          if (parts.length === 0 && content.trim()) {
+            const textNode = document.createTextNode(content);
+            container.appendChild(textNode);
+          }
+
+          div.appendChild(container);
+        }
+
+        // Handle image/video generation
+        if (generationPrompt && (sender === 'bot' || sender === 'assistant')) {
+          setTimeout(() => {
+            generateAndShowMedia(generationPrompt, generationType, div);
+          }, 100);
+        }
       }
 
-      const textNode = document.createTextNode(displayText);
-      div.appendChild(textNode);
-
-      if (generationPrompt && (sender === 'bot' || sender === 'assistant')) {
-        setTimeout(() => {
-          generateAndShowMedia(generationPrompt, generationType, div);
-        }, 100);
-      }
-
+      // Handle attachments
       if (attachmentsList && attachmentsList.length > 0) {
         const attachContainer = document.createElement('div');
         attachContainer.className = 'attachments';
@@ -525,6 +792,7 @@
         div.appendChild(attachContainer);
       }
 
+      // Time
       const time = document.createElement('span');
       time.className = 'time';
       const ts = timestamp ? new Date(timestamp) : new Date();
@@ -815,7 +1083,7 @@
           message: text || 'I sent an attachment.',
           history: history,
           image: imageData || null,
-          model: selectedModel  // Send the selected model
+          model: selectedModel
         };
 
         const response = await fetch(`${API_BASE_URL}/api/grok`, {
@@ -983,7 +1251,6 @@
     clearBtn.addEventListener('click', clearCurrentChat);
     clearAllHistoryBtn.addEventListener('click', clearAllHistory);
 
-    // Drag and drop
     const chatContainer = document.querySelector('.chat-container');
     chatContainer.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -1021,7 +1288,7 @@
     // ============================================================
     // AUTH
     // ============================================================
-    loadSelectedModel(); // Load saved model on page load
+    loadSelectedModel();
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {

@@ -5,7 +5,6 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ---- CORS ----
 const allowedOrigins = [
   'https://earnspherehub.name.ng',
   'http://localhost:3000'
@@ -25,7 +24,6 @@ app.use(cors({
 
 app.use(express.json({ limit: '50mb' }));
 
-// ---- Configuration ----
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET;
 const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
@@ -43,8 +41,6 @@ if (!RUNWAY_API_KEY) {
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const PAYSTACK_URL = 'https://api.paystack.co';
-
-// ---- Default model ----
 const DEFAULT_MODEL = 'openai/gpt-oss-120b';
 
 // ============================================================
@@ -74,7 +70,7 @@ app.post('/api/grok', async (req, res) => {
       content: h.text || ''
     }));
 
-  // ---- SYSTEM PROMPT ----
+  // ---- SYSTEM PROMPT WITH THINKING INSTRUCTIONS ----
   const systemMessage = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub.
 
 **ABOUT EARNSPHERE:**
@@ -102,14 +98,28 @@ EarnSphere is a Nigerian rewards platform where users earn real money (₦) by c
 - Example: User says "Make a video of a car driving" → you reply with "[VIDEO: a car driving]"
 - If the user asks for something vague, ask them for a clearer description.
 
+**THINKING PROCESS:**
+- When you need to reason about a problem, show your thinking process inside [THINK: ...] tags BEFORE giving your final answer.
+- The thinking should be clear, step-by-step reasoning in plain English.
+- After the thinking, give your final answer as a separate paragraph.
+- Example format:
+  [THINK: I need to consider the user's question about withdrawals. First, I check the minimum withdrawal amount. Then I think about the verification process. Finally, I prepare a clear response.]
+  Your final answer goes here...
+
+**CODE FORMATTING:**
+- For any code you provide, use markdown code fences with the language name: 
+  \`\`\`javascript
+  console.log('Hello');
+  \`\`\`
+- This will be displayed as a formatted code block.
+
 **INSTRUCTIONS FOR YOU:**
 - Detect the user's language and reply in that same language (English, Pidgin, Yoruba, Igbo, Hausa, etc.).
 - Always be encouraging, helpful, and slightly playful.
-- Keep responses concise but informative (2-4 short paragraphs). You can provide longer explanations for complex topics.
+- Keep responses concise but informative.
 - Always end with an uplifting note.
-- If a user asks about a specific task, give clear, accurate details (rewards, limits, how to complete).
+- If a user asks about a specific task, give clear, accurate details.
 - If the user shares their balance or task count, use that to give personalized advice.
-- When generating code, use clear formatting and explain it step by step.
 
 Now, assist the user with their questions about EarnSphere!`;
 
@@ -117,7 +127,6 @@ Now, assist the user with their questions about EarnSphere!`;
   let payload;
 
   if (hasImage) {
-    // Vision model is fixed – image support requires a specific model
     const visionModel = 'llama-3.2-90b-vision-preview';
     payload = {
       model: visionModel,
@@ -129,12 +138,11 @@ Now, assist the user with their questions about EarnSphere!`;
         ]}
       ],
       temperature: 0.8,
-      max_tokens: 800,
+      max_tokens: 1200,
       top_p: 0.9,
       tool_choice: 'none'
     };
   } else {
-    // Use the selected model for text‑only requests
     payload = {
       model: selectedModel,
       messages: [
@@ -143,7 +151,7 @@ Now, assist the user with their questions about EarnSphere!`;
         { role: 'user', content: sanitisedMessage || 'Hello!' }
       ],
       temperature: 0.8,
-      max_tokens: 800,
+      max_tokens: 1200,
       top_p: 0.9,
       tool_choice: 'none'
     };
@@ -224,7 +232,7 @@ app.get('/api/resolve-account', async (req, res) => {
 });
 
 // ============================================================
-// IMAGE GENERATION (Pollinations.ai)
+// IMAGE GENERATION
 // ============================================================
 app.post('/api/generate-image', async (req, res) => {
   const { prompt } = req.body;
