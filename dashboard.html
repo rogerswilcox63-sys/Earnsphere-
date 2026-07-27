@@ -12,19 +12,150 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
-    /* ===== RESET & BASE (same as before) ===== */
+    /* ===== RESET & BASE ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
     #app { position:relative; z-index:1; flex:1; }
-    .navbar { background:rgba(30,41,59,.7); backdrop-filter:blur(12px); box-shadow:0 4px 12px rgba(0,0,0,.3); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:1px solid rgba(255,255,255,.1); }
-    .nav-links { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
-    .nav-links a { text-decoration:none; color:#cbd5e1; font-weight:500; padding:.5rem 1rem; border-radius:.5rem; transition:all 0.3s; }
-    .nav-links a:hover, .nav-links a.active { color:#3b82f6; background:rgba(59,130,246,.15); }
-    .logo { font-size:1.6rem; font-weight:800; background:linear-gradient(135deg, #3b82f6, #10b981); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .user-greeting { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
-    .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:.5rem 1rem; border-radius:2rem; font-weight:500; color:#3b82f6; cursor:pointer; transition:all 0.3s; }
-    .logout-btn:hover { background:rgba(59,130,246,.3); }
+
+    /* ===== NAVBAR WITH HAMBURGER ===== */
+    .navbar {
+      background: rgba(30,41,59,.8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      position: relative;
+      z-index: 50;
+    }
+    .navbar .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-decoration: none;
+    }
+    .navbar .logo i { margin-right: 0.3rem; }
+
+    .navbar .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .navbar .user-greeting {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .navbar .logout-btn {
+      background: rgba(59,130,246,.2);
+      border: 1px solid rgba(59,130,246,.3);
+      padding: 0.35rem 0.9rem;
+      border-radius: 2rem;
+      font-weight: 500;
+      color: #3b82f6;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+    .navbar .logout-btn:hover { background: rgba(59,130,246,.3); }
+
+    /* ---- HAMBURGER BUTTON ---- */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 51;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: #cbd5e1;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(4px, 4px);
+    }
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(4px, -4px);
+    }
+
+    /* ---- MOBILE NAV DROPDOWN ---- */
+    .mobile-nav {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(15,23,42,.98);
+      backdrop-filter: blur(12px);
+      padding: 0.8rem 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .mobile-nav.open {
+      display: flex;
+    }
+    .mobile-nav a {
+      text-decoration: none;
+      color: #cbd5e1;
+      font-weight: 500;
+      padding: 0.6rem 0.8rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .mobile-nav a:hover,
+    .mobile-nav a.active {
+      color: #3b82f6;
+      background: rgba(59,130,246,.15);
+    }
+    .mobile-nav a i { width: 20px; text-align: center; }
+    .mobile-nav .nav-divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,.06);
+      margin: 0.3rem 0;
+    }
+
+    /* ---- DESKTOP NAV (hidden on mobile) ---- */
+    .desktop-nav {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .desktop-nav a {
+      text-decoration: none;
+      color: #cbd5e1;
+      font-weight: 500;
+      padding: 0.35rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    .desktop-nav a:hover,
+    .desktop-nav a.active {
+      color: #3b82f6;
+      background: rgba(59,130,246,.15);
+    }
+
+    /* ---- DASHBOARD CONTENT (unchanged) ---- */
     .dashboard-container { max-width:1200px; margin:2rem auto; padding:0 1.5rem; width:100%; }
     .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
     .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
@@ -61,6 +192,8 @@
     .footer a:hover { color:#3b82f6; }
     .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; margin-bottom:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn .3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
     @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+    /* AI Chat Widget */
     #aiChatBtn { position:fixed; bottom:20px; right:20px; width:60px; height:60px; background:linear-gradient(135deg, #3b82f6, #10b981); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; cursor:pointer; z-index:10000; box-shadow:0 4px 20px rgba(59,130,246,.4); transition:transform .2s; }
     #aiChatBtn:hover { transform:scale(1.05); }
     #aiChatWindow { position:fixed; bottom:90px; right:20px; width:340px; height:460px; background:#1e293b; border:1px solid rgba(255,255,255,.1); border-radius:12px; display:none; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden; }
@@ -81,13 +214,7 @@
     #aiSendBtn { background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; color:#fff; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; transition:.2s; display:flex; align-items:center; justify-content:center; }
     #aiSendBtn:hover { transform:scale(1.05); box-shadow:0 0 15px rgba(59,130,246,.4); }
     #aiSendBtn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
-    @media (max-width:768px) {
-      .navbar { padding:1rem; }
-      .nav-links a { padding:.3rem .6rem; font-size:.9rem; }
-      .dashboard-container { padding:0 1rem; }
-      .offers-grid { grid-template-columns:1fr; }
-      #aiChatWindow { width:300px; height:400px; right:10px; bottom:80px; }
-    }
+
     .section-wrapper { margin-bottom:1.5rem; }
     .section-wrapper.hidden { display:none !important; }
     .ad-container { display:none; margin:.5rem 0; padding:.5rem; background:rgba(255,255,255,.02); border-radius:.5rem; border:1px dashed rgba(255,255,255,.05); text-align:center; min-height:0; overflow:hidden; }
@@ -96,6 +223,7 @@
     .timer-label { font-weight:700; color:#f59e0b; background:rgba(245,158,11,.1); padding:.3rem .8rem; border-radius:2rem; display:inline-block; border:1px solid rgba(245,158,11,.2); }
     .limit-badge { font-size:.8rem; color:#94a3b8; font-weight:400; margin-left:.5rem; }
 
+    /* Telegram Modal */
     .telegram-modal {
       display: none;
       position: fixed;
@@ -150,45 +278,69 @@
       transition: all 0.3s;
     }
     .telegram-modal-content .btn-later:hover { background: rgba(255,255,255,.12); color: #f1f5f9; }
+
+    @media (max-width: 768px) {
+      .desktop-nav { display: none; }
+      .hamburger { display: flex; }
+      .dashboard-container { padding: 0 1rem; }
+      .offers-grid { grid-template-columns: 1fr; }
+      .navbar .user-greeting { display: none; }
+      #aiChatWindow { width:300px; height:400px; right:10px; bottom:80px; }
+      .navbar { padding: 0.6rem 1rem; }
+    }
+    @media (min-width: 769px) {
+      .mobile-nav { display: none !important; }
+    }
   </style>
 </head>
 <body>
   <div id="app">
-    <!-- NAVBAR -->
-    <div class="navbar">
-      <div class="logo"><i class="fas fa-coins"></i> EarnSphere</div>
-      <div class="nav-links">
+    <!-- ===== NAVBAR WITH HAMBURGER ===== -->
+    <nav class="navbar">
+      <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
+
+      <!-- Desktop Nav -->
+      <div class="desktop-nav">
         <a href="dashboard.html" class="active">Dashboard</a>
         <a href="withdraw.html">Withdraw</a>
         <a href="profile.html">Profile</a>
-        <a href="refer.html">Refer and Earn</a>
+        <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+        <a href="refer.html">Refer</a>
         <a href="community.html">Community</a>
+        <a href="ranking.html"><i class="fas fa-trophy"></i> Leaderboard</a>
         <a href="blog.html">Blog</a>
+        <a href="ai-assistant.html"><i class="fas fa-robot"></i> AI</a>
+      </div>
+
+      <div class="nav-right">
+        <span class="user-greeting" id="userName">Welcome, User</span>
+        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <!-- Hamburger -->
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      <!-- Mobile Nav Dropdown -->
+      <div class="mobile-nav" id="mobileNav">
+        <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="withdraw.html"><i class="fas fa-credit-card"></i> Withdraw</a>
+        <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+        <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+        <a href="refer.html"><i class="fas fa-share-alt"></i> Refer</a>
+        <a href="community.html"><i class="fas fa-users"></i> Community</a>
+        <a href="ranking.html"><i class="fas fa-trophy"></i> Leaderboard</a>
+        <a href="blog.html"><i class="fas fa-blog"></i> Blog</a>
+        <hr class="nav-divider" />
         <a href="ai-assistant.html"><i class="fas fa-robot"></i> AI Assistant</a>
       </div>
-      <div class="user-greeting">
-        <span id="userName">Welcome, User</span>
-        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-      </div>
-    </div>
+    </nav>
 
-    <!-- TELEGRAM MODAL -->
-    <div class="telegram-modal" id="telegramModal">
-      <div class="telegram-modal-content">
-        <div class="telegram-icon"><i class="fab fa-telegram-plane"></i></div>
-        <h2>Join Our Telegram Community!</h2>
-        <p>Get the latest updates, exclusive offers, and chat with fellow EarnSphere hustlers. Don't miss out – join now!</p>
-        <div class="btn-group">
-          <a href="https://t.me/earnspherehub" target="_blank" class="btn-telegram" id="telegramJoinBtn">
-            <i class="fab fa-telegram-plane"></i> Join Telegram
-          </a>
-          <button class="btn-later" id="telegramLaterBtn">Maybe later</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- DASHBOARD CONTENT -->
+    <!-- ===== DASHBOARD CONTENT ===== -->
     <div class="dashboard-container">
+      <!-- Stats -->
       <h2 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Overview</h2>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-title">Wallet Balance</div><div class="stat-value" id="walletBalance">₦0.00</div></div>
@@ -221,7 +373,7 @@
         </div>
       </div>
 
-      <!-- AI Assistant Card -->
+      <!-- AI Assistant Button Card -->
       <h2 class="section-title"><i class="fas fa-robot"></i> AI Assistant</h2>
       <div class="stats-grid">
         <div class="ai-card" style="grid-column:span 1;">
@@ -237,7 +389,7 @@
         </div>
       </div>
 
-      <!-- SURVEYS (max 2/day) – all go to survey.html -->
+      <!-- Surveys -->
       <div class="section-wrapper" id="surveyWrapper">
         <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers <span class="limit-badge">(max 2 per day)</span></h2>
         <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
@@ -246,7 +398,7 @@
         <div class="offers-grid" id="surveyList"></div>
       </div>
 
-      <!-- APP DOWNLOADS (1/hour) – includes Free Fire -->
+      <!-- App Downloads -->
       <div class="section-wrapper" id="appWrapper">
         <h2 class="section-title"><i class="fas fa-download"></i> App Downloads <span class="limit-badge">(1 per hour)</span></h2>
         <div id="appResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
@@ -255,7 +407,7 @@
         <div class="offers-grid" id="appTaskList"></div>
       </div>
 
-      <!-- SOCIAL (1/hour) -->
+      <!-- Social -->
       <div class="section-wrapper" id="socialWrapper">
         <h2 class="section-title"><i class="fas fa-share-alt"></i> Social & YouTube <span class="limit-badge">(1 per hour)</span></h2>
         <div id="socialResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
@@ -264,7 +416,7 @@
         <div class="offers-grid" id="socialTaskList"></div>
       </div>
 
-      <!-- EXTRA (1/hour) -->
+      <!-- Extra -->
       <div class="section-wrapper" id="extraWrapper">
         <h2 class="section-title"><i class="fas fa-star"></i> More Earning Tasks <span class="limit-badge">(1 per hour)</span></h2>
         <div id="extraResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
@@ -288,12 +440,18 @@
     </div>
   </div>
 
+  <!-- FOOTER -->
   <footer class="footer">
-    <p><a href="privacy-policy.html">Privacy Policy</a> <a href="about.html">About</a> <a href="contact.html">Contact</a></p>
+    <p>
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="settings.html">Settings</a>
+    </p>
     <p style="margin-top:1rem;font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
-  <!-- AI Chat (floating widget) -->
+  <!-- AI Chat Widget -->
   <div id="aiChatBtn" onclick="toggleAiChat()"><i class="fas fa-robot"></i></div>
   <div id="aiChatWindow">
     <div id="aiChatHeader"><span><i class="fas fa-brain"></i> SphereAI Assistant</span><span class="close-btn" onclick="toggleAiChat()"><i class="fas fa-times"></i></span></div>
@@ -301,9 +459,45 @@
     <div id="aiChatInputArea"><input type="text" id="aiChatInput" placeholder="Type your message..." autocomplete="off" /><button id="aiSendBtn" onclick="sendAiMessage()"><i class="fas fa-paper-plane"></i></button></div>
   </div>
 
+  <!-- TELEGRAM MODAL -->
+  <div class="telegram-modal" id="telegramModal">
+    <div class="telegram-modal-content">
+      <div class="telegram-icon"><i class="fab fa-telegram-plane"></i></div>
+      <h2>Join Our Telegram Community!</h2>
+      <p>Get the latest updates, exclusive offers, and chat with fellow EarnSphere hustlers. Don't miss out – join now!</p>
+      <div class="btn-group">
+        <a href="https://t.me/earnspherehub" target="_blank" class="btn-telegram" id="telegramJoinBtn">
+          <i class="fab fa-telegram-plane"></i> Join Telegram
+        </a>
+        <button class="btn-later" id="telegramLaterBtn">Maybe later</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ============================================================
-    // FIREBASE
+    // HAMBURGER MENU TOGGLE
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburger = document.getElementById('hamburgerBtn');
+      const mobileNav = document.getElementById('mobileNav');
+
+      hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        mobileNav.classList.toggle('open');
+      });
+
+      // Close mobile nav when clicking a link
+      mobileNav.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          hamburger.classList.remove('active');
+          mobileNav.classList.remove('open');
+        });
+      });
+    });
+
+    // ============================================================
+    // FIREBASE (unchanged)
     // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
@@ -318,10 +512,9 @@
     const db = firebase.firestore();
 
     // ============================================================
-    // COUPON REWARDS – LOADED FROM FIRESTORE
+    // COUPON REWARDS
     // ============================================================
     let couponRewards = {};
-
     async function loadCouponsFromFirestore() {
       try {
         const snapshot = await db.collection('coupons').where('active', '==', true).get();
@@ -332,12 +525,9 @@
             couponRewards[data.code] = data.reward;
           });
           console.log('✅ Coupons loaded:', couponRewards);
-        } else {
-          console.log('No active coupons found.');
         }
       } catch (e) {
         console.error('Error loading coupons:', e);
-        couponRewards = {};
       }
     }
 
@@ -370,7 +560,7 @@
       { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.', link:'survey.html?id=srv_06' },
       { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.', link:'survey.html?id=srv_07' },
       { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.', link:'survey.html?id=srv_08' },
-      { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.', linklink:'survey.html?id=srv_09' },
+      { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.', link:'survey.html?id=srv_09' },
       { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.', link:'survey.html?id=srv_10' }
     ];
 
@@ -399,7 +589,7 @@
     ];
 
     // ============================================================
-    // HELPERS
+    // HELPERS (unchanged)
     // ============================================================
     function getTodayDateString() { return new Date().toISOString().split('T')[0]; }
 
@@ -511,7 +701,7 @@
     }
 
     // ============================================================
-    // COUPON REDEEM – NOW USES DYNAMIC COUPONS
+    // COUPON REDEEM
     // ============================================================
     async function redeemCoupon() {
       const input = document.getElementById('couponInput');
@@ -529,7 +719,6 @@
         return;
       }
 
-      // Ensure coupons are loaded
       if (Object.keys(couponRewards).length === 0) {
         await loadCouponsFromFirestore();
       }
@@ -609,7 +798,6 @@
     // RENDER TASKS
     // ============================================================
     function renderTasks() {
-      // Surveys
       const surveyWrapper = document.getElementById('surveyWrapper');
       const surveyContainer = document.getElementById('surveyList');
       const surveyCount = getSurveyCountToday();
@@ -635,11 +823,8 @@
         });
       }
 
-      // App downloads
       renderLimitedCategory('appTaskList', 'appWrapper', appTasks, 'appLastCompleted', 'app', 1);
-      // Social
       renderLimitedCategory('socialTaskList', 'socialWrapper', socialTasks, 'socialLastCompleted', 'social', 1);
-      // Extra
       renderLimitedCategory('extraTaskList', 'extraWrapper', extraTasks, 'extraLastCompleted', 'extra', 1);
     }
 
@@ -867,14 +1052,10 @@
       renderTasks();
       updateCountdowns();
       checkAndShowAds();
+      loadCouponsFromFirestore();
 
-      setInterval(() => {
-        updateCountdowns();
-      }, 1000);
-
-      setInterval(() => {
-        renderTasks();
-      }, 5000);
+      setInterval(() => { updateCountdowns(); }, 1000);
+      setInterval(() => { renderTasks(); }, 5000);
 
       auth.onAuthStateChanged(async (user) => {
         if (user) {
@@ -887,10 +1068,6 @@
             userData = doc.data();
             localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
           }
-          
-          // Load coupons from Firestore
-          await loadCouponsFromFirestore();
-
           updateInterfaceValues();
           renderTasks();
           updateCountdowns();

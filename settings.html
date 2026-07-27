@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Account Settings - EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: #f1f5f9;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(16,185,129,.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    #app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .navbar {
+      background: rgba(30,41,59,.8);
+      backdrop-filter: blur(12px);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .navbar .logo {
+      font-size: 1.3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-decoration: none;
+    }
+    .navbar .logo i { margin-right: 0.3rem; }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .nav-right .user-greeting {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .logout-btn {
+      background: rgba(59,130,246,.2);
+      border: 1px solid rgba(59,130,246,.3);
+      padding: 0.35rem 0.9rem;
+      border-radius: 2rem;
+      font-weight: 500;
+      color: #3b82f6;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+    .logout-btn:hover { background: rgba(59,130,246,.3); }
+
+    .settings-container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    .settings-header {
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .settings-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .settings-header h1 i { color: #3b82f6; }
+    .settings-header .back-link {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .settings-header .back-link:hover { text-decoration: underline; }
+
+    .settings-card {
+      background: rgba(30,41,59,.6);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      padding: 1.8rem;
+      border: 1px solid rgba(255,255,255,.1);
+      margin-bottom: 1.5rem;
+    }
+    .settings-card .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #e2e8f0;
+    }
+    .settings-card .card-title i { color: #3b82f6; }
+
+    .profile-image-section {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .profile-image-section .avatar-wrapper {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+    }
+    .profile-image-section .avatar-wrapper img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,.1);
+      background: #1e293b;
+    }
+    .profile-image-section .avatar-wrapper .upload-overlay {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #3b82f6;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid #0f172a;
+    }
+    .profile-image-section .avatar-wrapper .upload-overlay:hover {
+      transform: scale(1.1);
+      background: #2563eb;
+    }
+    .profile-image-section .avatar-wrapper .upload-overlay i {
+      font-size: 0.7rem;
+      color: #fff;
+    }
+    .profile-image-section .avatar-info h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .profile-image-section .avatar-info p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 0.3rem;
+      font-weight: 500;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: rgba(15,23,42,.6);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 0.75rem;
+      color: #f1f5f9;
+      font-size: 0.95rem;
+      transition: border 0.3s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.2);
+    }
+    .form-group input:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .form-group .helper-text {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.2rem;
+    }
+
+    .btn {
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(59,130,246,.3); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-danger {
+      background: rgba(239,68,68,.15);
+      color: #ef4444;
+      border: 1px solid rgba(239,68,68,.3);
+    }
+    .btn-danger:hover { background: rgba(239,68,68,.25); }
+    .btn-secondary {
+      background: rgba(255,255,255,.06);
+      color: #94a3b8;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.12); color: #f1f5f9; }
+
+    .btn-row {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .message {
+      padding: 0.8rem 1rem;
+      border-radius: 0.75rem;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .message.success {
+      display: block;
+      background: rgba(16,185,129,.15);
+      border: 1px solid rgba(16,185,129,.3);
+      color: #6ee7b7;
+    }
+    .message.error {
+      display: block;
+      background: rgba(239,68,68,.15);
+      border: 1px solid rgba(239,68,68,.3);
+      color: #fca5a5;
+    }
+    .message.info {
+      display: block;
+      background: rgba(59,130,246,.15);
+      border: 1px solid rgba(59,130,246,.3);
+      color: #93bbfc;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,.06);
+      margin: 1.5rem 0;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ef4444;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,.4);
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      max-width: 90%;
+    }
+    .toast.show { opacity: 1; pointer-events: auto; }
+    .toast.success { background: #10b981; }
+
+    /* Hidden file input */
+    #imageUploadInput { display: none; }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0.6rem 1rem; }
+      .settings-container { padding: 0 1rem; }
+      .settings-card { padding: 1.2rem; }
+      .settings-header h1 { font-size: 1.4rem; }
+      .profile-image-section { flex-direction: column; align-items: center; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <nav class="navbar">
+      <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
+      <div class="nav-right">
+        <span class="user-greeting" id="userName">Welcome, User</span>
+        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </nav>
+
+    <div class="settings-container">
+      <div class="settings-header">
+        <h1><i class="fas fa-cog"></i> Account Settings</h1>
+        <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+      </div>
+
+      <!-- Profile Image -->
+      <div class="settings-card">
+        <div class="card-title"><i class="fas fa-image"></i> Profile Picture</div>
+        <div class="profile-image-section">
+          <div class="avatar-wrapper">
+            <img id="profileImage" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff&size=80" alt="Profile" />
+            <div class="upload-overlay" onclick="document.getElementById('imageUploadInput').click()">
+              <i class="fas fa-camera"></i>
+            </div>
+          </div>
+          <div class="avatar-info">
+            <h3 id="displayNameHeader">User</h3>
+            <p id="emailHeader">user@email.com</p>
+            <p style="font-size:0.8rem; color:#64748b; margin-top:0.2rem;">
+              <i class="fas fa-info-circle"></i> Click the camera icon to upload a photo
+            </p>
+          </div>
+        </div>
+        <input type="file" id="imageUploadInput" accept="image/*" />
+        <div id="imageMessage" class="message"></div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="removeImageBtn" onclick="removeProfileImage()">
+            <i class="fas fa-trash-alt"></i> Remove Photo
+          </button>
+        </div>
+      </div>
+
+      <!-- Profile Settings -->
+      <div class="settings-card">
+        <div class="card-title"><i class="fas fa-user"></i> Profile Settings</div>
+        <div id="profileMessage" class="message"></div>
+        <form id="profileForm">
+          <div class="form-group">
+            <label>Display Name</label>
+            <input type="text" id="displayName" placeholder="Your full name" />
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="email" placeholder="Your email address" />
+            <div class="helper-text">Changing your email requires re-authentication.</div>
+          </div>
+          <div class="form-group">
+            <label>Occupation</label>
+            <select id="occupation">
+              <option value="Student">Student</option>
+              <option value="Self-Employed">Self-Employed</option>
+              <option value="Employed Full-Time">Employed Full-Time</option>
+              <option value="Employed Part-Time">Employed Part-Time</option>
+              <option value="Unemployed">Unemployed</option>
+              <option value="Business Owner">Business Owner</option>
+              <option value="Freelancer">Freelancer</option>
+              <option value="Retired">Retired</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Monthly Income</label>
+            <select id="monthlyIncome">
+              <option value="Below ₦50,000">Below ₦50,000</option>
+              <option value="₦50,000 - ₦100,000">₦50,000 - ₦100,000</option>
+              <option value="₦100,000 - ₦200,000">₦100,000 - ₦200,000</option>
+              <option value="₦200,000 - ₦500,000">₦200,000 - ₦500,000</option>
+              <option value="₦500,000 - ₦1,000,000">₦500,000 - ₦1,000,000</option>
+              <option value="Above ₦1,000,000">Above ₦1,000,000</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Security -->
+      <div class="settings-card">
+        <div class="card-title"><i class="fas fa-shield-alt"></i> Security</div>
+        <div id="passwordMessage" class="message"></div>
+        <form id="passwordForm">
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPassword" placeholder="Enter new password" />
+            <div class="helper-text">Minimum 6 characters.</div>
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="Confirm new password" />
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+              <i class="fas fa-key"></i> Update Password
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Account Management -->
+      <div class="settings-card">
+        <div class="card-title"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> Account Management</div>
+        <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:1rem;">
+          Once you delete your account, all your data including balance, tasks, and chat history will be permanently removed.
+        </p>
+        <div id="deleteMessage" class="message"></div>
+        <div class="btn-row">
+          <button class="btn btn-danger" id="deleteAccountBtn" onclick="confirmDelete()">
+            <i class="fas fa-trash-alt"></i> Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    // ============================================================
+    // FIREBASE
+    // ============================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+      authDomain: "earnspherehub-742e9.firebaseapp.com",
+      projectId: "earnspherehub-742e9",
+      storageBucket: "earnspherehub-742e9.firebasestorage.app",
+      messagingSenderId: "173538573377",
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // ============================================================
+    // DOM REFS
+    // ============================================================
+    const toast = document.getElementById('toast');
+    const displayNameInput = document.getElementById('displayName');
+    const emailInput = document.getElementById('email');
+    const occupationSelect = document.getElementById('occupation');
+    const monthlyIncomeSelect = document.getElementById('monthlyIncome');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const profileImage = document.getElementById('profileImage');
+    const displayNameHeader = document.getElementById('displayNameHeader');
+    const emailHeader = document.getElementById('emailHeader');
+
+    const profileMessage = document.getElementById('profileMessage');
+    const passwordMessage = document.getElementById('passwordMessage');
+    const deleteMessage = document.getElementById('deleteMessage');
+    const imageMessage = document.getElementById('imageMessage');
+
+    let currentUserData = {};
+    let currentUser = null;
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function showToast(msg, isError = true) {
+      toast.textContent = msg;
+      toast.className = 'toast' + (isError ? '' : ' success');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    function showMessage(el, msg, type = 'success') {
+      el.textContent = msg;
+      el.className = 'message ' + type;
+    }
+
+    function clearMessage(el) {
+      el.className = 'message';
+      el.textContent = '';
+    }
+
+    // ============================================================
+    // LOAD USER DATA
+    // ============================================================
+    async function loadUserData() {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          currentUserData = doc.data();
+          displayNameInput.value = currentUserData.displayName || currentUserData.name || user.displayName || '';
+          emailInput.value = user.email || '';
+          if (currentUserData.occupation) occupationSelect.value = currentUserData.occupation;
+          if (currentUserData.monthlyIncome) monthlyIncomeSelect.value = currentUserData.monthlyIncome;
+
+          // Update header
+          const name = currentUserData.displayName || currentUserData.name || user.displayName || 'User';
+          displayNameHeader.textContent = name;
+          emailHeader.textContent = user.email || '';
+
+          // Profile image
+          if (currentUserData.profileImage) {
+            profileImage.src = currentUserData.profileImage;
+          } else {
+            profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=80`;
+          }
+        } else {
+          displayNameInput.value = user.displayName || '';
+          emailInput.value = user.email || '';
+          displayNameHeader.textContent = user.displayName || 'User';
+          emailHeader.textContent = user.email || '';
+        }
+      } catch (e) {
+        console.error('Error loading user data:', e);
+      }
+    }
+
+    // ============================================================
+    // PROFILE IMAGE UPLOAD
+    // ============================================================
+    document.getElementById('imageUploadInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const user = auth.currentUser;
+      if (!user) {
+        showMessage(imageMessage, '⚠️ Please log in.', 'error');
+        return;
+      }
+
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        showMessage(imageMessage, '⚠️ Image must be less than 2MB.', 'error');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showMessage(imageMessage, '⚠️ Please upload an image.', 'error');
+        return;
+      }
+
+      showMessage(imageMessage, '⏳ Uploading...', 'info');
+
+      try {
+        const storageRef = storage.ref(`profile_images/${user.uid}`);
+        await storageRef.put(file);
+        const downloadURL = await storageRef.getDownloadURL();
+
+        // Update Firestore
+        await db.collection('users').doc(user.uid).update({
+          profileImage: downloadURL,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        profileImage.src = downloadURL;
+        showMessage(imageMessage, '✅ Profile image updated!', 'success');
+        showToast('✅ Profile photo uploaded!', false);
+      } catch (e) {
+        console.error('Upload error:', e);
+        showMessage(imageMessage, '❌ Error uploading image. Please try again.', 'error');
+      }
+
+      // Reset input
+      document.getElementById('imageUploadInput').value = '';
+    });
+
+    async function removeProfileImage() {
+      const user = auth.currentUser;
+      if (!user) {
+        showMessage(imageMessage, '⚠️ Please log in.', 'error');
+        return;
+      }
+
+      if (!confirm('Remove your profile picture?')) return;
+
+      try {
+        await db.collection('users').doc(user.uid).update({
+          profileImage: firebase.firestore.FieldValue.delete(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        const name = displayNameInput.value || 'User';
+        profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=80`;
+        showMessage(imageMessage, '✅ Profile image removed.', 'success');
+        showToast('✅ Photo removed.', false);
+      } catch (e) {
+        console.error('Remove error:', e);
+        showMessage(imageMessage, '❌ Error removing image.', 'error');
+      }
+    }
+
+    // ============================================================
+    // UPDATE PROFILE
+    // ============================================================
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearMessage(profileMessage);
+
+      const user = auth.currentUser;
+      if (!user) {
+        showMessage(profileMessage, '⚠️ You must be logged in.', 'error');
+        return;
+      }
+
+      const newName = displayNameInput.value.trim();
+      const newEmail = emailInput.value.trim();
+      const occupation = occupationSelect.value;
+      const monthlyIncome = monthlyIncomeSelect.value;
+
+      if (!newName) {
+        showMessage(profileMessage, '⚠️ Name is required.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('saveProfileBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+      try {
+        if (newName !== user.displayName) {
+          await user.updateProfile({ displayName: newName });
+        }
+
+        if (newEmail !== user.email) {
+          try {
+            await user.updateEmail(newEmail);
+          } catch (emailErr) {
+            if (emailErr.code === 'auth/requires-recent-login') {
+              showMessage(profileMessage, '⚠️ Please log out and log back in to change your email.', 'error');
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+              return;
+            }
+            throw emailErr;
+          }
+        }
+
+        await db.collection('users').doc(user.uid).update({
+          displayName: newName,
+          name: newName,
+          email: newEmail,
+          occupation: occupation,
+          monthlyIncome: monthlyIncome,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        displayNameHeader.textContent = newName;
+        emailHeader.textContent = newEmail;
+
+        // Update avatar if no custom image
+        if (!currentUserData.profileImage) {
+          profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName)}&background=3b82f6&color=fff&size=80`;
+        }
+
+        showMessage(profileMessage, '✅ Profile updated successfully!', 'success');
+        showToast('✅ Profile saved!', false);
+
+      } catch (err) {
+        console.error('Save error:', err);
+        showMessage(profileMessage, `❌ Error: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+      }
+    });
+
+    // ============================================================
+    // CHANGE PASSWORD
+    // ============================================================
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearMessage(passwordMessage);
+
+      const user = auth.currentUser;
+      if (!user) {
+        showMessage(passwordMessage, '⚠️ You must be logged in.', 'error');
+        return;
+      }
+
+      const newPass = newPasswordInput.value;
+      const confirmPass = confirmPasswordInput.value;
+
+      if (!newPass || newPass.length < 6) {
+        showMessage(passwordMessage, '⚠️ Password must be at least 6 characters.', 'error');
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showMessage(passwordMessage, '⚠️ Passwords do not match.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('changePasswordBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+      try {
+        await user.updatePassword(newPass);
+        showMessage(passwordMessage, '✅ Password updated successfully!', 'success');
+        showToast('✅ Password changed!', false);
+        newPasswordInput.value = '';
+        confirmPasswordInput.value = '';
+      } catch (err) {
+        console.error('Password error:', err);
+        if (err.code === 'auth/requires-recent-login') {
+          showMessage(passwordMessage, '⚠️ Please log out and log back in to change your password.', 'error');
+        } else {
+          showMessage(passwordMessage, `❌ Error: ${err.message}`, 'error');
+        }
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-key"></i> Update Password';
+      }
+    });
+
+    // ============================================================
+    // DELETE ACCOUNT
+    // ============================================================
+    function confirmDelete() {
+      if (confirm('⚠️ Are you sure you want to delete your account? This cannot be undone! All your data will be permanently deleted.')) {
+        const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+        if (confirmation === 'DELETE') {
+          deleteAccount();
+        } else {
+          showMessage(deleteMessage, '❌ Deletion cancelled. You did not type DELETE.', 'error');
+        }
+      }
+    }
+
+    async function deleteAccount() {
+      const user = auth.currentUser;
+      if (!user) {
+        showMessage(deleteMessage, '⚠️ You must be logged in.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('deleteAccountBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+      showMessage(deleteMessage, '⏳ Deleting your account...', 'info');
+
+      try {
+        await db.collection('users').doc(user.uid).delete();
+
+        const chatSnap = await db.collection('chat_history').where('userId', '==', user.uid).get();
+        const batch = db.batch();
+        chatSnap.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+
+        // Delete profile image from storage if exists
+        try {
+          const storageRef = storage.ref(`profile_images/${user.uid}`);
+          await storageRef.delete();
+        } catch (e) { /* ignore */ }
+
+        await user.delete();
+
+        showMessage(deleteMessage, '✅ Account deleted successfully. Redirecting...', 'success');
+        showToast('✅ Account deleted.', false);
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+
+      } catch (err) {
+        console.error('Delete error:', err);
+        if (err.code === 'auth/requires-recent-login') {
+          showMessage(deleteMessage, '⚠️ Please log out and log back in to delete your account.', 'error');
+        } else {
+          showMessage(deleteMessage, `❌ Error: ${err.message}`, 'error');
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-trash-alt"></i> Delete Account';
+      }
+    }
+
+    // ============================================================
+    // AUTH STATE
+    // ============================================================
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('userName').textContent = user.displayName || user.email || 'User';
+        await loadUserData();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    function logout() {
+      auth.signOut().then(() => {
+        localStorage.removeItem('earnsphere_user_data');
+        window.location.href = 'login.html';
+      });
+    }
+  </script>
+</body>
+</html>

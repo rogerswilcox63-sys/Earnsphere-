@@ -224,9 +224,7 @@
       text-decoration: underline;
     }
     
-    /* ============================================
-       VERIFICATION BANNER
-    ============================================ */
+    /* Verification Banner */
     .verification-banner {
       display: none;
       background: rgba(245,158,11,0.15);
@@ -263,7 +261,6 @@
       font-weight: 600;
     }
     
-    /* Modal */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -363,9 +360,7 @@
       <div class="code" id="referralCodeDisplay">—</div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- VERIFICATION BANNER (shown after email signup) -->
-    <!-- ========================================== -->
+    <!-- Verification Banner (shown after email signup) -->
     <div class="verification-banner" id="verificationBanner">
       <span class="icon">📧</span>
       <h3>Verify Your Email</h3>
@@ -478,9 +473,7 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
-  <!-- FORGOT PASSWORD MODAL -->
-  <!-- ============================================ -->
+  <!-- Forgot Password Modal -->
   <div class="modal-overlay" id="forgotPasswordModal">
     <div class="modal">
       <button class="close-btn" onclick="closeForgotPassword()">✕</button>
@@ -726,10 +719,10 @@
           const userRef = db.collection('users').doc(user.uid);
           await userRef.update({ emailVerified: true });
           
-          showToast('✅ Email verified! Redirecting to dashboard...', 'success');
+          showToast('✅ Email verified! Redirecting to onboarding...', 'success');
           hideVerificationBanner();
           setTimeout(() => {
-            window.location.href = 'dashboard.html';
+            window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
           }, 1500);
         } else {
           showToast('❌ Email not verified yet. Please check your inbox and click the verification link.', 'warning');
@@ -843,7 +836,7 @@
         // Save user to Firestore
         await saveUserToFirestore(user, fullName, storedReferralCode);
         
-        // SHOW THE VERIFICATION BANNER
+        // Show verification banner
         showVerificationBanner(email);
         showToast('📧 Verification email sent! Please check your inbox.', 'success');
         
@@ -966,7 +959,9 @@
         await saveUserToFirestore(user, fullName, storedReferralCode);
         
         showToast('✅ Phone verified and account created!', 'success');
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+        setTimeout(() => { 
+          window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
+        }, 2000);
         
       } catch (err) {
         console.error('OTP verification error:', err);
@@ -1004,7 +999,9 @@
           showToast('✅ Welcome back!', 'success');
         }
         
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+        setTimeout(() => { 
+          window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
+        }, 1500);
         
       } catch (err) {
         console.error('Google sign-in error:', err);
@@ -1020,18 +1017,18 @@
         console.log('👤 User detected:', user.email, 'Verified:', user.emailVerified);
         
         if (user.emailVerified) {
-          // User is verified - redirect to dashboard
+          // User is verified - redirect to onboarding (they can skip if already completed)
           try {
             const userRef = db.collection('users').doc(user.uid);
             await userRef.update({ emailVerified: true });
           } catch (e) {}
-          window.location.href = 'dashboard.html';
+          window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
         } else if (user.email && !user.emailVerified) {
           // User exists but email not verified - show banner
           showVerificationBanner(user.email);
         } else {
-          // Phone or Google user - redirect
-          window.location.href = 'dashboard.html';
+          // Phone or Google user - redirect to onboarding
+          window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
         }
       } else {
         console.log('👤 No user logged in');
