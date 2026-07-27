@@ -41,7 +41,6 @@
       flex-direction: column;
     }
 
-    /* ===== NAVBAR ===== */
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
@@ -92,7 +91,6 @@
     }
     .navbar .back-link:hover { color: #f1f5f9; }
 
-    /* ===== CONTENT ===== */
     .page-title {
       font-size: 1.6rem;
       font-weight: 700;
@@ -220,6 +218,22 @@
       font-size: 0.95rem;
     }
 
+    .index-hint {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 0.75rem;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+      color: #f59e0b;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+    .index-hint i { font-size: 1.2rem; margin-top: 0.1rem; }
+    .index-hint a { color: #3b82f6; text-decoration: underline; }
+    .index-hint a:hover { color: #60a5fa; }
+
     .toast {
       position: fixed;
       bottom: 30px;
@@ -270,6 +284,19 @@
     <span class="badge-count" id="unreadCount">0</span>
   </div>
 
+  <!-- INDEX HINT (hidden by default) -->
+  <div class="index-hint" id="indexHint" style="display:none;">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div>
+      <strong>Index required</strong> — To sort notifications, Firestore needs a composite index.
+      <br />
+      <a href="#" id="indexLink" target="_blank">Click here to create it automatically</a>.
+      <span style="font-size:0.8rem;display:block;margin-top:0.3rem;color:#94a3b8;">
+        (If the link doesn't work, create it manually: <code>userId</code> Ascending, <code>timestamp</code> Descending)
+      </span>
+    </div>
+  </div>
+
   <!-- TOOLBAR -->
   <div class="toolbar-actions">
     <button class="btn-mark-read" id="markReadBtn" onclick="markAllAsRead()">
@@ -310,6 +337,8 @@
   const notifList = document.getElementById('notifList');
   const unreadCountEl = document.getElementById('unreadCount');
   const markReadBtn = document.getElementById('markReadBtn');
+  const indexHint = document.getElementById('indexHint');
+  const indexLink = document.getElementById('indexLink');
 
   // ============================================================
   // TOAST
@@ -335,11 +364,12 @@
   }
 
   // ============================================================
-  // FETCH NOTIFICATIONS
+  // FETCH NOTIFICATIONS (with fallback)
   // ============================================================
   async function fetchNotifications() {
     if (!currentUser) return;
     try {
+      // Try the ordered query first
       const snapshot = await db.collection('notifications')
         .where('userId', '==', currentUser.uid)
         .orderBy('timestamp', 'desc')
@@ -354,11 +384,61 @@
           timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
         });
       });
-
       renderNotifications();
     } catch (err) {
-      console.error('Error fetching notifications:', err);
-      showToast('❌ Could not load notifications.', 'error');
+      console.error('Full error:', err);
+
+      // Check if it's an index error
+      if (err.message && err.message.includes('index')) {
+        // Try to extract the index creation URL
+        const urlMatch = err.message.match(/https:\/\/console\.firebase\.google\.com[^\s]+/);
+        if (urlMatch) {
+          indexLink.href = urlMatch[0];
+          indexHint.style.display = 'flex';
+        } else {
+          // Fallback: show generic message
+          indexHint.innerHTML = `
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+              <strong>Index required</strong> — Please create a composite index for <code>notifications</code>:
+              <br /><code>userId</code> Ascending, <code>timestamp</code> Descending.
+              <br />
+              <span style="font-size:0.8rem;color:#94a3b8;">
+                Go to Firebase Console → Firestore → Indexes → Create Composite Index.
+              </span>
+            </div>
+          `;
+          indexHint.style.display = 'flex';
+        }
+
+        // Fallback: fetch without ordering and sort client-side
+        const fallbackSnap = await db.collection('notifications')
+          .where('userId', '==', currentUser.uid)
+          .get();
+
+        notifications = [];
+        fallbackSnap.forEach(doc => {
+          const data = doc.data();
+          notifications.push({
+            id: doc.id,
+            ...data,
+            timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
+          });
+        });
+        // Sort descending by timestamp
+        notifications.sort((a, b) => b.timestamp - a.timestamp);
+        renderNotifications();
+        showToast('⚠️ Sorted locally (index missing)', 'info');
+      } else {
+        // Other error
+        showToast('❌ Could not load notifications: ' + err.message, 'error');
+        notifList.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Error loading notifications. Please try again later.</p>
+          </div>
+        `;
+      }
     }
   }
 
