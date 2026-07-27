@@ -10,6 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
+    /* (All styles remain exactly as before – no changes needed) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.08) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -37,6 +38,35 @@
     .chat-header .actions button.primary { background:rgba(16,185,129,.15); color:#10b981; }
     .chat-header .actions button.primary:hover { background:rgba(16,185,129,.25); }
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+    /* ---- Model Selector (added) ---- */
+    .model-selector {
+      margin-left: auto;
+      margin-right: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    .model-selector select {
+      background: rgba(15,23,42,.6);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 0.5rem;
+      padding: 0.2rem 0.4rem;
+      color: #f1f5f9;
+      font-size: 0.75rem;
+      cursor: pointer;
+      outline: none;
+    }
+    .model-selector select:focus {
+      border-color: #3b82f6;
+    }
+    .model-selector select option {
+      background: #1e293b;
+    }
+
+    /* (rest of styles unchanged) */
     .messages-wrapper { flex:1; overflow-y:auto; padding:0.8rem 0.3rem 0.3rem; display:flex; flex-direction:column; gap:0.6rem; scroll-behavior:smooth; }
     .messages-wrapper::-webkit-scrollbar { width:4px; }
     .messages-wrapper::-webkit-scrollbar-track { background:rgba(255,255,255,.02); border-radius:10px; }
@@ -120,6 +150,8 @@
       .input-row .btn-icon { width:34px; height:34px; font-size:0.85rem; }
       .chat-header .info h1 { font-size:1rem; }
       .history-sidebar { width:280px; left:-320px; }
+      .model-selector { font-size:0.7rem; }
+      .model-selector select { font-size:0.7rem; padding:0.1rem 0.3rem; }
     }
     @media (max-width:480px) {
       .chat-header .info p { display:none; }
@@ -156,6 +188,17 @@
       <div class="status">
         <span class="dot"></span> Active
       </div>
+
+      <!-- ===== MODEL SELECTOR (added) ===== -->
+      <div class="model-selector">
+        <i class="fas fa-microchip" style="color:#3b82f6;"></i>
+        <select id="modelSelector">
+          <option value="openai/gpt-oss-20b">⚡ 20B (Fast)</option>
+          <option value="openai/gpt-oss-120b" selected>🚀 120B (Best)</option>
+          <option value="qwen/qwen3.6-27b">🧠 Qwen 3.6 27B</option>
+        </select>
+      </div>
+
       <div class="actions">
         <button class="primary" id="newChatBtn" title="New Chat"><i class="fas fa-plus"></i></button>
         <button id="historyBtn" title="Chat History"><i class="fas fa-clock-rotate-left"></i></button>
@@ -234,6 +277,7 @@
     const clearAllHistoryBtn = document.getElementById('clearAllHistory');
     const newChatBtn = document.getElementById('newChatBtn');
     const clearBtn = document.getElementById('clearBtn');
+    const modelSelector = document.getElementById('modelSelector');
 
     // ============================================================
     // STATE
@@ -245,6 +289,24 @@
     let isSending = false;
     const API_BASE_URL = 'https://earnsphere-ai.onrender.com';
     const COLLECTION_NAME = 'chat_history';
+    const STORAGE_KEY = 'sphereai_selected_model';
+
+    // Load saved model from localStorage
+    function loadSelectedModel() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved && modelSelector.querySelector(`option[value="${saved}"]`)) {
+        modelSelector.value = saved;
+      } else {
+        // Default to 120B
+        modelSelector.value = 'openai/gpt-oss-120b';
+        localStorage.setItem(STORAGE_KEY, 'openai/gpt-oss-120b');
+      }
+    }
+
+    // Save model selection
+    modelSelector.addEventListener('change', () => {
+      localStorage.setItem(STORAGE_KEY, modelSelector.value);
+    });
 
     // ============================================================
     // HELPERS
@@ -548,7 +610,6 @@
               addMessageToDOM(msg.text || '', msg.role || 'bot', msg.attachments || [], msg.timestamp || Date.now(), generated);
             } catch (e) {
               console.warn('Error parsing message:', e);
-              // Skip malformed message
             }
           });
         }
@@ -666,7 +727,6 @@
         await saveMessageToSession(newId, 'bot', welcome.text, []);
         await updateSessionTitle(newId, 'New Chat');
       } else {
-        // Fallback: create a local session without Firestore
         currentSessionId = 'local_' + Date.now();
         const welcome = {
           role: 'bot',
@@ -749,10 +809,13 @@
           text: h.text || ''
         }));
 
+        const selectedModel = modelSelector.value;
+
         const payload = {
           message: text || 'I sent an attachment.',
           history: history,
-          image: imageData || null
+          image: imageData || null,
+          model: selectedModel  // Send the selected model
         };
 
         const response = await fetch(`${API_BASE_URL}/api/grok`, {
@@ -958,6 +1021,8 @@
     // ============================================================
     // AUTH
     // ============================================================
+    loadSelectedModel(); // Load saved model on page load
+
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;

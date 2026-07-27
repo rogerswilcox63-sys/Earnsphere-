@@ -44,6 +44,9 @@ if (!RUNWAY_API_KEY) {
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const PAYSTACK_URL = 'https://api.paystack.co';
 
+// ---- Default model ----
+const DEFAULT_MODEL = 'openai/gpt-oss-120b';
+
 // ============================================================
 // HEALTH CHECK
 // ============================================================
@@ -55,13 +58,14 @@ app.get('/health', (req, res) => {
 // AI CHAT ENDPOINT (Groq)
 // ============================================================
 app.post('/api/grok', async (req, res) => {
-  const { message, history, image } = req.body;
+  const { message, history, image, model } = req.body;
 
   if (!message && !image) {
     return res.status(400).json({ error: 'Message or image is required.' });
   }
 
   const sanitisedMessage = (message || '').trim().slice(0, 4000);
+  const selectedModel = model || DEFAULT_MODEL;
 
   const historyMessages = (history || [])
     .slice(-15)
@@ -70,6 +74,7 @@ app.post('/api/grok', async (req, res) => {
       content: h.text || ''
     }));
 
+  // ---- SYSTEM PROMPT ----
   const systemMessage = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub.
 
 **ABOUT EARNSPHERE:**
@@ -112,6 +117,7 @@ Now, assist the user with their questions about EarnSphere!`;
   let payload;
 
   if (hasImage) {
+    // Vision model is fixed – image support requires a specific model
     const visionModel = 'llama-3.2-90b-vision-preview';
     payload = {
       model: visionModel,
@@ -128,9 +134,9 @@ Now, assist the user with their questions about EarnSphere!`;
       tool_choice: 'none'
     };
   } else {
-    const textModel = 'openai/gpt-oss-120b';
+    // Use the selected model for text‑only requests
     payload = {
-      model: textModel,
+      model: selectedModel,
       messages: [
         { role: 'system', content: systemMessage },
         ...historyMessages,
@@ -218,7 +224,7 @@ app.get('/api/resolve-account', async (req, res) => {
 });
 
 // ============================================================
-// IMAGE GENERATION (Pollinations.ai – free)
+// IMAGE GENERATION (Pollinations.ai)
 // ============================================================
 app.post('/api/generate-image', async (req, res) => {
   const { prompt } = req.body;
@@ -242,7 +248,7 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 // ============================================================
-// VIDEO GENERATION (RunwayML – Correct endpoint + model)
+// VIDEO GENERATION (RunwayML)
 // ============================================================
 app.post('/api/generate-video', async (req, res) => {
   const { prompt } = req.body;
@@ -258,7 +264,6 @@ app.post('/api/generate-video', async (req, res) => {
   const sanitisedPrompt = prompt.trim().slice(0, 500);
 
   try {
-    // Use the correct endpoint and include the model parameter
     const submitRes = await fetch('https://api.runwayml.com/v1/text_to_video', {
       method: 'POST',
       headers: {
@@ -266,7 +271,7 @@ app.post('/api/generate-video', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gen4.5',          // The model to use (matching your SDK snippet)
+        model: 'gen4.5',
         promptText: sanitisedPrompt,
         ratio: '1280:720',
         duration: 5
@@ -283,7 +288,6 @@ app.post('/api/generate-video', async (req, res) => {
 
     const jobId = job.id;
 
-    // Poll for completion
     let videoUrl = null;
     let attempts = 0;
     const maxAttempts = 60;
@@ -346,7 +350,20 @@ app.post('/api/fetch', async (req, res) => {
     if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
       return res.status(400).json({ error: 'Only HTTP/HTTPS URLs are allowed.' });
     }
-    // ... (same as before) ...
+    const hostname = parsedUrl.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1' ||
+        hostname.startsWith('192.168.') || hostname.startsWith('10.') ||
+        hostname.startsWith('172.16.') || hostname.startsWith('172.17.') ||
+        hostname.startsWith('172.18.') || hostname.startsWith('172.19.') ||
+        hostname.startsWith('172.20.') || hostname.startsWith('172.21.') ||
+        hostname.startsWith('172.22.') || hostname.startsWith('172.23.') ||
+        hostname.startsWith('172.24.') || hostname.startsWith('172.25.') ||
+        hostname.startsWith('172.26.') || hostname.startsWith('172.27.') ||
+        hostname.startsWith('172.28.') || hostname.startsWith('172.29.') ||
+        hostname.startsWith('172.30.') || hostname.startsWith('172.31.') ||
+        hostname === '169.254.0.0' || hostname.endsWith('.local')) {
+      return res.status(403).json({ error: 'Access to internal addresses is not allowed.' });
+    }
   } catch (e) {
     return res.status(400).json({ error: 'Invalid URL format.' });
   }
