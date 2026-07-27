@@ -100,6 +100,19 @@
     #specificUserGroup { display:none; }
     #sendProgress { display:none; margin-top:1rem; color:#94a3b8; }
 
+    .demo-banner {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      color: #f59e0b;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     @media (max-width:768px) {
       .navbar { flex-direction:column; text-align:center; }
       .admin-form .form-group { flex:1 1 100%; }
@@ -108,7 +121,6 @@
 </head>
 <body>
   <div id="app">
-    <!-- NAVBAR -->
     <nav class="navbar">
       <div class="logo"><i class="fas fa-coins"></i> EarnSphere</div>
       <div class="nav-links">
@@ -124,7 +136,6 @@
       </div>
     </nav>
 
-    <!-- TABS -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="coupons"><i class="fas fa-ticket-alt"></i> Coupons</button>
       <button class="tab-btn" data-tab="users"><i class="fas fa-users"></i> Users</button>
@@ -132,7 +143,7 @@
       <button class="tab-btn" data-tab="notifications"><i class="fas fa-bell"></i> Notifications</button>
     </div>
 
-    <!-- COUPONS TAB -->
+    <!-- COUPONS -->
     <div class="tab-content active" id="tab-coupons">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
         <h2 style="margin:0;"><i class="fas fa-ticket-alt"></i> Manage Coupons</h2>
@@ -157,20 +168,21 @@
       </div>
     </div>
 
-    <!-- USERS TAB -->
+    <!-- USERS -->
     <div class="tab-content" id="tab-users">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
         <h2 style="margin:0;"><i class="fas fa-users"></i> Manage Users</h2>
         <button class="refresh-btn" onclick="loadAllUsers()"><i class="fas fa-sync-alt"></i> Refresh</button>
       </div>
       <p style="color:#94a3b8; margin-bottom:1rem;">Click any user to manage their balance.</p>
-
+      <div class="demo-banner" id="userDemoBanner">
+        <i class="fas fa-info-circle"></i> No users found in Firestore. Add users or sign up to see them here.
+      </div>
       <div class="search-box">
         <input type="text" id="userSearchInput" placeholder="Search by name, email, or UID..." />
         <button class="btn btn-primary" id="searchUserBtn"><i class="fas fa-search"></i> Search</button>
         <button class="btn btn-secondary" id="clearSearchBtn" style="background:rgba(255,255,255,.1);color:#94a3b8;">Clear</button>
       </div>
-
       <div class="user-list" id="userList">
         <table>
           <thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Tasks</th><th>Joined</th></tr></thead>
@@ -178,8 +190,6 @@
         </table>
       </div>
       <div class="pagination" id="paginationControls"></div>
-
-      <!-- User Detail Panel -->
       <div class="user-detail" id="userDetail">
         <h3 style="margin-bottom:0.5rem;"><i class="fas fa-user-circle"></i> User Details</h3>
         <div class="row"><span class="label">Name:</span><span class="value" id="detailName">—</span></div>
@@ -198,35 +208,30 @@
       </div>
     </div>
 
-    <!-- PAYOUTS TAB -->
+    <!-- PAYOUTS -->
     <div class="tab-content" id="tab-payouts">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
         <h2 style="margin:0;"><i class="fas fa-credit-card"></i> Payout Requests</h2>
         <button class="refresh-btn" onclick="loadPayouts()"><i class="fas fa-sync-alt"></i> Refresh</button>
       </div>
+      <div class="demo-banner" id="payoutDemoBanner">
+        <i class="fas fa-info-circle"></i> No payout requests yet. Users will appear here when they request withdrawals.
+      </div>
       <div class="table-wrapper">
         <table>
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Bank</th>
-              <th>Account</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Requested</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+          <thead><tr><th>User</th><th>Email</th><th>Bank</th><th>Account</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
           <tbody id="payoutTableBody"><tr><td colspan="8" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- NOTIFICATIONS TAB -->
+    <!-- NOTIFICATIONS -->
     <div class="tab-content" id="tab-notifications">
       <h2><i class="fas fa-bullhorn"></i> Send Notification</h2>
       <p style="color:#94a3b8; margin-bottom:1rem;">Broadcast a message to all users or a specific user.</p>
+      <div class="demo-banner" id="notifDemoBanner">
+        <i class="fas fa-info-circle"></i> Notifications will appear in users' bell icons and notification pages.
+      </div>
       <div class="admin-form">
         <div class="form-group" style="flex:1 1 100%;">
           <label>Target Audience</label>
@@ -256,9 +261,6 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ============================================================
-    // FIREBASE
-    // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -271,9 +273,6 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ============================================================
-    // DOM REFS
-    // ============================================================
     const toast = document.getElementById('toast');
 
     function showToast(msg, isError = true) {
@@ -283,9 +282,7 @@
       setTimeout(() => toast.classList.remove('show'), 4000);
     }
 
-    // ============================================================
     // TABS
-    // ============================================================
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -296,7 +293,7 @@
     });
 
     // ============================================================
-    // NOTIFICATION SENDING LOGIC
+    // SEND NOTIFICATION (FIXED)
     // ============================================================
     document.getElementById('notifAudience').addEventListener('change', function() {
       document.getElementById('specificUserGroup').style.display = this.value === 'specific' ? 'block' : 'none';
@@ -316,16 +313,17 @@
       try {
         if (audience === 'all') {
           const snap = await db.collection('users').get();
-          if (snap.empty) { showToast('No users found.'); return; }
+          if (snap.empty) {
+            showToast('⚠️ No users found. Create users first.', true);
+            return;
+          }
           snap.forEach(doc => targetUsers.push(doc.id));
         } else {
           if (!specificUser) { showToast('Please enter a User UID or Email.'); return; }
-          // Try finding by email
           const userSnap = await db.collection('users').where('email', '==', specificUser).get();
           if (!userSnap.empty) {
             userSnap.forEach(doc => targetUsers.push(doc.id));
           } else {
-            // Try as UID
             const doc = await db.collection('users').doc(specificUser).get();
             if (doc.exists) targetUsers.push(doc.id);
             else { showToast('User not found.'); return; }
@@ -366,19 +364,19 @@
         console.error(e);
         progressDiv.style.display = 'none';
         this.disabled = false;
-        showToast('❌ Failed to send notification.');
+        showToast('❌ Failed to send notification: ' + e.message);
       }
     });
 
     // ============================================================
-    // COUPON MANAGEMENT
+    // COUPONS
     // ============================================================
     async function loadCoupons() {
       const tbody = document.getElementById('couponTableBody');
       try {
         const snap = await db.collection('coupons').orderBy('code').get();
         if (snap.empty) {
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No coupons.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No coupons. Add one above.</td></tr>';
           return;
         }
         let html = '';
@@ -462,13 +460,14 @@
     });
 
     // ============================================================
-    // USER MANAGEMENT
+    // USERS
     // ============================================================
     let allUsers = [];
     let filteredUsers = [];
     let currentPage = 1;
     const pageSize = 20;
     let selectedUserUid = null;
+    const userDemoBanner = document.getElementById('userDemoBanner');
 
     async function loadAllUsers() {
       const tbody = document.getElementById('userTableBody');
@@ -489,6 +488,11 @@
           });
         });
         filteredUsers = [...allUsers];
+        if (allUsers.length === 0) {
+          userDemoBanner.style.display = 'flex';
+        } else {
+          userDemoBanner.style.display = 'none';
+        }
         applyFilterAndRender();
       } catch (e) {
         console.error(e);
@@ -583,9 +587,7 @@
       if (e.key === 'Enter') { currentPage = 1; applyFilterAndRender(); }
     });
 
-    // ============================================================
-    // BALANCE OPERATIONS
-    // ============================================================
+    // BALANCE
     async function adjustBalance(operation) {
       const amount = parseFloat(document.getElementById('balanceAmount').value);
       if (isNaN(amount) || amount <= 0) { showToast('Enter a positive amount.'); return; }
@@ -617,18 +619,12 @@
     document.getElementById('subtractBalanceBtn').addEventListener('click', () => adjustBalance('subtract'));
     document.getElementById('setBalanceBtn').addEventListener('click', () => adjustBalance('set'));
 
-    // ============================================================
     // DELETE USER
-    // ============================================================
     document.getElementById('deleteUserBtn').addEventListener('click', async () => {
       if (!selectedUserUid) { showToast('Select a user first.'); return; }
       if (!confirm('Delete this user and all their data?')) return;
       try {
         await db.collection('users').doc(selectedUserUid).delete();
-        const chatSnap = await db.collection('chat_history').where('userId', '==', selectedUserUid).get();
-        const batch = db.batch();
-        chatSnap.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
         showToast('✅ User deleted.', false);
         document.getElementById('userDetail').classList.remove('show');
         selectedUserUid = null;
@@ -636,18 +632,19 @@
       } catch (e) { showToast('❌ Failed to delete user.'); }
     });
 
-    // ============================================================
-    // PAYOUT MANAGEMENT
-    // ============================================================
+    // PAYOUTS
     async function loadPayouts() {
       const tbody = document.getElementById('payoutTableBody');
+      const demoBanner = document.getElementById('payoutDemoBanner');
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;">Loading...</td></tr>';
       try {
         const snap = await db.collection('payouts').orderBy('requestedAt', 'desc').get();
         if (snap.empty) {
           tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;">No payout requests.</td></tr>';
+          demoBanner.style.display = 'flex';
           return;
         }
+        demoBanner.style.display = 'none';
         let html = '';
         for (const doc of snap.docs) {
           const data = doc.data();
@@ -706,9 +703,7 @@
       } catch (e) { showToast('❌ Failed to update payout.'); }
     }
 
-    // ============================================================
-    // AUTH & INIT
-    // ============================================================
+    // AUTH
     auth.onAuthStateChanged(async (user) => {
       if (!user) { window.location.href = 'login.html'; return; }
       try {
@@ -733,7 +728,6 @@
       });
     }
 
-    // Refresh functions exposed globally
     window.loadCoupons = loadCoupons;
     window.loadAllUsers = loadAllUsers;
     window.loadPayouts = loadPayouts;

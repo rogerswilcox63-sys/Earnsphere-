@@ -41,7 +41,6 @@
       flex-direction: column;
     }
 
-    /* ===== NAVBAR ===== */
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
@@ -92,7 +91,6 @@
     }
     .navbar .back-link:hover { color: #f1f5f9; }
 
-    /* ===== CONTENT ===== */
     .page-title {
       font-size: 1.6rem;
       font-weight: 700;
@@ -100,6 +98,7 @@
       align-items: center;
       gap: 0.6rem;
       margin-bottom: 1.2rem;
+      flex-wrap: wrap;
     }
     .page-title i { color: #10b981; }
     .page-title .balance-summary {
@@ -167,13 +166,12 @@
     }
     .tx-item .tx-amount.credit { color: #10b981; }
     .tx-item .tx-amount.debit { color: #ef4444; }
-
     .tx-item .tx-balance {
       font-size: 0.8rem;
       color: #94a3b8;
       text-align: right;
     }
-    /* On small screens, stack differently */
+
     @media (max-width: 600px) {
       .tx-item {
         grid-template-columns: 1fr 1fr;
@@ -223,6 +221,21 @@
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
     .toast.success { border-left: 4px solid #22c55e; }
     .toast.error { border-left: 4px solid #ef4444; }
+    .toast.info { border-left: 4px solid #3b82f6; }
+
+    .demo-banner {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.2rem;
+      margin-bottom: 1rem;
+      color: #f59e0b;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .demo-banner i { font-size: 1.1rem; }
 
     @media (max-width: 640px) {
       .navbar { padding: 0.6rem 1rem; }
@@ -235,7 +248,6 @@
 <body>
 
 <div class="wrapper">
-  <!-- NAVBAR -->
   <nav class="navbar">
     <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
     <div class="nav-right">
@@ -244,7 +256,6 @@
     </div>
   </nav>
 
-  <!-- PAGE TITLE -->
   <div class="page-title">
     <i class="fas fa-history"></i> Transaction History
     <span class="balance-summary">
@@ -252,18 +263,16 @@
     </span>
   </div>
 
-  <!-- TRANSACTION LIST -->
-  <div class="tx-list" id="txList">
-    <!-- dynamically filled -->
+  <div class="demo-banner" id="demoBanner">
+    <i class="fas fa-info-circle"></i>
+    <span>Sample transactions shown. Real data will appear once you complete tasks or earn rewards.</span>
   </div>
 
+  <div class="tx-list" id="txList"></div>
   <div id="toast" class="toast"></div>
 </div>
 
 <script>
-  // ============================================================
-  // FIREBASE CONFIG
-  // ============================================================
   const firebaseConfig = {
     apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
     authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -276,19 +285,12 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // ============================================================
-  // GLOBALS
-  // ============================================================
   let currentUser = null;
-  let transactions = [];
-
   const txList = document.getElementById('txList');
   const balanceEl = document.getElementById('currentBalance');
+  const demoBanner = document.getElementById('demoBanner');
 
-  // ============================================================
-  // TOAST
-  // ============================================================
-  function showToast(msg, type = 'success') {
+  function showToast(msg, type = 'info') {
     const toast = document.getElementById('toast');
     toast.textContent = msg;
     toast.className = 'toast ' + type;
@@ -298,9 +300,6 @@
     toast._hide = setTimeout(() => toast.classList.remove('show'), 4000);
   }
 
-  // ============================================================
-  // LOGOUT
-  // ============================================================
   function logout() {
     auth.signOut().then(() => {
       localStorage.removeItem('earnsphere_user_data');
@@ -308,46 +307,73 @@
     });
   }
 
-  // ============================================================
-  // FETCH TRANSACTIONS
-  // ============================================================
+  // Generate sample transactions for demo
+  function getSampleTransactions(uid) {
+    const now = new Date();
+    const samples = [
+      { id: 'sample1', userId: uid, amount: 5000, type: 'credit', description: '🎉 Welcome Bonus', balanceAfter: 5000 },
+      { id: 'sample2', userId: uid, amount: 2500, type: 'credit', description: '📝 Survey Completed', balanceAfter: 7500 },
+      { id: 'sample3', userId: uid, amount: 300, type: 'debit', description: '💳 Withdrawal', balanceAfter: 7200 },
+      { id: 'sample4', userId: uid, amount: 1500, type: 'credit', description: '📱 App Download Reward', balanceAfter: 8700 },
+      { id: 'sample5', userId: uid, amount: 200, type: 'credit', description: '🎯 Daily Check-in', balanceAfter: 8900 },
+    ];
+    return samples.map((tx, i) => {
+      const d = new Date(now);
+      d.setHours(d.getHours() - i * 3);
+      return { ...tx, timestamp: d };
+    });
+  }
+
   async function fetchTransactions() {
     if (!currentUser) return;
+
     try {
-      // Also fetch current balance from user doc
+      // Get user balance
       const userDoc = await db.collection('users').doc(currentUser.uid).get();
       if (userDoc.exists) {
         const data = userDoc.data();
         balanceEl.textContent = `₦${(data.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
       }
 
+      // Try to fetch real transactions
       const snapshot = await db.collection('transactions')
         .where('userId', '==', currentUser.uid)
         .orderBy('timestamp', 'desc')
+        .limit(50)
         .get();
 
-      transactions = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        transactions.push({
-          id: doc.id,
-          ...data,
-          timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
-        });
-      });
+      let transactions = [];
 
-      renderTransactions();
+      if (!snapshot.empty) {
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          transactions.push({
+            id: doc.id,
+            ...data,
+            timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
+          });
+        });
+        demoBanner.style.display = 'none';
+      } else {
+        // No real transactions — show samples
+        transactions = getSampleTransactions(currentUser.uid);
+        demoBanner.style.display = 'flex';
+      }
+
+      renderTransactions(transactions);
+
     } catch (err) {
       console.error('Error fetching transactions:', err);
-      showToast('❌ Could not load transaction history.', 'error');
+      // Show sample data on error
+      const samples = getSampleTransactions(currentUser.uid);
+      renderTransactions(samples);
+      demoBanner.style.display = 'flex';
+      showToast('⚠️ Using sample data (Firestore connection issue)', 'info');
     }
   }
 
-  // ============================================================
-  // RENDER TRANSACTIONS
-  // ============================================================
-  function renderTransactions() {
-    if (!transactions.length) {
+  function renderTransactions(transactions) {
+    if (!transactions || transactions.length === 0) {
       txList.innerHTML = `
         <div class="empty-state">
           <i class="fas fa-receipt"></i>
@@ -359,13 +385,12 @@
 
     let html = '';
     transactions.forEach(tx => {
-      const type = tx.type || 'credit'; // 'credit' or 'debit'
+      const type = tx.type || 'credit';
       const amount = tx.amount || 0;
       const formattedAmount = `₦${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      const timeStr = tx.timestamp.toLocaleString('en-NG', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      });
+      const timeStr = tx.timestamp instanceof Date
+        ? tx.timestamp.toLocaleString('en-NG', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : new Date(tx.timestamp).toLocaleString('en-NG', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
       const balanceAfter = tx.balanceAfter ? `₦${tx.balanceAfter.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—';
 
       html += `
@@ -381,9 +406,6 @@
     txList.innerHTML = html;
   }
 
-  // ============================================================
-  // AUTH STATE
-  // ============================================================
   auth.onAuthStateChanged((user) => {
     if (user) {
       currentUser = user;
@@ -393,6 +415,5 @@
     }
   });
 </script>
-
 </body>
 </html>
