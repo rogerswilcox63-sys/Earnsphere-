@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    /* (styles unchanged – same as before) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%); min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background:radial-gradient(circle at 20% 50%,rgba(59,130,246,.08) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(16,185,129,.08) 0%,transparent 50%); pointer-events:none; z-index:0; }
@@ -44,8 +43,9 @@
     .admin-form { display:flex; flex-wrap:wrap; gap:0.8rem; align-items:flex-end; margin-bottom:1rem; }
     .admin-form .form-group { flex:1 1 180px; min-width:140px; }
     .admin-form label { display:block; font-size:0.8rem; color:#94a3b8; margin-bottom:0.2rem; }
-    .admin-form input, .admin-form select { width:100%; padding:0.6rem 0.8rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.5rem; color:#f1f5f9; font-size:0.9rem; }
-    .admin-form input:focus, .admin-form select:focus { outline:none; border-color:#3b82f6; }
+    .admin-form input, .admin-form select, .admin-form textarea { width:100%; padding:0.6rem 0.8rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.5rem; color:#f1f5f9; font-size:0.9rem; font-family:inherit; }
+    .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus { outline:none; border-color:#3b82f6; }
+    .admin-form textarea { resize:vertical; }
 
     .btn { padding:0.6rem 1.2rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-size:0.85rem; }
     .btn-primary { background:#3b82f6; color:#fff; }
@@ -97,6 +97,9 @@
     .refresh-btn { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color:#94a3b8; padding:0.4rem 1rem; border-radius:0.5rem; cursor:pointer; transition:all 0.2s; }
     .refresh-btn:hover { background:rgba(255,255,255,.12); color:#f1f5f9; }
 
+    #specificUserGroup { display:none; }
+    #sendProgress { display:none; margin-top:1rem; color:#94a3b8; }
+
     @media (max-width:768px) {
       .navbar { flex-direction:column; text-align:center; }
       .admin-form .form-group { flex:1 1 100%; }
@@ -126,6 +129,7 @@
       <button class="tab-btn active" data-tab="coupons"><i class="fas fa-ticket-alt"></i> Coupons</button>
       <button class="tab-btn" data-tab="users"><i class="fas fa-users"></i> Users</button>
       <button class="tab-btn" data-tab="payouts"><i class="fas fa-credit-card"></i> Payouts</button>
+      <button class="tab-btn" data-tab="notifications"><i class="fas fa-bell"></i> Notifications</button>
     </div>
 
     <!-- COUPONS TAB -->
@@ -218,6 +222,35 @@
         </table>
       </div>
     </div>
+
+    <!-- NOTIFICATIONS TAB -->
+    <div class="tab-content" id="tab-notifications">
+      <h2><i class="fas fa-bullhorn"></i> Send Notification</h2>
+      <p style="color:#94a3b8; margin-bottom:1rem;">Broadcast a message to all users or a specific user.</p>
+      <div class="admin-form">
+        <div class="form-group" style="flex:1 1 100%;">
+          <label>Target Audience</label>
+          <select id="notifAudience">
+            <option value="all">All Users</option>
+            <option value="specific">Specific User</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1 1 100%;" id="specificUserGroup">
+          <label>User UID or Email</label>
+          <input type="text" id="notifUserSearch" placeholder="Enter User UID or Email" />
+        </div>
+        <div class="form-group" style="flex:1 1 100%;">
+          <label>Message</label>
+          <textarea id="notifMessage" rows="3" placeholder="Write your notification message..." style="width:100%;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Icon (optional)</label>
+          <input type="text" id="notifIcon" placeholder="fa-bell, fa-gift, etc." value="fa-bell" />
+        </div>
+        <button class="btn btn-success" id="sendNotifBtn" style="align-self:flex-end;"><i class="fas fa-paper-plane"></i> Send Notification</button>
+      </div>
+      <div id="sendProgress"><i class="fas fa-spinner fa-spin"></i> Sending...</div>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -260,6 +293,81 @@
         document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
       });
+    });
+
+    // ============================================================
+    // NOTIFICATION SENDING LOGIC
+    // ============================================================
+    document.getElementById('notifAudience').addEventListener('change', function() {
+      document.getElementById('specificUserGroup').style.display = this.value === 'specific' ? 'block' : 'none';
+    });
+
+    document.getElementById('sendNotifBtn').addEventListener('click', async function() {
+      const audience = document.getElementById('notifAudience').value;
+      const message = document.getElementById('notifMessage').value.trim();
+      const icon = document.getElementById('notifIcon').value.trim() || 'fa-bell';
+      const specificUser = document.getElementById('notifUserSearch').value.trim();
+      const progressDiv = document.getElementById('sendProgress');
+
+      if (!message) { showToast('Please enter a message.'); return; }
+
+      let targetUsers = [];
+
+      try {
+        if (audience === 'all') {
+          const snap = await db.collection('users').get();
+          if (snap.empty) { showToast('No users found.'); return; }
+          snap.forEach(doc => targetUsers.push(doc.id));
+        } else {
+          if (!specificUser) { showToast('Please enter a User UID or Email.'); return; }
+          // Try finding by email
+          const userSnap = await db.collection('users').where('email', '==', specificUser).get();
+          if (!userSnap.empty) {
+            userSnap.forEach(doc => targetUsers.push(doc.id));
+          } else {
+            // Try as UID
+            const doc = await db.collection('users').doc(specificUser).get();
+            if (doc.exists) targetUsers.push(doc.id);
+            else { showToast('User not found.'); return; }
+          }
+        }
+
+        if (targetUsers.length === 0) { showToast('No users found.'); return; }
+
+        this.disabled = true;
+        progressDiv.style.display = 'block';
+        let successCount = 0;
+        const batchSize = 500;
+
+        for (let i = 0; i < targetUsers.length; i += batchSize) {
+          const batch = db.batch();
+          const chunk = targetUsers.slice(i, i + batchSize);
+          chunk.forEach(uid => {
+            const ref = db.collection('notifications').doc();
+            batch.set(ref, {
+              userId: uid,
+              message: message,
+              icon: icon,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              read: false
+            });
+          });
+          await batch.commit();
+          successCount += chunk.length;
+          progressDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending... ${successCount}/${targetUsers.length}`;
+        }
+
+        progressDiv.style.display = 'none';
+        this.disabled = false;
+        showToast(`✅ Notification sent to ${successCount} users!`, false);
+        document.getElementById('notifMessage').value = '';
+
+      } catch (e) {
+        console.error(e);
+        progressDiv.style.display = 'none';
+        this.disabled = false;
+        showToast('❌ Failed to send notification.');
+      }
     });
 
     // ============================================================
@@ -354,7 +462,7 @@
     });
 
     // ============================================================
-    // USER MANAGEMENT (full list + search + pagination)
+    // USER MANAGEMENT
     // ============================================================
     let allUsers = [];
     let filteredUsers = [];
@@ -476,7 +584,7 @@
     });
 
     // ============================================================
-    // BALANCE OPERATIONS (UPDATES FIRESTORE)
+    // BALANCE OPERATIONS
     // ============================================================
     async function adjustBalance(operation) {
       const amount = parseFloat(document.getElementById('balanceAmount').value);
@@ -497,7 +605,6 @@
         showToast(`✅ Balance ${operation}ed successfully!`, false);
         document.getElementById('balanceAmount').value = '';
         await loadAllUsers();
-        // re-select the user to update detail panel
         const user = allUsers.find(u => u.uid === selectedUserUid);
         if (user) selectUser(selectedUserUid);
       } catch (e) {

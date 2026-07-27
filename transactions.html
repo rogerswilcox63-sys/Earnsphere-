@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Transaction History – EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 2rem;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .wrapper {
+      width: 100%;
+      max-width: 820px;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      background: rgba(30,41,59,.8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .navbar .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-decoration: none;
+    }
+    .navbar .logo i { margin-right: 0.3rem; }
+    .navbar .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .navbar .logout-btn {
+      background: rgba(59,130,246,.2);
+      border: 1px solid rgba(59,130,246,.3);
+      padding: 0.35rem 0.9rem;
+      border-radius: 2rem;
+      font-weight: 500;
+      color: #3b82f6;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+    .navbar .logout-btn:hover { background: rgba(59,130,246,.3); }
+    .navbar .back-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.3s;
+    }
+    .navbar .back-link:hover { color: #f1f5f9; }
+
+    /* ===== CONTENT ===== */
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+    .page-title i { color: #10b981; }
+    .page-title .balance-summary {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #94a3b8;
+      margin-left: auto;
+    }
+    .page-title .balance-summary span {
+      color: #10b981;
+      font-weight: 700;
+    }
+
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .tx-item {
+      background: rgba(30, 41, 59, 0.4);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 0.8rem;
+      padding: 0.9rem 1.2rem;
+      display: grid;
+      grid-template-columns: 1fr 0.8fr 0.8fr 0.8fr;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .tx-item:hover {
+      border-color: rgba(255,255,255,0.12);
+    }
+    .tx-item .tx-date {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    .tx-item .tx-desc {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #e2e8f0;
+    }
+    .tx-item .tx-type {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 0.15rem 0.6rem;
+      border-radius: 20px;
+      width: fit-content;
+      background: rgba(100,116,139,0.15);
+      color: #94a3b8;
+    }
+    .tx-item .tx-type.credit {
+      background: rgba(16,185,129,0.15);
+      color: #10b981;
+    }
+    .tx-item .tx-type.debit {
+      background: rgba(239,68,68,0.15);
+      color: #ef4444;
+    }
+    .tx-item .tx-amount {
+      font-weight: 700;
+      text-align: right;
+      font-size: 0.95rem;
+    }
+    .tx-item .tx-amount.credit { color: #10b981; }
+    .tx-item .tx-amount.debit { color: #ef4444; }
+
+    .tx-item .tx-balance {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+    /* On small screens, stack differently */
+    @media (max-width: 600px) {
+      .tx-item {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.3rem 0.8rem;
+        padding: 0.8rem 1rem;
+      }
+      .tx-item .tx-date { grid-column: 1 / -1; }
+      .tx-item .tx-desc { grid-column: 1 / -1; }
+      .tx-item .tx-type { justify-self: start; }
+      .tx-item .tx-amount { text-align: right; }
+      .tx-item .tx-balance { text-align: right; }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: #64748b;
+    }
+    .empty-state i {
+      font-size: 2.5rem;
+      color: #334155;
+      margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-size: 13px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      z-index: 9999;
+      max-width: 90%;
+      font-weight: 500;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+    .toast.success { border-left: 4px solid #22c55e; }
+    .toast.error { border-left: 4px solid #ef4444; }
+
+    @media (max-width: 640px) {
+      .navbar { padding: 0.6rem 1rem; }
+      .navbar .back-link span { display: none; }
+      .page-title { font-size: 1.3rem; flex-wrap: wrap; }
+      .page-title .balance-summary { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
+    <div class="nav-right">
+      <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> <span>Back</span></a>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </nav>
+
+  <!-- PAGE TITLE -->
+  <div class="page-title">
+    <i class="fas fa-history"></i> Transaction History
+    <span class="balance-summary">
+      Balance: <span id="currentBalance">₦0.00</span>
+    </span>
+  </div>
+
+  <!-- TRANSACTION LIST -->
+  <div class="tx-list" id="txList">
+    <!-- dynamically filled -->
+  </div>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<script>
+  // ============================================================
+  // FIREBASE CONFIG
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+    authDomain: "earnspherehub-742e9.firebaseapp.com",
+    projectId: "earnspherehub-742e9",
+    storageBucket: "earnspherehub-742e9.firebasestorage.app",
+    messagingSenderId: "173538573377",
+    appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // ============================================================
+  // GLOBALS
+  // ============================================================
+  let currentUser = null;
+  let transactions = [];
+
+  const txList = document.getElementById('txList');
+  const balanceEl = document.getElementById('currentBalance');
+
+  // ============================================================
+  // TOAST
+  // ============================================================
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast ' + type;
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    clearTimeout(toast._hide);
+    toast._hide = setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  // ============================================================
+  // LOGOUT
+  // ============================================================
+  function logout() {
+    auth.signOut().then(() => {
+      localStorage.removeItem('earnsphere_user_data');
+      window.location.href = 'login.html';
+    });
+  }
+
+  // ============================================================
+  // FETCH TRANSACTIONS
+  // ============================================================
+  async function fetchTransactions() {
+    if (!currentUser) return;
+    try {
+      // Also fetch current balance from user doc
+      const userDoc = await db.collection('users').doc(currentUser.uid).get();
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        balanceEl.textContent = `₦${(data.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      }
+
+      const snapshot = await db.collection('transactions')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('timestamp', 'desc')
+        .get();
+
+      transactions = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        transactions.push({
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
+        });
+      });
+
+      renderTransactions();
+    } catch (err) {
+      console.error('Error fetching transactions:', err);
+      showToast('❌ Could not load transaction history.', 'error');
+    }
+  }
+
+  // ============================================================
+  // RENDER TRANSACTIONS
+  // ============================================================
+  function renderTransactions() {
+    if (!transactions.length) {
+      txList.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-receipt"></i>
+          <p>No transactions yet. Start earning today!</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    transactions.forEach(tx => {
+      const type = tx.type || 'credit'; // 'credit' or 'debit'
+      const amount = tx.amount || 0;
+      const formattedAmount = `₦${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      const timeStr = tx.timestamp.toLocaleString('en-NG', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+      const balanceAfter = tx.balanceAfter ? `₦${tx.balanceAfter.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—';
+
+      html += `
+        <div class="tx-item">
+          <div class="tx-date"><i class="far fa-calendar-alt"></i> ${timeStr}</div>
+          <div class="tx-desc">${tx.description || 'Transaction'}</div>
+          <div class="tx-type ${type}">${type === 'credit' ? 'Credit' : 'Debit'}</div>
+          <div class="tx-amount ${type}">${type === 'credit' ? '+' : '-'} ${formattedAmount}</div>
+          <div class="tx-balance">Balance: ${balanceAfter}</div>
+        </div>
+      `;
+    });
+    txList.innerHTML = html;
+  }
+
+  // ============================================================
+  // AUTH STATE
+  // ============================================================
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      currentUser = user;
+      fetchTransactions();
+    } else {
+      window.location.href = 'login.html';
+    }
+  });
+</script>
+
+</body>
+</html>

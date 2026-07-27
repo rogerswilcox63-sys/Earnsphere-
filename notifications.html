@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Notifications – EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 2rem;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .wrapper {
+      width: 100%;
+      max-width: 820px;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      background: rgba(30,41,59,.8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .navbar .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-decoration: none;
+    }
+    .navbar .logo i { margin-right: 0.3rem; }
+    .navbar .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .navbar .logout-btn {
+      background: rgba(59,130,246,.2);
+      border: 1px solid rgba(59,130,246,.3);
+      padding: 0.35rem 0.9rem;
+      border-radius: 2rem;
+      font-weight: 500;
+      color: #3b82f6;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+    .navbar .logout-btn:hover { background: rgba(59,130,246,.3); }
+    .navbar .back-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.3s;
+    }
+    .navbar .back-link:hover { color: #f1f5f9; }
+
+    /* ===== CONTENT ===== */
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+    .page-title i { color: #3b82f6; }
+    .page-title .badge-count {
+      background: #3b82f6;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.1rem 0.6rem;
+      border-radius: 20px;
+      margin-left: 0.3rem;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1.2rem;
+    }
+    .btn-mark-read {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #10b981;
+      padding: 0.45rem 1.2rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-mark-read:hover {
+      background: rgba(16, 185, 129, 0.25);
+      transform: scale(1.02);
+    }
+    .btn-mark-read:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .notif-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .notif-item {
+      background: rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 0.8rem;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      transition: all 0.3s;
+    }
+    .notif-item:hover {
+      border-color: rgba(255,255,255,0.12);
+    }
+    .notif-item.unread {
+      border-left: 4px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.05);
+    }
+    .notif-item .notif-icon {
+      font-size: 1.2rem;
+      color: #3b82f6;
+      width: 2rem;
+      text-align: center;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .notif-item .notif-body {
+      flex: 1;
+    }
+    .notif-item .notif-body .notif-message {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+    .notif-item .notif-body .notif-time {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-top: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .notif-item .notif-body .notif-time i {
+      font-size: 0.6rem;
+    }
+    .notif-item .notif-status {
+      font-size: 0.6rem;
+      font-weight: 600;
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
+      padding: 0.15rem 0.6rem;
+      border-radius: 12px;
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+    .notif-item .notif-status.read {
+      background: rgba(100, 116, 139, 0.15);
+      color: #64748b;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: #64748b;
+    }
+    .empty-state i {
+      font-size: 2.5rem;
+      color: #334155;
+      margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-size: 13px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      z-index: 9999;
+      max-width: 90%;
+      font-weight: 500;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+    .toast.success { border-left: 4px solid #22c55e; }
+    .toast.error { border-left: 4px solid #ef4444; }
+    .toast.info { border-left: 4px solid #3b82f6; }
+
+    @media (max-width: 640px) {
+      .navbar { padding: 0.6rem 1rem; }
+      .navbar .back-link span { display: none; }
+      .page-title { font-size: 1.3rem; }
+      .notif-item { padding: 0.8rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
+    <div class="nav-right">
+      <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> <span>Back</span></a>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </nav>
+
+  <!-- PAGE TITLE -->
+  <div class="page-title">
+    <i class="fas fa-bell"></i> Notifications
+    <span class="badge-count" id="unreadCount">0</span>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar-actions">
+    <button class="btn-mark-read" id="markReadBtn" onclick="markAllAsRead()">
+      <i class="fas fa-check-double"></i> Mark all as read
+    </button>
+  </div>
+
+  <!-- NOTIFICATION LIST -->
+  <div class="notif-list" id="notifList">
+    <!-- dynamically filled -->
+  </div>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<script>
+  // ============================================================
+  // FIREBASE CONFIG
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+    authDomain: "earnspherehub-742e9.firebaseapp.com",
+    projectId: "earnspherehub-742e9",
+    storageBucket: "earnspherehub-742e9.firebasestorage.app",
+    messagingSenderId: "173538573377",
+    appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // ============================================================
+  // GLOBALS
+  // ============================================================
+  let currentUser = null;
+  let notifications = [];
+
+  const notifList = document.getElementById('notifList');
+  const unreadCountEl = document.getElementById('unreadCount');
+  const markReadBtn = document.getElementById('markReadBtn');
+
+  // ============================================================
+  // TOAST
+  // ============================================================
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast ' + type;
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    clearTimeout(toast._hide);
+    toast._hide = setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  // ============================================================
+  // LOGOUT
+  // ============================================================
+  function logout() {
+    auth.signOut().then(() => {
+      localStorage.removeItem('earnsphere_user_data');
+      window.location.href = 'login.html';
+    });
+  }
+
+  // ============================================================
+  // FETCH NOTIFICATIONS
+  // ============================================================
+  async function fetchNotifications() {
+    if (!currentUser) return;
+    try {
+      const snapshot = await db.collection('notifications')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('timestamp', 'desc')
+        .get();
+
+      notifications = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        notifications.push({
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
+        });
+      });
+
+      renderNotifications();
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+      showToast('❌ Could not load notifications.', 'error');
+    }
+  }
+
+  // ============================================================
+  // RENDER NOTIFICATIONS
+  // ============================================================
+  function renderNotifications() {
+    if (!notifications.length) {
+      notifList.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-bell-slash"></i>
+          <p>No notifications yet. Stay tuned!</p>
+        </div>
+      `;
+      unreadCountEl.textContent = '0';
+      return;
+    }
+
+    const unread = notifications.filter(n => !n.read).length;
+    unreadCountEl.textContent = unread;
+
+    let html = '';
+    notifications.forEach(notif => {
+      const isUnread = !notif.read;
+      const timeStr = notif.timestamp.toLocaleString('en-NG', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+      html += `
+        <div class="notif-item ${isUnread ? 'unread' : ''}">
+          <div class="notif-icon">
+            <i class="fas fa-${notif.icon || 'bell'}"></i>
+          </div>
+          <div class="notif-body">
+            <div class="notif-message">${notif.message}</div>
+            <div class="notif-time">
+              <i class="fas fa-clock"></i> ${timeStr}
+            </div>
+          </div>
+          <div class="notif-status ${isUnread ? '' : 'read'}">
+            ${isUnread ? 'New' : 'Read'}
+          </div>
+        </div>
+      `;
+    });
+    notifList.innerHTML = html;
+  }
+
+  // ============================================================
+  // MARK ALL AS READ
+  // ============================================================
+  async function markAllAsRead() {
+    if (!currentUser) return;
+    const unread = notifications.filter(n => !n.read);
+    if (!unread.length) {
+      showToast('All notifications already read.', 'info');
+      return;
+    }
+
+    markReadBtn.disabled = true;
+    markReadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
+
+    try {
+      const batch = db.batch();
+      unread.forEach(notif => {
+        const ref = db.collection('notifications').doc(notif.id);
+        batch.update(ref, { read: true });
+      });
+      await batch.commit();
+
+      // Update local state
+      notifications = notifications.map(n => ({ ...n, read: true }));
+      renderNotifications();
+      showToast(`✅ ${unread.length} notifications marked as read.`, 'success');
+    } catch (err) {
+      console.error('Error marking read:', err);
+      showToast('❌ Failed to update. Please try again.', 'error');
+    } finally {
+      markReadBtn.disabled = false;
+      markReadBtn.innerHTML = '<i class="fas fa-check-double"></i> Mark all as read';
+    }
+  }
+
+  // ============================================================
+  // AUTH STATE
+  // ============================================================
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      currentUser = user;
+      fetchNotifications();
+    } else {
+      window.location.href = 'login.html';
+    }
+  });
+</script>
+
+</body>
+</html>

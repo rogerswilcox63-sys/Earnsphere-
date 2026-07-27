@@ -18,7 +18,7 @@
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
     #app { position:relative; z-index:1; flex:1; }
 
-    /* ===== NAVBAR WITH HAMBURGER ===== */
+    /* ===== NAVBAR ===== */
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
@@ -64,7 +64,38 @@
     }
     .navbar .logout-btn:hover { background: rgba(59,130,246,.3); }
 
-    /* ---- HAMBURGER BUTTON ---- */
+    /* ---- Notification Bell ---- */
+    .notif-bell {
+      position: relative;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color 0.3s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    .notif-bell:hover { color: #f1f5f9; }
+    .notif-bell .badge {
+      position: absolute;
+      top: -6px;
+      right: -8px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.55rem;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #1e293b;
+      transition: transform 0.2s;
+    }
+    .notif-bell .badge.zero { display: none; }
+
+    /* ---- Hamburger ---- */
     .hamburger {
       display: none;
       flex-direction: column;
@@ -83,17 +114,11 @@
       border-radius: 4px;
       transition: all 0.3s;
     }
-    .hamburger.active span:nth-child(1) {
-      transform: rotate(45deg) translate(4px, 4px);
-    }
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-    }
-    .hamburger.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(4px, -4px);
-    }
+    .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
 
-    /* ---- MOBILE NAV DROPDOWN ---- */
+    /* ---- Mobile Nav ---- */
     .mobile-nav {
       display: none;
       position: absolute;
@@ -107,9 +132,7 @@
       flex-direction: column;
       gap: 0.3rem;
     }
-    .mobile-nav.open {
-      display: flex;
-    }
+    .mobile-nav.open { display: flex; }
     .mobile-nav a {
       text-decoration: none;
       color: #cbd5e1;
@@ -134,7 +157,7 @@
       margin: 0.3rem 0;
     }
 
-    /* ---- DESKTOP NAV (hidden on mobile) ---- */
+    /* ---- Desktop Nav ---- */
     .desktop-nav {
       display: flex;
       gap: 0.5rem;
@@ -155,7 +178,7 @@
       background: rgba(59,130,246,.15);
     }
 
-    /* ---- DASHBOARD CONTENT (unchanged) ---- */
+    /* ===== DASHBOARD CONTENT ===== */
     .dashboard-container { max-width:1200px; margin:2rem auto; padding:0 1.5rem; width:100%; }
     .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
     .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
@@ -295,7 +318,7 @@
 </head>
 <body>
   <div id="app">
-    <!-- ===== NAVBAR WITH HAMBURGER ===== -->
+    <!-- ===== NAVBAR ===== -->
     <nav class="navbar">
       <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
 
@@ -308,12 +331,18 @@
         <a href="refer.html">Refer</a>
         <a href="community.html">Community</a>
         <a href="ranking.html"><i class="fas fa-trophy"></i> Leaderboard</a>
+        <a href="transactions.html"><i class="fas fa-history"></i> Transactions</a>
         <a href="blog.html">Blog</a>
         <a href="ai-assistant.html"><i class="fas fa-robot"></i> AI</a>
       </div>
 
       <div class="nav-right">
         <span class="user-greeting" id="userName">Welcome, User</span>
+        <!-- Notification Bell -->
+        <a href="notifications.html" class="notif-bell" id="notifBell">
+          <i class="fas fa-bell"></i>
+          <span class="badge zero" id="notifBadge">0</span>
+        </a>
         <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
         <!-- Hamburger -->
         <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
@@ -332,6 +361,7 @@
         <a href="refer.html"><i class="fas fa-share-alt"></i> Refer</a>
         <a href="community.html"><i class="fas fa-users"></i> Community</a>
         <a href="ranking.html"><i class="fas fa-trophy"></i> Leaderboard</a>
+        <a href="transactions.html"><i class="fas fa-history"></i> Transactions</a>
         <a href="blog.html"><i class="fas fa-blog"></i> Blog</a>
         <hr class="nav-divider" />
         <a href="ai-assistant.html"><i class="fas fa-robot"></i> AI Assistant</a>
@@ -487,7 +517,6 @@
         mobileNav.classList.toggle('open');
       });
 
-      // Close mobile nav when clicking a link
       mobileNav.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
           hamburger.classList.remove('active');
@@ -497,7 +526,7 @@
     });
 
     // ============================================================
-    // FIREBASE (unchanged)
+    // FIREBASE
     // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
@@ -524,11 +553,8 @@
             const data = doc.data();
             couponRewards[data.code] = data.reward;
           });
-          console.log('✅ Coupons loaded:', couponRewards);
         }
-      } catch (e) {
-        console.error('Error loading coupons:', e);
-      }
+      } catch (e) { console.error('Error loading coupons:', e); }
     }
 
     // ============================================================
@@ -589,7 +615,7 @@
     ];
 
     // ============================================================
-    // HELPERS (unchanged)
+    // HELPERS
     // ============================================================
     function getTodayDateString() { return new Date().toISOString().split('T')[0]; }
 
@@ -664,6 +690,29 @@
       toast.innerHTML = msg;
       document.body.appendChild(toast);
       setTimeout(() => { toast.remove(); }, 3500);
+    }
+
+    // ============================================================
+    // NOTIFICATION BELL – FETCH UNREAD COUNT
+    // ============================================================
+    async function fetchUnreadCount() {
+      if (!currentUser) return;
+      try {
+        const snapshot = await db.collection('notifications')
+          .where('userId', '==', currentUser.uid)
+          .where('read', '==', false)
+          .get();
+        const count = snapshot.size;
+        const badge = document.getElementById('notifBadge');
+        if (count > 0) {
+          badge.textContent = count > 9 ? '9+' : count;
+          badge.classList.remove('zero');
+        } else {
+          badge.classList.add('zero');
+        }
+      } catch (err) {
+        console.error('Error fetching unread count:', err);
+      }
     }
 
     // ============================================================
@@ -1032,7 +1081,7 @@
     });
 
     // ============================================================
-    // AUTH & INIT
+    // LOGOUT
     // ============================================================
     function logout() {
       auth.signOut().then(() => {
@@ -1041,6 +1090,9 @@
       });
     }
 
+    // ============================================================
+    // AUTH & INIT
+    // ============================================================
     document.getElementById('telegramJoinBtn').addEventListener('click', closeTelegramPopup);
     document.getElementById('telegramLaterBtn').addEventListener('click', closeTelegramPopup);
 
@@ -1071,6 +1123,9 @@
           updateInterfaceValues();
           renderTasks();
           updateCountdowns();
+
+          // Fetch unread notification count
+          fetchUnreadCount();
 
           setTimeout(showTelegramPopup, 800);
         } else {
