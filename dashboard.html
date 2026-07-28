@@ -328,7 +328,7 @@
         </div>
       </div>
 
-      <!-- Surveys -->
+      <!-- Surveys (professional cards) -->
       <div class="section-wrapper" id="surveyWrapper">
         <h2 class="section-title"><i class="fas fa-poll"></i> Survey Offers <span class="limit-badge">(max 2 per day)</span></h2>
         <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
@@ -393,10 +393,17 @@
     <p style="margin-top:1rem;font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
-  <!-- ===== MONDIAD BANNER AD (already included above) ===== -->
+  <!-- ===== MONDIAD BANNER (already included above) ===== -->
   <!-- ===== MONDIAD POP‑UNDER AD ===== -->
   <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
-  <!-- ===== END ADS ===== -->
+
+  <!-- ===== ADCASH CODE (added) ===== -->
+  <script type="text/javascript">
+    aclib.runAutoTag({
+        zoneId: 'rcnic8lxix',
+    });
+  </script>
+  <!-- ===== END ADCASH ===== -->
 
   <script>
     // ============================================================
@@ -431,7 +438,6 @@
       appId: "1:173538573377:web:6d8c748376afcb9096dac0"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -541,7 +547,7 @@
     }
 
     // ============================================================
-    // TASK DEFINITIONS (simplified)
+    // TASK DEFINITIONS
     // ============================================================
     function getSurveyTasks() {
       return [
@@ -583,7 +589,7 @@
     ];
 
     // ============================================================
-    // RENDER TASKS
+    // RENDER TASKS (with professional survey cards)
     // ============================================================
     function renderTasks() {
       const surveyWrapper = document.getElementById('surveyWrapper');
@@ -591,7 +597,7 @@
       const surveyTasks = getSurveyTasks();
       const surveyCount = getSurveyCountToday();
       const availableSurveys = surveyTasks.filter(task => !isTaskCompleted(task.id));
-      
+
       if (surveyCount >= 2 || availableSurveys.length === 0) {
         if (surveyWrapper) surveyWrapper.classList.add('hidden');
         if (surveyContainer) surveyContainer.innerHTML = '';
@@ -600,13 +606,28 @@
         const toShow = availableSurveys.slice(0, 2);
         surveyContainer.innerHTML = '';
         toShow.forEach(task => {
+          const completionRate = Math.floor(Math.random() * 40) + 30; // mock progress
           surveyContainer.innerHTML += `
             <div class="offer-card">
-              <div class="offer-title">${task.title}</div>
+              <span class="offer-badge">${task.category}</span>
+              <div class="offer-title">
+                <i class="fas fa-clipboard-list"></i> ${task.title}
+              </div>
+              <div class="offer-meta">
+                <span><i class="fas fa-clock"></i> ~5 min</span>
+                <span><i class="fas fa-users"></i> 342 responses</span>
+                <span><i class="fas fa-star" style="color:#f59e0b;"></i> 4.8 rating</span>
+              </div>
               <p class="offer-desc">${task.desc}</p>
-              <span class="badge badge-survey">${task.category}</span>
-              <div class="offer-reward">₦${task.reward}</div>
-              <button class="start-btn" onclick="completeSurveyTask('${task.id}', ${task.reward})">🚀 Start Survey</button>
+              <div class="offer-progress">
+                <div class="bar" style="width:${completionRate}%;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="offer-reward">₦${task.reward}</span>
+                <button class="start-btn" onclick="completeSurveyTask('${task.id}', ${task.reward})" style="width:auto;padding:0.6rem 1.5rem;border-radius:8px;font-size:0.85rem;">
+                  <i class="fas fa-arrow-right"></i> Start
+                </button>
+              </div>
             </div>
           `;
         });
@@ -674,12 +695,12 @@
         showToast('⚠️ You have reached the daily limit of 2 surveys.');
         return;
       }
-      
+
       const survey = getSurveyTasks().find(t => t.id === taskId);
       if (survey && survey.link) {
         window.open(survey.link, '_blank');
       }
-      
+
       if (!userData.completedTasks) userData.completedTasks = {};
       userData.completedTasks[taskId] = Date.now();
       userData.balance = (userData.balance || 0) + reward;
@@ -825,7 +846,7 @@
     }
 
     // ============================================================
-    // NOTIFICATION BELL (simple)
+    // NOTIFICATION BELL
     // ============================================================
     async function fetchUnreadCount() {
       if (!currentUser) return;
@@ -876,7 +897,6 @@
             localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
           } else {
             console.warn('User document does not exist. Creating default.');
-            // Create default user document
             userData = {
               displayName: displayName,
               balance: 0,
@@ -893,7 +913,6 @@
           }
         } catch (err) {
           console.error('Error loading user data:', err);
-          // Continue with default data
         }
 
         updateInterfaceValues();
@@ -901,16 +920,12 @@
         fetchUnreadCount();
         loadCouponsFromFirestore();
 
-        // Start countdown timers
         setInterval(() => {
           const dailyMs = getTimeToMidnight();
           const surveyEl = document.getElementById('surveyCountdown');
           if (surveyEl) surveyEl.textContent = dailyMs <= 0 ? 'Resets now' : `Resets in ${formatTime(dailyMs)}`;
-
-          // For other countdowns, we can add later
         }, 1000);
 
-        // Re-render tasks periodically
         setInterval(() => { renderTasks(); }, 5000);
 
         console.log('✅ Dashboard loaded successfully');
@@ -921,7 +936,7 @@
       }
     });
 
-    // Expose functions globally so inline onclick works
+    // Expose functions globally
     window.claimDailyReward = claimDailyReward;
     window.redeemCoupon = redeemCoupon;
     window.completeSurveyTask = completeSurveyTask;

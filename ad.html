@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Watch an Ad - EarnSphere</title>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724"
-     crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -27,7 +25,6 @@
     .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
     @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
 
-    /* ===== MONDIAD AD CONTAINER ===== */
     .ad-container {
       max-width: 728px;
       margin: 20px auto;
@@ -58,16 +55,6 @@
 
     <div id="timerDisplay" class="timer-text">⏳ 10 seconds</div>
 
-    <!-- Google AdSense Ad Unit -->
-    <ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-5803688718527724"
-     data-ad-slot="YOUR_AD_SLOT_ID"
-     data-ad-format="auto"></ins>
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-
     <button class="btn-primary" id="startBtn" onclick="watchAd()"><i class="fas fa-play"></i> Start Watching</button>
     <button class="btn-primary btn-success" id="claimBtn" style="display:none;" onclick="claimReward()"><i class="fas fa-check"></i> Claim ₦50</button>
   </div>
@@ -77,11 +64,9 @@
     <script async src="https://ss.mrmnd.com/banner.js"></script>
     <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
   </div>
-  <!-- ===== END BANNER ===== -->
 
   <!-- ===== MONDIAD POP‑UNDER AD ===== -->
   <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
-  <!-- ===== END ADS ===== -->
 
   <script>
     const firebaseConfig = {
