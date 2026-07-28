@@ -6,7 +6,6 @@
   <title>EarnSphere Nigeria - Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5803688718527724" crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -240,9 +239,23 @@
 
     .section-wrapper { margin-bottom:1.5rem; }
     .section-wrapper.hidden { display:none !important; }
-    .ad-container { display:none; margin:.5rem 0; padding:.5rem; background:rgba(255,255,255,.02); border-radius:.5rem; border:1px dashed rgba(255,255,255,.05); text-align:center; min-height:0; overflow:hidden; }
-    .ad-container.has-ad { display:block !important; min-height:60px; }
-    .ad-container ins { margin:0 auto; }
+
+    /* ===== MONDIAD AD CONTAINER ===== */
+    .ad-container {
+      max-width: 728px;
+      margin: 20px auto;
+      padding: 12px;
+      background: rgba(30, 41, 59, 0.4);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
     .timer-label { font-weight:700; color:#f59e0b; background:rgba(245,158,11,.1); padding:.3rem .8rem; border-radius:2rem; display:inline-block; border:1px solid rgba(245,158,11,.2); }
     .limit-badge { font-size:.8rem; color:#94a3b8; font-weight:400; margin-left:.5rem; }
 
@@ -383,8 +396,11 @@
         </div>
       </div>
 
-      <!-- Ad 1 -->
-      <div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5803688718527724" data-ad-slot="2561139179" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
+      <!-- ===== MONDIAD AD 1 ===== -->
+      <div class="ad-container">
+        <script async src="https://ss.mrmnd.com/banner.js"></script>
+        <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
+      </div>
 
       <!-- Coupon -->
       <h2 class="section-title"><i class="fas fa-ticket-alt"></i> Coupon Code</h2>
@@ -455,8 +471,11 @@
         <div class="offers-grid" id="extraTaskList"></div>
       </div>
 
-      <!-- Ad 2 -->
-      <div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5803688718527724" data-ad-slot="2561139179" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
+      <!-- ===== MONDIAD AD 2 ===== -->
+      <div class="ad-container">
+        <script async src="https://ss.mrmnd.com/banner.js"></script>
+        <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
+      </div>
 
       <!-- Support -->
       <h2 class="section-title"><i class="fas fa-headset"></i> Contact Support</h2>
@@ -727,26 +746,6 @@
 
     function closeTelegramPopup() {
       document.getElementById('telegramModal').classList.remove('active');
-    }
-
-    // ============================================================
-    // ADSENSE CHECK
-    // ============================================================
-    function checkAndShowAds() {
-      document.querySelectorAll('.ad-container').forEach(container => {
-        const ins = container.querySelector('ins.adsbygoogle');
-        if (!ins) return;
-        setTimeout(() => {
-          const hasIframe = ins.querySelector('iframe');
-          const hasHeight = ins.offsetHeight > 40;
-          if (hasIframe || hasHeight) {
-            container.classList.add('has-ad');
-          } else {
-            container.classList.remove('has-ad');
-            container.style.display = 'none';
-          }
-        }, 4500);
-      });
     }
 
     // ============================================================
@@ -1103,7 +1102,6 @@
       updateInterfaceValues();
       renderTasks();
       updateCountdowns();
-      checkAndShowAds();
       loadCouponsFromFirestore();
 
       setInterval(() => { updateCountdowns(); }, 1000);

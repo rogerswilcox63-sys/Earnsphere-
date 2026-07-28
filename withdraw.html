@@ -41,6 +41,22 @@ button[type="submit"]:hover { background: var(--accent-hover); }
 button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); cursor: not-allowed; }
 .loader { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--text-muted); border-top: 2px solid var(--accent-glow); border-radius: 50%; animation: spin 1s linear infinite; margin-left: 8px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Mondiad Banner Ad Container */
+.ad-container {
+    max-width: 728px;
+    margin: 20px auto;
+    padding: 12px;
+    background: rgba(30, 41, 59, 0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: center;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
     </style>
 </head>
 <body>
@@ -101,7 +117,14 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         </form>
     </div>
 
-    <!-- FontAwesome for the calendar icon -->
+    <!-- ===== MONDIAD BANNER AD ===== -->
+    <div class="ad-container">
+        <script async src="https://ss.mrmnd.com/banner.js"></script>
+        <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
+    </div>
+    <!-- ===== END AD ===== -->
+
+    <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <script type="module">
@@ -129,11 +152,8 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ===== FIXED BACKEND URL =====
     const BACKEND_URL = 'https://earnsphere-ai.onrender.com'; 
-
-    // ===== WITHDRAWAL DATE CONSTANT =====
-    const WITHDRAWAL_DATE = new Date('2026-08-20T00:00:00Z'); // UTC midnight
+    const WITHDRAWAL_DATE = new Date('2026-08-20T00:00:00Z');
 
     const balanceEl = document.getElementById('user-balance');
     const withdrawForm = document.getElementById('withdrawal-form');
@@ -154,7 +174,6 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         return new Intl.NumberFormat('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
     };
 
-    // 1. LOAD BANKS FROM RENDER
     async function loadBanks() {
         try {
             const res = await fetch(`${BACKEND_URL}/api/banks`);
@@ -177,7 +196,6 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
     }
     loadBanks();
 
-    // 2. RESOLVE ACCOUNT NAME
     let fetchTimeout;
     async function resolveAccountName() {
         const accountNumber = accountInput.value;
@@ -220,7 +238,6 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         if (accountInput.value.length === 10) resolveAccountName();
     });
 
-    // Live balance sync
     onAuthStateChanged(auth, (user) => {
         if (user) {
             const userDocRef = doc(db, "users", user.uid);
@@ -240,10 +257,8 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         }
     });
 
-    // ===== CHECK WITHDRAWAL DATE =====
     function isWithdrawalAllowed() {
         const now = new Date();
-        // Compare UTC timestamps to avoid timezone issues
         return now.getTime() >= WITHDRAWAL_DATE.getTime();
     }
 
@@ -265,7 +280,6 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         event.preventDefault();
         clearError();
 
-        // Check withdrawal date first
         if (!isWithdrawalAllowed()) {
             showError(`Withdrawals are not available until ${WITHDRAWAL_DATE.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}.`);
             submitBtn.disabled = true;
@@ -327,7 +341,6 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
     function showError(message) { errorBox.textContent = message; errorBox.style.display = 'block'; successBox.style.display = 'none'; }
     function showSuccess(message) { successBox.textContent = message; successBox.style.display = 'block'; errorBox.style.display = 'none'; }
     function clearError() { errorBox.style.display = 'none'; successBox.style.display = 'none'; }
-
 </script>
 </body>
 </html>
