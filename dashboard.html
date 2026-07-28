@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    /* ===== RESET & BASE ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -135,11 +134,7 @@
     }
     .mobile-nav a:hover { color: #3b82f6; background: rgba(59,130,246,.15); }
     .mobile-nav a i { width: 20px; text-align: center; }
-    .mobile-nav .nav-divider {
-      border: none;
-      border-top: 1px solid rgba(255,255,255,.06);
-      margin: 0.3rem 0;
-    }
+    .mobile-nav .nav-divider { border: none; border-top: 1px solid rgba(255,255,255,.06); margin: 0.3rem 0; }
 
     .desktop-nav {
       display: flex;
@@ -165,12 +160,98 @@
     .dashboard-container { max-width:1200px; margin:2rem auto; padding:0 1.5rem; width:100%; }
     .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
     .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
-    .stat-card, .offer-card, .withdraw-card, .coupon-card, .ai-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); transition:transform 0.2s; }
+
+    /* Professional Survey Cards */
+    .offer-card {
+      background: rgba(30,41,59,.7);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 1.8rem;
+      border: 1px solid rgba(255,255,255,.08);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .offer-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(59,130,246,.4);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    }
+    .offer-card .offer-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(16,185,129,.2);
+      color: #10b981;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.8rem;
+      border-radius: 20px;
+      border: 1px solid rgba(16,185,129,.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .offer-card .offer-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .offer-card .offer-title i {
+      color: #3b82f6;
+      font-size: 1.4rem;
+    }
+    .offer-card .offer-meta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .offer-card .offer-meta span {
+      background: rgba(255,255,255,.05);
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+    }
+    .offer-card .offer-desc {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin: 0.2rem 0 0.5rem;
+    }
+    .offer-card .offer-reward {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #10b981;
+      margin-top: auto;
+    }
+    .offer-card .offer-progress {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,.08);
+      border-radius: 4px;
+      margin: 0.5rem 0;
+      overflow: hidden;
+    }
+    .offer-card .offer-progress .bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    .offer-card .start-btn {
+      margin-top: 0.5rem;
+    }
+
+    .stat-card, .withdraw-card, .coupon-card, .ai-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); transition:transform 0.2s; }
     .stat-title { font-size:.85rem; color:#94a3b8; margin-bottom:.5rem; }
     .stat-value { font-size:1.8rem; font-weight:800; color:#10b981; }
-    .offer-title { font-weight:700; margin-bottom:.5rem; font-size:1.1rem; }
-    .offer-desc { font-size:.9rem; color:#cbd5e1; margin-bottom:1rem; }
-    .offer-reward { color:#10b981; font-weight:700; margin-bottom:1rem; font-size:1.1rem; }
     .start-btn, .support-btn, .reward-btn, .coupon-btn, .ai-btn { width:100%; background:linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border:none; padding:1rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.3s; }
     .reward-btn { background:linear-gradient(135deg, #f59e0b, #d97706); margin-top:1rem; }
     .coupon-btn { background:linear-gradient(135deg, #10b981, #059669); margin-top:0.5rem; }
@@ -393,18 +474,29 @@
     <p style="margin-top:1rem;font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
-  <!-- ===== MONDIAD BANNER (already included above) ===== -->
-  <!-- ===== MONDIAD POP‑UNDER AD ===== -->
+  <!-- ===== ALL ADS ===== -->
+
+  <!-- MONDIAD POP‑UNDER -->
   <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
 
-  <!-- ===== ADCASH CODE (added) ===== -->
-  <script type="text/javascript">
-    aclib.runAutoTag({
-        zoneId: 'rcnic8lxix',
-    });
-  </script>
-  <!-- ===== END ADCASH ===== -->
+  <!-- ADCASH LIBRARY (required for all Adcash features) -->
+  <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
 
+  <!-- ADCASH VIDEO SLIDER -->
+  <script type="text/javascript">
+      aclib.runVideoSlider({
+          zoneId: '11851230',
+      });
+  </script>
+
+  <!-- ADCASH AUTO TAG -->
+  <script type="text/javascript">
+      aclib.runAutoTag({
+          zoneId: 'rcnic8lxix',
+      });
+  </script>
+
+  <!-- ===== DASHBOARD JAVASCRIPT ===== -->
   <script>
     // ============================================================
     // HAMBURGER MENU TOGGLE
@@ -606,7 +698,7 @@
         const toShow = availableSurveys.slice(0, 2);
         surveyContainer.innerHTML = '';
         toShow.forEach(task => {
-          const completionRate = Math.floor(Math.random() * 40) + 30; // mock progress
+          const completionRate = Math.floor(Math.random() * 40) + 30;
           surveyContainer.innerHTML += `
             <div class="offer-card">
               <span class="offer-badge">${task.category}</span>
