@@ -12,8 +12,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; padding:2rem; display:flex; align-items:center; justify-content:center; }
-    .container { max-width:500px; background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:2rem; border:1px solid rgba(255,255,255,.1); text-align:center; }
+    body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; padding:2rem; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .container { max-width:500px; background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:2rem; border:1px solid rgba(255,255,255,.1); text-align:center; width:100%; }
     .back-link { color:#3b82f6; text-decoration:none; display:inline-block; margin-bottom:1rem; float:left; }
     .back-link:hover { text-decoration:underline; }
     h1 { margin-bottom:.5rem; }
@@ -26,6 +26,22 @@
     .btn-success { background:linear-gradient(135deg, #10b981, #059669); }
     .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
     @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+    /* ===== MONDIAD AD CONTAINER ===== */
+    .ad-container {
+      max-width: 728px;
+      margin: 20px auto;
+      padding: 12px;
+      background: rgba(30, 41, 59, 0.4);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -41,17 +57,31 @@
     </div>
 
     <div id="timerDisplay" class="timer-text">⏳ 10 seconds</div>
+
+    <!-- Google AdSense Ad Unit -->
     <ins class="adsbygoogle"
      style="display:block"
      data-ad-client="ca-pub-5803688718527724"
      data-ad-slot="YOUR_AD_SLOT_ID"
      data-ad-format="auto"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
     <button class="btn-primary" id="startBtn" onclick="watchAd()"><i class="fas fa-play"></i> Start Watching</button>
     <button class="btn-primary btn-success" id="claimBtn" style="display:none;" onclick="claimReward()"><i class="fas fa-check"></i> Claim ₦50</button>
   </div>
+
+  <!-- ===== MONDIAD BANNER AD ===== -->
+  <div class="ad-container">
+    <script async src="https://ss.mrmnd.com/banner.js"></script>
+    <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
+  </div>
+  <!-- ===== END BANNER ===== -->
+
+  <!-- ===== MONDIAD POP‑UNDER AD ===== -->
+  <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
+  <!-- ===== END ADS ===== -->
 
   <script>
     const firebaseConfig = {

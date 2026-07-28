@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="OmREFY19mXHN-Y_0WTJBDrcGZQoo_6SPjpn_YkoM7S0" />
     <title>EarnSphere - Money Tips & Guides</title>
-    
     <style>
         :root {
-            --primary-color: #0052cc; /* EarnSphere Hub Blue */
-            --dark-color: #003d99;    /* Darker Blue Accent */
-            --light-bg: #f4f7fc;      /* Soft Light Blue/Gray Background */
-            --text-color: #1e293b;    /* Deep Charcoal for Text */
+            --primary-color: #0052cc;
+            --dark-color: #003d99;
+            --light-bg: #f4f7fc;
+            --text-color: #1e293b;
         }
 
         * {
@@ -27,7 +26,6 @@
             line-height: 1.6;
         }
 
-        /* Header & Navigation */
         header {
             background-color: #ffffff;
             box-shadow: 0 2px 8px rgba(0, 82, 204, 0.08);
@@ -53,7 +51,6 @@
             letter-spacing: -0.5px;
         }
 
-        /* Hamburger Menu (Three Hyphens) */
         .menu-toggle {
             display: flex;
             flex-direction: column;
@@ -74,7 +71,6 @@
             transition: 0.3s;
         }
 
-        /* Nav Links Menu */
         .nav-menu {
             display: none;
             position: absolute;
@@ -122,7 +118,6 @@
             color: #ffffff;
         }
 
-        /* Desktop Navigation Styles */
         @media (min-width: 768px) {
             .menu-toggle {
                 display: none;
@@ -143,14 +138,12 @@
             }
         }
 
-        /* Main Content Grid */
         main {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
-        /* Promotional Feature Banner Section */
         .promo-banner-container {
             width: 100%;
             max-width: 800px;
@@ -210,7 +203,6 @@
             box-shadow: 0 10px 20px rgba(0, 82, 204, 0.08);
         }
 
-        /* Blog Card Feature Image placeholder styling */
         .blog-image {
             width: 100%;
             height: 200px;
@@ -264,7 +256,6 @@
             text-decoration: underline;
         }
 
-        /* ===== MONDIAD AD CONTAINER ===== */
         .ad-container {
             max-width: 728px;
             margin: 20px auto;
@@ -280,7 +271,6 @@
             width: 100%;
         }
 
-        /* Footer */
         footer {
             background-color: #0f172a;
             color: #94a3b8;
@@ -311,13 +301,11 @@
     <header>
         <div class="nav-container">
             <a href="index.html" class="logo">EarnSphere</a>
-            
             <button class="menu-toggle" id="mobile-menu-btn" aria-label="Toggle navigation">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-
             <ul class="nav-menu" id="nav-menu-list">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="login.html">Login</a></li>
@@ -371,9 +359,13 @@
             <script async src="https://ss.mrmnd.com/banner.js"></script>
             <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
         </div>
-        <!-- ===== END AD ===== -->
+        <!-- ===== END BANNER ===== -->
 
     </main>
+
+    <!-- ===== MONDIAD POP‑UNDER AD ===== -->
+    <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
+    <!-- ===== END ADS ===== -->
 
     <footer>
         <div class="footer-links">
@@ -392,6 +384,5 @@
             navMenu.classList.toggle('active');
         });
     </script>
-
 </body>
 </html>

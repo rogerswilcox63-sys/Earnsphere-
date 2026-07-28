@@ -11,13 +11,11 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
-    /* ===== RESET & BASE ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
     #app { position:relative; z-index:1; flex:1; }
 
-    /* ===== NAVBAR ===== */
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
@@ -40,16 +38,12 @@
       text-decoration: none;
     }
     .navbar .logo i { margin-right: 0.3rem; }
-
     .navbar .nav-right {
       display: flex;
       align-items: center;
       gap: 0.8rem;
     }
-    .navbar .user-greeting {
-      font-size: 0.85rem;
-      color: #94a3b8;
-    }
+    .navbar .user-greeting { font-size: 0.85rem; color: #94a3b8; }
     .navbar .logout-btn {
       background: rgba(59,130,246,.2);
       border: 1px solid rgba(59,130,246,.3);
@@ -63,7 +57,6 @@
     }
     .navbar .logout-btn:hover { background: rgba(59,130,246,.3); }
 
-    /* ---- Notification Bell ---- */
     .notif-bell {
       position: relative;
       color: #94a3b8;
@@ -94,7 +87,6 @@
     }
     .notif-bell .badge.zero { display: none; }
 
-    /* ---- Hamburger ---- */
     .hamburger {
       display: none;
       flex-direction: column;
@@ -117,7 +109,6 @@
     .hamburger.active span:nth-child(2) { opacity: 0; }
     .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
 
-    /* ---- Mobile Nav ---- */
     .mobile-nav {
       display: none;
       position: absolute;
@@ -156,7 +147,6 @@
       margin: 0.3rem 0;
     }
 
-    /* ---- Desktop Nav ---- */
     .desktop-nav {
       display: flex;
       gap: 0.5rem;
@@ -177,7 +167,6 @@
       background: rgba(59,130,246,.15);
     }
 
-    /* ===== DASHBOARD CONTENT ===== */
     .dashboard-container { max-width:1200px; margin:2rem auto; padding:0 1.5rem; width:100%; }
     .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
     .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
@@ -215,32 +204,11 @@
     .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; margin-bottom:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn .3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
     @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
 
-    /* AI Chat Widget */
-    #aiChatBtn { position:fixed; bottom:20px; right:20px; width:60px; height:60px; background:linear-gradient(135deg, #3b82f6, #10b981); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; cursor:pointer; z-index:10000; box-shadow:0 4px 20px rgba(59,130,246,.4); transition:transform .2s; }
-    #aiChatBtn:hover { transform:scale(1.05); }
-    #aiChatWindow { position:fixed; bottom:90px; right:20px; width:340px; height:460px; background:#1e293b; border:1px solid rgba(255,255,255,.1); border-radius:12px; display:none; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,.5); z-index:10000; overflow:hidden; }
-    #aiChatHeader { background:linear-gradient(to right, #3b82f6, #10b981); padding:12px 16px; color:white; font-weight:700; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
-    #aiChatHeader span i { margin-right:6px; }
-    #aiChatHeader .close-btn { cursor:pointer; font-size:1.2rem; opacity:.8; transition:.2s; }
-    #aiChatHeader .close-btn:hover { opacity:1; }
-    #aiMessages { flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:14px; background:rgba(0,0,0,.2); }
-    .ai-msg { max-width:85%; padding:8px 14px; border-radius:12px; word-wrap:break-word; line-height:1.5; }
-    .ai-msg.user { align-self:flex-end; background:#3b82f6; color:#fff; border-bottom-right-radius:4px; }
-    .ai-msg.bot { align-self:flex-start; background:rgba(255,255,255,.08); color:#e2e8f0; border-bottom-left-radius:4px; }
-    .ai-msg.bot .msg-time { font-size:.65rem; color:#94a3b8; margin-top:4px; display:block; }
-    .ai-msg.typing { align-self:flex-start; background:rgba(255,255,255,.05); color:#94a3b8; font-style:italic; padding:8px 16px; }
-    #aiChatInputArea { display:flex; padding:10px 12px; gap:8px; background:rgba(15,23,42,.8); border-top:1px solid rgba(255,255,255,.08); flex-shrink:0; }
-    #aiChatInput { flex:1; background:rgba(30,41,59,.6); border:1px solid rgba(255,255,255,.15); border-radius:20px; padding:8px 16px; color:#f1f5f9; font-size:14px; outline:none; transition:border .2s; }
-    #aiChatInput:focus { border-color:#3b82f6; }
-    #aiChatInput::placeholder { color:#64748b; }
-    #aiSendBtn { background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; color:#fff; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; transition:.2s; display:flex; align-items:center; justify-content:center; }
-    #aiSendBtn:hover { transform:scale(1.05); box-shadow:0 0 15px rgba(59,130,246,.4); }
-    #aiSendBtn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
-
     .section-wrapper { margin-bottom:1.5rem; }
     .section-wrapper.hidden { display:none !important; }
+    .timer-label { font-weight:700; color:#f59e0b; background:rgba(245,158,11,.1); padding:.3rem .8rem; border-radius:2rem; display:inline-block; border:1px solid rgba(245,158,11,.2); }
+    .limit-badge { font-size:.8rem; color:#94a3b8; font-weight:400; margin-left:.5rem; }
 
-    /* ===== MONDIAD AD CONTAINER ===== */
     .ad-container {
       max-width: 728px;
       margin: 20px auto;
@@ -256,10 +224,6 @@
       width: 100%;
     }
 
-    .timer-label { font-weight:700; color:#f59e0b; background:rgba(245,158,11,.1); padding:.3rem .8rem; border-radius:2rem; display:inline-block; border:1px solid rgba(245,158,11,.2); }
-    .limit-badge { font-size:.8rem; color:#94a3b8; font-weight:400; margin-left:.5rem; }
-
-    /* Telegram Modal */
     .telegram-modal {
       display: none;
       position: fixed;
@@ -321,7 +285,6 @@
       .dashboard-container { padding: 0 1rem; }
       .offers-grid { grid-template-columns: 1fr; }
       .navbar .user-greeting { display: none; }
-      #aiChatWindow { width:300px; height:400px; right:10px; bottom:80px; }
       .navbar { padding: 0.6rem 1rem; }
     }
     @media (min-width: 769px) {
@@ -331,11 +294,9 @@
 </head>
 <body>
   <div id="app">
-    <!-- ===== NAVBAR ===== -->
+    <!-- NAVBAR -->
     <nav class="navbar">
       <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
-
-      <!-- Desktop Nav -->
       <div class="desktop-nav">
         <a href="dashboard.html" class="active">Dashboard</a>
         <a href="withdraw.html">Withdraw</a>
@@ -348,24 +309,17 @@
         <a href="blog.html">Blog</a>
         <a href="ai-assistant.html"><i class="fas fa-robot"></i> AI</a>
       </div>
-
       <div class="nav-right">
         <span class="user-greeting" id="userName">Welcome, User</span>
-        <!-- Notification Bell -->
         <a href="notifications.html" class="notif-bell" id="notifBell">
           <i class="fas fa-bell"></i>
           <span class="badge zero" id="notifBadge">0</span>
         </a>
         <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-        <!-- Hamburger -->
         <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </button>
       </div>
-
-      <!-- Mobile Nav Dropdown -->
       <div class="mobile-nav" id="mobileNav">
         <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
         <a href="withdraw.html"><i class="fas fa-credit-card"></i> Withdraw</a>
@@ -381,9 +335,8 @@
       </div>
     </nav>
 
-    <!-- ===== DASHBOARD CONTENT ===== -->
+    <!-- DASHBOARD CONTENT -->
     <div class="dashboard-container">
-      <!-- Stats -->
       <h2 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Overview</h2>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-title">Wallet Balance</div><div class="stat-value" id="walletBalance">₦0.00</div></div>
@@ -396,7 +349,7 @@
         </div>
       </div>
 
-      <!-- ===== MONDIAD AD 1 ===== -->
+      <!-- MONDIAD BANNER AD 1 -->
       <div class="ad-container">
         <script async src="https://ss.mrmnd.com/banner.js"></script>
         <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
@@ -419,7 +372,7 @@
         </div>
       </div>
 
-      <!-- AI Assistant Button Card -->
+      <!-- AI Assistant -->
       <h2 class="section-title"><i class="fas fa-robot"></i> AI Assistant</h2>
       <div class="stats-grid">
         <div class="ai-card" style="grid-column:span 1;">
@@ -471,7 +424,7 @@
         <div class="offers-grid" id="extraTaskList"></div>
       </div>
 
-      <!-- ===== MONDIAD AD 2 ===== -->
+      <!-- MONDIAD BANNER AD 2 -->
       <div class="ad-container">
         <script async src="https://ss.mrmnd.com/banner.js"></script>
         <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
@@ -500,42 +453,20 @@
     <p style="margin-top:1rem;font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
-  <!-- AI Chat Widget -->
-  <div id="aiChatBtn" onclick="toggleAiChat()"><i class="fas fa-robot"></i></div>
-  <div id="aiChatWindow">
-    <div id="aiChatHeader"><span><i class="fas fa-brain"></i> SphereAI Assistant</span><span class="close-btn" onclick="toggleAiChat()"><i class="fas fa-times"></i></span></div>
-    <div id="aiMessages"><div class="ai-msg bot">👋 How you dey? I'm SphereAI...<span class="msg-time">Just now</span></div></div>
-    <div id="aiChatInputArea"><input type="text" id="aiChatInput" placeholder="Type your message..." autocomplete="off" /><button id="aiSendBtn" onclick="sendAiMessage()"><i class="fas fa-paper-plane"></i></button></div>
-  </div>
-
-  <!-- TELEGRAM MODAL -->
-  <div class="telegram-modal" id="telegramModal">
-    <div class="telegram-modal-content">
-      <div class="telegram-icon"><i class="fab fa-telegram-plane"></i></div>
-      <h2>Join Our Telegram Community!</h2>
-      <p>Get the latest updates, exclusive offers, and chat with fellow EarnSphere hustlers. Don't miss out – join now!</p>
-      <div class="btn-group">
-        <a href="https://t.me/earnspherehub" target="_blank" class="btn-telegram" id="telegramJoinBtn">
-          <i class="fab fa-telegram-plane"></i> Join Telegram
-        </a>
-        <button class="btn-later" id="telegramLaterBtn">Maybe later</button>
-      </div>
-    </div>
-  </div>
+  <!-- ===== MONDIAD BANNER AD (already above) ===== -->
+  <!-- ===== MONDIAD POP‑UNDER AD (NEW) ===== -->
+  <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
+  <!-- ===== END ADS ===== -->
 
   <script>
-    // ============================================================
-    // HAMBURGER MENU TOGGLE
-    // ============================================================
+    // ===== HAMBURGER MENU =====
     document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.getElementById('hamburgerBtn');
       const mobileNav = document.getElementById('mobileNav');
-
       hamburger.addEventListener('click', () => {
         hamburger.classList.toggle('active');
         mobileNav.classList.toggle('open');
       });
-
       mobileNav.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
           hamburger.classList.remove('active');
@@ -544,9 +475,7 @@
       });
     });
 
-    // ============================================================
-    // FIREBASE
-    // ============================================================
+    // ===== FIREBASE =====
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -559,9 +488,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ============================================================
-    // COUPON REWARDS
-    // ============================================================
+    // ===== COUPON REWARDS =====
     let couponRewards = {};
     async function loadCouponsFromFirestore() {
       try {
@@ -576,9 +503,7 @@
       } catch (e) { console.error('Error loading coupons:', e); }
     }
 
-    // ============================================================
-    // GLOBALS
-    // ============================================================
+    // ===== GLOBALS =====
     let currentUser = null;
     let userData = {
       displayName: '',
@@ -593,9 +518,7 @@
       extraLastCompleted: 0
     };
 
-    // ============================================================
-    // TASK DEFINITIONS
-    // ============================================================
+    // ===== TASK DEFINITIONS =====
     const surveyTasks = [
       { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits', link:'survey.html?id=srv_01' },
       { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets', link:'survey.html?id=srv_02' },
@@ -633,24 +556,19 @@
       { id:'extra_ad', title:'🎬 Watch an Ad', desc:'Watch a short ad and earn ₦50.', reward:50, badge:'Ad', badgeClass:'badge-ad', page:'ad.html' }
     ];
 
-    // ============================================================
-    // HELPERS
-    // ============================================================
+    // ===== HELPERS =====
     function getTodayDateString() { return new Date().toISOString().split('T')[0]; }
-
     function isTaskCompleted(taskId) {
       if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
       const completedDate = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
       return completedDate === getTodayDateString();
     }
-
     function getTimeToMidnight() {
       const now = new Date();
       const midnight = new Date(now);
       midnight.setHours(24,0,0,0);
       return midnight.getTime() - now.getTime();
     }
-
     function formatTime(ms) {
       if (ms <= 0) return 'Available now';
       const totalSec = Math.floor(ms / 1000);
@@ -663,18 +581,15 @@
       parts.push(s + 's');
       return 'Available in ' + parts.join(' ');
     }
-
     function getSurveyCountToday() {
       let count = 0;
       surveyTasks.forEach(task => { if (isTaskCompleted(task.id)) count++; });
       return count;
     }
-
     function isCooldownActive(lastTimestamp) {
       if (!lastTimestamp) return false;
       return (Date.now() - lastTimestamp) < 3600000;
     }
-
     function updateInterfaceValues() {
       if (!userData) return;
       document.getElementById('walletBalance').innerText = `₦${(userData.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
@@ -693,7 +608,6 @@
         }
       }
     }
-
     async function saveUserData() {
       localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
       if (currentUser) {
@@ -702,7 +616,6 @@
         } catch (e) { console.error("Error saving data:", e); }
       }
     }
-
     function showToast(msg) {
       const toast = document.createElement('div');
       toast.className = 'toast';
@@ -711,9 +624,7 @@
       setTimeout(() => { toast.remove(); }, 3500);
     }
 
-    // ============================================================
-    // NOTIFICATION BELL – FETCH UNREAD COUNT
-    // ============================================================
+    // ===== NOTIFICATION BELL =====
     async function fetchUnreadCount() {
       if (!currentUser) return;
       try {
@@ -734,23 +645,18 @@
       }
     }
 
-    // ============================================================
-    // TELEGRAM POPUP
-    // ============================================================
+    // ===== TELEGRAM POPUP =====
     function showTelegramPopup() {
       const modal = document.getElementById('telegramModal');
       if (sessionStorage.getItem('telegramPopupShown') === 'true') return;
       modal.classList.add('active');
       sessionStorage.setItem('telegramPopupShown', 'true');
     }
-
     function closeTelegramPopup() {
       document.getElementById('telegramModal').classList.remove('active');
     }
 
-    // ============================================================
-    // COUPON REDEEM
-    // ============================================================
+    // ===== COUPON REDEEM =====
     async function redeemCoupon() {
       const input = document.getElementById('couponInput');
       const messageDiv = document.getElementById('couponMessage');
@@ -828,9 +734,7 @@
       }
     }
 
-    // ============================================================
-    // DAILY REWARD
-    // ============================================================
+    // ===== DAILY REWARD =====
     async function claimDailyReward() {
       const today = getTodayDateString();
       if (userData.lastDailyRewardDate === today) return;
@@ -842,9 +746,7 @@
       showToast('🎉 +₦100 Daily Bonus!');
     }
 
-    // ============================================================
-    // RENDER TASKS
-    // ============================================================
+    // ===== RENDER TASKS =====
     function renderTasks() {
       const surveyWrapper = document.getElementById('surveyWrapper');
       const surveyContainer = document.getElementById('surveyList');
@@ -920,9 +822,7 @@
       });
     }
 
-    // ============================================================
-    // COMPLETE TASKS
-    // ============================================================
+    // ===== COMPLETE TASKS =====
     async function completeSurveyTask(taskId, reward) {
       if (isTaskCompleted(taskId)) {
         showToast('⚠️ You already completed this survey.');
@@ -975,9 +875,7 @@
       showToast(`🎉 Task completed! +₦${reward} earned!`);
     }
 
-    // ============================================================
-    // COUNTDOWN UPDATES
-    // ============================================================
+    // ===== COUNTDOWN UPDATES =====
     function updateCountdowns() {
       const dailyMs = getTimeToMidnight();
       document.getElementById('surveyCountdown').textContent = dailyMs <= 0 ? 'Resets now' : `Resets in ${formatTime(dailyMs)}`;
@@ -992,96 +890,7 @@
       document.getElementById('extraCountdown').textContent = (extraMs > 0) ? formatTime(extraMs) : 'Available now';
     }
 
-    // ============================================================
-    // AI CHAT (floating widget)
-    // ============================================================
-    const aiMessages = document.getElementById('aiMessages');
-    const aiInput = document.getElementById('aiChatInput');
-    const aiSendBtn = document.getElementById('aiSendBtn');
-    const API_BASE_URL = 'https://earnsphere-ai.onrender.com';
-
-    function toggleAiChat() {
-      const win = document.getElementById('aiChatWindow');
-      win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
-      if (win.style.display === 'flex') {
-        aiInput.focus();
-        aiMessages.scrollTop = aiMessages.scrollHeight;
-      }
-    }
-
-    function addAiMessage(text, sender = 'bot', isTyping = false) {
-      const div = document.createElement('div');
-      div.className = `ai-msg ${sender}`;
-      if (isTyping) {
-        div.classList.add('typing');
-        div.textContent = text;
-      } else {
-        div.innerHTML = text;
-        if (sender === 'bot') {
-          const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          const timeSpan = document.createElement('span');
-          timeSpan.className = 'msg-time';
-          timeSpan.textContent = time;
-          div.appendChild(timeSpan);
-        }
-      }
-      aiMessages.appendChild(div);
-      aiMessages.scrollTop = aiMessages.scrollHeight;
-    }
-
-    function removeTypingIndicator() {
-      const last = aiMessages.lastElementChild;
-      if (last && last.classList.contains('typing')) last.remove();
-    }
-
-    async function sendAiMessage() {
-      const text = aiInput.value.trim();
-      if (!text) return;
-      aiInput.disabled = true;
-      aiSendBtn.disabled = true;
-      addAiMessage(text, 'user');
-      aiInput.value = '';
-      addAiMessage('SphereAI is thinking...', 'bot', true);
-      try {
-        const reply = await callBackendProxy(text);
-        removeTypingIndicator();
-        addAiMessage(reply, 'bot');
-      } catch (error) {
-        removeTypingIndicator();
-        const friendlyError = `😅 Oops! My brain no dey work right now. ${error.message || 'Try again later.'} No wahala, I go soon reset.`;
-        addAiMessage(friendlyError, 'bot');
-      } finally {
-        aiInput.disabled = false;
-        aiSendBtn.disabled = false;
-        aiInput.focus();
-      }
-    }
-
-    async function callBackendProxy(userMessage) {
-      const endpoint = `${API_BASE_URL}/api/grok`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage })
-      });
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Server error (${response.status}): ${errText}`);
-      }
-      const data = await response.json();
-      return data.reply || "I no get response o, but I dey try!";
-    }
-
-    aiInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendAiMessage();
-      }
-    });
-
-    // ============================================================
-    // LOGOUT
-    // ============================================================
+    // ===== LOGOUT =====
     function logout() {
       auth.signOut().then(() => {
         localStorage.removeItem('earnsphere_user_data');
@@ -1089,9 +898,7 @@
       });
     }
 
-    // ============================================================
-    // AUTH & INIT
-    // ============================================================
+    // ===== AUTH & INIT =====
     document.getElementById('telegramJoinBtn').addEventListener('click', closeTelegramPopup);
     document.getElementById('telegramLaterBtn').addEventListener('click', closeTelegramPopup);
 
@@ -1122,7 +929,6 @@
           renderTasks();
           updateCountdowns();
 
-          // Fetch unread notification count
           fetchUnreadCount();
 
           setTimeout(showTelegramPopup, 800);
