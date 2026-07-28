@@ -25,9 +25,11 @@ body { background-color: var(--bg-dark); color: var(--text-main); display: flex;
 header { text-align: center; margin-bottom: 28px; }
 header p { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-glow); font-weight: 700; }
 h1 { font-size: 1.75rem; font-weight: 600; }
-.balance-display { background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 16px; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; }
+.balance-display { background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; }
 .balance-display span:first-child { color: var(--text-muted); }
 .balance-display span:last-child { font-size: 1.25rem; font-weight: 700; }
+.withdrawal-notice { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #f59e0b; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+.withdrawal-notice i { font-size: 1.2rem; }
 form > div { margin-bottom: 20px; }
 label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
 input, select { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; color: var(--text-main); font-size: 1rem; }
@@ -59,6 +61,12 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         <div class="balance-display">
             <span>Your Balance</span>
             <span>₦<span id="user-balance">0.00</span></span>
+        </div>
+
+        <!-- Withdrawal Date Notice -->
+        <div class="withdrawal-notice">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Withdrawals are available from <strong>August 20, 2026</strong></span>
         </div>
 
         <div id="error-box"></div>
@@ -93,6 +101,9 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         </form>
     </div>
 
+    <!-- FontAwesome for the calendar icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -120,6 +131,9 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
 
     // ===== FIXED BACKEND URL =====
     const BACKEND_URL = 'https://earnsphere-ai.onrender.com'; 
+
+    // ===== WITHDRAWAL DATE CONSTANT =====
+    const WITHDRAWAL_DATE = new Date('2026-08-20T00:00:00Z'); // UTC midnight
 
     const balanceEl = document.getElementById('user-balance');
     const withdrawForm = document.getElementById('withdrawal-form');
@@ -226,10 +240,20 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
         }
     });
 
+    // ===== CHECK WITHDRAWAL DATE =====
+    function isWithdrawalAllowed() {
+        const now = new Date();
+        // Compare UTC timestamps to avoid timezone issues
+        return now.getTime() >= WITHDRAWAL_DATE.getTime();
+    }
+
     amountInput.addEventListener('input', () => {
         const requestedAmount = parseFloat(amountInput.value) || 0;
         if (requestedAmount > currentBalance && requestedAmount > 0) {
             showError(`Insufficient funds. Your balance is ₦${formatNaira(currentBalance)}`);
+            submitBtn.disabled = true;
+        } else if (!isWithdrawalAllowed()) {
+            showError(`Withdrawals are not available until ${WITHDRAWAL_DATE.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}.`);
             submitBtn.disabled = true;
         } else {
             clearError();
@@ -240,6 +264,13 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
     withdrawForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         clearError();
+
+        // Check withdrawal date first
+        if (!isWithdrawalAllowed()) {
+            showError(`Withdrawals are not available until ${WITHDRAWAL_DATE.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}.`);
+            submitBtn.disabled = true;
+            return;
+        }
 
         const user = auth.currentUser;
         const bankCode = bankSelect.value;
