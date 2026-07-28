@@ -207,7 +207,6 @@
   </div>
 
   <script>
-    // ===== FIREBASE =====
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -220,7 +219,6 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ===== SURVEY DATA (same as dashboard) =====
     const surveyTasks = [
       { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits', link:'survey.html?id=srv_01' },
       { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets', link:'survey.html?id=srv_02' },
@@ -237,7 +235,6 @@
     let currentUser = null;
     let userData = { completedTasks: {} };
 
-    // ===== HELPERS =====
     function getTodayDateString() {
       return new Date().toISOString().split('T')[0];
     }
@@ -247,7 +244,6 @@
       return completedDate === getTodayDateString();
     }
 
-    // ===== RENDER SURVEYS =====
     function renderSurveys(filter = 'all', search = '') {
       const grid = document.getElementById('surveyGrid');
       let filtered = surveyTasks.filter(s => {
@@ -264,7 +260,7 @@
 
       grid.innerHTML = filtered.map(s => {
         const completed = isTaskCompleted(s.id);
-        const progress = completed ? 100 : Math.floor(Math.random() * 40) + 30; // mock progress
+        const progress = completed ? 100 : Math.floor(Math.random() * 40) + 30;
         return `
           <div class="survey-card">
             <span class="category-badge">${s.category}</span>
@@ -287,7 +283,6 @@
       }).join('');
     }
 
-    // ===== FILTER & SEARCH =====
     function filterSurveys() {
       const search = document.getElementById('searchInput').value.trim();
       const activeTab = document.querySelector('#filterTabs .tab.active');
@@ -305,13 +300,11 @@
 
     document.getElementById('searchInput').addEventListener('input', filterSurveys);
 
-    // ===== START SURVEY =====
     async function startSurvey(taskId) {
       if (!currentUser) {
         alert('Please log in first.');
         return;
       }
-      // Similar logic as dashboard – open link, mark complete, update balance
       const survey = surveyTasks.find(s => s.id === taskId);
       if (!survey) return;
 
@@ -320,23 +313,19 @@
         return;
       }
 
-      // Open survey link (simulate)
       window.open(survey.link || '#', '_blank');
 
-      // Mark as completed (mimic dashboard logic)
       if (!userData.completedTasks) userData.completedTasks = {};
       userData.completedTasks[taskId] = Date.now();
       userData.balance = (userData.balance || 0) + survey.reward;
       userData.lifetimeTotal = (userData.lifetimeTotal || 0) + survey.reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
 
-      // Save to Firestore
       await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
       alert(`🎉 Survey completed! +₦${survey.reward} earned!`);
       renderSurveys();
     }
 
-    // ===== AUTH =====
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
@@ -348,7 +337,6 @@
       }
     });
 
-    // Expose for inline onclick
     window.startSurvey = startSurvey;
     window.filterSurveys = filterSurveys;
   </script>
