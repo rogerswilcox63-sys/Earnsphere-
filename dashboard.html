@@ -9,17 +9,16 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
+    /* ===== RESET & BASE ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
+    body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
     #app { position:relative; z-index:1; flex:1; }
 
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
-      box-shadow: 0 4px 12px rgba(0,0,0,.3);
       padding: 0.8rem 1.5rem;
       display: flex;
       justify-content: space-between;
@@ -27,6 +26,8 @@
       border-bottom: 1px solid rgba(255,255,255,.1);
       position: relative;
       z-index: 50;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
     .navbar .logo {
       font-size: 1.4rem;
@@ -61,8 +62,6 @@
       position: relative;
       color: #94a3b8;
       font-size: 1.2rem;
-      cursor: pointer;
-      transition: color 0.3s;
       text-decoration: none;
       display: flex;
       align-items: center;
@@ -83,7 +82,6 @@
       align-items: center;
       justify-content: center;
       border: 2px solid #1e293b;
-      transition: transform 0.2s;
     }
     .notif-bell .badge.zero { display: none; }
 
@@ -135,11 +133,7 @@
       align-items: center;
       gap: 0.6rem;
     }
-    .mobile-nav a:hover,
-    .mobile-nav a.active {
-      color: #3b82f6;
-      background: rgba(59,130,246,.15);
-    }
+    .mobile-nav a:hover { color: #3b82f6; background: rgba(59,130,246,.15); }
     .mobile-nav a i { width: 20px; text-align: center; }
     .mobile-nav .nav-divider {
       border: none;
@@ -151,6 +145,7 @@
       display: flex;
       gap: 0.5rem;
       align-items: center;
+      flex-wrap: wrap;
     }
     .desktop-nav a {
       text-decoration: none;
@@ -171,14 +166,12 @@
     .section-title { font-size:1.4rem; font-weight:700; margin:2rem 0 1.5rem; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
     .stats-grid, .offers-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem; }
     .stat-card, .offer-card, .withdraw-card, .coupon-card, .ai-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); transition:transform 0.2s; }
-    .stat-card:hover, .offer-card:hover, .ai-card:hover { transform:translateY(-2px); }
     .stat-title { font-size:.85rem; color:#94a3b8; margin-bottom:.5rem; }
     .stat-value { font-size:1.8rem; font-weight:800; color:#10b981; }
     .offer-title { font-weight:700; margin-bottom:.5rem; font-size:1.1rem; }
     .offer-desc { font-size:.9rem; color:#cbd5e1; margin-bottom:1rem; }
     .offer-reward { color:#10b981; font-weight:700; margin-bottom:1rem; font-size:1.1rem; }
     .start-btn, .support-btn, .reward-btn, .coupon-btn, .ai-btn { width:100%; background:linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border:none; padding:1rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.3s; }
-    .ai-btn { background:linear-gradient(135deg, #8b5cf6, #6d28d9); }
     .reward-btn { background:linear-gradient(135deg, #f59e0b, #d97706); margin-top:1rem; }
     .coupon-btn { background:linear-gradient(135deg, #10b981, #059669); margin-top:0.5rem; }
     .reward-btn:hover:not(:disabled), .start-btn:hover:not(:disabled), .support-btn:hover:not(:disabled), .coupon-btn:hover:not(:disabled), .ai-btn:hover:not(:disabled) { transform:scale(1.02); box-shadow:0 4px 15px rgba(59,130,246,.3); }
@@ -201,12 +194,11 @@
     .footer { background:rgba(15,23,42,.8); padding:2rem; margin-top:auto; text-align:center; border-top:1px solid rgba(255,255,255,.1); font-size:.9rem; color:#64748b; }
     .footer a { color:#64748b; text-decoration:none; margin:0 .5rem; }
     .footer a:hover { color:#3b82f6; }
-    .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; margin-bottom:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn .3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
+    .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
     @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
 
     .section-wrapper { margin-bottom:1.5rem; }
     .section-wrapper.hidden { display:none !important; }
-    .timer-label { font-weight:700; color:#f59e0b; background:rgba(245,158,11,.1); padding:.3rem .8rem; border-radius:2rem; display:inline-block; border:1px solid rgba(245,158,11,.2); }
     .limit-badge { font-size:.8rem; color:#94a3b8; font-weight:400; margin-left:.5rem; }
 
     .ad-container {
@@ -223,61 +215,6 @@
       justify-content: center;
       width: 100%;
     }
-
-    .telegram-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.7);
-      z-index: 99999;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(6px);
-    }
-    .telegram-modal.active { display: flex; }
-    .telegram-modal-content {
-      background: linear-gradient(145deg, #1e293b, #0f172a);
-      border-radius: 1.5rem;
-      max-width: 420px;
-      width: 90%;
-      padding: 2rem 1.8rem;
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: 0 20px 60px rgba(0,0,0,.6);
-      text-align: center;
-    }
-    .telegram-modal-content .telegram-icon { font-size: 4rem; color: #26A5E4; margin-bottom: 0.5rem; }
-    .telegram-modal-content h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .telegram-modal-content p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; }
-    .telegram-modal-content .btn-group { display: flex; flex-direction: column; gap: 0.75rem; }
-    .telegram-modal-content .btn-telegram {
-      background: linear-gradient(135deg, #26A5E4, #1E8FC9);
-      border: none;
-      color: #fff;
-      padding: 0.9rem;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-    }
-    .telegram-modal-content .btn-telegram:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(38,165,228,.3); }
-    .telegram-modal-content .btn-later {
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.08);
-      color: #94a3b8;
-      padding: 0.7rem;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .telegram-modal-content .btn-later:hover { background: rgba(255,255,255,.12); color: #f1f5f9; }
 
     @media (max-width: 768px) {
       .desktop-nav { display: none; }
@@ -297,6 +234,7 @@
     <!-- NAVBAR -->
     <nav class="navbar">
       <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
+
       <div class="desktop-nav">
         <a href="dashboard.html" class="active">Dashboard</a>
         <a href="withdraw.html">Withdraw</a>
@@ -309,6 +247,7 @@
         <a href="blog.html">Blog</a>
         <a href="ai-assistant.html"><i class="fas fa-robot"></i> AI</a>
       </div>
+
       <div class="nav-right">
         <span class="user-greeting" id="userName">Welcome, User</span>
         <a href="notifications.html" class="notif-bell" id="notifBell">
@@ -320,6 +259,7 @@
           <span></span><span></span><span></span>
         </button>
       </div>
+
       <div class="mobile-nav" id="mobileNav">
         <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
         <a href="withdraw.html"><i class="fas fa-credit-card"></i> Withdraw</a>
@@ -453,29 +393,35 @@
     <p style="margin-top:1rem;font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
-  <!-- ===== MONDIAD BANNER AD (already above) ===== -->
-  <!-- ===== MONDIAD POP‑UNDER AD (NEW) ===== -->
+  <!-- ===== MONDIAD BANNER AD (already included above) ===== -->
+  <!-- ===== MONDIAD POP‑UNDER AD ===== -->
   <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
   <!-- ===== END ADS ===== -->
 
   <script>
-    // ===== HAMBURGER MENU =====
-    document.addEventListener('DOMContentLoaded', () => {
+    // ============================================================
+    // HAMBURGER MENU TOGGLE
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
       const hamburger = document.getElementById('hamburgerBtn');
       const mobileNav = document.getElementById('mobileNav');
-      hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        mobileNav.classList.toggle('open');
-      });
-      mobileNav.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          hamburger.classList.remove('active');
-          mobileNav.classList.remove('open');
+      if (hamburger && mobileNav) {
+        hamburger.addEventListener('click', function() {
+          hamburger.classList.toggle('active');
+          mobileNav.classList.toggle('open');
         });
-      });
+        mobileNav.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', function() {
+            hamburger.classList.remove('active');
+            mobileNav.classList.remove('open');
+          });
+        });
+      }
     });
 
-    // ===== FIREBASE =====
+    // ============================================================
+    // FIREBASE CONFIG
+    // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -484,26 +430,17 @@
       messagingSenderId: "173538573377",
       appId: "1:173538573377:web:6d8c748376afcb9096dac0"
     };
+
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ===== COUPON REWARDS =====
-    let couponRewards = {};
-    async function loadCouponsFromFirestore() {
-      try {
-        const snapshot = await db.collection('coupons').where('active', '==', true).get();
-        couponRewards = {};
-        if (!snapshot.empty) {
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            couponRewards[data.code] = data.reward;
-          });
-        }
-      } catch (e) { console.error('Error loading coupons:', e); }
-    }
+    console.log('✅ Firebase initialized');
 
-    // ===== GLOBALS =====
+    // ============================================================
+    // GLOBALS
+    // ============================================================
     let currentUser = null;
     let userData = {
       displayName: '',
@@ -518,19 +455,108 @@
       extraLastCompleted: 0
     };
 
-    // ===== TASK DEFINITIONS =====
-    const surveyTasks = [
-      { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits', link:'survey.html?id=srv_01' },
-      { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets', link:'survey.html?id=srv_02' },
-      { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200, desc:'Tell us your favourite Nollywood actors and movies.', link:'survey.html?id=srv_03' },
-      { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180, desc:'What are your favourite Nigerian dishes and recipes?', link:'survey.html?id=srv_04' },
-      { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220, desc:'How do you listen to music? Share your streaming habits.', link:'survey.html?id=srv_05' },
-      { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.', link:'survey.html?id=srv_06' },
-      { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.', link:'survey.html?id=srv_07' },
-      { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.', link:'survey.html?id=srv_08' },
-      { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.', link:'survey.html?id=srv_09' },
-      { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.', link:'survey.html?id=srv_10' }
-    ];
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function getTodayDateString() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function isTaskCompleted(taskId) {
+      if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
+      const completedDate = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
+      return completedDate === getTodayDateString();
+    }
+
+    function formatTime(ms) {
+      if (ms <= 0) return 'Available now';
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      let parts = [];
+      if (h > 0) parts.push(h + 'h');
+      if (m > 0) parts.push(m + 'm');
+      parts.push(s + 's');
+      return 'Available in ' + parts.join(' ');
+    }
+
+    function getTimeToMidnight() {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24,0,0,0);
+      return midnight.getTime() - now.getTime();
+    }
+
+    function isCooldownActive(lastTimestamp) {
+      if (!lastTimestamp) return false;
+      return (Date.now() - lastTimestamp) < 3600000;
+    }
+
+    function getSurveyCountToday() {
+      let count = 0;
+      const surveyTasks = getSurveyTasks();
+      surveyTasks.forEach(task => { if (isTaskCompleted(task.id)) count++; });
+      return count;
+    }
+
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3500);
+    }
+
+    function updateInterfaceValues() {
+      if (!userData) return;
+      const balanceEl = document.getElementById('walletBalance');
+      const lifetimeEl = document.getElementById('lifetimeTotal');
+      const taskEl = document.getElementById('successfulTaskCount');
+      const rewardBtn = document.getElementById('dailyRewardBtn');
+
+      if (balanceEl) balanceEl.innerText = `₦${(userData.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      if (lifetimeEl) lifetimeEl.innerText = `₦${(userData.lifetimeTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      if (taskEl) taskEl.innerText = userData.successfulTaskCount || 0;
+
+      if (rewardBtn) {
+        const today = getTodayDateString();
+        if (userData.lastDailyRewardDate === today) {
+          rewardBtn.disabled = true;
+          rewardBtn.innerHTML = '<i class="fas fa-check-circle"></i> Claimed Today';
+        } else {
+          rewardBtn.disabled = false;
+          rewardBtn.innerHTML = '<i class="fas fa-gift"></i> Claim Daily Reward';
+        }
+      }
+    }
+
+    async function saveUserData() {
+      localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
+      if (currentUser) {
+        try {
+          await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
+        } catch (e) { console.error("Error saving data:", e); }
+      }
+    }
+
+    // ============================================================
+    // TASK DEFINITIONS (simplified)
+    // ============================================================
+    function getSurveyTasks() {
+      return [
+        { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits', link:'survey.html?id=srv_01' },
+        { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets', link:'survey.html?id=srv_02' },
+        { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200, desc:'Tell us your favourite Nollywood actors and movies.', link:'survey.html?id=srv_03' },
+        { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180, desc:'What are your favourite Nigerian dishes and recipes?', link:'survey.html?id=srv_04' },
+        { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220, desc:'How do you listen to music? Share your streaming habits.', link:'survey.html?id=srv_05' },
+        { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.', link:'survey.html?id=srv_06' },
+        { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.', link:'survey.html?id=srv_07' },
+        { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.', link:'survey.html?id=srv_08' },
+        { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.', link:'survey.html?id=srv_09' },
+        { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.', link:'survey.html?id=srv_10' }
+      ];
+    }
 
     const appTasks = [
       { id:'app_01', title:'Download Grok', desc:'Download and install the Grok AI app from the Play Store.', reward:400, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=ai.x.grok', reset:'daily' },
@@ -556,107 +582,157 @@
       { id:'extra_ad', title:'🎬 Watch an Ad', desc:'Watch a short ad and earn ₦50.', reward:50, badge:'Ad', badgeClass:'badge-ad', page:'ad.html' }
     ];
 
-    // ===== HELPERS =====
-    function getTodayDateString() { return new Date().toISOString().split('T')[0]; }
-    function isTaskCompleted(taskId) {
-      if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
-      const completedDate = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
-      return completedDate === getTodayDateString();
-    }
-    function getTimeToMidnight() {
-      const now = new Date();
-      const midnight = new Date(now);
-      midnight.setHours(24,0,0,0);
-      return midnight.getTime() - now.getTime();
-    }
-    function formatTime(ms) {
-      if (ms <= 0) return 'Available now';
-      const totalSec = Math.floor(ms / 1000);
-      const h = Math.floor(totalSec / 3600);
-      const m = Math.floor((totalSec % 3600) / 60);
-      const s = totalSec % 60;
-      let parts = [];
-      if (h > 0) parts.push(h + 'h');
-      if (m > 0) parts.push(m + 'm');
-      parts.push(s + 's');
-      return 'Available in ' + parts.join(' ');
-    }
-    function getSurveyCountToday() {
-      let count = 0;
-      surveyTasks.forEach(task => { if (isTaskCompleted(task.id)) count++; });
-      return count;
-    }
-    function isCooldownActive(lastTimestamp) {
-      if (!lastTimestamp) return false;
-      return (Date.now() - lastTimestamp) < 3600000;
-    }
-    function updateInterfaceValues() {
-      if (!userData) return;
-      document.getElementById('walletBalance').innerText = `₦${(userData.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      document.getElementById('lifetimeTotal').innerText = `₦${(userData.lifetimeTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      document.getElementById('successfulTaskCount').innerText = userData.successfulTaskCount || 0;
+    // ============================================================
+    // RENDER TASKS
+    // ============================================================
+    function renderTasks() {
+      const surveyWrapper = document.getElementById('surveyWrapper');
+      const surveyContainer = document.getElementById('surveyList');
+      const surveyTasks = getSurveyTasks();
+      const surveyCount = getSurveyCountToday();
+      const availableSurveys = surveyTasks.filter(task => !isTaskCompleted(task.id));
+      
+      if (surveyCount >= 2 || availableSurveys.length === 0) {
+        if (surveyWrapper) surveyWrapper.classList.add('hidden');
+        if (surveyContainer) surveyContainer.innerHTML = '';
+      } else {
+        if (surveyWrapper) surveyWrapper.classList.remove('hidden');
+        const toShow = availableSurveys.slice(0, 2);
+        surveyContainer.innerHTML = '';
+        toShow.forEach(task => {
+          surveyContainer.innerHTML += `
+            <div class="offer-card">
+              <div class="offer-title">${task.title}</div>
+              <p class="offer-desc">${task.desc}</p>
+              <span class="badge badge-survey">${task.category}</span>
+              <div class="offer-reward">₦${task.reward}</div>
+              <button class="start-btn" onclick="completeSurveyTask('${task.id}', ${task.reward})">🚀 Start Survey</button>
+            </div>
+          `;
+        });
+      }
 
-      const rewardBtn = document.getElementById('dailyRewardBtn');
-      if (rewardBtn) {
-        const today = getTodayDateString();
-        if (userData.lastDailyRewardDate === today) {
-          rewardBtn.disabled = true;
-          rewardBtn.innerHTML = '<i class="fas fa-check-circle"></i> Claimed Today';
+      renderLimitedCategory('appTaskList', 'appWrapper', appTasks, 'appLastCompleted', 'app', 1);
+      renderLimitedCategory('socialTaskList', 'socialWrapper', socialTasks, 'socialLastCompleted', 'social', 1);
+      renderLimitedCategory('extraTaskList', 'extraWrapper', extraTasks, 'extraLastCompleted', 'extra', 1);
+    }
+
+    function renderLimitedCategory(containerId, wrapperId, tasks, lastKey, categoryKey, limit) {
+      const container = document.getElementById(containerId);
+      const wrapper = document.getElementById(wrapperId);
+      if (!container || !wrapper) return;
+
+      const lastTimestamp = userData[lastKey] || 0;
+      const inCooldown = isCooldownActive(lastTimestamp);
+      const available = tasks.filter(task => !isTaskCompleted(task.id));
+
+      if (inCooldown || available.length === 0) {
+        wrapper.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+      }
+
+      wrapper.classList.remove('hidden');
+      const toShow = available.slice(0, limit);
+      container.innerHTML = '';
+      toShow.forEach(task => {
+        if (categoryKey === 'extra') {
+          container.innerHTML += `
+            <div class="offer-card">
+              <div class="offer-title">${task.title}</div>
+              <p class="offer-desc">${task.desc}</p>
+              <span class="badge ${task.badgeClass}">${task.badge}</span>
+              <div class="offer-reward">₦${task.reward}</div>
+              <a href="${task.page}" class="start-btn" style="display:block;text-align:center;text-decoration:none;" target="_blank">🚀 Go to Task</a>
+            </div>
+          `;
         } else {
-          rewardBtn.disabled = false;
-          rewardBtn.innerHTML = '<i class="fas fa-gift"></i> Claim Daily Reward';
+          const link = task.link || '#';
+          container.innerHTML += `
+            <div class="offer-card">
+              <div class="offer-title">${task.title}</div>
+              <p class="offer-desc">${task.desc}</p>
+              ${task.badge ? `<span class="badge ${task.badgeClass}">${task.badge}</span>` : ''}
+              <div class="offer-reward">₦${task.reward}</div>
+              <button class="start-btn" onclick="completeCategoryTask('${task.id}', ${task.reward}, '${link}', '${lastKey}')">🚀 Start Task</button>
+            </div>
+          `;
         }
-      }
-    }
-    async function saveUserData() {
-      localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
-      if (currentUser) {
-        try {
-          await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
-        } catch (e) { console.error("Error saving data:", e); }
-      }
-    }
-    function showToast(msg) {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = msg;
-      document.body.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 3500);
+      });
     }
 
-    // ===== NOTIFICATION BELL =====
-    async function fetchUnreadCount() {
-      if (!currentUser) return;
+    // ============================================================
+    // TASK COMPLETION
+    // ============================================================
+    async function completeSurveyTask(taskId, reward) {
+      if (isTaskCompleted(taskId)) {
+        showToast('⚠️ You already completed this survey.');
+        return;
+      }
+      const surveyCount = getSurveyCountToday();
+      if (surveyCount >= 2) {
+        showToast('⚠️ You have reached the daily limit of 2 surveys.');
+        return;
+      }
+      
+      const survey = getSurveyTasks().find(t => t.id === taskId);
+      if (survey && survey.link) {
+        window.open(survey.link, '_blank');
+      }
+      
+      if (!userData.completedTasks) userData.completedTasks = {};
+      userData.completedTasks[taskId] = Date.now();
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+      updateInterfaceValues();
+      await saveUserData();
+      renderTasks();
+      showToast(`🎉 Survey completed! +₦${reward} earned!`);
+    }
+
+    async function completeCategoryTask(taskId, reward, link, lastKey) {
+      if (isTaskCompleted(taskId)) {
+        showToast('⚠️ You already completed this task today.');
+        return;
+      }
+      const lastTimestamp = userData[lastKey] || 0;
+      if (isCooldownActive(lastTimestamp)) {
+        showToast('⏳ Please wait 1 hour before doing another task in this category.');
+        return;
+      }
+      if (link && link !== '#') {
+        window.open(link, '_blank');
+      }
+      if (!userData.completedTasks) userData.completedTasks = {};
+      userData.completedTasks[taskId] = Date.now();
+      userData[lastKey] = Date.now();
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+      updateInterfaceValues();
+      await saveUserData();
+      renderTasks();
+      showToast(`🎉 Task completed! +₦${reward} earned!`);
+    }
+
+    // ============================================================
+    // COUPON REDEEM
+    // ============================================================
+    let couponRewards = {};
+    async function loadCouponsFromFirestore() {
       try {
-        const snapshot = await db.collection('notifications')
-          .where('userId', '==', currentUser.uid)
-          .where('read', '==', false)
-          .get();
-        const count = snapshot.size;
-        const badge = document.getElementById('notifBadge');
-        if (count > 0) {
-          badge.textContent = count > 9 ? '9+' : count;
-          badge.classList.remove('zero');
-        } else {
-          badge.classList.add('zero');
+        const snapshot = await db.collection('coupons').where('active', '==', true).get();
+        couponRewards = {};
+        if (!snapshot.empty) {
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            couponRewards[data.code] = data.reward;
+          });
         }
-      } catch (err) {
-        console.error('Error fetching unread count:', err);
-      }
+      } catch (e) { console.error('Error loading coupons:', e); }
     }
 
-    // ===== TELEGRAM POPUP =====
-    function showTelegramPopup() {
-      const modal = document.getElementById('telegramModal');
-      if (sessionStorage.getItem('telegramPopupShown') === 'true') return;
-      modal.classList.add('active');
-      sessionStorage.setItem('telegramPopupShown', 'true');
-    }
-    function closeTelegramPopup() {
-      document.getElementById('telegramModal').classList.remove('active');
-    }
-
-    // ===== COUPON REDEEM =====
     async function redeemCoupon() {
       const input = document.getElementById('couponInput');
       const messageDiv = document.getElementById('couponMessage');
@@ -734,7 +810,9 @@
       }
     }
 
-    // ===== DAILY REWARD =====
+    // ============================================================
+    // DAILY REWARD
+    // ============================================================
     async function claimDailyReward() {
       const today = getTodayDateString();
       if (userData.lastDailyRewardDate === today) return;
@@ -746,151 +824,34 @@
       showToast('🎉 +₦100 Daily Bonus!');
     }
 
-    // ===== RENDER TASKS =====
-    function renderTasks() {
-      const surveyWrapper = document.getElementById('surveyWrapper');
-      const surveyContainer = document.getElementById('surveyList');
-      const surveyCount = getSurveyCountToday();
-      const availableSurveys = surveyTasks.filter(task => !isTaskCompleted(task.id));
-      
-      if (surveyCount >= 2 || availableSurveys.length === 0) {
-        surveyWrapper.classList.add('hidden');
-        surveyContainer.innerHTML = '';
-      } else {
-        surveyWrapper.classList.remove('hidden');
-        const toShow = availableSurveys.slice(0, 2);
-        surveyContainer.innerHTML = '';
-        toShow.forEach(task => {
-          surveyContainer.innerHTML += `
-            <div class="offer-card">
-              <div class="offer-title">${task.title}</div>
-              <p class="offer-desc">${task.desc}</p>
-              <span class="badge badge-survey">${task.category}</span>
-              <div class="offer-reward">₦${task.reward}</div>
-              <button class="start-btn" onclick="completeSurveyTask('${task.id}', ${task.reward})">🚀 Start Survey</button>
-            </div>
-          `;
-        });
-      }
-
-      renderLimitedCategory('appTaskList', 'appWrapper', appTasks, 'appLastCompleted', 'app', 1);
-      renderLimitedCategory('socialTaskList', 'socialWrapper', socialTasks, 'socialLastCompleted', 'social', 1);
-      renderLimitedCategory('extraTaskList', 'extraWrapper', extraTasks, 'extraLastCompleted', 'extra', 1);
-    }
-
-    function renderLimitedCategory(containerId, wrapperId, tasks, lastKey, categoryKey, limit) {
-      const container = document.getElementById(containerId);
-      const wrapper = document.getElementById(wrapperId);
-      if (!container || !wrapper) return;
-
-      const lastTimestamp = userData[lastKey] || 0;
-      const inCooldown = isCooldownActive(lastTimestamp);
-      const available = tasks.filter(task => !isTaskCompleted(task.id));
-
-      if (inCooldown || available.length === 0) {
-        wrapper.classList.add('hidden');
-        container.innerHTML = '';
-        return;
-      }
-
-      wrapper.classList.remove('hidden');
-      const toShow = available.slice(0, limit);
-      container.innerHTML = '';
-      toShow.forEach(task => {
-        if (categoryKey === 'extra') {
-          container.innerHTML += `
-            <div class="offer-card">
-              <div class="offer-title">${task.title}</div>
-              <p class="offer-desc">${task.desc}</p>
-              <span class="badge ${task.badgeClass}">${task.badge}</span>
-              <div class="offer-reward">₦${task.reward}</div>
-              <a href="${task.page}" class="start-btn" style="display:block;text-align:center;text-decoration:none;" target="_blank">🚀 Go to Task</a>
-            </div>
-          `;
-        } else {
-          const link = task.link || '#';
-          container.innerHTML += `
-            <div class="offer-card">
-              <div class="offer-title">${task.title}</div>
-              <p class="offer-desc">${task.desc}</p>
-              ${task.badge ? `<span class="badge ${task.badgeClass}">${task.badge}</span>` : ''}
-              <div class="offer-reward">₦${task.reward}</div>
-              <button class="start-btn" onclick="completeCategoryTask('${task.id}', ${task.reward}, '${link}', '${lastKey}')">🚀 Start Task</button>
-            </div>
-          `;
+    // ============================================================
+    // NOTIFICATION BELL (simple)
+    // ============================================================
+    async function fetchUnreadCount() {
+      if (!currentUser) return;
+      try {
+        const snapshot = await db.collection('notifications')
+          .where('userId', '==', currentUser.uid)
+          .where('read', '==', false)
+          .get();
+        const count = snapshot.size;
+        const badge = document.getElementById('notifBadge');
+        if (badge) {
+          if (count > 0) {
+            badge.textContent = count > 9 ? '9+' : count;
+            badge.classList.remove('zero');
+          } else {
+            badge.classList.add('zero');
+          }
         }
-      });
+      } catch (err) {
+        console.error('Error fetching unread count:', err);
+      }
     }
 
-    // ===== COMPLETE TASKS =====
-    async function completeSurveyTask(taskId, reward) {
-      if (isTaskCompleted(taskId)) {
-        showToast('⚠️ You already completed this survey.');
-        return;
-      }
-      const surveyCount = getSurveyCountToday();
-      if (surveyCount >= 2) {
-        showToast('⚠️ You have reached the daily limit of 2 surveys.');
-        return;
-      }
-      
-      const survey = surveyTasks.find(t => t.id === taskId);
-      if (survey && survey.link) {
-        window.open(survey.link, '_blank');
-      }
-      
-      if (!userData.completedTasks) userData.completedTasks = {};
-      userData.completedTasks[taskId] = Date.now();
-      userData.balance = (userData.balance || 0) + reward;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-      updateInterfaceValues();
-      await saveUserData();
-      renderTasks();
-      showToast(`🎉 Survey completed! +₦${reward} earned!`);
-    }
-
-    async function completeCategoryTask(taskId, reward, link, lastKey) {
-      if (isTaskCompleted(taskId)) {
-        showToast('⚠️ You already completed this task today.');
-        return;
-      }
-      const lastTimestamp = userData[lastKey] || 0;
-      if (isCooldownActive(lastTimestamp)) {
-        showToast('⏳ Please wait 1 hour before doing another task in this category.');
-        return;
-      }
-      if (link && link !== '#') {
-        window.open(link, '_blank');
-      }
-      if (!userData.completedTasks) userData.completedTasks = {};
-      userData.completedTasks[taskId] = Date.now();
-      userData[lastKey] = Date.now();
-      userData.balance = (userData.balance || 0) + reward;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-      updateInterfaceValues();
-      await saveUserData();
-      renderTasks();
-      showToast(`🎉 Task completed! +₦${reward} earned!`);
-    }
-
-    // ===== COUNTDOWN UPDATES =====
-    function updateCountdowns() {
-      const dailyMs = getTimeToMidnight();
-      document.getElementById('surveyCountdown').textContent = dailyMs <= 0 ? 'Resets now' : `Resets in ${formatTime(dailyMs)}`;
-
-      const appMs = userData.appLastCompleted ? 3600000 - (Date.now() - userData.appLastCompleted) : 0;
-      document.getElementById('appCountdown').textContent = (appMs > 0) ? formatTime(appMs) : 'Available now';
-
-      const socialMs = userData.socialLastCompleted ? 3600000 - (Date.now() - userData.socialLastCompleted) : 0;
-      document.getElementById('socialCountdown').textContent = (socialMs > 0) ? formatTime(socialMs) : 'Available now';
-
-      const extraMs = userData.extraLastCompleted ? 3600000 - (Date.now() - userData.extraLastCompleted) : 0;
-      document.getElementById('extraCountdown').textContent = (extraMs > 0) ? formatTime(extraMs) : 'Available now';
-    }
-
-    // ===== LOGOUT =====
+    // ============================================================
+    // LOGOUT
+    // ============================================================
     function logout() {
       auth.signOut().then(() => {
         localStorage.removeItem('earnsphere_user_data');
@@ -898,45 +859,76 @@
       });
     }
 
-    // ===== AUTH & INIT =====
-    document.getElementById('telegramJoinBtn').addEventListener('click', closeTelegramPopup);
-    document.getElementById('telegramLaterBtn').addEventListener('click', closeTelegramPopup);
+    // ============================================================
+    // AUTH & INIT
+    // ============================================================
+    auth.onAuthStateChanged(async (user) => {
+      console.log('Auth state changed:', user ? user.uid : 'null');
+      if (user) {
+        currentUser = user;
+        const displayName = user.displayName || user.email || 'User';
+        document.getElementById('userName').textContent = displayName;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const savedData = localStorage.getItem('earnsphere_user_data');
-      if (savedData) userData = JSON.parse(savedData);
-
-      updateInterfaceValues();
-      renderTasks();
-      updateCountdowns();
-      loadCouponsFromFirestore();
-
-      setInterval(() => { updateCountdowns(); }, 1000);
-      setInterval(() => { renderTasks(); }, 5000);
-
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          currentUser = user;
-          const displayName = user.displayName || user.email || 'User';
-          document.getElementById('userName').textContent = displayName;
-
+        try {
           const doc = await db.collection('users').doc(user.uid).get();
           if (doc.exists) {
             userData = doc.data();
             localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
+          } else {
+            console.warn('User document does not exist. Creating default.');
+            // Create default user document
+            userData = {
+              displayName: displayName,
+              balance: 0,
+              lifetimeTotal: 0,
+              successfulTaskCount: 0,
+              completedTasks: {},
+              lastDailyRewardDate: '',
+              redeemedCoupons: [],
+              socialLastCompleted: 0,
+              appLastCompleted: 0,
+              extraLastCompleted: 0
+            };
+            await db.collection('users').doc(user.uid).set(userData);
           }
-          updateInterfaceValues();
-          renderTasks();
-          updateCountdowns();
-
-          fetchUnreadCount();
-
-          setTimeout(showTelegramPopup, 800);
-        } else {
-          window.location.href = 'login.html';
+        } catch (err) {
+          console.error('Error loading user data:', err);
+          // Continue with default data
         }
-      });
+
+        updateInterfaceValues();
+        renderTasks();
+        fetchUnreadCount();
+        loadCouponsFromFirestore();
+
+        // Start countdown timers
+        setInterval(() => {
+          const dailyMs = getTimeToMidnight();
+          const surveyEl = document.getElementById('surveyCountdown');
+          if (surveyEl) surveyEl.textContent = dailyMs <= 0 ? 'Resets now' : `Resets in ${formatTime(dailyMs)}`;
+
+          // For other countdowns, we can add later
+        }, 1000);
+
+        // Re-render tasks periodically
+        setInterval(() => { renderTasks(); }, 5000);
+
+        console.log('✅ Dashboard loaded successfully');
+
+      } else {
+        console.log('No user, redirecting to login');
+        window.location.href = 'login.html';
+      }
     });
+
+    // Expose functions globally so inline onclick works
+    window.claimDailyReward = claimDailyReward;
+    window.redeemCoupon = redeemCoupon;
+    window.completeSurveyTask = completeSurveyTask;
+    window.completeCategoryTask = completeCategoryTask;
+    window.logout = logout;
+
+    console.log('✅ Dashboard script loaded');
   </script>
 </body>
 </html>
