@@ -2,46 +2,212 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Survey - EarnSphere</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Surveys – EarnSphere</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; padding:2rem; }
-    .container { max-width:900px; margin:0 auto; }
-    .back-link { color:#3b82f6; text-decoration:none; display:inline-block; margin-bottom:1.5rem; }
-    .back-link:hover { text-decoration:underline; }
-    h1 { margin-bottom:0.5rem; }
-    .subtitle { color:#94a3b8; margin-bottom:1.5rem; }
-    .survey-grid { display:grid; grid-template-columns:1fr; gap:1.5rem; max-width:500px; margin:0 auto; }
-    .survey-card { background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); }
-    .survey-card h3 { margin-bottom:.5rem; }
-    .survey-card .desc { font-size:.9rem; color:#cbd5e1; margin-bottom:.5rem; }
-    .survey-card .badge { display:inline-block; padding:.25rem .75rem; border-radius:.25rem; font-size:.8rem; background:rgba(59,130,246,.2); color:#3b82f6; margin:.5rem 0; }
-    .survey-card .reward { color:#10b981; font-weight:700; font-size:1.1rem; margin:.5rem 0; }
-    .start-btn { width:100%; background:linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border:none; padding:.8rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.3s; }
-    .start-btn:hover:not(:disabled) { transform:scale(1.02); box-shadow:0 4px 15px rgba(59,130,246,.3); }
-    .start-btn:disabled { background:#334155; cursor:not-allowed; opacity:0.7; }
-    .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
-    @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
-    .not-found { text-align:center; padding:2rem; color:#94a3b8; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height:100vh;
+      color:#f1f5f9;
+      padding:1.5rem;
+    }
+    .container { max-width:1200px; margin:0 auto; }
+    .back-link { color:#3b82f6; text-decoration:none; font-size:0.95rem; display:inline-block; margin-bottom:1.5rem; }
+    .back-link i { margin-right:0.3rem; }
+    .page-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:1rem;
+      margin-bottom:2rem;
+    }
+    .page-header h1 { font-size:2rem; display:flex; align-items:center; gap:0.6rem; }
+    .page-header h1 i { color:#3b82f6; }
+    .search-bar {
+      display:flex;
+      gap:0.5rem;
+      flex:1 1 300px;
+    }
+    .search-bar input {
+      flex:1;
+      padding:0.6rem 1rem;
+      background:rgba(15,23,42,.6);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:8px;
+      color:#f1f5f9;
+      font-size:0.95rem;
+      outline:none;
+    }
+    .search-bar input:focus { border-color:#3b82f6; }
+    .search-bar button {
+      padding:0.6rem 1.2rem;
+      background:#3b82f6;
+      border:none;
+      border-radius:8px;
+      color:#fff;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .filter-tabs {
+      display:flex;
+      gap:0.5rem;
+      flex-wrap:wrap;
+      margin-bottom:2rem;
+    }
+    .filter-tabs .tab {
+      padding:0.4rem 1rem;
+      border-radius:20px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      color:#94a3b8;
+      font-size:0.85rem;
+      cursor:pointer;
+      transition:all 0.2s;
+    }
+    .filter-tabs .tab.active, .filter-tabs .tab:hover {
+      background:rgba(59,130,246,.2);
+      border-color:#3b82f6;
+      color:#f1f5f9;
+    }
+    .survey-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(320px,1fr));
+      gap:1.5rem;
+    }
+    .survey-card {
+      background:rgba(30,41,59,.6);
+      backdrop-filter:blur(8px);
+      border-radius:16px;
+      padding:1.5rem;
+      border:1px solid rgba(255,255,255,.06);
+      transition:transform 0.2s, box-shadow 0.2s;
+      display:flex;
+      flex-direction:column;
+      gap:0.6rem;
+    }
+    .survey-card:hover {
+      transform:translateY(-4px);
+      box-shadow:0 12px 30px rgba(0,0,0,0.3);
+      border-color:rgba(59,130,246,.3);
+    }
+    .survey-card .category-badge {
+      display:inline-block;
+      background:rgba(59,130,246,.2);
+      color:#3b82f6;
+      padding:0.15rem 0.8rem;
+      border-radius:20px;
+      font-size:0.7rem;
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      width:fit-content;
+    }
+    .survey-card .title {
+      font-size:1.1rem;
+      font-weight:700;
+      color:#f1f5f9;
+    }
+    .survey-card .desc {
+      font-size:0.9rem;
+      color:#cbd5e1;
+      line-height:1.5;
+      flex:1;
+    }
+    .survey-card .meta {
+      display:flex;
+      gap:1rem;
+      flex-wrap:wrap;
+      font-size:0.8rem;
+      color:#94a3b8;
+    }
+    .survey-card .meta span {
+      background:rgba(255,255,255,.05);
+      padding:0.2rem 0.6rem;
+      border-radius:12px;
+    }
+    .survey-card .reward {
+      font-size:1.2rem;
+      font-weight:700;
+      color:#10b981;
+    }
+    .survey-card .progress {
+      width:100%;
+      height:4px;
+      background:rgba(255,255,255,.08);
+      border-radius:4px;
+      overflow:hidden;
+    }
+    .survey-card .progress .bar {
+      height:100%;
+      background:linear-gradient(90deg, #3b82f6, #10b981);
+      width:0%;
+      transition:width 0.5s;
+    }
+    .survey-card .start-btn {
+      padding:0.5rem 1.2rem;
+      background:linear-gradient(135deg, #3b82f6, #2563eb);
+      border:none;
+      border-radius:8px;
+      color:#fff;
+      font-weight:600;
+      cursor:pointer;
+      transition:0.2s;
+      align-self:flex-start;
+      margin-top:0.3rem;
+    }
+    .survey-card .start-btn:hover { transform:scale(1.02); }
+    .survey-card .start-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+    .empty-state { text-align:center; padding:3rem; color:#64748b; }
+    .empty-state i { font-size:2.5rem; display:block; margin-bottom:0.5rem; }
+
+    @media (max-width:640px) {
+      .page-header { flex-direction:column; align-items:stretch; }
+      .search-bar { flex:1; }
+      .survey-grid { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-    <div id="surveyHeader">
-      <h1><i class="fas fa-poll"></i> Survey</h1>
-      <p class="subtitle">Complete this survey to earn rewards!</p>
+
+    <div class="page-header">
+      <h1><i class="fas fa-poll"></i> All Surveys</h1>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search surveys..." />
+        <button onclick="filterSurveys()"><i class="fas fa-search"></i></button>
+      </div>
     </div>
 
-    <div class="survey-grid" id="surveyGrid"></div>
+    <!-- Filter Tabs -->
+    <div class="filter-tabs" id="filterTabs">
+      <span class="tab active" data-filter="all">All</span>
+      <span class="tab" data-filter="Tech">Tech</span>
+      <span class="tab" data-filter="Finance">Finance</span>
+      <span class="tab" data-filter="Entertainment">Entertainment</span>
+      <span class="tab" data-filter="Lifestyle">Lifestyle</span>
+      <span class="tab" data-filter="E-commerce">E-commerce</span>
+      <span class="tab" data-filter="Sports">Sports</span>
+      <span class="tab" data-filter="Education">Education</span>
+    </div>
+
+    <!-- Survey Grid -->
+    <div class="survey-grid" id="surveyGrid">
+      <!-- dynamically filled -->
+    </div>
   </div>
 
   <script>
+    // ===== FIREBASE =====
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -54,115 +220,137 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let userData = { balance:0, lifetimeTotal:0, successfulTaskCount:0, completedTasks:{} };
-
-    // The full list of surveys (same as in dashboard)
-    const allSurveys = [
-      { id: 'srv_01', title: 'Social Media Usage', category: 'Tech', reward: 150, desc: 'Tell us about your screen time habits' },
-      { id: 'srv_02', title: 'Crypto Knowledge Check', category: 'Finance', reward: 250, desc: 'Your insights on digital assets' },
-      { id: 'srv_03', title: 'Nollywood Movie Preferences', category: 'Entertainment', reward: 200, desc: 'Tell us your favourite Nollywood actors and movies.' },
-      { id: 'srv_04', title: 'Nigerian Food Culture', category: 'Lifestyle', reward: 180, desc: 'What are your favourite Nigerian dishes and recipes?' },
-      { id: 'srv_05', title: 'Music Streaming Habits', category: 'Entertainment', reward: 220, desc: 'How do you listen to music? Share your streaming habits.' },
-      { id: 'srv_06', title: 'Online Shopping Behavior', category: 'E-commerce', reward: 250, desc: 'Share your experience with online shopping in Nigeria.' },
-      { id: 'srv_07', title: 'Football & Sports Passion', category: 'Sports', reward: 200, desc: 'Tell us about your favourite teams and how you follow sports.' },
-      { id: 'srv_08', title: 'Education & Career Goals', category: 'Education', reward: 300, desc: 'Share your educational background and career aspirations.' },
-      { id: 'srv_09', title: 'Travel & Tourism Preferences', category: 'Lifestyle', reward: 180, desc: 'Where do you want to travel? Share your dream destinations.' },
-      { id: 'srv_10', title: 'Smartphone Usage Patterns', category: 'Tech', reward: 250, desc: 'How do you use your smartphone daily? Share your habits.' }
+    // ===== SURVEY DATA (same as dashboard) =====
+    const surveyTasks = [
+      { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits', link:'survey.html?id=srv_01' },
+      { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets', link:'survey.html?id=srv_02' },
+      { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200, desc:'Tell us your favourite Nollywood actors and movies.', link:'survey.html?id=srv_03' },
+      { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180, desc:'What are your favourite Nigerian dishes and recipes?', link:'survey.html?id=srv_04' },
+      { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220, desc:'How do you listen to music? Share your streaming habits.', link:'survey.html?id=srv_05' },
+      { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.', link:'survey.html?id=srv_06' },
+      { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.', link:'survey.html?id=srv_07' },
+      { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.', link:'survey.html?id=srv_08' },
+      { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.', link:'survey.html?id=srv_09' },
+      { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.', link:'survey.html?id=srv_10' }
     ];
 
-    function showToast(msg) {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = msg;
-      document.body.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 3500);
-    }
+    let currentUser = null;
+    let userData = { completedTasks: {} };
 
+    // ===== HELPERS =====
     function getTodayDateString() {
       return new Date().toISOString().split('T')[0];
     }
-
-    function isCompletedToday(taskId) {
+    function isTaskCompleted(taskId) {
       if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
       const completedDate = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
       return completedDate === getTodayDateString();
     }
 
-    async function loadUserData(uid) {
-      const doc = await db.collection('users').doc(uid).get();
-      if (doc.exists) {
-        userData = doc.data();
-      }
-    }
-
-    async function completeSurvey(taskId, reward) {
-      const user = auth.currentUser;
-      if (!user) {
-        showToast('⚠️ Please log in.');
-        return;
-      }
-      await loadUserData(user.uid);
-      if (isCompletedToday(taskId)) {
-        showToast('⚠️ You already completed this survey today!');
-        return;
-      }
-
-      if (!userData.completedTasks) userData.completedTasks = {};
-      userData.completedTasks[taskId] = Date.now();
-      userData.balance = (userData.balance || 0) + reward;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-
-      await db.collection('users').doc(user.uid).set(userData, { merge: true });
-      showToast(`🎉 Survey completed! +₦${reward} earned!`);
-      renderSurvey(); // re‑render to show completed state
-    }
-
-    function renderSurvey() {
+    // ===== RENDER SURVEYS =====
+    function renderSurveys(filter = 'all', search = '') {
       const grid = document.getElementById('surveyGrid');
-      const urlParams = new URLSearchParams(window.location.search);
-      const surveyId = urlParams.get('id');
+      let filtered = surveyTasks.filter(s => {
+        const matchCategory = filter === 'all' || s.category === filter;
+        const matchSearch = s.title.toLowerCase().includes(search.toLowerCase()) ||
+                            s.desc.toLowerCase().includes(search.toLowerCase());
+        return matchCategory && matchSearch;
+      });
 
-      // Find the survey
-      const survey = allSurveys.find(s => s.id === surveyId);
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><i class="fas fa-poll-h"></i><p>No surveys match your filters.</p></div>`;
+        return;
+      }
 
-      if (!survey) {
-        grid.innerHTML = `
-          <div class="not-found">
-            <i class="fas fa-exclamation-circle" style="font-size:2rem; color:#ef4444;"></i>
-            <p>Survey not found. Please go back to the dashboard.</p>
+      grid.innerHTML = filtered.map(s => {
+        const completed = isTaskCompleted(s.id);
+        const progress = completed ? 100 : Math.floor(Math.random() * 40) + 30; // mock progress
+        return `
+          <div class="survey-card">
+            <span class="category-badge">${s.category}</span>
+            <div class="title">${s.title}</div>
+            <div class="desc">${s.desc}</div>
+            <div class="meta">
+              <span><i class="fas fa-clock"></i> ~5 min</span>
+              <span><i class="fas fa-users"></i> ${Math.floor(Math.random()*500)+100} responses</span>
+              <span><i class="fas fa-star" style="color:#f59e0b;"></i> ${(Math.random()*0.5+4.5).toFixed(1)} rating</span>
+            </div>
+            <div class="progress"><div class="bar" style="width:${progress}%;"></div></div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="reward">₦${s.reward}</span>
+              <button class="start-btn" ${completed ? 'disabled' : ''} onclick="startSurvey('${s.id}')">
+                ${completed ? '✅ Completed' : 'Start Survey'}
+              </button>
+            </div>
           </div>
         `;
+      }).join('');
+    }
+
+    // ===== FILTER & SEARCH =====
+    function filterSurveys() {
+      const search = document.getElementById('searchInput').value.trim();
+      const activeTab = document.querySelector('#filterTabs .tab.active');
+      const filter = activeTab ? activeTab.dataset.filter : 'all';
+      renderSurveys(filter, search);
+    }
+
+    document.querySelectorAll('#filterTabs .tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('#filterTabs .tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        filterSurveys();
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', filterSurveys);
+
+    // ===== START SURVEY =====
+    async function startSurvey(taskId) {
+      if (!currentUser) {
+        alert('Please log in first.');
+        return;
+      }
+      // Similar logic as dashboard – open link, mark complete, update balance
+      const survey = surveyTasks.find(s => s.id === taskId);
+      if (!survey) return;
+
+      if (isTaskCompleted(taskId)) {
+        alert('You already completed this survey today.');
         return;
       }
 
-      const completed = isCompletedToday(survey.id);
+      // Open survey link (simulate)
+      window.open(survey.link || '#', '_blank');
 
-      // Update header
-      document.querySelector('h1').textContent = `📝 ${survey.title}`;
-      document.querySelector('.subtitle').textContent = `Complete this survey to earn ₦${survey.reward}!`;
+      // Mark as completed (mimic dashboard logic)
+      if (!userData.completedTasks) userData.completedTasks = {};
+      userData.completedTasks[taskId] = Date.now();
+      userData.balance = (userData.balance || 0) + survey.reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + survey.reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
 
-      grid.innerHTML = `
-        <div class="survey-card">
-          <h3>${survey.title}</h3>
-          <p class="desc">${survey.desc}</p>
-          <span class="badge">${survey.category}</span>
-          <div class="reward">₦${survey.reward}</div>
-          <button class="start-btn" onclick="completeSurvey('${survey.id}', ${survey.reward})" ${completed ? 'disabled' : ''}>
-            ${completed ? '✅ Completed' : '📝 Start Survey'}
-          </button>
-        </div>
-      `;
+      // Save to Firestore
+      await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
+      alert(`🎉 Survey completed! +₦${survey.reward} earned!`);
+      renderSurveys();
     }
 
+    // ===== AUTH =====
     auth.onAuthStateChanged(async (user) => {
       if (user) {
-        await loadUserData(user.uid);
-        renderSurvey();
+        currentUser = user;
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) userData = doc.data();
+        renderSurveys();
       } else {
         window.location.href = 'login.html';
       }
     });
+
+    // Expose for inline onclick
+    window.startSurvey = startSurvey;
+    window.filterSurveys = filterSurveys;
   </script>
 </body>
 </html>
