@@ -12,150 +12,87 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Inter', sans-serif; background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%); min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
-    body::before { content:''; position:fixed; inset:0; background:radial-gradient(circle at 20% 50%,rgba(59,130,246,.08) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(16,185,129,.08) 0%,transparent 50%); pointer-events:none; z-index:0; }
-    #app { position:relative; z-index:1; flex:1; padding:1rem; max-width:1400px; margin:0 auto; width:100%; }
-
-    .navbar { background:rgba(30,41,59,.8); backdrop-filter:blur(12px); padding:0.7rem 1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:1.5rem; border-radius:0.75rem; }
-    .nav-links { display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center; }
-    .nav-links a { text-decoration:none; color:#cbd5e1; font-weight:500; padding:0.35rem 0.8rem; border-radius:0.5rem; font-size:0.85rem; transition:all 0.3s; }
-    .nav-links a:hover, .nav-links a.active { color:#3b82f6; background:rgba(59,130,246,.15); }
+    body { font-family:'Inter', sans-serif; background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%); min-height:100vh; color:#f1f5f9; }
+    #app { max-width:1200px; margin:0 auto; padding:1.5rem; }
+    .navbar { background:rgba(30,41,59,.8); backdrop-filter:blur(12px); padding:1rem 1.5rem; border-radius:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem; }
     .logo { font-size:1.3rem; font-weight:800; background:linear-gradient(135deg,#3b82f6,#10b981); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .logo i { margin-right:0.3rem; }
-    .user-greeting { display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap; }
-    .user-greeting span { font-size:0.85rem; color:#94a3b8; }
-    .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:0.35rem 0.9rem; border-radius:2rem; font-weight:500; color:#3b82f6; cursor:pointer; font-size:0.8rem; transition:all 0.3s; }
-    .logout-btn:hover { background:rgba(59,130,246,.3); }
-
-    .tabs { display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
-    .tab-btn { padding:0.6rem 1.5rem; border-radius:0.75rem; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color:#94a3b8; font-weight:600; cursor:pointer; transition:all 0.3s; }
+    .nav-links a { color:#cbd5e1; text-decoration:none; padding:0.35rem 0.8rem; border-radius:0.5rem; font-size:0.85rem; }
+    .nav-links a:hover, .nav-links a.active { color:#3b82f6; background:rgba(59,130,246,.15); }
+    .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:0.35rem 0.9rem; border-radius:2rem; color:#3b82f6; cursor:pointer; }
+    .tab-btn { padding:0.6rem 1.2rem; border-radius:0.75rem; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color:#94a3b8; font-weight:600; cursor:pointer; margin-right:0.4rem; }
     .tab-btn.active { background:rgba(59,130,246,.2); border-color:#3b82f6; color:#f1f5f9; }
-    .tab-btn:hover { background:rgba(255,255,255,.1); }
-
-    .tab-content { display:none; background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); }
+    .tab-content { display:none; background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); margin-top:1rem; }
     .tab-content.active { display:block; }
-
-    .table-wrapper { overflow-x:auto; margin-top:1rem; }
-    table { width:100%; border-collapse:collapse; font-size:0.9rem; }
-    th, td { padding:0.8rem 0.6rem; text-align:left; border-bottom:1px solid rgba(255,255,255,.06); }
-    th { color:#94a3b8; font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; }
-    td { color:#e2e8f0; }
-
     .admin-form { display:flex; flex-wrap:wrap; gap:0.8rem; align-items:flex-end; margin-bottom:1rem; }
     .admin-form .form-group { flex:1 1 180px; min-width:140px; }
     .admin-form label { display:block; font-size:0.8rem; color:#94a3b8; margin-bottom:0.2rem; }
-    .admin-form input, .admin-form select, .admin-form textarea { width:100%; padding:0.6rem 0.8rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.5rem; color:#f1f5f9; font-size:0.9rem; font-family:inherit; }
-    .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus { outline:none; border-color:#3b82f6; }
+    .admin-form input, .admin-form textarea { width:100%; padding:0.6rem 0.8rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.5rem; color:#f1f5f9; font-size:0.9rem; }
     .admin-form textarea { resize:vertical; }
-
-    .image-preview { margin-top:0.5rem; display:none; max-width:200px; border-radius:0.5rem; border:1px solid rgba(255,255,255,.1); overflow:hidden; }
-    .image-preview img { width:100%; height:auto; display:block; }
-
-    .btn { padding:0.6rem 1.2rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-size:0.85rem; }
-    .btn-primary { background:#3b82f6; color:#fff; }
-    .btn-primary:hover { background:#2563eb; }
+    .btn { padding:0.6rem 1.2rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.85rem; }
     .btn-success { background:#10b981; color:#fff; }
     .btn-success:hover { background:#059669; }
     .btn-danger { background:#ef4444; color:#fff; }
     .btn-danger:hover { background:#dc2626; }
-    .btn-warning { background:#f59e0b; color:#000; }
-    .btn-warning:hover { background:#d97706; }
+    .btn-primary { background:#3b82f6; color:#fff; }
+    .btn-primary:hover { background:#2563eb; }
     .btn-sm { padding:0.25rem 0.6rem; font-size:0.75rem; }
     .btn:disabled { opacity:0.5; cursor:not-allowed; }
-
-    .badge { padding:0.2rem 0.6rem; border-radius:2rem; font-size:0.7rem; font-weight:600; text-transform:uppercase; }
+    table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+    th, td { padding:0.8rem 0.6rem; text-align:left; border-bottom:1px solid rgba(255,255,255,.06); }
+    th { color:#94a3b8; font-weight:600; font-size:0.8rem; text-transform:uppercase; }
+    td { color:#e2e8f0; }
+    .badge { padding:0.2rem 0.6rem; border-radius:2rem; font-size:0.7rem; font-weight:600; }
     .badge-active { background:#10b981; color:#000; }
     .badge-inactive { background:#ef4444; color:#fff; }
     .badge-pending { background:#f59e0b; color:#000; }
     .badge-approved { background:#3b82f6; color:#fff; }
     .badge-paid { background:#10b981; color:#fff; }
     .badge-rejected { background:#ef4444; color:#fff; }
-
-    .search-box { display:flex; gap:0.8rem; flex-wrap:wrap; margin-bottom:1rem; }
-    .search-box input { flex:1; padding:0.6rem 1rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.5rem; color:#f1f5f9; font-size:0.9rem; min-width:200px; }
-    .search-box input:focus { outline:none; border-color:#3b82f6; }
-
-    .user-detail { background:rgba(15,23,42,.4); padding:1rem; border-radius:0.75rem; margin:1rem 0; display:none; }
-    .user-detail.show { display:block; }
-    .user-detail .row { display:flex; flex-wrap:wrap; gap:0.5rem; margin:0.3rem 0; }
-    .user-detail .label { color:#94a3b8; width:120px; }
-    .user-detail .value { color:#f1f5f9; font-weight:600; }
-
-    .balance-control { display:flex; flex-wrap:wrap; gap:0.8rem; align-items:center; margin-top:0.5rem; }
-    .balance-control input { width:150px; padding:0.5rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.5rem; color:#f1f5f9; }
-    .balance-control input:focus { outline:none; border-color:#3b82f6; }
-
-    .clickable-row { cursor:pointer; transition:background 0.2s; }
-    .clickable-row:hover { background:rgba(59,130,246,.1); }
-
-    .pagination { display:flex; gap:0.5rem; justify-content:center; margin-top:1rem; flex-wrap:wrap; }
-    .pagination button { padding:0.3rem 0.8rem; border:1px solid rgba(255,255,255,.1); background:rgba(15,23,42,.6); color:#94a3b8; border-radius:0.5rem; cursor:pointer; transition:all 0.2s; }
-    .pagination button.active { background:#3b82f6; color:#fff; border-color:#3b82f6; }
-    .pagination button:hover:not(.active) { background:rgba(255,255,255,.05); }
-    .pagination button:disabled { opacity:0.4; cursor:not-allowed; }
-
-    .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#ef4444; color:#fff; padding:10px 20px; border-radius:8px; font-size:0.85rem; box-shadow:0 8px 30px rgba(0,0,0,.4); z-index:9999; opacity:0; transition:opacity 0.3s ease; pointer-events:none; max-width:90%; }
-    .toast.show { opacity:1; pointer-events:auto; }
+    .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#ef4444; color:#fff; padding:10px 20px; border-radius:8px; z-index:9999; opacity:0; transition:opacity 0.3s; max-width:90%; }
+    .toast.show { opacity:1; }
     .toast.success { background:#10b981; }
-
-    .refresh-btn { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color:#94a3b8; padding:0.4rem 1rem; border-radius:0.5rem; cursor:pointer; transition:all 0.2s; }
-    .refresh-btn:hover { background:rgba(255,255,255,.12); color:#f1f5f9; }
-
+    .image-preview { display:none; max-width:200px; margin-top:0.5rem; border-radius:0.5rem; border:1px solid rgba(255,255,255,.1); overflow:hidden; }
+    .image-preview img { width:100%; height:auto; display:block; }
+    .demo-banner { background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.2); border-radius:0.5rem; padding:0.5rem 1rem; margin-bottom:1rem; color:#f59e0b; font-size:0.8rem; display:flex; align-items:center; gap:0.5rem; }
+    .error-box { background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.3); border-radius:0.5rem; padding:1rem; margin-bottom:1rem; color:#ef4444; }
     #specificUserGroup { display:none; }
-    #sendProgress { display:none; margin-top:1rem; color:#94a3b8; }
-
-    .demo-banner {
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      border-radius: 0.5rem;
-      padding: 0.5rem 1rem;
-      margin-bottom: 1rem;
-      color: #f59e0b;
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    @media (max-width:768px) {
-      .navbar { flex-direction:column; text-align:center; }
-      .admin-form .form-group { flex:1 1 100%; }
-    }
+    #sendProgress { display:none; color:#94a3b8; margin-top:0.5rem; }
+    @media (max-width:768px) { .navbar { flex-direction:column; text-align:center; } }
   </style>
 </head>
 <body>
   <div id="app">
+    <!-- NAVBAR -->
     <nav class="navbar">
-      <div class="logo"><i class="fas fa-coins"></i> EarnSphere</div>
+      <div class="logo"><i class="fas fa-coins"></i> EarnSphere Admin</div>
       <div class="nav-links">
         <a href="dashboard.html">Dashboard</a>
-        <a href="withdraw.html">Withdraw</a>
-        <a href="profile.html">Profile</a>
         <a href="admin.html" class="active">Admin</a>
         <a href="ai-assistant.html"><i class="fas fa-robot"></i> AI</a>
       </div>
-      <div class="user-greeting">
-        <span id="adminName">Admin</span>
+      <div>
+        <span id="adminName" style="color:#94a3b8;margin-right:1rem;">Admin</span>
         <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </div>
     </nav>
 
-    <div class="tabs">
+    <!-- TABS -->
+    <div>
       <button class="tab-btn active" data-tab="coupons"><i class="fas fa-ticket-alt"></i> Coupons</button>
       <button class="tab-btn" data-tab="users"><i class="fas fa-users"></i> Users</button>
       <button class="tab-btn" data-tab="payouts"><i class="fas fa-credit-card"></i> Payouts</button>
       <button class="tab-btn" data-tab="notifications"><i class="fas fa-bell"></i> Notifications</button>
     </div>
 
+    <!-- ERROR LOG (for debugging) -->
+    <div id="errorLog" class="error-box" style="display:none;"></div>
+
     <!-- COUPONS -->
     <div class="tab-content active" id="tab-coupons">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-        <h2 style="margin:0;"><i class="fas fa-ticket-alt"></i> Manage Coupons</h2>
-        <button class="refresh-btn" onclick="loadCoupons()"><i class="fas fa-sync-alt"></i> Refresh</button>
-      </div>
+      <h2><i class="fas fa-ticket-alt"></i> Manage Coupons</h2>
       <div class="admin-form">
         <div class="form-group">
-          <label>Coupon Code</label>
+          <label>Code</label>
           <input type="text" id="couponCode" placeholder="e.g. FREEMONEY" style="text-transform:uppercase;" />
         </div>
         <div class="form-group">
@@ -174,68 +111,35 @@
 
     <!-- USERS -->
     <div class="tab-content" id="tab-users">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-        <h2 style="margin:0;"><i class="fas fa-users"></i> Manage Users</h2>
-        <button class="refresh-btn" onclick="loadAllUsers()"><i class="fas fa-sync-alt"></i> Refresh</button>
-      </div>
-      <p style="color:#94a3b8; margin-bottom:1rem;">Click any user to manage their balance.</p>
+      <h2><i class="fas fa-users"></i> Manage Users</h2>
       <div class="demo-banner" id="userDemoBanner"><i class="fas fa-info-circle"></i> No users found.</div>
-      <div class="search-box">
-        <input type="text" id="userSearchInput" placeholder="Search by name, email, or UID..." />
-        <button class="btn btn-primary" id="searchUserBtn"><i class="fas fa-search"></i> Search</button>
-        <button class="btn btn-secondary" id="clearSearchBtn" style="background:rgba(255,255,255,.1);color:#94a3b8;">Clear</button>
-      </div>
-      <div class="user-list" id="userList">
+      <div class="table-wrapper">
         <table>
-          <thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Tasks</th><th>Joined</th></tr></thead>
-          <tbody id="userTableBody"><tr><td colspan="5" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody>
+          <thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Tasks</th></tr></thead>
+          <tbody id="userTableBody"><tr><td colspan="4" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody>
         </table>
-      </div>
-      <div class="pagination" id="paginationControls"></div>
-      <div class="user-detail" id="userDetail">
-        <h3 style="margin-bottom:0.5rem;"><i class="fas fa-user-circle"></i> User Details</h3>
-        <div class="row"><span class="label">Name:</span><span class="value" id="detailName">—</span></div>
-        <div class="row"><span class="label">Email:</span><span class="value" id="detailEmail">—</span></div>
-        <div class="row"><span class="label">Balance:</span><span class="value" id="detailBalance">₦0.00</span></div>
-        <div class="row"><span class="label">Tasks:</span><span class="value" id="detailTasks">0</span></div>
-        <div class="row"><span class="label">UID:</span><span class="value" id="detailUid" style="font-size:0.8rem;color:#94a3b8;">—</span></div>
-        <div class="balance-control">
-          <span style="color:#94a3b8;">Adjust balance:</span>
-          <input type="number" id="balanceAmount" placeholder="Amount" />
-          <button class="btn btn-success btn-sm" id="addBalanceBtn"><i class="fas fa-plus"></i> Add</button>
-          <button class="btn btn-danger btn-sm" id="subtractBalanceBtn"><i class="fas fa-minus"></i> Subtract</button>
-          <button class="btn btn-warning btn-sm" id="setBalanceBtn"><i class="fas fa-edit"></i> Set</button>
-        </div>
-        <button class="btn btn-danger" id="deleteUserBtn" style="margin-top:1rem;"><i class="fas fa-trash-alt"></i> Delete User</button>
       </div>
     </div>
 
     <!-- PAYOUTS -->
     <div class="tab-content" id="tab-payouts">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-        <h2 style="margin:0;"><i class="fas fa-credit-card"></i> Payout Requests</h2>
-        <button class="refresh-btn" onclick="loadPayouts()"><i class="fas fa-sync-alt"></i> Refresh</button>
-      </div>
-      <div class="demo-banner" id="payoutDemoBanner"><i class="fas fa-info-circle"></i> No payout requests yet.</div>
+      <h2><i class="fas fa-credit-card"></i> Payout Requests</h2>
+      <div class="demo-banner" id="payoutDemoBanner"><i class="fas fa-info-circle"></i> No payout requests.</div>
       <div class="table-wrapper">
         <table>
-          <thead><tr><th>User</th><th>Email</th><th>Bank</th><th>Account</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
-          <tbody id="payoutTableBody"><tr><td colspan="8" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody>
+          <thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="payoutTableBody"><tr><td colspan="4" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ============================================================
-         NOTIFICATIONS TAB (UPDATED WITH IMAGE UPLOAD)
-    ============================================================ -->
+    <!-- NOTIFICATIONS -->
     <div class="tab-content" id="tab-notifications">
       <h2><i class="fas fa-bullhorn"></i> Send Notification</h2>
-      <p style="color:#94a3b8; margin-bottom:1rem;">Broadcast a message to all users or a specific user. Attach an image (optional).</p>
-      <div class="demo-banner" id="notifDemoBanner"><i class="fas fa-info-circle"></i> Notifications appear in users' bell icon.</div>
-      
+      <div class="demo-banner"><i class="fas fa-info-circle"></i> Notifications appear in users' bell icon.</div>
       <div class="admin-form">
         <div class="form-group" style="flex:1 1 100%;">
-          <label>Target Audience</label>
+          <label>Audience</label>
           <select id="notifAudience">
             <option value="all">All Users</option>
             <option value="specific">Specific User</option>
@@ -247,22 +151,21 @@
         </div>
         <div class="form-group" style="flex:1 1 100%;">
           <label>Message</label>
-          <textarea id="notifMessage" rows="3" placeholder="Write your notification message..." style="width:100%;"></textarea>
+          <textarea id="notifMessage" rows="3" placeholder="Write your message..." style="width:100%;"></textarea>
         </div>
         <div class="form-group">
-          <label>Icon (optional)</label>
-          <input type="text" id="notifIcon" placeholder="fa-bell, fa-gift, etc." value="fa-bell" />
+          <label>Icon</label>
+          <input type="text" id="notifIcon" placeholder="fa-bell" value="fa-bell" />
         </div>
-        <!-- Image Upload -->
         <div class="form-group" style="flex:1 1 100%;">
-          <label>Attach Image (optional)</label>
+          <label>Attach Image</label>
           <input type="file" id="notifImage" accept="image/*" />
           <div class="image-preview" id="imagePreview">
             <img id="previewImg" src="#" alt="Preview" />
             <button class="btn btn-danger btn-sm" id="removeImageBtn" style="margin-top:0.3rem;width:100%;">Remove</button>
           </div>
         </div>
-        <button class="btn btn-success" id="sendNotifBtn" style="align-self:flex-end;"><i class="fas fa-paper-plane"></i> Send Notification</button>
+        <button class="btn btn-success" id="sendNotifBtn"><i class="fas fa-paper-plane"></i> Send</button>
       </div>
       <div id="sendProgress"><i class="fas fa-spinner fa-spin"></i> Sending...</div>
     </div>
@@ -288,6 +191,7 @@
     const storage = firebase.storage();
 
     const toast = document.getElementById('toast');
+    const errorLog = document.getElementById('errorLog');
 
     function showToast(msg, isError = true) {
       toast.textContent = msg;
@@ -296,29 +200,39 @@
       setTimeout(() => toast.classList.remove('show'), 4000);
     }
 
-    // Tabs
+    function logError(msg) {
+      errorLog.style.display = 'block';
+      errorLog.innerHTML += `<div>⚠️ ${msg}</div>`;
+      console.error(msg);
+    }
+
+    // ============================================================
+    // TABS
+    // ============================================================
     document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', function() {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        this.classList.add('active');
         document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        document.getElementById('tab-' + this.dataset.tab).classList.add('active');
       });
     });
 
     // ============================================================
-    // NOTIFICATION SEND (WITH IMAGE UPLOAD)
+    // AUDIENCE TOGGLE
     // ============================================================
     document.getElementById('notifAudience').addEventListener('change', function() {
       document.getElementById('specificUserGroup').style.display = this.value === 'specific' ? 'block' : 'none';
     });
 
-    // Image preview
-    const notifImageInput = document.getElementById('notifImage');
+    // ============================================================
+    // IMAGE PREVIEW
+    // ============================================================
+    const imageInput = document.getElementById('notifImage');
     const imagePreview = document.getElementById('imagePreview');
     const previewImg = document.getElementById('previewImg');
 
-    notifImageInput.addEventListener('change', function(e) {
+    imageInput.addEventListener('change', function(e) {
       const file = this.files[0];
       if (file) {
         const reader = new FileReader();
@@ -327,16 +241,17 @@
           imagePreview.style.display = 'block';
         };
         reader.readAsDataURL(file);
-      } else {
-        imagePreview.style.display = 'none';
       }
     });
 
     document.getElementById('removeImageBtn').addEventListener('click', function() {
-      notifImageInput.value = '';
+      imageInput.value = '';
       imagePreview.style.display = 'none';
     });
 
+    // ============================================================
+    // SEND NOTIFICATION (with image upload)
+    // ============================================================
     document.getElementById('sendNotifBtn').addEventListener('click', async function() {
       const audience = document.getElementById('notifAudience').value;
       const message = document.getElementById('notifMessage').value.trim();
@@ -348,19 +263,16 @@
       if (!message) { showToast('Please enter a message.'); return; }
 
       let targetUsers = [];
-
       try {
-        // Get target users
         if (audience === 'all') {
           const snap = await db.collection('users').get();
-          if (snap.empty) { showToast('⚠️ No users found.', true); return; }
+          if (snap.empty) { showToast('⚠️ No users found.'); return; }
           snap.forEach(doc => targetUsers.push(doc.id));
         } else {
-          if (!specificUser) { showToast('Please enter a User UID or Email.'); return; }
+          if (!specificUser) { showToast('Enter a User UID or Email.'); return; }
           const userSnap = await db.collection('users').where('email', '==', specificUser).get();
-          if (!userSnap.empty) {
-            userSnap.forEach(doc => targetUsers.push(doc.id));
-          } else {
+          if (!userSnap.empty) { userSnap.forEach(doc => targetUsers.push(doc.id)); }
+          else {
             const doc = await db.collection('users').doc(specificUser).get();
             if (doc.exists) targetUsers.push(doc.id);
             else { showToast('User not found.'); return; }
@@ -371,10 +283,8 @@
 
         this.disabled = true;
         progressDiv.style.display = 'block';
-
         let imageUrl = null;
 
-        // Upload image if present
         if (imageFile) {
           progressDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading image...`;
           const storagePath = `notifications/${Date.now()}_${imageFile.name}`;
@@ -387,57 +297,181 @@
 
         let successCount = 0;
         const batchSize = 500;
-
         for (let i = 0; i < targetUsers.length; i += batchSize) {
           const batch = db.batch();
           const chunk = targetUsers.slice(i, i + batchSize);
           chunk.forEach(uid => {
             const ref = db.collection('notifications').doc();
-            const notifData = {
+            const data = {
               userId: uid,
               message: message,
               icon: icon,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-              read: false
+              read: false,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
-            if (imageUrl) {
-              notifData.imageUrl = imageUrl;
-            }
-            batch.set(ref, notifData);
+            if (imageUrl) data.imageUrl = imageUrl;
+            batch.set(ref, data);
           });
           await batch.commit();
           successCount += chunk.length;
-          progressDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending... ${successCount}/${targetUsers.length}`;
+          progressDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${successCount}/${targetUsers.length}`;
         }
 
         progressDiv.style.display = 'none';
         this.disabled = false;
-        showToast(`✅ Notification sent to ${successCount} users!`, false);
+        showToast(`✅ Sent to ${successCount} users!`, false);
         document.getElementById('notifMessage').value = '';
         document.getElementById('notifImage').value = '';
         imagePreview.style.display = 'none';
-
       } catch (e) {
         console.error(e);
         progressDiv.style.display = 'none';
         this.disabled = false;
-        showToast('❌ Failed to send: ' + e.message);
+        showToast('❌ Error: ' + e.message);
+        logError('Send Notification: ' + e.message);
       }
     });
 
     // ============================================================
-    // (Placeholders for other admin functions)
+    // SIMPLIFIED LOAD FUNCTIONS (with error logging)
     // ============================================================
-    async function loadCoupons() { document.getElementById('couponTableBody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">Coupons loaded</td></tr>'; }
-    async function loadAllUsers() { document.getElementById('userTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;">Users loaded</td></tr>'; }
-    async function loadPayouts() { document.getElementById('payoutTableBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;">Payouts loaded</td></tr>'; }
+    async function loadCoupons() {
+      const tbody = document.getElementById('couponTableBody');
+      try {
+        const snap = await db.collection('coupons').orderBy('code').get();
+        if (snap.empty) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No coupons.</td></tr>';
+          return;
+        }
+        let html = '';
+        snap.forEach(doc => {
+          const data = doc.data();
+          const active = data.active !== false;
+          html += `
+            <tr>
+              <td><strong>${data.code || doc.id}</strong></td>
+              <td>₦${data.reward || 0}</td>
+              <td><span class="badge ${active ? 'badge-active' : 'badge-inactive'}">${active ? 'Active' : 'Inactive'}</span></td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="deleteCoupon('${doc.id}')"><i class="fas fa-trash-alt"></i></button>
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#ef4444;">Error: ${e.message}</td></tr>`;
+        logError('loadCoupons: ' + e.message);
+      }
+    }
 
-    // Auth
-    auth.onAuthStateChanged((user) => {
-      if (!user) { window.location.href = 'login.html'; return; }
-      document.getElementById('adminName').textContent = 'Admin';
+    async function deleteCoupon(id) {
+      if (!confirm('Delete this coupon?')) return;
+      try {
+        await db.collection('coupons').doc(id).delete();
+        showToast('✅ Coupon deleted!', false);
+        loadCoupons();
+      } catch (e) { showToast('❌ Failed to delete.'); }
+    }
+
+    document.getElementById('addCouponBtn').addEventListener('click', async function() {
+      const code = document.getElementById('couponCode').value.trim().toUpperCase();
+      const reward = parseInt(document.getElementById('couponReward').value);
+      if (!code || isNaN(reward) || reward < 0) { showToast('Enter valid code and reward.'); return; }
+      try {
+        await db.collection('coupons').doc(code).set({ code, reward, active: true });
+        showToast('✅ Coupon added!', false);
+        document.getElementById('couponCode').value = '';
+        document.getElementById('couponReward').value = '';
+        loadCoupons();
+      } catch (e) { showToast('❌ Failed to add.'); }
     });
 
+    async function loadAllUsers() {
+      const tbody = document.getElementById('userTableBody');
+      try {
+        const snap = await db.collection('users').orderBy('displayName').get();
+        if (snap.empty) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No users.</td></tr>';
+          document.getElementById('userDemoBanner').style.display = 'flex';
+          return;
+        }
+        document.getElementById('userDemoBanner').style.display = 'none';
+        let html = '';
+        snap.forEach(doc => {
+          const data = doc.data();
+          html += `
+            <tr>
+              <td>${data.displayName || data.name || '—'}</td>
+              <td>${data.email || '—'}</td>
+              <td>₦${(data.balance || 0).toLocaleString()}</td>
+              <td>${data.successfulTaskCount || 0}</td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#ef4444;">Error: ${e.message}</td></tr>`;
+        logError('loadAllUsers: ' + e.message);
+      }
+    }
+
+    async function loadPayouts() {
+      const tbody = document.getElementById('payoutTableBody');
+      try {
+        const snap = await db.collection('payouts').orderBy('requestedAt', 'desc').get();
+        if (snap.empty) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No payouts.</td></tr>';
+          document.getElementById('payoutDemoBanner').style.display = 'flex';
+          return;
+        }
+        document.getElementById('payoutDemoBanner').style.display = 'none';
+        let html = '';
+        snap.forEach(doc => {
+          const data = doc.data();
+          const status = data.status || 'pending';
+          const badgeMap = { pending:'badge-pending', approved:'badge-approved', paid:'badge-paid', rejected:'badge-rejected' };
+          html += `
+            <tr>
+              <td>${data.uid || 'Unknown'}</td>
+              <td>₦${(data.amountNGN || 0).toLocaleString()}</td>
+              <td><span class="badge ${badgeMap[status] || 'badge-pending'}">${status}</span></td>
+              <td>
+                ${status === 'pending' ? `
+                  <button class="btn btn-success btn-sm" onclick="updatePayout('${doc.id}','approved')">Approve</button>
+                  <button class="btn btn-danger btn-sm" onclick="updatePayout('${doc.id}','rejected')">Reject</button>
+                ` : ''}
+                ${status === 'approved' ? `
+                  <button class="btn btn-primary btn-sm" onclick="updatePayout('${doc.id}','paid')">Mark Paid</button>
+                ` : ''}
+                ${status === 'paid' ? '✅' : ''}
+                ${status === 'rejected' ? '❌' : ''}
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#ef4444;">Error: ${e.message}</td></tr>`;
+        logError('loadPayouts: ' + e.message);
+      }
+    }
+
+    async function updatePayout(id, status) {
+      if (!confirm(`Mark as "${status}"?`)) return;
+      try {
+        await db.collection('payouts').doc(id).update({ status });
+        showToast(`✅ ${status}`, false);
+        loadPayouts();
+      } catch (e) { showToast('❌ Failed.'); }
+    }
+
+    // ============================================================
+    // LOGOUT
+    // ============================================================
     function logout() {
       auth.signOut().then(() => {
         localStorage.removeItem('earnsphere_user_data');
@@ -445,6 +479,50 @@
       });
     }
 
+    // ============================================================
+    // AUTH - With detailed error logging
+    // ============================================================
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        logError('No user logged in. Redirecting to login...');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        
+        if (!userDoc.exists) {
+          logError(`User document does not exist for UID: ${user.uid}`);
+          showToast('⚠️ User document not found. Redirecting...', true);
+          setTimeout(() => window.location.href = 'dashboard.html', 2000);
+          return;
+        }
+
+        const userData = userDoc.data();
+        document.getElementById('adminName').textContent = userData.displayName || 'Admin';
+
+        if (userData.isAdmin !== true) {
+          logError(`User is not an admin. isAdmin = ${userData.isAdmin}`);
+          showToast('⚠️ Unauthorized. Redirecting...', true);
+          setTimeout(() => window.location.href = 'dashboard.html', 2000);
+          return;
+        }
+
+        // Admin confirmed — load everything
+        await Promise.all([loadCoupons(), loadAllUsers(), loadPayouts()]);
+        errorLog.style.display = 'none'; // Hide errors if successful
+
+      } catch (e) {
+        console.error('Auth error:', e);
+        logError('Auth error: ' + e.message);
+        showToast('❌ Error loading admin panel: ' + e.message, true);
+      }
+    });
+
+    // Expose functions globally
+    window.deleteCoupon = deleteCoupon;
+    window.updatePayout = updatePayout;
     window.loadCoupons = loadCoupons;
     window.loadAllUsers = loadAllUsers;
     window.loadPayouts = loadPayouts;
