@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    /* ===== RESET & BASE ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -559,16 +558,44 @@
   </footer>
 
   <!-- ===== ALL ADS ===== -->
+
+  <!-- MONDIAD POP-UNDER -->
   <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
+
+  <!-- MONDIAD CTATIC -->
+  <script async src="https://ss.mrmnd.com/ctatic/9ea83a71-e6b6-4ebc-ae22-cb0df1870ae7.js"></script>
+
+  <!-- MONDIAD NATIVE (with container div) -->
+  <script async src="https://ss.mrmnd.com/native.js"></script>
+  <div data-mndazid="3e2075d4-e0ca-4589-b3a6-57960eb2fcd0"></div>
+
+  <!-- MONDIAD DYNAMIC -->
+  <script async src="https://ss.mrmnd.com/dynamic.js" data-mnddynid="a26ab055-a0eb-469b-98b1-ce863bec9ba7"></script>
+
+  <!-- MONDIAD INTERSTITIAL -->
+  <script async src="https://ss.mrmnd.com/interstitial.js" data-mndintid="c60da3d3-0ed9-41fc-bf0d-23b11a6002f0"></script>
+
+  <!-- MONDIAD STATIC (NEW) -->
+  <script async src="https://ss.mrmnd.com/static/50a5a986-052e-4ac4-acea-2d9bc37b53f3.js"></script>
+
+  <!-- ADCASH LIBRARY -->
   <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
+
+  <!-- ADCASH VIDEO SLIDER -->
   <script type="text/javascript">
-      aclib.runVideoSlider({ zoneId: '11851230' });
-  </script>
-  <script type="text/javascript">
-      aclib.runAutoTag({ zoneId: 'rcnic8lxix' });
+      aclib.runVideoSlider({
+          zoneId: '11851230',
+      });
   </script>
 
-  <!-- ===== DASHBOARD JAVASCRIPT (FULL) ===== -->
+  <!-- ADCASH AUTO TAG -->
+  <script type="text/javascript">
+      aclib.runAutoTag({
+          zoneId: 'rcnic8lxix',
+      });
+  </script>
+
+  <!-- ===== DASHBOARD JAVASCRIPT ===== -->
   <script>
     // ============================================================
     // HAMBURGER MENU TOGGLE
@@ -604,6 +631,8 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+
+    console.log('✅ Firebase initialized');
 
     // ============================================================
     // GLOBALS
@@ -1097,7 +1126,7 @@
       }
     });
 
-    // Expose functions globally for onclick
+    // Expose functions globally
     window.claimDailyReward = claimDailyReward;
     window.redeemCoupon = redeemCoupon;
     window.completeSurveyTask = completeSurveyTask;
