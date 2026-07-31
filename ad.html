@@ -45,19 +45,16 @@
     <p>Watch a short ad and earn <strong>₦50</strong>!</p>
     <div class="reward-badge"><i class="fas fa-coins"></i> Reward: ₦50 per day</div>
 
-    <!-- Ad Wrapper -->
+    <!-- Ad Wrapper for AutoTag Placement -->
     <div class="ad-placeholder">
-      <script id="aclib" type="text/javascript" src="//://acscdn.com"></script>
-      <script type="text/javascript">
-          aclib.runVideoSlider({
-              zoneId: '11851230',
-          });
+      <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
+      <script type="text/javascript"> 
+          aclib.runAutoTag({ zoneId: 'rcnic8lxix' }); 
       </script>
     </div>
 
     <div id="timerDisplay" class="timer-text">⏳ 10 seconds</div>
 
-    <!-- Interface Action Toggles -->
     <button class="btn-primary" id="startBtn" onclick="watchAd()"><i class="fas fa-play"></i> Start Watching</button>
     <button class="btn-primary btn-success" id="claimBtn" style="display:none;" onclick="claimReward()"><i class="fas fa-check"></i> Claim ₦50</button>
   </div>
@@ -126,7 +123,7 @@
           clearInterval(adTimer);
           timerDisplay.textContent = '🎉 Ad Complete!';
           startBtn.style.display = 'none';
-          claimBtn.style.display = 'block'; // Reveals the interactive claim action
+          claimBtn.style.display = 'block';
         }
       }, 1000);
     }
@@ -138,9 +135,15 @@
         return;
       }
 
-      // 1. Instantly opens the ad destination in a new tab upon user click.
-      // This click action cleanly bypasses all web browser popup blockers.
-      window.open('https://://acscdn.com', '_blank');
+      // Automatically triggers your pop-under ad zone when the user clicks the button.
+      // This bypasses browser popup blockers by executing on direct user interaction.
+      try {
+          if (typeof aclib !== 'undefined' && typeof aclib.runPop === 'function') {
+              aclib.runPop({ zoneId: '11871326' });
+          }
+      } catch(e) {
+          console.error("Ad script error:", e);
+      }
 
       await loadUserData(user.uid);
       const taskId = 'extra_ad';
