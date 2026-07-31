@@ -162,6 +162,8 @@
       transition:0.2s;
       align-self:flex-start;
       margin-top:0.3rem;
+      text-decoration:none;
+      display:inline-block;
     }
     .survey-card .start-btn:hover { transform:scale(1.02); }
     .survey-card .start-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
@@ -207,6 +209,7 @@
   </div>
 
   <script>
+    // ===== FIREBASE =====
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
       authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -219,17 +222,18 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // ===== SURVEY DATA (same as dashboard) =====
     const surveyTasks = [
-      { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits', link:'survey.html?id=srv_01' },
-      { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets', link:'survey.html?id=srv_02' },
-      { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200, desc:'Tell us your favourite Nollywood actors and movies.', link:'survey.html?id=srv_03' },
-      { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180, desc:'What are your favourite Nigerian dishes and recipes?', link:'survey.html?id=srv_04' },
-      { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220, desc:'How do you listen to music? Share your streaming habits.', link:'survey.html?id=srv_05' },
-      { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.', link:'survey.html?id=srv_06' },
-      { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.', link:'survey.html?id=srv_07' },
-      { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.', link:'survey.html?id=srv_08' },
-      { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.', link:'survey.html?id=srv_09' },
-      { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.', link:'survey.html?id=srv_10' }
+      { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits' },
+      { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets' },
+      { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200, desc:'Tell us your favourite Nollywood actors and movies.' },
+      { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180, desc:'What are your favourite Nigerian dishes and recipes?' },
+      { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220, desc:'How do you listen to music? Share your streaming habits.' },
+      { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.' },
+      { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.' },
+      { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.' },
+      { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.' },
+      { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.' }
     ];
 
     let currentUser = null;
@@ -274,9 +278,10 @@
             <div class="progress"><div class="bar" style="width:${progress}%;"></div></div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span class="reward">₦${s.reward}</span>
-              <button class="start-btn" ${completed ? 'disabled' : ''} onclick="startSurvey('${s.id}')">
-                ${completed ? '✅ Completed' : 'Start Survey'}
-              </button>
+              ${completed 
+                ? `<button class="start-btn" disabled>✅ Completed</button>`
+                : `<a href="survey-take.html?id=${s.id}" class="start-btn">Start Survey</a>`
+              }
             </div>
           </div>
         `;
@@ -300,32 +305,6 @@
 
     document.getElementById('searchInput').addEventListener('input', filterSurveys);
 
-    async function startSurvey(taskId) {
-      if (!currentUser) {
-        alert('Please log in first.');
-        return;
-      }
-      const survey = surveyTasks.find(s => s.id === taskId);
-      if (!survey) return;
-
-      if (isTaskCompleted(taskId)) {
-        alert('You already completed this survey today.');
-        return;
-      }
-
-      window.open(survey.link || '#', '_blank');
-
-      if (!userData.completedTasks) userData.completedTasks = {};
-      userData.completedTasks[taskId] = Date.now();
-      userData.balance = (userData.balance || 0) + survey.reward;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + survey.reward;
-      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-
-      await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
-      alert(`🎉 Survey completed! +₦${survey.reward} earned!`);
-      renderSurveys();
-    }
-
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
@@ -337,7 +316,6 @@
       }
     });
 
-    window.startSurvey = startSurvey;
     window.filterSurveys = filterSurveys;
   </script>
 </body>

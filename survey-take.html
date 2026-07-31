@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Take Survey – EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height:100vh;
+      color:#f1f5f9;
+      padding:2rem 1rem;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+    .container {
+      max-width:750px;
+      width:100%;
+      background:rgba(30,41,59,.7);
+      backdrop-filter:blur(12px);
+      border-radius:1.5rem;
+      padding:2rem;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 20px 60px rgba(0,0,0,0.4);
+    }
+    .back-link { color:#3b82f6; text-decoration:none; font-size:0.9rem; display:inline-block; margin-bottom:1rem; }
+    .back-link i { margin-right:0.3rem; }
+    h1 { font-size:1.6rem; margin-bottom:0.3rem; display:flex; align-items:center; gap:0.6rem; }
+    h1 i { color:#3b82f6; }
+    .survey-meta { color:#94a3b8; font-size:0.85rem; margin-bottom:1.5rem; display:flex; gap:1.5rem; flex-wrap:wrap; }
+    .survey-meta span { background:rgba(255,255,255,.05); padding:0.2rem 0.8rem; border-radius:20px; }
+    .progress-section { margin-bottom:1.5rem; }
+    .progress-bar-bg {
+      width:100%; height:6px; background:rgba(255,255,255,.08); border-radius:4px; overflow:hidden;
+    }
+    .progress-bar-fill {
+      height:100%; background:linear-gradient(90deg, #3b82f6, #10b981); border-radius:4px; width:0%; transition:width 0.3s;
+    }
+    .progress-text { font-size:0.8rem; color:#94a3b8; margin-top:0.3rem; text-align:right; }
+    .question-block {
+      background:rgba(15,23,42,.4);
+      border-radius:12px;
+      padding:1.5rem;
+      margin-bottom:1.5rem;
+      border:1px solid rgba(255,255,255,.06);
+      transition:border-color 0.3s;
+    }
+    .question-block.answered { border-color:rgba(16,185,129,.3); }
+    .question-block .q-number {
+      font-size:0.7rem; font-weight:700; color:#3b82f6; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.3rem;
+    }
+    .question-block .q-text {
+      font-weight:600; margin-bottom:0.8rem; font-size:1.05rem; line-height:1.5;
+    }
+    .question-block .options label {
+      display:block;
+      padding:0.7rem 0.9rem;
+      background:rgba(255,255,255,.04);
+      border-radius:8px;
+      margin-bottom:0.4rem;
+      cursor:pointer;
+      transition:background 0.2s, border-color 0.2s;
+      border:1px solid transparent;
+      font-size:0.95rem;
+    }
+    .question-block .options label:hover { background:rgba(255,255,255,.08); }
+    .question-block .options input[type="radio"] {
+      margin-right:0.6rem;
+      accent-color:#3b82f6;
+      transform:scale(1.1);
+    }
+    .question-block .options label.selected {
+      background:rgba(59,130,246,.15);
+      border-color:#3b82f6;
+    }
+    .question-block .options label.selected input { accent-color:#3b82f6; }
+    .btn-submit {
+      width:100%;
+      padding:0.9rem;
+      background:linear-gradient(135deg, #3b82f6, #2563eb);
+      border:none;
+      border-radius:10px;
+      color:#fff;
+      font-size:1rem;
+      font-weight:700;
+      cursor:pointer;
+      transition:0.3s;
+      margin-top:0.5rem;
+    }
+    .btn-submit:hover:not(:disabled) { transform:scale(1.02); box-shadow:0 4px 20px rgba(59,130,246,.3); }
+    .btn-submit:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    .toast {
+      position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:#1e293b; border:1px solid #334155; color:#f1f5f9;
+      padding:12px 24px; border-radius:12px; font-size:14px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.7);
+      opacity:0; transition:opacity 0.35s ease, transform 0.35s ease;
+      pointer-events:none; z-index:9999; max-width:90%;
+      font-weight:500;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+    .toast.success { border-left:4px solid #22c55e; }
+    .toast.error { border-left:4px solid #ef4444; }
+    .survey-complete {
+      text-align:center; padding:2rem 0; display:none;
+    }
+    .survey-complete i { font-size:4rem; color:#10b981; display:block; margin-bottom:1rem; }
+    .survey-complete h2 { margin-bottom:0.5rem; }
+    .survey-complete p { color:#94a3b8; }
+    @media (max-width:640px) {
+      .container { padding:1.2rem; }
+      h1 { font-size:1.3rem; }
+      .question-block { padding:1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="survey.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Surveys</a>
+    <h1><i class="fas fa-clipboard-list"></i> <span id="surveyTitle">Loading...</span></h1>
+    <div class="survey-meta">
+      <span><i class="fas fa-tag"></i> <span id="category">—</span></span>
+      <span><i class="fas fa-coins"></i> Reward: <span id="reward">₦0</span></span>
+      <span><i class="fas fa-clock"></i> ~<span id="questionCount">0</span> questions</span>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-section">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">0 / 0 answered</div>
+    </div>
+
+    <div id="questionsContainer"></div>
+    <button class="btn-submit" id="submitBtn" disabled>Submit Answers</button>
+
+    <!-- Complete state (hidden) -->
+    <div class="survey-complete" id="completeState">
+      <i class="fas fa-check-circle"></i>
+      <h2>Survey Completed! 🎉</h2>
+      <p>Your answers have been submitted. You earned <strong id="earnedReward">₦0</strong>!</p>
+      <p style="margin-top:1rem; font-size:0.9rem; color:#94a3b8;">Redirecting to surveys...</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+      authDomain: "earnspherehub-742e9.firebaseapp.com",
+      projectId: "earnspherehub-742e9",
+      storageBucket: "earnspherehub-742e9.firebasestorage.app",
+      messagingSenderId: "173538573377",
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // ===== COMPREHENSIVE SURVEY QUESTIONS (6-8 per survey) =====
+    const surveyQuestions = {
+      'srv_01': [
+        { q: 'How many hours per day do you typically spend on social media?', options: ['Less than 1 hour', '1-3 hours', '4-6 hours', '7-9 hours', '10+ hours'] },
+        { q: 'Which social media platform do you use most frequently?', options: ['WhatsApp', 'TikTok', 'Instagram', 'Facebook', 'X (Twitter)', 'YouTube', 'Other'] },
+        { q: 'Do you follow any influencers or content creators?', options: ['Yes, many', 'A few', 'None'] },
+        { q: 'How often do you share your own content (photos, videos, status)?', options: ['Daily', 'Weekly', 'Monthly', 'Rarely', 'Never'] },
+        { q: 'Do you believe social media has a positive or negative impact on your life?', options: ['Very positive', 'Somewhat positive', 'Neutral', 'Somewhat negative', 'Very negative'] },
+        { q: 'How much time do you spend on social media for work or business purposes?', options: ['None', 'Less than 1 hour', '1-3 hours', '4-6 hours', '7+ hours'] },
+        { q: 'Which of these best describes your social media usage pattern?', options: ['Heavy user (scrolling often)', 'Moderate user', 'Light user', 'Primarily for communication', 'Primarily for entertainment'] }
+      ],
+      'srv_02': [
+        { q: 'Have you ever invested in or traded cryptocurrency?', options: ['Yes, regularly', 'Yes, occasionally', 'No, but I plan to', 'No, and I\'m not interested'] },
+        { q: 'Which cryptocurrencies are you most familiar with?', options: ['Bitcoin', 'Ethereum', 'USDT', 'Solana', 'BNB', 'All of the above', 'None'] },
+        { q: 'What is your primary source of information about crypto?', options: ['Social media', 'News websites', 'YouTube', 'Friends/Family', 'Crypto exchanges', 'Other'] },
+        { q: 'Do you think cryptocurrency will become mainstream in Nigeria?', options: ['Yes, definitely', 'Likely', 'Not sure', 'Unlikely', 'No'] },
+        { q: 'How much of your investment portfolio is in crypto?', options: ['0%', '1-10%', '11-30%', '31-50%', 'Over 50%'] },
+        { q: 'What is your biggest concern about cryptocurrency?', options: ['Volatility', 'Security/hacks', 'Government regulations', 'Lack of understanding', 'Nothing'] },
+        { q: 'Would you prefer to receive payments in crypto or Naira?', options: ['Crypto', 'Naira', 'Both equally', 'Not sure'] }
+      ],
+      'srv_03': [
+        { q: 'How often do you watch Nollywood movies?', options: ['Daily', 'Several times a week', 'Weekly', 'Monthly', 'Rarely'] },
+        { q: 'Who is your favourite Nollywood actor/actress?', options: ['Funke Akindele', 'Richard Mofe-Damijo', 'Mercy Johnson', 'Don Jazzy', 'Genevieve Nnaji', 'Other'] },
+        { q: 'What genre of Nollywood films do you prefer?', options: ['Comedy', 'Drama', 'Romance', 'Action', 'Thriller', 'Family'] },
+        { q: 'Do you watch Nollywood movies on streaming platforms?', options: ['Yes, regularly', 'Yes, occasionally', 'No, I watch on TV', 'No, I don\'t watch at all'] },
+        { q: 'How do you discover new Nollywood movies?', options: ['Social media', 'Friends', 'Streaming platforms', 'TV ads', 'Other'] },
+        { q: 'Would you recommend Nollywood movies to international friends?', options: ['Yes, definitely', 'Maybe', 'No'] },
+        { q: 'What do you think is the biggest strength of Nollywood?', options: ['Relatable stories', 'Talented actors', 'Fast production', 'Cultural representation', 'Other'] }
+      ],
+      'srv_04': [
+        { q: 'What is your favourite Nigerian dish?', options: ['Jollof Rice', 'Pounded Yam', 'Egusi Soup', 'Amala', 'Eba', 'Other'] },
+        { q: 'How often do you eat traditional Nigerian meals?', options: ['Daily', 'Several times a week', 'Weekly', 'Occasionally', 'Rarely'] },
+        { q: 'Do you prefer local or continental food?', options: ['Local', 'Continental', 'Both equally'] },
+        { q: 'Have you ever tried cooking a Nigerian meal from scratch?', options: ['Yes, regularly', 'Yes, occasionally', 'No, but I\'d like to', 'No'] },
+        { q: 'Where do you usually eat your Nigerian meals?', options: ['At home', 'At a restaurant', 'Street food', 'Other'] },
+        { q: 'How important is food to Nigerian culture?', options: ['Very important', 'Somewhat important', 'Not very important'] },
+        { q: 'Which Nigerian cuisine would you introduce to a foreigner first?', options: ['Jollof Rice', 'Egusi Soup', 'Pounded Yam', 'Other'] }
+      ],
+      'srv_05': [
+        { q: 'How do you listen to music most often?', options: ['Streaming app (Spotify, Apple Music)', 'YouTube', 'Radio', 'Physical media (CD, vinyl)', 'Other'] },
+        { q: 'Which music genre do you enjoy most?', options: ['Afrobeats', 'Hip-hop/Rap', 'Gospel', 'R&B/Soul', 'Highlife', 'Other'] },
+        { q: 'Do you pay for a music streaming subscription?', options: ['Yes', 'No'] },
+        { q: 'How much time do you spend listening to music daily?', options: ['Less than 1 hour', '1-3 hours', '4-6 hours', '7-9 hours', '10+ hours'] },
+        { q: 'What do you usually do while listening to music?', options: ['Working', 'Exercising', 'Driving', 'Relaxing', 'Other'] },
+        { q: 'Do you follow your favourite artists on social media?', options: ['Yes, all of them', 'Some of them', 'Rarely', 'No'] },
+        { q: 'Would you attend a live concert in Nigeria?', options: ['Yes, definitely', 'Probably', 'Not sure', 'No'] }
+      ],
+      'srv_06': [
+        { q: 'How often do you shop online?', options: ['Daily', 'Several times a week', 'Weekly', 'Monthly', 'Rarely'] },
+        { q: 'Which online shopping platform do you prefer?', options: ['Jumia', 'Konga', 'AliExpress', 'Amazon', 'WhatsApp sellers', 'Other'] },
+        { q: 'Do you trust online shopping in Nigeria?', options: ['Yes, completely', 'Yes, mostly', 'Neutral', 'Slightly distrust', 'No'] },
+        { q: 'What do you usually buy online?', options: ['Clothing', 'Electronics', 'Food', 'Household items', 'Other'] },
+        { q: 'How do you pay for online purchases?', options: ['Card payment', 'Bank transfer', 'Mobile money', 'Cash on delivery', 'Other'] },
+        { q: 'What is your biggest challenge with online shopping?', options: ['Delivery time', 'Product quality', 'Payment security', 'Customer service', 'None'] },
+        { q: 'Would you recommend online shopping to a friend?', options: ['Yes, definitely', 'Maybe', 'No'] }
+      ],
+      'srv_07': [
+        { q: 'Do you support a football team?', options: ['Yes, passionately', 'Yes, casually', 'No'] },
+        { q: 'Which team do you support?', options: ['Super Eagles', 'Manchester United', 'Arsenal', 'Chelsea', 'Liverpool', 'Other'] },
+        { q: 'How do you follow sports news?', options: ['TV', 'Social media', 'Radio', 'Websites', 'Other'] },
+        { q: 'How often do you watch live sports?', options: ['Daily', 'Weekly', 'Monthly', 'Rarely'] },
+        { q: 'Do you participate in sports betting?', options: ['Yes, regularly', 'Yes, occasionally', 'No'] },
+        { q: 'Which sport do you enjoy watching most?', options: ['Football', 'Basketball', 'Athletics', 'Boxing', 'Other'] },
+        { q: 'Would you encourage children to take up sports?', options: ['Yes, definitely', 'Maybe', 'No'] }
+      ],
+      'srv_08': [
+        { q: 'What is your highest level of education?', options: ['SSCE/WASSCE', 'Diploma/OND', 'Bachelor\'s degree', 'Master\'s degree', 'PhD', 'Other'] },
+        { q: 'What field of study are you in or did you study?', options: ['Sciences', 'Arts/Humanities', 'Business/Finance', 'Engineering/Technology', 'Health/Medicine', 'Other'] },
+        { q: 'Do you plan to further your education?', options: ['Yes, within the next year', 'Yes, in the next 2-3 years', 'No immediate plans', 'No'] },
+        { q: 'What is your career aspiration?', options: ['Entrepreneurship', 'Corporate job', 'Creative industry', 'Public service', 'Other'] },
+        { q: 'Do you currently have a job?', options: ['Yes, full-time', 'Yes, part-time', 'Self-employed', 'Unemployed', 'Student'] },
+        { q: 'How important is education to success in Nigeria?', options: ['Very important', 'Somewhat important', 'Not very important'] },
+        { q: 'Would you consider taking online courses?', options: ['Yes, have taken them', 'Yes, interested', 'Not sure', 'No'] }
+      ],
+      'srv_09': [
+        { q: 'Have you ever travelled outside Nigeria?', options: ['Yes, frequently', 'Yes, a few times', 'No, but I plan to', 'No, not interested'] },
+        { q: 'What is your dream travel destination?', options: ['Dubai', 'London', 'Paris', 'New York', 'Cape Town', 'Other'] },
+        { q: 'What do you value most about travel?', options: ['Culture', 'Food', 'Sightseeing', 'Relaxation', 'Adventure'] },
+        { q: 'How do you prefer to travel?', options: ['Group tours', 'Solo travel', 'Family trips', 'Business travel'] },
+        { q: 'What is your biggest barrier to travel?', options: ['Cost', 'Time', 'Safety concerns', 'Visa issues', 'Other'] },
+        { q: 'Do you use travel apps to plan trips?', options: ['Yes, often', 'Yes, sometimes', 'No'] },
+        { q: 'Would you like to see more tourism promotion in Nigeria?', options: ['Yes, definitely', 'Maybe', 'Not necessary'] }
+      ],
+      'srv_10': [
+        { q: 'Which brand of smartphone do you currently use?', options: ['iPhone', 'Samsung', 'Tecno', 'Infinix', 'Itel', 'Other'] },
+        { q: 'How often do you upgrade your phone?', options: ['Every year', 'Every 2 years', 'Every 3+ years', 'Only when it breaks'] },
+        { q: 'What is your primary use for your smartphone?', options: ['Social media', 'Work/Productivity', 'Entertainment (games, videos)', 'Communication', 'Other'] },
+        { q: 'How much time do you spend on your phone daily?', options: ['Less than 2 hours', '2-4 hours', '5-7 hours', '8-10 hours', 'Over 10 hours'] },
+        { q: 'Do you use any protective accessories (case, screen protector)?', options: ['Yes, both', 'Yes, case only', 'Yes, screen protector only', 'No'] },
+        { q: 'Which feature is most important to you in a phone?', options: ['Camera quality', 'Battery life', 'Performance/speed', 'Display quality', 'Price'] },
+        { q: 'Would you consider using a foldable phone?', options: ['Yes, definitely', 'Maybe', 'No'] }
+      ]
+    };
+
+    let currentUser = null;
+    let surveyId = null;
+    let surveyData = null;
+    let answers = {};
+
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast ' + type;
+      void toast.offsetWidth;
+      toast.classList.add('show');
+      clearTimeout(toast._hide);
+      toast._hide = setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    function updateProgress() {
+      const total = document.querySelectorAll('.question-block').length;
+      const answered = document.querySelectorAll('.question-block.answered').length;
+      const fill = document.getElementById('progressFill');
+      const text = document.getElementById('progressText');
+      const pct = total > 0 ? (answered / total) * 100 : 0;
+      fill.style.width = pct + '%';
+      text.textContent = `${answered} / ${total} answered`;
+      // Enable submit when all answered
+      document.getElementById('submitBtn').disabled = (answered < total);
+    }
+
+    function renderQuestions() {
+      const container = document.getElementById('questionsContainer');
+      const questions = surveyQuestions[surveyId];
+      if (!questions) {
+        container.innerHTML = '<p style="color:#ef4444;">Survey not found.</p>';
+        return;
+      }
+
+      // Update question count
+      document.getElementById('questionCount').textContent = questions.length;
+
+      container.innerHTML = '';
+      questions.forEach((q, idx) => {
+        const div = document.createElement('div');
+        div.className = 'question-block';
+        div.dataset.q = idx;
+        div.innerHTML = `
+          <div class="q-number">Question ${idx+1}</div>
+          <div class="q-text">${q.q}</div>
+          <div class="options" data-q="${idx}">
+            ${q.options.map((opt, oi) => `
+              <label>
+                <input type="radio" name="q${idx}" value="${opt}" />
+                ${opt}
+              </label>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      // Add event listeners
+      document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+          const block = this.closest('.question-block');
+          block.classList.add('answered');
+          // Highlight label
+          const parentLabel = this.closest('label');
+          const siblings = parentLabel.closest('.options').querySelectorAll('label');
+          siblings.forEach(l => l.classList.remove('selected'));
+          parentLabel.classList.add('selected');
+          updateProgress();
+        });
+      });
+
+      updateProgress();
+    }
+
+    async function submitSurvey() {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      // Gather answers
+      const allQs = document.querySelectorAll('.question-block');
+      const answers = [];
+      allQs.forEach(block => {
+        const checked = block.querySelector('input[type="radio"]:checked');
+        if (checked) answers.push(checked.value);
+        else answers.push(null); // should not happen since all answered
+      });
+
+      // Save to Firebase and add reward
+      try {
+        const user = auth.currentUser;
+        if (!user) { showToast('Please log in.', 'error'); return; }
+
+        const survey = surveyData;
+        if (!survey) { showToast('Survey data missing.', 'error'); return; }
+
+        // Check if already completed today
+        const doc = await db.collection('users').doc(user.uid).get();
+        const userData = doc.data() || {};
+        const completed = userData.completedTasks || {};
+        if (completed[surveyId]) {
+          const compDate = new Date(completed[surveyId]).toISOString().split('T')[0];
+          if (compDate === new Date().toISOString().split('T')[0]) {
+            showToast('You already completed this survey today.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Submit Answers';
+            return;
+          }
+        }
+
+        // Update user balance
+        const newBalance = (userData.balance || 0) + survey.reward;
+        const newLifetime = (userData.lifetimeTotal || 0) + survey.reward;
+        const newTasks = (userData.successfulTaskCount || 0) + 1;
+        const newCompleted = { ...completed, [surveyId]: Date.now() };
+
+        await db.collection('users').doc(user.uid).set({
+          balance: newBalance,
+          lifetimeTotal: newLifetime,
+          successfulTaskCount: newTasks,
+          completedTasks: newCompleted
+        }, { merge: true });
+
+        // Show completion
+        document.getElementById('completeState').style.display = 'block';
+        document.getElementById('earnedReward').textContent = `₦${survey.reward}`;
+        document.getElementById('questionsContainer').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'none';
+        document.querySelector('.progress-section').style.display = 'none';
+
+        // Redirect after 4 seconds
+        setTimeout(() => {
+          window.location.href = 'survey.html';
+        }, 4000);
+
+      } catch (e) {
+        console.error(e);
+        showToast('Error submitting survey.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Submit Answers';
+      }
+    }
+
+    // Load survey data
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      surveyId = params.get('id');
+      if (!surveyId) {
+        document.getElementById('surveyTitle').textContent = 'Survey not found';
+        return;
+      }
+
+      // Get survey details from the list (reuse from survey.html)
+      const surveyList = [
+        { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150 },
+        { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250 },
+        { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200 },
+        { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180 },
+        { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220 },
+        { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250 },
+        { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200 },
+        { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300 },
+        { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180 },
+        { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250 }
+      ];
+      surveyData = surveyList.find(s => s.id === surveyId);
+      if (!surveyData) {
+        document.getElementById('surveyTitle').textContent = 'Survey not found';
+        return;
+      }
+
+      document.getElementById('surveyTitle').textContent = surveyData.title;
+      document.getElementById('category').textContent = surveyData.category;
+      document.getElementById('reward').textContent = `₦${surveyData.reward}`;
+
+      // Render questions
+      renderQuestions();
+
+      // Auth check
+      auth.onAuthStateChanged(user => {
+        if (!user) window.location.href = 'login.html';
+        else currentUser = user;
+      });
+
+      // Submit handler
+      document.getElementById('submitBtn').addEventListener('click', submitSurvey);
+    };
+  </script>
+</body>
+</html>

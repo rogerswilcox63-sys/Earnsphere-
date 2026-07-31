@@ -48,9 +48,14 @@
     <p>Watch a short ad and earn <strong>₦50</strong>!</p>
     <div class="reward-badge"><i class="fas fa-coins"></i> Reward: ₦50 per day</div>
 
-    <div class="ad-placeholder">
-      <i class="fas fa-film" style="font-size:3rem; color:#64748b;"></i>
-      <p style="margin-top:.5rem; color:#94a3b8;">Your ad will appear here</p>
+    <!-- Video Slider Ad (from Adcash) -->
+    <div class="ad-container" style="margin:1rem auto;">
+      <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
+      <script type="text/javascript">
+          aclib.runVideoSlider({
+              zoneId: '11851230',
+          });
+      </script>
     </div>
 
     <div id="timerDisplay" class="timer-text">⏳ 10 seconds</div>
@@ -58,15 +63,6 @@
     <button class="btn-primary" id="startBtn" onclick="watchAd()"><i class="fas fa-play"></i> Start Watching</button>
     <button class="btn-primary btn-success" id="claimBtn" style="display:none;" onclick="claimReward()"><i class="fas fa-check"></i> Claim ₦50</button>
   </div>
-
-  <!-- ===== MONDIAD BANNER AD ===== -->
-  <div class="ad-container">
-    <script async src="https://ss.mrmnd.com/banner.js"></script>
-    <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
-  </div>
-
-  <!-- ===== MONDIAD POP‑UNDER AD ===== -->
-  <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
 
   <script>
     const firebaseConfig = {
