@@ -20,6 +20,7 @@
     .btn-primary { background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; color:#fff; padding:1rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; width:100%; margin-top:.5rem; transition:all 0.3s; }
     .btn-primary:hover:not(:disabled) { transform:scale(1.02); }
     .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+    .btn-success { background:linear-gradient(135deg, #10b981, #059669); }
     .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
     @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
 
@@ -44,6 +45,7 @@
     <p>Watch a short ad and earn <strong>₦50</strong>!</p>
     <div class="reward-badge"><i class="fas fa-coins"></i> Reward: ₦50 per day</div>
 
+    <!-- Ad Wrapper -->
     <div class="ad-placeholder">
       <script id="aclib" type="text/javascript" src="//://acscdn.com"></script>
       <script type="text/javascript">
@@ -55,7 +57,9 @@
 
     <div id="timerDisplay" class="timer-text">⏳ 10 seconds</div>
 
+    <!-- Interface Action Toggles -->
     <button class="btn-primary" id="startBtn" onclick="watchAd()"><i class="fas fa-play"></i> Start Watching</button>
+    <button class="btn-primary btn-success" id="claimBtn" style="display:none;" onclick="claimReward()"><i class="fas fa-check"></i> Claim ₦50</button>
   </div>
 
   <script>
@@ -107,24 +111,22 @@
 
     function watchAd() {
       const startBtn = document.getElementById('startBtn');
+      const claimBtn = document.getElementById('claimBtn');
       const timerDisplay = document.getElementById('timerDisplay');
-
-      // 1. Force the Ad landing page to open immediately using the user's initial button click action.
-      // This bypasses browser popup blockers perfectly.
-      window.open('https://://acscdn.com', '_blank');
 
       startBtn.disabled = true;
       startBtn.innerHTML = '⏳ Watching...';
       seconds = 10;
       timerDisplay.textContent = `⏳ ${seconds} seconds`;
 
-      adTimer = setInterval(async () => {
+      adTimer = setInterval(() => {
         seconds--;
         timerDisplay.textContent = `⏳ ${seconds} seconds`;
         if (seconds <= 0) {
           clearInterval(adTimer);
-          timerDisplay.textContent = '✅ Ad watched!';
-          await claimReward();
+          timerDisplay.textContent = '🎉 Ad Complete!';
+          startBtn.style.display = 'none';
+          claimBtn.style.display = 'block'; // Reveals the interactive claim action
         }
       }, 1000);
     }
@@ -135,6 +137,10 @@
         showToast('⚠️ Please log in.');
         return;
       }
+
+      // 1. Instantly opens the ad destination in a new tab upon user click.
+      // This click action cleanly bypasses all web browser popup blockers.
+      window.open('https://://acscdn.com', '_blank');
 
       await loadUserData(user.uid);
       const taskId = 'extra_ad';
@@ -151,17 +157,20 @@
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
 
       try {
+        const claimBtn = document.getElementById('claimBtn');
+        claimBtn.disabled = true;
+        claimBtn.innerHTML = '⏳ Processing...';
+
         await db.collection('users').doc(user.uid).set(userData, { merge: true });
         showToast(`🎉 Ad reward claimed! +₦${reward} earned!`);
-        document.getElementById('startBtn').innerHTML = '✅ Claimed Today';
         
         setTimeout(() => {
           window.location.href = 'dashboard.html';
-        }, 1500);
+        }, 1200);
       } catch (error) {
         showToast('⚠️ Error claiming reward. Please try again.');
-        document.getElementById('startBtn').disabled = false;
-        document.getElementById('startBtn').innerHTML = '<i class="fas fa-play"></i> Start Watching';
+        document.getElementById('claimBtn').disabled = false;
+        document.getElementById('claimBtn').innerHTML = '<i class="fas fa-check"></i> Claim ₦50';
       }
     }
 
