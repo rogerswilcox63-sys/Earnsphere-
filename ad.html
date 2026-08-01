@@ -4,37 +4,107 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Watch an Ad - EarnSphere</title>
-  <link href="https://googleapis.com" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cloudflare.com" />
-  <script src="https://gstatic.com"></script>
-  <script src="https://gstatic.com"></script>
-  <script src="https://gstatic.com"></script>
+  <!-- Correct CDN links -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; padding:2rem; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-    .container { max-width:500px; background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:2rem; border:1px solid rgba(255,255,255,.1); text-align:center; width:100%; }
-    .back-link { color:#3b82f6; text-decoration:none; display:inline-block; margin-bottom:1rem; float:left; }
-    .back-link:hover { text-decoration:underline; }
-    h1 { margin-bottom:.5rem; }
-    .reward-badge { background:rgba(16,185,129,.2); color:#10b981; padding:.25rem .75rem; border-radius:.25rem; font-size:.9rem; display:inline-block; margin:1rem 0; }
-    .timer-text { font-size:2rem; font-weight:700; color:#f59e0b; margin:1.5rem 0; }
-    .btn-primary { background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; color:#fff; padding:1rem; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; width:100%; margin-top:.5rem; transition:all 0.3s; }
-    .btn-primary:hover:not(:disabled) { transform:scale(1.02); }
-    .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
-    .btn-success { background:linear-gradient(135deg, #10b981, #059669); }
-    .toast { background:rgba(30,41,59,.95); padding:1rem 1.5rem; border-radius:.5rem; border:1px solid rgba(16,185,129,.3); color:#fff; animation:slideIn 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,.3); position:fixed; top:20px; right:20px; z-index:9999; max-width:90%; }
-    @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
-
-    .ad-placeholder {
-      max-width: 100%;
-      margin: 1.5rem auto;
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 500px;
+      background: rgba(30, 41, 59, .6);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, .1);
+      text-align: center;
+      width: 100%;
+    }
+    .back-link {
+      color: #3b82f6;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 1rem;
+      float: left;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { margin-bottom: .5rem; }
+    .reward-badge {
+      background: rgba(16, 185, 129, .2);
+      color: #10b981;
+      padding: .25rem .75rem;
+      border-radius: .25rem;
+      font-size: .9rem;
+      display: inline-block;
+      margin: 1rem 0;
+    }
+    .timer-text {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f59e0b;
+      margin: 1.5rem 0;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border: none;
+      color: #fff;
       padding: 1rem;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      border: 2px dashed rgba(255, 255, 255, 0.1);
-      min-height: 120px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-top: .5rem;
+      transition: all 0.3s;
+    }
+    .btn-primary:hover:not(:disabled) { transform: scale(1.02); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-success { background: linear-gradient(135deg, #10b981, #059669); }
+    .toast {
+      background: rgba(30, 41, 59, .95);
+      padding: 1rem 1.5rem;
+      border-radius: .5rem;
+      border: 1px solid rgba(16, 185, 129, .3);
+      color: #fff;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, .3);
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 90%;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Ad container – replaces the placeholder */
+    .ad-container {
+      max-width: 728px;
+      margin: 1.5rem auto;
+      padding: 12px;
+      background: rgba(30, 41, 59, 0.4);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+      min-height: 90px;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 100%;
     }
   </style>
 </head>
@@ -45,12 +115,10 @@
     <p>Watch a short ad and earn <strong>₦50</strong>!</p>
     <div class="reward-badge"><i class="fas fa-coins"></i> Reward: ₦50 per day</div>
 
-    <!-- Ad Wrapper for AutoTag Placement -->
-    <div class="ad-placeholder">
-      <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
-      <script type="text/javascript"> 
-          aclib.runAutoTag({ zoneId: 'rcnic8lxix' }); 
-      </script>
+    <!-- ===== REPLACED WITH MONDIAD BANNER (same as dashboard) ===== -->
+    <div class="ad-container">
+      <script async src="https://ss.mrmnd.com/banner.js"></script>
+      <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
     </div>
 
     <div id="timerDisplay" class="timer-text">⏳ 10 seconds</div>
@@ -60,9 +128,12 @@
   </div>
 
   <script>
+    // ============================================================
+    // FIREBASE CONFIG (fixed authDomain)
+    // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-      authDomain: "://firebaseapp.com",
+      authDomain: "earnspherehub-742e9.firebaseapp.com",   // FIXED
       projectId: "earnspherehub-742e9",
       storageBucket: "earnspherehub-742e9.firebasestorage.app",
       messagingSenderId: "173538573377",
@@ -72,7 +143,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let userData = { balance:0, lifetimeTotal:0, successfulTaskCount:0, completedTasks:{} };
+    let userData = { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTasks: {} };
     let adTimer;
     let seconds = 10;
 
@@ -135,14 +206,13 @@
         return;
       }
 
-      // Automatically triggers your pop-under ad zone when the user clicks the button.
-      // This bypasses browser popup blockers by executing on direct user interaction.
+      // Trigger pop-under ad on claim – uses Adcash pop (already defined)
       try {
-          if (typeof aclib !== 'undefined' && typeof aclib.runPop === 'function') {
-              aclib.runPop({ zoneId: '11871326' });
-          }
-      } catch(e) {
-          console.error("Ad script error:", e);
+        if (typeof aclib !== 'undefined' && typeof aclib.runPop === 'function') {
+          aclib.runPop({ zoneId: '11871326' });
+        }
+      } catch (e) {
+        console.error("Ad script error:", e);
       }
 
       await loadUserData(user.uid);
@@ -166,7 +236,7 @@
 
         await db.collection('users').doc(user.uid).set(userData, { merge: true });
         showToast(`🎉 Ad reward claimed! +₦${reward} earned!`);
-        
+
         setTimeout(() => {
           window.location.href = 'dashboard.html';
         }, 1200);
