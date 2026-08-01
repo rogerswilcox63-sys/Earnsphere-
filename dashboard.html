@@ -351,6 +351,48 @@
       width: 100%;
     }
 
+    /* ===== SUSPENSION BANNER ===== */
+    .suspension-banner {
+      display: none;
+      background: rgba(239,68,68,0.15);
+      border: 2px solid #ef4444;
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      animation: pulseBorder 2s infinite;
+    }
+    @keyframes pulseBorder {
+      0% { border-color: #ef4444; }
+      50% { border-color: #f87171; }
+      100% { border-color: #ef4444; }
+    }
+    .suspension-banner .icon {
+      font-size: 3rem;
+      color: #ef4444;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .suspension-banner h2 {
+      color: #ef4444;
+      font-size: 1.5rem;
+      margin-bottom: 0.3rem;
+    }
+    .suspension-banner .reason {
+      color: #e2e8f0;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .suspension-banner .help {
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+    .suspension-banner .help a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    .suspension-banner .help a:hover { text-decoration: underline; }
+
     @media (max-width: 768px) {
       .desktop-nav { display: none; }
       .hamburger { display: flex; }
@@ -359,6 +401,7 @@
       .navbar .user-greeting { display: none; }
       .navbar { padding: 0.6rem 1rem; }
       .trust-badges { gap: 0.8rem; }
+      .suspension-banner { padding: 1.2rem; }
     }
     @media (min-width: 769px) {
       .mobile-nav { display: none !important; }
@@ -414,6 +457,14 @@
 
     <!-- DASHBOARD CONTENT -->
     <div class="dashboard-container">
+      <!-- SUSPENSION BANNER -->
+      <div class="suspension-banner" id="suspensionBanner">
+        <span class="icon"><i class="fas fa-lock"></i></span>
+        <h2>Account Suspended</h2>
+        <p class="reason" id="suspensionReason">Your account has been suspended for inactivity or policy violation.</p>
+        <p class="help">If you believe this is an error, please contact support at <a href="mailto:support@earnspherehub.name.ng">support@earnspherehub.name.ng</a></p>
+      </div>
+
       <div class="trust-badges">
         <span class="badge-item"><i class="fas fa-users"></i> 12,000+ Users</span>
         <span class="badge-item"><i class="fas fa-lock"></i> 256‑bit Encryption</span>
@@ -605,7 +656,11 @@
       redeemedCoupons: [],
       socialLastCompleted: 0,
       appLastCompleted: 0,
-      extraLastCompleted: 0
+      extraLastCompleted: 0,
+      lastActive: null,          // NEW
+      status: 'active',          // 'active', 'suspended', 'banned'
+      suspensionReason: null,
+      taskTimestamps: []         // for rapid task detection
     };
 
     // ============================================================
@@ -679,6 +734,30 @@
           await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
         } catch (e) { console.error("Error saving data:", e); }
       }
+    }
+
+    // ===== INACTIVITY CHECK =====
+    function checkInactivity() {
+      const lastActive = userData.lastActive;
+      if (!lastActive) return false; // new user, no inactivity
+      const now = Date.now();
+      const diffDays = (now - lastActive) / (1000 * 60 * 60 * 24);
+      return diffDays >= 30; // 30 days or more
+    }
+
+    // ===== RAPID TASK CHECK =====
+    function checkRapidTaskCompletion() {
+      const timestamps = userData.taskTimestamps || [];
+      const recent = timestamps.slice(-5);
+      if (recent.length >= 5) {
+        const first = recent[0];
+        const last = recent[recent.length - 1];
+        const timeDiff = (last - first) / 1000 / 60; // minutes
+        if (timeDiff < 5) {
+          return true; // 5 tasks in under 5 minutes -> suspend
+        }
+      }
+      return false;
     }
 
     // ============================================================
@@ -807,36 +886,81 @@
     }
 
     // ============================================================
-    // TASK COMPLETION
+    // TASK COMPLETION (with auto-suspension)
     // ============================================================
     async function completeSurveyTask(taskId, reward) {
       if (isTaskCompleted(taskId)) { showToast('⚠️ You already completed this survey.'); return; }
       const surveyCount = getSurveyCountToday();
       if (surveyCount >= 2) { showToast('⚠️ You have reached the daily limit of 2 surveys.'); return; }
+
+      // Record timestamp
+      const now = Date.now();
+      if (!userData.taskTimestamps) userData.taskTimestamps = [];
+      userData.taskTimestamps.push(now);
+      if (userData.taskTimestamps.length > 5) userData.taskTimestamps.shift();
+
+      // Rapid task check
+      if (checkRapidTaskCompletion()) {
+        userData.status = 'suspended';
+        userData.suspensionReason = 'Completed 5 tasks within 5 minutes – possible automated activity.';
+        await db.collection('users').doc(currentUser.uid).update({
+          status: 'suspended',
+          suspensionReason: userData.suspensionReason,
+          taskTimestamps: userData.taskTimestamps
+        });
+        showToast('⛔ Account suspended for unusual activity.', 'error');
+        location.reload();
+        return;
+      }
+
+      // Continue with normal completion
       const survey = getSurveyTasks().find(t => t.id === taskId);
       if (survey && survey.link) { window.open(survey.link, '_blank'); }
       if (!userData.completedTasks) userData.completedTasks = {};
-      userData.completedTasks[taskId] = Date.now();
+      userData.completedTasks[taskId] = now;
       userData.balance = (userData.balance || 0) + reward;
       userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+
       updateInterfaceValues();
       await saveUserData();
       renderTasks();
       showToast(`🎉 Survey completed! +₦${reward} earned!`);
     }
 
+    // Also update category tasks (app, social, extra) similarly.
     async function completeCategoryTask(taskId, reward, link, lastKey) {
       if (isTaskCompleted(taskId)) { showToast('⚠️ You already completed this task today.'); return; }
       const lastTimestamp = userData[lastKey] || 0;
       if (isCooldownActive(lastTimestamp)) { showToast('⏳ Please wait 1 hour before doing another task in this category.'); return; }
+
+      // Record timestamp
+      const now = Date.now();
+      if (!userData.taskTimestamps) userData.taskTimestamps = [];
+      userData.taskTimestamps.push(now);
+      if (userData.taskTimestamps.length > 5) userData.taskTimestamps.shift();
+
+      if (checkRapidTaskCompletion()) {
+        userData.status = 'suspended';
+        userData.suspensionReason = 'Completed 5 tasks within 5 minutes – possible automated activity.';
+        await db.collection('users').doc(currentUser.uid).update({
+          status: 'suspended',
+          suspensionReason: userData.suspensionReason,
+          taskTimestamps: userData.taskTimestamps
+        });
+        showToast('⛔ Account suspended for unusual activity.', 'error');
+        location.reload();
+        return;
+      }
+
       if (link && link !== '#') { window.open(link, '_blank'); }
       if (!userData.completedTasks) userData.completedTasks = {};
-      userData.completedTasks[taskId] = Date.now();
-      userData[lastKey] = Date.now();
+      userData.completedTasks[taskId] = now;
+      userData[lastKey] = now;
       userData.balance = (userData.balance || 0) + reward;
       userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+
       updateInterfaceValues();
       await saveUserData();
       renderTasks();
@@ -954,6 +1078,26 @@
           const doc = await db.collection('users').doc(user.uid).get();
           if (doc.exists) {
             userData = doc.data();
+            // Ensure fields exist
+            if (!userData.lastActive) userData.lastActive = Date.now();
+            if (!userData.status) userData.status = 'active';
+            if (!userData.taskTimestamps) userData.taskTimestamps = [];
+
+            // --- INACTIVITY CHECK ---
+            if (userData.status === 'active' && checkInactivity()) {
+              userData.status = 'suspended';
+              userData.suspensionReason = 'Inactive for 30 days';
+              await db.collection('users').doc(user.uid).update({
+                status: 'suspended',
+                suspensionReason: 'Inactive for 30 days'
+              });
+              console.log('User suspended due to inactivity');
+            }
+
+            // Update lastActive
+            userData.lastActive = Date.now();
+            await db.collection('users').doc(user.uid).update({ lastActive: userData.lastActive });
+
             localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
           } else {
             console.warn('User document does not exist. Creating default.');
@@ -967,11 +1111,27 @@
               redeemedCoupons: [],
               socialLastCompleted: 0,
               appLastCompleted: 0,
-              extraLastCompleted: 0
+              extraLastCompleted: 0,
+              lastActive: Date.now(),
+              status: 'active',
+              suspensionReason: null,
+              taskTimestamps: []
             };
             await db.collection('users').doc(user.uid).set(userData);
           }
         } catch (err) { console.error('Error loading user data:', err); }
+
+        // --- SHOW SUSPENSION BANNER IF SUSPENDED/BANNED ---
+        const banner = document.getElementById('suspensionBanner');
+        const reasonEl = document.getElementById('suspensionReason');
+        if (userData.status === 'suspended' || userData.status === 'banned') {
+          banner.style.display = 'block';
+          reasonEl.textContent = userData.suspensionReason || 'Account suspended. Contact support.';
+          document.querySelectorAll('.start-btn, .reward-btn, .coupon-btn, .ai-btn, #dailyRewardBtn, .support-btn, #couponBtn').forEach(el => el.disabled = true);
+        } else {
+          banner.style.display = 'none';
+        }
+
         updateInterfaceValues();
         renderTasks();
         fetchUnreadCount();
