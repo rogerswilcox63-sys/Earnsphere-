@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Claim 120-Task Reward – EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: #f1f5f9;
+    }
+
+    .container {
+      max-width: 480px;
+      width: 100%;
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border-radius: 1.5rem;
+      padding: 2.5rem 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 3.5rem;
+      color: #fbbf24;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .message-box {
+      background: rgba(15, 23, 42, 0.4);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .message-box .status-msg {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+    .message-box .status-msg strong {
+      color: #f1f5f9;
+    }
+    .message-box .status-msg .highlight {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+    .message-box .status-msg .reward-amount {
+      color: #10b981;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .progress-section {
+      margin-bottom: 1.8rem;
+    }
+    .progress-section .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.3rem;
+    }
+    .progress-section .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-section .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    .progress-section .progress-emoji {
+      margin-top: 0.3rem;
+      font-size: 0.85rem;
+      color: #fbbf24;
+    }
+
+    .reward-box {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      margin: 0 0 1.8rem;
+      display: inline-block;
+    }
+    .reward-box .amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #10b981;
+    }
+    .reward-box .label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      display: block;
+      margin-top: 0.1rem;
+    }
+
+    .claim-btn {
+      display: inline-block;
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .claim-btn:hover:not(:disabled) {
+      transform: scale(1.02);
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5);
+    }
+    .claim-btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    .claim-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .claim-btn.claimed {
+      background: #334155;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 1.2rem;
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+    .back-link:hover {
+      color: #60a5fa;
+      text-decoration: underline;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      z-index: 9999;
+      max-width: 90%;
+      font-weight: 500;
+      text-align: center;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+    .toast.success { border-left: 4px solid #22c55e; }
+    .toast.error { border-left: 4px solid #ef4444; }
+    .toast.warning { border-left: 4px solid #facc15; }
+
+    @media (max-width: 480px) {
+      .container { padding: 1.8rem 1.2rem; }
+      .title { font-size: 1.3rem; }
+      .reward-box .amount { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <span class="icon"><i class="fas fa-trophy"></i></span>
+  <h1 class="title">🏆 120-Task Reward</h1>
+  <p class="subtitle">Claim your bonus for reaching this milestone!</p>
+
+  <!-- Status Message -->
+  <div class="message-box">
+    <div class="status-msg" id="statusMsg">
+      <i class="fas fa-spinner fa-spin"></i> Loading your progress…
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-section">
+    <div class="progress-label">
+      <span>Progress to 120 tasks</span>
+      <span id="progressText">0 / 120</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill" style="width: 0%;"></div>
+    </div>
+    <div class="progress-emoji" id="progressEmoji">💪 Keep going!</div>
+  </div>
+
+  <!-- Reward Box -->
+  <div class="reward-box">
+    <span class="amount">₦5,000</span>
+    <span class="label">Bonus Reward</span>
+  </div>
+
+  <!-- Claim Button -->
+  <button class="claim-btn" id="claimBtn" disabled>
+    <i class="fas fa-spinner fa-spin"></i> Loading…
+  </button>
+
+  <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  // ============================================================
+  // FIREBASE CONFIG
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+    authDomain: "earnspherehub-742e9.firebaseapp.com",
+    projectId: "earnspherehub-742e9",
+    storageBucket: "earnspherehub-742e9.firebasestorage.app",
+    messagingSenderId: "173538573377",
+    appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // ============================================================
+  // CONSTANTS
+  // ============================================================
+  const TARGET_TASKS = 120;
+  const REWARD_AMOUNT = 5000;
+  const ACHIEVEMENT_KEY = 'claimed_120tasks';
+
+  // ============================================================
+  // DOM REFS
+  // ============================================================
+  const claimBtn = document.getElementById('claimBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  const progressEmoji = document.getElementById('progressEmoji');
+
+  // ============================================================
+  // TOAST
+  // ============================================================
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast ' + type;
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    clearTimeout(toast._hide);
+    toast._hide = setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  // ============================================================
+  // UPDATE UI
+  // ============================================================
+  function updateUI(tasksDone, claimed, user) {
+    const isEligible = tasksDone >= TARGET_TASKS;
+    const percent = Math.min((tasksDone / TARGET_TASKS) * 100, 100);
+
+    progressFill.style.width = `${percent}%`;
+    progressText.textContent = `${tasksDone} / ${TARGET_TASKS}`;
+
+    if (tasksDone >= TARGET_TASKS) {
+      progressEmoji.textContent = '🔥 100% Complete – You\'re a legend!';
+    } else {
+      progressEmoji.textContent = `💪 ${Math.round(percent)}% – Keep going!`;
+    }
+
+    if (!user) {
+      statusMsg.innerHTML = '🔒 Please <a href="login.html" style="color:#3b82f6;">log in</a> to check your progress.';
+      claimBtn.disabled = true;
+      claimBtn.innerHTML = '🔒 Login to Claim';
+      return;
+    }
+
+    if (claimed) {
+      statusMsg.innerHTML = '✅ You already claimed this reward!';
+      claimBtn.disabled = true;
+      claimBtn.innerHTML = '✅ Already Claimed';
+      claimBtn.classList.add('claimed');
+      return;
+    }
+
+    if (isEligible) {
+      statusMsg.innerHTML = '🎉 You\'ve completed <strong>120 tasks</strong>! Claim your <strong class="reward-amount">₦5,000</strong> reward now!';
+      claimBtn.disabled = false;
+      claimBtn.innerHTML = '<i class="fas fa-check-circle"></i> Claim ₦5,000 Now';
+      claimBtn.classList.remove('claimed');
+    } else {
+      const remaining = TARGET_TASKS - tasksDone;
+      statusMsg.innerHTML = `📊 You've completed <strong>${tasksDone}</strong> tasks. Complete <strong class="highlight">${remaining} more</strong> to unlock ₦5,000!`;
+      claimBtn.disabled = true;
+      claimBtn.innerHTML = '🔒 Complete 120 tasks to claim';
+      claimBtn.classList.remove('claimed');
+    }
+  }
+
+  // ============================================================
+  // LOAD USER DATA
+  // ============================================================
+  async function loadUserData(user) {
+    try {
+      const doc = await db.collection('users').doc(user.uid).get();
+      if (!doc.exists) {
+        updateUI(0, false, user);
+        statusMsg.innerHTML = '⚠️ User data not found. Complete some tasks first.';
+        return;
+      }
+      const data = doc.data();
+      const tasksDone = data.successfulTaskCount || 0;
+      const claimedAchievements = data.claimedAchievements || [];
+      const claimed = claimedAchievements.includes(ACHIEVEMENT_KEY);
+
+      updateUI(tasksDone, claimed, user);
+    } catch (err) {
+      console.error('Error loading user data:', err);
+      statusMsg.innerHTML = '❌ Error loading your progress. Please try again.';
+      claimBtn.disabled = true;
+      claimBtn.innerHTML = '⚠️ Error';
+    }
+  }
+
+  // ============================================================
+  // CLAIM REWARD
+  // ============================================================
+  async function claimReward(user) {
+    try {
+      const userRef = db.collection('users').doc(user.uid);
+
+      await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(userRef);
+        if (!doc.exists) throw new Error('User not found.');
+
+        const data = doc.data();
+        const tasksDone = data.successfulTaskCount || 0;
+        if (tasksDone < TARGET_TASKS) {
+          throw new Error('You have not completed 120 tasks.');
+        }
+
+        const claimedAchievements = data.claimedAchievements || [];
+        if (claimedAchievements.includes(ACHIEVEMENT_KEY)) {
+          throw new Error('Reward already claimed.');
+        }
+
+        const newBalance = (data.balance || 0) + REWARD_AMOUNT;
+        const newLifetime = (data.lifetimeTotal || 0) + REWARD_AMOUNT;
+        const newClaimed = [...claimedAchievements, ACHIEVEMENT_KEY];
+
+        transaction.update(userRef, {
+          balance: newBalance,
+          lifetimeTotal: newLifetime,
+          claimedAchievements: newClaimed
+        });
+      });
+
+      showToast(`🎉 ₦5,000 added to your wallet!`, 'success');
+      // Reload UI to update
+      await loadUserData(user);
+      // Redirect after short delay
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 2000);
+
+    } catch (err) {
+      console.error('Claim error:', err);
+      if (err.message === 'Reward already claimed.') {
+        showToast('⚠️ You already claimed this reward.', 'warning');
+      } else if (err.message === 'You have not completed 120 tasks.') {
+        showToast('⚠️ Complete 120 tasks first.', 'warning');
+      } else {
+        showToast('❌ Error claiming reward. Please try again.', 'error');
+      }
+      // Re-load to reset state
+      if (auth.currentUser) await loadUserData(auth.currentUser);
+    }
+  }
+
+  // ============================================================
+  // AUTH STATE
+  // ============================================================
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      updateUI(0, false, null);
+      return;
+    }
+    await loadUserData(user);
+
+    // Claim button handler
+    claimBtn.addEventListener('click', async () => {
+      if (claimBtn.disabled) return;
+      claimBtn.disabled = true;
+      claimBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
+      await claimReward(user);
+    });
+  });
+</script>
+
+</body>
+</html>
