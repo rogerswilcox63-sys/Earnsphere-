@@ -177,14 +177,41 @@
     .notif-item .notif-body {
       flex: 1;
     }
+    /* -------- HTML RENDER SUPPORT -------- */
     .notif-item .notif-body .notif-message {
       font-size: 0.95rem;
-      line-height: 1.5;
+      line-height: 1.6;
       color: #e2e8f0;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+    .notif-item .notif-body .notif-message strong {
+      color: #f1f5f9;
+    }
+    .notif-item .notif-body .notif-message a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    .notif-item .notif-body .notif-message a:hover {
+      text-decoration: underline;
+    }
+    .notif-item .notif-body .notif-message .claim-btn-inline {
+      display: inline-block;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-decoration: none;
+      margin-top: 0.2rem;
+      transition: all 0.3s;
+    }
+    .notif-item .notif-body .notif-message .claim-btn-inline:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 15px rgba(16,185,129,0.3);
     }
     .notif-item .notif-body .notif-time {
       font-size: 0.7rem;
@@ -274,12 +301,41 @@
       align-items: center;
       gap: 0.4rem;
     }
+    /* -------- MODAL HTML RENDER -------- */
     .notif-modal-content .modal-message {
       font-size: 1rem;
-      line-height: 1.7;
+      line-height: 1.8;
       color: #e2e8f0;
       white-space: pre-wrap;
       word-break: break-word;
+    }
+    .notif-modal-content .modal-message strong {
+      color: #f1f5f9;
+    }
+    .notif-modal-content .modal-message a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    .notif-modal-content .modal-message a:hover {
+      text-decoration: underline;
+    }
+    .notif-modal-content .modal-message .claim-btn-modal {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-decoration: none;
+      margin: 1rem 0 0.5rem;
+      transition: all 0.3s;
+    }
+    .notif-modal-content .modal-message .claim-btn-modal:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 20px rgba(16,185,129,0.4);
     }
     .notif-modal-content .modal-image {
       width: 100%;
@@ -504,7 +560,7 @@
   }
 
   // ============================================================
-  // RENDER NOTIFICATIONS
+  // RENDER NOTIFICATIONS (HTML SUPPORT)
   // ============================================================
   function renderNotifications() {
     if (!notifications.length) {
@@ -535,7 +591,7 @@
             <i class="fas fa-${notif.icon || 'bell'}"></i>
           </div>
           <div class="notif-body">
-            <div class="notif-message">${notif.message}</div>
+            <div class="notif-message">${notif.message}</div> <!-- HTML rendered here -->
             ${imageThumb}
             <div class="notif-time">
               <i class="fas fa-clock"></i> ${timeStr}
@@ -551,7 +607,7 @@
   }
 
   // ============================================================
-  // MODAL (Tap to Read)
+  // MODAL (HTML SUPPORT)
   // ============================================================
   function openModal(index) {
     const notif = notifications[index];
@@ -561,7 +617,7 @@
     document.getElementById('modalIcon').innerHTML = `<i class="fas fa-${notif.icon || 'bell'}"></i>`;
     document.getElementById('modalTitle').textContent = 'Notification';
     document.getElementById('modalTime').innerHTML = `<i class="fas fa-clock"></i> ${notif.timestamp.toLocaleString('en-NG', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
-    document.getElementById('modalMessage').textContent = notif.message;
+    document.getElementById('modalMessage').innerHTML = notif.message; // HTML rendered here
 
     const img = document.getElementById('modalImage');
     if (notif.imageUrl) {
@@ -601,7 +657,6 @@
   async function markAsRead(notifId) {
     try {
       await db.collection('notifications').doc(notifId).update({ read: true });
-      // Update local state
       const notif = notifications.find(n => n.id === notifId);
       if (notif) notif.read = true;
       renderNotifications();
