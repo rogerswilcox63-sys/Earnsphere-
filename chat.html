@@ -10,6 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
+    /* (styles are the same as before – I'll keep them minimal) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Inter', sans-serif;
@@ -23,11 +24,11 @@
     }
     .wrapper {
       width: 100%;
-      max-width: 900px;
+      max-width: 700px;
       flex: 1;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 80px);
+      height: calc(100vh - 60px);
     }
     .navbar {
       background: rgba(30,41,59,.8);
@@ -47,72 +48,93 @@
     .navbar .logout-btn:hover { background:rgba(59,130,246,.3); }
     .navbar .back-link { color:#94a3b8; text-decoration:none; font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; }
     .navbar .back-link:hover { color:#f1f5f9; }
-    .chat-container {
-      display: flex;
-      flex: 1;
-      background: rgba(30,41,59,0.4);
-      backdrop-filter: blur(8px);
+
+    .friend-list-container {
+      background: rgba(30,41,59,0.3);
       border-radius: 1rem;
+      padding: 1rem;
       border: 1px solid rgba(255,255,255,0.06);
-      overflow: hidden;
-      min-height: 400px;
+      margin-bottom: 0.5rem;
     }
-    .friends-sidebar {
-      width: 280px;
-      background: rgba(15,23,42,0.3);
-      border-right: 1px solid rgba(255,255,255,0.06);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-    .friends-sidebar .sidebar-header {
-      padding: 1rem 1.2rem;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: #94a3b8;
+    .friend-list-container .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 0.5rem;
     }
-    .friends-sidebar .sidebar-header .count { background:rgba(255,255,255,0.05); padding:0.1rem 0.5rem; border-radius:12px; font-size:0.7rem; color:#64748b; }
-    .refresh-btn { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#94a3b8; padding:0.3rem 0.8rem; border-radius:0.5rem; cursor:pointer; font-size:0.7rem; }
+    .friend-list-container .header h3 { color: #94a3b8; font-weight: 600; }
+    .refresh-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #94a3b8;
+      padding: 0.2rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.7rem;
+    }
     .refresh-btn:hover { background:rgba(255,255,255,0.1); color:#f1f5f9; }
-    .friends-list { flex:1; overflow-y:auto; padding:0.5rem; }
-    .friend-item { display:flex; align-items:center; gap:0.8rem; padding:0.7rem 0.8rem; border-radius:10px; cursor:pointer; transition:all 0.3s; border:1px solid transparent; }
+    .friend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.7rem 0.8rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+      margin-bottom: 0.3rem;
+    }
     .friend-item:hover { background:rgba(255,255,255,0.04); }
-    .friend-item .avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#8b5cf6); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem; color:#fff; flex-shrink:0; }
-    .friend-item .avatar.admin { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#000; }
-    .friend-item .info { flex:1; min-width:0; }
-    .friend-item .info .name { font-weight:600; font-size:0.9rem; color:#f1f5f9; }
-    .friend-item .info .last-msg { font-size:0.75rem; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .friend-item .unread-badge { background:#3b82f6; color:#fff; font-size:0.6rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:12px; }
-    .chat-area { flex:1; display:flex; flex-direction:column; background:rgba(15,23,42,0.15); }
-    .chat-area .chat-header { padding:0.8rem 1.2rem; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; gap:0.8rem; font-weight:600; }
-    .chat-area .chat-header .avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#8b5cf6); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; color:#fff; }
-    .chat-area .chat-header .avatar.admin { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#000; }
-    .chat-messages { flex:1; padding:1rem 1.2rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.5rem; }
+    .friend-item .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #fff;
+    }
+    .friend-item .info { flex:1; }
+    .friend-item .info .name { font-weight:600; font-size:0.95rem; }
+    .friend-item .info .last-msg { font-size:0.75rem; color:#64748b; }
+    .debug-box {
+      background: rgba(0,0,0,0.3);
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-top: 0.5rem;
+      font-family: monospace;
+      word-break: break-all;
+    }
+    .chat-area { display: none; flex:1; flex-direction:column; background:rgba(30,41,59,0.3); border-radius:1rem; border:1px solid rgba(255,255,255,0.06); overflow:hidden; margin-top:0.5rem; }
+    .chat-header { padding:0.8rem 1.2rem; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; gap:0.8rem; font-weight:600; }
+    .chat-header .avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#8b5cf6); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; color:#fff; }
+    .chat-messages { flex:1; padding:1rem 1.2rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.5rem; min-height:200px; }
     .chat-messages .msg { max-width:75%; padding:0.6rem 0.9rem; border-radius:12px; word-wrap:break-word; line-height:1.5; font-size:0.9rem; }
     .chat-messages .msg.sent { align-self:flex-end; background:#3b82f6; color:#fff; border-bottom-right-radius:4px; }
     .chat-messages .msg.received { align-self:flex-start; background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:4px; }
     .chat-messages .msg .time { font-size:0.6rem; opacity:0.6; display:block; margin-top:0.2rem; text-align:right; }
-    .chat-area .chat-input { display:flex; gap:0.5rem; padding:0.8rem 1.2rem; border-top:1px solid rgba(255,255,255,0.06); background:rgba(15,23,42,0.2); }
-    .chat-area .chat-input input { flex:1; padding:0.6rem 1rem; background:rgba(15,23,42,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:20px; color:#f1f5f9; font-size:0.9rem; outline:none; }
-    .chat-area .chat-input input:focus { border-color:#3b82f6; }
-    .chat-area .chat-input button { padding:0.5rem 1rem; background:linear-gradient(135deg,#3b82f6,#2563eb); border:none; border-radius:50%; color:#fff; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; }
-    .chat-placeholder { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#64748b; padding:2rem; text-align:center; }
-    .chat-placeholder i { font-size:3rem; color:#334155; margin-bottom:1rem; }
-    .loading-spinner { display:flex; justify-content:center; align-items:center; padding:2rem; color:#64748b; }
-    .loading-spinner i { animation:spin 1s linear infinite; margin-right:0.5rem; }
+    .chat-input { display:flex; gap:0.5rem; padding:0.8rem 1.2rem; border-top:1px solid rgba(255,255,255,0.06); background:rgba(15,23,42,0.3); }
+    .chat-input input { flex:1; padding:0.6rem 1rem; background:rgba(15,23,42,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:20px; color:#f1f5f9; font-size:0.9rem; outline:none; }
+    .chat-input input:focus { border-color:#3b82f6; }
+    .chat-input button { padding:0.5rem 1rem; background:linear-gradient(135deg,#3b82f6,#2563eb); border:none; border-radius:50%; color:#fff; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; }
+    .placeholder { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#64748b; padding:2rem; text-align:center; }
+    .placeholder i { font-size:3rem; color:#334155; margin-bottom:1rem; }
+    .loading { text-align:center; padding:1rem; color:#64748b; }
+    .loading i { animation:spin 1s linear infinite; margin-right:0.5rem; }
     @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
     .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:#1e293b; border:1px solid #334155; color:#f1f5f9; padding:10px 22px; border-radius:12px; font-size:13px; box-shadow:0 10px 40px rgba(0,0,0,0.7); opacity:0; transition:opacity 0.35s ease, transform 0.35s ease; pointer-events:none; z-index:9999; max-width:90%; font-weight:500; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
     .toast.success { border-left:4px solid #22c55e; }
     .toast.error { border-left:4px solid #ef4444; }
-    @media (max-width:768px) { .friends-sidebar { width:100%; max-height:200px; border-right:none; border-bottom:1px solid rgba(255,255,255,0.06); } .chat-container { flex-direction:column; } }
   </style>
 </head>
 <body>
+
 <div class="wrapper">
   <nav class="navbar">
     <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
@@ -122,35 +144,33 @@
     </div>
   </nav>
 
-  <div class="chat-container">
-    <div class="friends-sidebar">
-      <div class="sidebar-header">
-        <span><i class="fas fa-user-friends"></i> Friends</span>
-        <span style="display:flex; gap:0.5rem; align-items:center;">
-          <span class="count" id="friendCount">0</span>
-          <button class="refresh-btn" onclick="loadFriends()"><i class="fas fa-sync-alt"></i></button>
-        </span>
-      </div>
-      <div class="friends-list" id="friendsList">
-        <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+  <!-- FRIEND LIST -->
+  <div class="friend-list-container">
+    <div class="header">
+      <h3><i class="fas fa-user-friends"></i> Friends</h3>
+      <button class="refresh-btn" onclick="loadFriends()"><i class="fas fa-sync-alt"></i> Refresh</button>
+    </div>
+    <div id="friendList">
+      <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+    </div>
+    <div id="debugInfo" class="debug-box">🔍 Debug: Waiting for data...</div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area" id="chatArea" style="display:none;">
+    <div class="chat-header" id="chatHeader">
+      <div class="avatar" id="chatAvatar">U</div>
+      <span class="name" id="chatName">Friend</span>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="placeholder">
+        <i class="fas fa-comment-dots"></i>
+        <p>Select a friend to start chatting</p>
       </div>
     </div>
-
-    <div class="chat-area">
-      <div class="chat-header" id="chatHeader" style="display:none;">
-        <div class="avatar" id="chatAvatar">U</div>
-        <span class="name" id="chatName">Friend</span>
-      </div>
-      <div class="chat-messages" id="chatMessages">
-        <div class="chat-placeholder">
-          <i class="fas fa-comment-dots"></i>
-          <p>Select a friend to start chatting</p>
-        </div>
-      </div>
-      <div class="chat-input" id="chatInputArea" style="display:none;">
-        <input type="text" id="messageInput" placeholder="Type a message..." />
-        <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-      </div>
+    <div class="chat-input">
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
 </div>
@@ -173,6 +193,7 @@
   let currentUser = null;
   let currentFriendId = null;
   let chatUnsubscribe = null;
+  let friendList = [];
 
   function showToast(msg, type='success') {
     const t=document.getElementById('toast');
@@ -190,41 +211,56 @@
   }
 
   // ============================================================
-  // LOAD FRIENDS – EXACT LOGIC FROM COMMUNITY PAGE
+  // LOAD FRIENDS – EXACTLY THE SAME AS COMMUNITY
   // ============================================================
   async function loadFriends() {
-    if(!currentUser) { console.warn('No user'); return; }
-    const list = document.getElementById('friendsList');
-    list.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+    if(!currentUser) {
+      document.getElementById('friendList').innerHTML = `<div class="loading">Not logged in</div>`;
+      document.getElementById('debugInfo').textContent = '🔍 No user logged in.';
+      return;
+    }
+
+    const list = document.getElementById('friendList');
+    const debug = document.getElementById('debugInfo');
+    list.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+    debug.textContent = `🔍 Your UID: ${currentUser.uid}`;
 
     try {
-      // Query as sender (same as community page)
+      // Query as sender (exactly like community)
       const snap1 = await db.collection('friends')
         .where('uid', '==', currentUser.uid)
         .where('status', '==', 'accepted')
         .get();
 
-      // Query as receiver (same as community page)
+      // Query as receiver (exactly like community)
       const snap2 = await db.collection('friends')
         .where('friendId', '==', currentUser.uid)
         .where('status', '==', 'accepted')
         .get();
 
-      console.log('Sender friends:', snap1.size);
-      console.log('Receiver friends:', snap2.size);
+      debug.textContent += `\nSender: ${snap1.size}, Receiver: ${snap2.size}`;
 
       const friendIds = [];
-      snap1.forEach(doc => friendIds.push(doc.data().friendId));
-      snap2.forEach(doc => friendIds.push(doc.data().uid));
+      snap1.forEach(doc => {
+        const data = doc.data();
+        friendIds.push(data.friendId);
+        debug.textContent += `\nSender doc: friendId=${data.friendId}`;
+      });
+      snap2.forEach(doc => {
+        const data = doc.data();
+        friendIds.push(data.uid);
+        debug.textContent += `\nReceiver doc: uid=${data.uid}`;
+      });
 
       if(friendIds.length === 0) {
-        list.innerHTML = `<div class="empty-friends"><i class="fas fa-user-friends"></i><p>No friends yet.<br />Add friends from the Community page.</p></div>`;
-        document.getElementById('friendCount').textContent='0';
+        list.innerHTML = `<div style="text-align:center; padding:1rem; color:#64748b;">
+          <i class="fas fa-user-friends" style="font-size:2rem; display:block; margin-bottom:0.5rem; color:#334155;"></i>
+          No friends yet. Add friends from the Community page.
+        </div>`;
         return;
       }
 
-      document.getElementById('friendCount').textContent=friendIds.length;
-
+      // Get user details for each friend
       let html = '';
       for(const uid of friendIds) {
         try {
@@ -233,111 +269,106 @@
           const data = doc.data();
           const isAdmin = data.isAdmin === true;
           const avatarChar = (data.displayName || 'U').charAt(0).toUpperCase();
-          const avatarClass = isAdmin ? 'avatar admin' : 'avatar';
-          // Get last message (optional)
-          const chatId = [currentUser.uid, uid].sort().join('_');
-          const lastMsgSnap = await db.collection('messages')
-            .where('chatId', '==', chatId)
-            .orderBy('timestamp', 'desc')
-            .limit(1)
-            .get();
-          let lastMsg = 'No messages yet';
-          let lastTime = '';
-          if(!lastMsgSnap.empty) {
-            const msgData = lastMsgSnap.docs[0].data();
-            lastMsg = msgData.message;
-            const ts = msgData.timestamp ? msgData.timestamp.toDate() : new Date();
-            lastTime = ts.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-          }
-          // Unread count
-          const unreadSnap = await db.collection('messages')
-            .where('chatId', '==', chatId)
-            .where('receiverId', '==', currentUser.uid)
-            .where('read', '==', false)
-            .get();
-          const unreadCount = unreadSnap.size;
-
           html += `
             <div class="friend-item" onclick="selectFriend('${uid}')">
-              <div class="${avatarClass}">${avatarChar}</div>
-              <div class="info">
-                <div class="name">${data.displayName || 'Unknown'} ${isAdmin ? '<span style="color:#fbbf24;">👑</span>' : ''}</div>
-                <div class="last-msg">${lastMsg}</div>
+              <div class="avatar" style="background:${isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}; color:${isAdmin ? '#000' : '#fff'};">
+                ${avatarChar}
               </div>
-              ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ''}
-              <span class="time">${lastTime}</span>
+              <div class="info">
+                <div class="name">${data.displayName || 'Unknown'} ${isAdmin ? '👑' : ''}</div>
+                <div class="last-msg">Click to chat</div>
+              </div>
             </div>
           `;
-        } catch(e) { console.error('Error loading friend:', uid, e); }
+        } catch(e) {
+          console.warn('Error loading user:', uid, e);
+        }
       }
-      list.innerHTML = html || `<div class="empty-friends"><i class="fas fa-user-friends"></i><p>No friends found.</p></div>`;
+      list.innerHTML = html || `<div style="color:#64748b;">No friends found.</div>`;
+
     } catch(err) {
       console.error('Load friends error:', err);
-      list.innerHTML = `<div class="empty-friends"><i class="fas fa-exclamation-circle"></i><p>Error: ${err.message}</p></div>`;
+      list.innerHTML = `<div style="color:#ef4444;">Error: ${err.message}</div>`;
+      debug.textContent += `\n❌ Error: ${err.message}`;
       showToast('❌ Error loading friends.', 'error');
     }
   }
 
+  // ============================================================
+  // SELECT FRIEND
+  // ============================================================
   function selectFriend(friendId) {
     if(chatUnsubscribe) chatUnsubscribe();
     currentFriendId = friendId;
-    loadMessages(friendId);
-    document.querySelectorAll('.friend-item').forEach(el=>el.classList.remove('active'));
-    document.querySelector(`.friend-item[onclick="selectFriend('${friendId}')"]`)?.classList.add('active');
-  }
+    document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active'));
+    const el = document.querySelector(`.friend-item[onclick="selectFriend('${friendId}')"]`);
+    if(el) el.classList.add('active');
 
-  function loadMessages(friendId) {
-    const header = document.getElementById('chatHeader');
-    const inputArea = document.getElementById('chatInputArea');
-    const messages = document.getElementById('chatMessages');
-    header.style.display='flex';
-    inputArea.style.display='flex';
+    // Show chat area
+    document.getElementById('chatArea').style.display = 'flex';
+
+    // Update header
     db.collection('users').doc(friendId).get().then(doc => {
       if(doc.exists) {
-        const data=doc.data();
-        const isAdmin=data.isAdmin===true;
-        const avatarChar=(data.displayName||'U').charAt(0).toUpperCase();
-        document.getElementById('chatAvatar').textContent=avatarChar;
-        document.getElementById('chatAvatar').className=isAdmin?'avatar admin':'avatar';
-        document.getElementById('chatName').textContent=data.displayName||'Unknown';
+        const data = doc.data();
+        const isAdmin = data.isAdmin === true;
+        document.getElementById('chatAvatar').textContent = (data.displayName || 'U').charAt(0).toUpperCase();
+        document.getElementById('chatAvatar').style.background = isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)';
+        document.getElementById('chatAvatar').style.color = isAdmin ? '#000' : '#fff';
+        document.getElementById('chatName').textContent = data.displayName || 'Unknown';
       }
     });
-    messages.innerHTML='<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
-    const chatId=[currentUser.uid, friendId].sort().join('_');
+
+    loadMessages(friendId);
+  }
+
+  // ============================================================
+  // LOAD MESSAGES
+  // ============================================================
+  function loadMessages(friendId) {
+    const messages = document.getElementById('chatMessages');
+    const chatId = [currentUser.uid, friendId].sort().join('_');
+
     if(chatUnsubscribe) chatUnsubscribe();
+
     chatUnsubscribe = db.collection('messages')
       .where('chatId', '==', chatId)
       .orderBy('timestamp', 'asc')
       .onSnapshot(snapshot => {
         const container = messages;
-        container.innerHTML='';
+        container.innerHTML = '';
         snapshot.forEach(doc => {
-          const data=doc.data();
-          const isSent=data.senderId===currentUser.uid;
-          const timeStr=data.timestamp?data.timestamp.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+          const data = doc.data();
+          const isSent = data.senderId === currentUser.uid;
+          const timeStr = data.timestamp ? data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
           container.innerHTML += `
-            <div class="msg ${isSent?'sent':'received'}">
+            <div class="msg ${isSent ? 'sent' : 'received'}">
               ${data.message}
               <span class="time">${timeStr}</span>
             </div>
           `;
         });
-        container.scrollTop=container.scrollHeight;
-        // Mark messages as read
+        container.scrollTop = container.scrollHeight;
+
+        // Mark as read
         snapshot.forEach(doc => {
-          const data=doc.data();
-          if(data.receiverId===currentUser.uid && !data.read) {
+          const data = doc.data();
+          if(data.receiverId === currentUser.uid && !data.read) {
             db.collection('messages').doc(doc.id).update({ read: true });
           }
         });
       });
   }
 
+  // ============================================================
+  // SEND MESSAGE
+  // ============================================================
   async function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
     if(!text || !currentFriendId) return;
-    const chatId=[currentUser.uid, currentFriendId].sort().join('_');
+
+    const chatId = [currentUser.uid, currentFriendId].sort().join('_');
     try {
       await db.collection('messages').add({
         chatId: chatId,
@@ -347,28 +378,34 @@
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         read: false
       });
-      input.value='';
-    } catch(e) { showToast('❌ Error sending message.', 'error'); }
+      input.value = '';
+    } catch(e) {
+      showToast('❌ Error sending message.', 'error');
+    }
   }
 
   document.getElementById('messageInput').addEventListener('keydown', (e) => {
-    if(e.key==='Enter') { e.preventDefault(); sendMessage(); }
+    if(e.key === 'Enter') { e.preventDefault(); sendMessage(); }
   });
 
+  // ============================================================
+  // AUTH
+  // ============================================================
   auth.onAuthStateChanged(async (user) => {
     if(user) {
-      currentUser=user;
-      console.log('Logged in:', user.uid);
+      currentUser = user;
+      // First load friends
       await loadFriends();
     } else {
-      window.location.href='login.html';
+      window.location.href = 'login.html';
     }
   });
 
-  window.loadFriends=loadFriends;
-  window.selectFriend=selectFriend;
-  window.sendMessage=sendMessage;
-  window.logout=logout;
+  window.loadFriends = loadFriends;
+  window.selectFriend = selectFriend;
+  window.sendMessage = sendMessage;
+  window.logout = logout;
 </script>
+
 </body>
 </html>
