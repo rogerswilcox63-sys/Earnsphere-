@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Community – EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 2rem;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(16,185,129,.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .wrapper {
+      width: 100%;
+      max-width: 820px;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      background: rgba(30,41,59,.8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .navbar .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-decoration: none;
+    }
+    .navbar .logo i { margin-right: 0.3rem; }
+    .navbar .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .navbar .logout-btn {
+      background: rgba(59,130,246,.2);
+      border: 1px solid rgba(59,130,246,.3);
+      padding: 0.35rem 0.9rem;
+      border-radius: 2rem;
+      font-weight: 500;
+      color: #3b82f6;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+    .navbar .logout-btn:hover { background: rgba(59,130,246,.3); }
+    .navbar .back-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.3s;
+    }
+    .navbar .back-link:hover { color: #f1f5f9; }
+
+    /* ===== COMMUNITY TABS ===== */
+    .community-tabs {
+      display: flex;
+      gap: 0.3rem;
+      margin-bottom: 1.5rem;
+      background: rgba(15, 23, 42, 0.4);
+      border-radius: 12px;
+      padding: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .community-tabs .tab {
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+    .community-tabs .tab:hover {
+      color: #cbd5e1;
+      background: rgba(255,255,255,0.05);
+    }
+    .community-tabs .tab.active {
+      background: rgba(59,130,246,0.2);
+      color: #3b82f6;
+    }
+    .community-tabs .tab i { margin-right: 0.3rem; }
+
+    /* ===== CREATE POST ===== */
+    .create-post {
+      background: rgba(30,41,59,0.5);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 1.5rem;
+    }
+    .create-post .input-area {
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+    }
+    .create-post .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .create-post textarea {
+      flex: 1;
+      background: rgba(15,23,42,0.4);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      color: #f1f5f9;
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 60px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+    .create-post textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .create-post textarea::placeholder {
+      color: #64748b;
+    }
+    .create-post .post-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .create-post .post-btn {
+      padding: 0.4rem 1.2rem;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .create-post .post-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+    }
+    .create-post .post-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ===== POSTS FEED ===== */
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .post-card {
+      background: rgba(30,41,59,0.5);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      padding: 1.2rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s;
+    }
+    .post-card:hover {
+      border-color: rgba(255,255,255,0.12);
+    }
+    .post-card .post-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+    .post-card .post-header .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .post-card .post-header .name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #f1f5f9;
+    }
+    .post-card .post-header .admin-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: #fbbf24;
+      background: rgba(251,191,36,0.15);
+      padding: 0.1rem 0.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(251,191,36,0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .post-card .post-header .time {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-left: auto;
+    }
+    .post-card .post-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-bottom: 0.8rem;
+      word-wrap: break-word;
+    }
+    .post-card .post-actions-row {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: #64748b;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    .post-card .post-actions-row button {
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: inherit;
+    }
+    .post-card .post-actions-row button:hover {
+      color: #3b82f6;
+    }
+    .post-card .post-actions-row button.liked {
+      color: #ef4444;
+    }
+
+    /* ===== COMMENTS ===== */
+    .comments-section {
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      display: none;
+    }
+    .comments-section.open { display: block; }
+    .comments-section .comment {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+      padding: 0.4rem 0;
+    }
+    .comments-section .comment .avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.6rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .comments-section .comment .body {
+      flex: 1;
+    }
+    .comments-section .comment .body .name {
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: #f1f5f9;
+    }
+    .comments-section .comment .body .name .admin-badge {
+      font-size: 0.5rem;
+      color: #fbbf24;
+    }
+    .comments-section .comment .body .text {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+    .comments-section .comment .body .time {
+      font-size: 0.6rem;
+      color: #64748b;
+    }
+    .comments-section .comment-input {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .comments-section .comment-input input {
+      flex: 1;
+      padding: 0.4rem 0.8rem;
+      background: rgba(15,23,42,0.4);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      color: #f1f5f9;
+      font-size: 0.85rem;
+    }
+    .comments-section .comment-input input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .comments-section .comment-input button {
+      padding: 0.4rem 0.8rem;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: #64748b;
+    }
+    .empty-state i {
+      font-size: 2.5rem;
+      color: #334155;
+      margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-size: 13px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      z-index: 9999;
+      max-width: 90%;
+      font-weight: 500;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+    .toast.success { border-left: 4px solid #22c55e; }
+    .toast.error { border-left: 4px solid #ef4444; }
+    .toast.info { border-left: 4px solid #3b82f6; }
+
+    @media (max-width: 640px) {
+      .navbar { padding: 0.6rem 1rem; }
+      .navbar .back-link span { display: none; }
+      .create-post .input-area { flex-direction: column; }
+      .create-post .avatar { display: none; }
+      .community-tabs .tab { font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
+    <div class="nav-right">
+      <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> <span>Back</span></a>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </nav>
+
+  <!-- TITLE -->
+  <h1 style="font-size:1.5rem; font-weight:700; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.6rem;">
+    <i class="fas fa-users" style="color:#3b82f6;"></i> Community
+  </h1>
+  <p style="color:#94a3b8; margin-bottom:1.5rem; font-size:0.9rem;">Connect with fellow EarnSphere hustlers</p>
+
+  <!-- TABS -->
+  <div class="community-tabs">
+    <button class="tab active" data-tab="feed"><i class="fas fa-newspaper"></i> Feed</button>
+    <button class="tab" data-tab="friends"><i class="fas fa-user-friends"></i> Friends</button>
+    <button class="tab" data-tab="admins"><i class="fas fa-crown"></i> Admins</button>
+  </div>
+
+  <!-- TAB: FEED -->
+  <div id="tab-feed">
+    <!-- Create Post -->
+    <div class="create-post" id="createPostArea">
+      <div class="input-area">
+        <div class="avatar" id="userAvatar">U</div>
+        <textarea id="postInput" placeholder="What's on your mind? Share your progress, tips, or questions..." rows="2"></textarea>
+      </div>
+      <div class="post-actions">
+        <button class="post-btn" id="postBtn"><i class="fas fa-paper-plane"></i> Post</button>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div class="feed" id="feed"></div>
+  </div>
+
+  <!-- TAB: FRIENDS -->
+  <div id="tab-friends" style="display:none;">
+    <div class="empty-state">
+      <i class="fas fa-user-friends"></i>
+      <p>Friends feature coming soon!<br />Invite your friends to EarnSphere and connect with them here.</p>
+    </div>
+  </div>
+
+  <!-- TAB: ADMINS -->
+  <div id="tab-admins" style="display:none;">
+    <div class="empty-state" id="adminsList">
+      <i class="fas fa-crown"></i>
+      <p>Loading admins...</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<script>
+  // ============================================================
+  // FIREBASE CONFIG
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+    authDomain: "earnspherehub-742e9.firebaseapp.com",
+    projectId: "earnspherehub-742e9",
+    storageBucket: "earnspherehub-742e9.firebasestorage.app",
+    messagingSenderId: "173538573377",
+    appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // ============================================================
+  // GLOBALS
+  // ============================================================
+  let currentUser = null;
+  let userData = {};
+  let posts = [];
+  let currentTab = 'feed';
+
+  const feed = document.getElementById('feed');
+  const postInput = document.getElementById('postInput');
+  const postBtn = document.getElementById('postBtn');
+  const toast = document.getElementById('toast');
+
+  // ============================================================
+  // TOAST
+  // ============================================================
+  function showToast(msg, type = 'success') {
+    toast.textContent = msg;
+    toast.className = 'toast ' + type;
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    clearTimeout(toast._hide);
+    toast._hide = setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  // ============================================================
+  // TAB SWITCHING
+  // ============================================================
+  document.querySelectorAll('.community-tabs .tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.community-tabs .tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      currentTab = this.dataset.tab;
+      document.getElementById('tab-feed').style.display = currentTab === 'feed' ? 'block' : 'none';
+      document.getElementById('tab-friends').style.display = currentTab === 'friends' ? 'block' : 'none';
+      document.getElementById('tab-admins').style.display = currentTab === 'admins' ? 'block' : 'none';
+      if (currentTab === 'admins') loadAdmins();
+    });
+  });
+
+  // ============================================================
+  // LOAD ADMINS
+  // ============================================================
+  async function loadAdmins() {
+    const container = document.getElementById('adminsList');
+    try {
+      const snap = await db.collection('users').where('isAdmin', '==', true).get();
+      if (snap.empty) {
+        container.innerHTML = `
+          <i class="fas fa-crown"></i>
+          <p>No admins found.</p>
+        `;
+        return;
+      }
+      let html = `
+        <div style="display:grid; gap:0.8rem; text-align:left; max-width:400px; margin:0 auto;">
+          <h3 style="color:#fbbf24; text-align:center; margin-bottom:0.5rem;">👑 Admins</h3>
+      `;
+      snap.forEach(doc => {
+        const data = doc.data();
+        html += `
+          <div style="display:flex; align-items:center; gap:0.8rem; background:rgba(255,255,255,0.03); padding:0.8rem 1rem; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#fbbf24,#f59e0b); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; color:#000;">
+              ${(data.displayName || 'A').charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div style="font-weight:600;">${data.displayName || 'Admin'}</div>
+              <div style="font-size:0.75rem; color:#fbbf24;"><i class="fas fa-crown"></i> Admin</div>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+      container.innerHTML = html;
+    } catch (e) {
+      console.error(e);
+      container.innerHTML = `<i class="fas fa-crown"></i><p>Error loading admins.</p>`;
+    }
+  }
+
+  // ============================================================
+  // LOGOUT
+  // ============================================================
+  function logout() {
+    auth.signOut().then(() => {
+      localStorage.removeItem('earnsphere_user_data');
+      window.location.href = 'login.html';
+    });
+  }
+
+  // ============================================================
+  // LOAD POSTS
+  // ============================================================
+  async function loadPosts() {
+    try {
+      const snap = await db.collection('posts')
+        .orderBy('timestamp', 'desc')
+        .limit(50)
+        .get();
+
+      posts = [];
+      for (const doc of snap.docs) {
+        const data = doc.data();
+        // Fetch user data for each post
+        let user = { displayName: 'Unknown', isAdmin: false };
+        try {
+          const userDoc = await db.collection('users').doc(data.userId).get();
+          if (userDoc.exists) user = userDoc.data();
+        } catch (e) {}
+
+        // Load comments
+        let comments = [];
+        try {
+          const commentSnap = await db.collection('posts').doc(doc.id).collection('comments')
+            .orderBy('timestamp', 'asc')
+            .limit(20)
+            .get();
+          for (const cDoc of commentSnap.docs) {
+            const cData = cDoc.data();
+            let cUser = { displayName: 'Unknown', isAdmin: false };
+            try {
+              const uDoc = await db.collection('users').doc(cData.userId).get();
+              if (uDoc.exists) cUser = uDoc.data();
+            } catch (e) {}
+            comments.push({
+              id: cDoc.id,
+              ...cData,
+              user: cUser
+            });
+          }
+        } catch (e) {}
+
+        posts.push({
+          id: doc.id,
+          ...data,
+          user: user,
+          comments: comments
+        });
+      }
+      renderPosts();
+    } catch (e) {
+      console.error('Error loading posts:', e);
+      feed.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-exclamation-circle"></i>
+          <p>Error loading feed. Please refresh.</p>
+        </div>
+      `;
+    }
+  }
+
+  // ============================================================
+  // RENDER POSTS
+  // ============================================================
+  function renderPosts() {
+    if (!posts.length) {
+      feed.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-newspaper"></i>
+          <p>No posts yet. Be the first to share something!</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    posts.forEach((post, index) => {
+      const isAdmin = post.user.isAdmin === true;
+      const timeStr = post.timestamp ? post.timestamp.toDate().toLocaleDateString('en-NG', {
+        day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      }) : 'Just now';
+
+      const adminBadge = isAdmin ? `<span class="admin-badge"><i class="fas fa-crown"></i> ADMIN</span>` : '';
+
+      html += `
+        <div class="post-card" data-id="${post.id}">
+          <div class="post-header">
+            <div class="avatar" style="background:${isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}; color:#000;">
+              ${(post.user.displayName || 'U').charAt(0).toUpperCase()}
+            </div>
+            <span class="name">${post.user.displayName || 'Unknown'}</span>
+            ${adminBadge}
+            <span class="time"><i class="fas fa-clock"></i> ${timeStr}</span>
+          </div>
+          <div class="post-content">${post.content}</div>
+          <div class="post-actions-row">
+            <button onclick="toggleLike('${post.id}')">
+              <i class="fas fa-heart"></i> ${post.likes || 0}
+            </button>
+            <button onclick="toggleComments('${post.id}')">
+              <i class="fas fa-comment"></i> ${post.comments ? post.comments.length : 0}
+            </button>
+          </div>
+          <div class="comments-section" id="comments-${post.id}">
+            ${post.comments ? post.comments.map(c => `
+              <div class="comment">
+                <div class="avatar" style="background:${c.user && c.user.isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}; color:#000; width:24px; height:24px; font-size:0.6rem;">
+                  ${(c.user && c.user.displayName || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div class="body">
+                  <div class="name">${c.user && c.user.displayName || 'Unknown'} ${c.user && c.user.isAdmin ? '<span class="admin-badge" style="font-size:0.5rem;"><i class="fas fa-crown"></i></span>' : ''}</div>
+                  <div class="text">${c.text}</div>
+                  <div class="time">${c.timestamp ? c.timestamp.toDate().toLocaleDateString('en-NG', {hour:'2-digit',minute:'2-digit'}) : 'Just now'}</div>
+                </div>
+              </div>
+            `).join('') : ''}
+            <div class="comment-input">
+              <input type="text" placeholder="Write a comment..." id="comment-input-${post.id}" />
+              <button onclick="addComment('${post.id}')"><i class="fas fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    feed.innerHTML = html;
+  }
+
+  // ============================================================
+  // CREATE POST
+  // ============================================================
+  postBtn.addEventListener('click', async function() {
+    const content = postInput.value.trim();
+    if (!content) { showToast('Please write something.', 'error'); return; }
+    if (!currentUser) { showToast('Please log in.', 'error'); return; }
+
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+      await db.collection('posts').add({
+        userId: currentUser.uid,
+        content: content,
+        likes: 0,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      postInput.value = '';
+      showToast('✅ Post published!', 'success');
+      await loadPosts();
+    } catch (e) {
+      console.error(e);
+      showToast('❌ Error posting.', 'error');
+    }
+    this.disabled = false;
+    this.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
+  });
+
+  // ============================================================
+  // TOGGLE COMMENTS
+  // ============================================================
+  function toggleComments(postId) {
+    const section = document.getElementById(`comments-${postId}`);
+    if (section) section.classList.toggle('open');
+  }
+
+  // ============================================================
+  // ADD COMMENT
+  // ============================================================
+  async function addComment(postId) {
+    const input = document.getElementById(`comment-input-${postId}`);
+    const text = input.value.trim();
+    if (!text) { showToast('Please write a comment.', 'error'); return; }
+    if (!currentUser) { showToast('Please log in.', 'error'); return; }
+
+    try {
+      await db.collection('posts').doc(postId).collection('comments').add({
+        userId: currentUser.uid,
+        text: text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      input.value = '';
+      showToast('✅ Comment added!', 'success');
+      await loadPosts();
+    } catch (e) {
+      console.error(e);
+      showToast('❌ Error commenting.', 'error');
+    }
+  }
+
+  // ============================================================
+  // TOGGLE LIKE
+  // ============================================================
+  async function toggleLike(postId) {
+    if (!currentUser) { showToast('Please log in.', 'error'); return; }
+    try {
+      const postRef = db.collection('posts').doc(postId);
+      await postRef.update({
+        likes: firebase.firestore.FieldValue.increment(1)
+      });
+      await loadPosts();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // ============================================================
+  // AUTH & INIT
+  // ============================================================
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      currentUser = user;
+      try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          userData = doc.data();
+          document.getElementById('userAvatar').textContent = (userData.displayName || 'U').charAt(0).toUpperCase();
+        }
+      } catch (e) { console.error(e); }
+      await loadPosts();
+    } else {
+      window.location.href = 'login.html';
+    }
+  });
+
+  // Expose functions globally
+  window.toggleComments = toggleComments;
+  window.addComment = addComment;
+  window.toggleLike = toggleLike;
+  window.logout = logout;
+</script>
+
+</body>
+</html>
