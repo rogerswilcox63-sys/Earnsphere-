@@ -43,7 +43,6 @@
       min-height: 500px;
     }
 
-    /* ===== NAVBAR ===== */
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
@@ -94,7 +93,23 @@
     }
     .navbar .back-link:hover { color: #f1f5f9; }
 
-    /* ===== CHAT LAYOUT ===== */
+    /* Refresh button */
+    .refresh-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #94a3b8;
+      padding: 0.3rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.7rem;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .refresh-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: #f1f5f9;
+    }
+
     .chat-container {
       display: flex;
       flex: 1;
@@ -106,7 +121,6 @@
       min-height: 400px;
     }
 
-    /* ===== FRIENDS LIST SIDEBAR ===== */
     .friends-sidebar {
       width: 280px;
       background: rgba(15,23,42,0.3);
@@ -124,6 +138,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      justify-content: space-between;
     }
     .friends-sidebar .sidebar-header .count {
       background: rgba(255,255,255,0.05);
@@ -219,7 +234,6 @@
       color: #334155;
     }
 
-    /* ===== CHAT AREA ===== */
     .chat-area {
       flex: 1;
       display: flex;
@@ -339,10 +353,6 @@
       transform: scale(1.05);
       box-shadow: 0 4px 15px rgba(59,130,246,0.3);
     }
-    .chat-area .chat-input button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
 
     .chat-placeholder {
       flex: 1;
@@ -358,9 +368,6 @@
       font-size: 3rem;
       color: #334155;
       margin-bottom: 1rem;
-    }
-    .chat-placeholder p {
-      font-size: 0.95rem;
     }
 
     .loading-spinner {
@@ -408,7 +415,6 @@
       .friends-sidebar { width: 100%; max-height: 200px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
       .chat-container { flex-direction: column; }
       .chat-placeholder { min-height: 200px; }
-      .friends-list .friend-item { padding: 0.5rem 0.6rem; }
     }
   </style>
 </head>
@@ -429,8 +435,11 @@
     <!-- Friends Sidebar -->
     <div class="friends-sidebar">
       <div class="sidebar-header">
-        <i class="fas fa-user-friends"></i> Friends
-        <span class="count" id="friendCount">0</span>
+        <span><i class="fas fa-user-friends"></i> Friends</span>
+        <span style="display:flex; gap:0.5rem; align-items:center;">
+          <span class="count" id="friendCount">0</span>
+          <button class="refresh-btn" onclick="loadFriends()"><i class="fas fa-sync-alt"></i></button>
+        </span>
       </div>
       <div class="friends-list" id="friendsList">
         <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading friends...</div>
@@ -439,22 +448,17 @@
 
     <!-- Chat Area -->
     <div class="chat-area">
-      <!-- Chat Header (hidden when no friend selected) -->
       <div class="chat-header" id="chatHeader" style="display:none;">
         <div class="avatar" id="chatAvatar">U</div>
         <span class="name" id="chatName">Friend</span>
         <span class="online-status"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Online</span>
       </div>
-
-      <!-- Messages -->
       <div class="chat-messages" id="chatMessages">
         <div class="chat-placeholder">
           <i class="fas fa-comment-dots"></i>
           <p>Select a friend to start chatting</p>
         </div>
       </div>
-
-      <!-- Chat Input (hidden when no friend selected) -->
       <div class="chat-input" id="chatInputArea" style="display:none;">
         <input type="text" id="messageInput" placeholder="Type a message..." />
         <button id="sendBtn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
@@ -523,45 +527,82 @@
   }
 
   // ============================================================
-  // LOAD FRIENDS (with real-time updates)
+  // GET FRIEND STATUS
+  // ============================================================
+  async function getFriendStatus(targetUid) {
+    try {
+      const snap = await db.collection('friends')
+        .where('uid', '==', currentUser.uid)
+        .where('friendId', '==', targetUid)
+        .get();
+      if (!snap.empty) return snap.docs[0].data().status;
+
+      const snap2 = await db.collection('friends')
+        .where('uid', '==', targetUid)
+        .where('friendId', '==', currentUser.uid)
+        .get();
+      if (!snap2.empty) return snap2.docs[0].data().status;
+
+      return null;
+    } catch (e) { return null; }
+  }
+
+  // ============================================================
+  // LOAD FRIENDS (with real-time updates) - FIXED
   // ============================================================
   function loadFriends() {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.warn('No current user');
+      return;
+    }
 
-    if (friendUnsubscribe) friendUnsubscribe();
+    if (friendUnsubscribe) {
+      friendUnsubscribe();
+      friendUnsubscribe = null;
+    }
 
-    const friendsRef = db.collection('friends')
-      .where('status', '==', 'accepted');
+    console.log('Loading friends for user:', currentUser.uid);
 
     // Query where current user is the sender
-    const q1 = friendsRef.where('uid', '==', currentUser.uid);
+    const q1 = db.collection('friends')
+      .where('uid', '==', currentUser.uid)
+      .where('status', '==', 'accepted');
+
     // Query where current user is the receiver
-    const q2 = friendsRef.where('friendId', '==', currentUser.uid);
+    const q2 = db.collection('friends')
+      .where('friendId', '==', currentUser.uid)
+      .where('status', '==', 'accepted');
 
     let allFriends = [];
 
-    // We'll use two listeners and combine results
     const unsub1 = q1.onSnapshot((snapshot) => {
-      snapshot.docChanges().forEach(() => {});
+      console.log('q1 snapshot size:', snapshot.size);
       const results = [];
       snapshot.forEach(doc => {
         const data = doc.data();
+        console.log('q1 friend found:', data);
         results.push({ uid: data.friendId, direction: 'sent' });
       });
-      // Merge with q2 results
+      allFriends = results;
+      // Also get q2
       const unsub2 = q2.onSnapshot((snap2) => {
-        snap2.docChanges().forEach(() => {});
+        console.log('q2 snapshot size:', snap2.size);
         const results2 = [];
         snap2.forEach(doc => {
           const data = doc.data();
+          console.log('q2 friend found:', data);
           results2.push({ uid: data.uid, direction: 'received' });
         });
         // Combine unique friends
-        const combined = [...results, ...results2];
+        const combined = [...allFriends, ...results2];
         const unique = combined.filter((v, i, a) => a.findIndex(t => t.uid === v.uid) === i);
+        console.log('Total unique friends:', unique.length);
         renderFriends(unique);
       });
       friendUnsubscribe = () => { unsub1(); unsub2(); };
+    }, (error) => {
+      console.error('q1 error:', error);
+      friendsList.innerHTML = `<div class="empty-friends"><i class="fas fa-exclamation-circle"></i><p>Error loading friends: ${error.message}</p></div>`;
     });
   }
 
@@ -569,6 +610,8 @@
   // RENDER FRIENDS
   // ============================================================
   async function renderFriends(friendIds) {
+    console.log('Rendering friends:', friendIds.length);
+
     if (!friendIds.length) {
       friendsList.innerHTML = `
         <div class="empty-friends">
@@ -585,8 +628,12 @@
     let html = '';
     for (const { uid } of friendIds) {
       try {
+        console.log('Loading user data for:', uid);
         const doc = await db.collection('users').doc(uid).get();
-        if (!doc.exists) continue;
+        if (!doc.exists) {
+          console.warn('User document not found for:', uid);
+          continue;
+        }
         const data = doc.data();
         const isAdmin = data.isAdmin === true;
         const avatarChar = (data.displayName || 'U').charAt(0).toUpperCase();
@@ -631,7 +678,7 @@
           </div>
         `;
       } catch (e) {
-        console.error(e);
+        console.error('Error loading friend:', uid, e);
       }
     }
     friendsList.innerHTML = html || `
@@ -641,7 +688,6 @@
       </div>
     `;
 
-    // If a friend was selected, re-select to refresh messages
     if (currentFriendId) {
       const stillFriend = friendIds.some(f => f.uid === currentFriendId);
       if (!stillFriend) {
@@ -660,7 +706,6 @@
     if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
     currentFriendId = friendId;
     loadMessages(friendId);
-    // Update active state
     document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active'));
     document.querySelector(`.friend-item[onclick="selectFriend('${friendId}')"]`)?.classList.add('active');
   }
@@ -680,16 +725,14 @@
   }
 
   // ============================================================
-  // LOAD MESSAGES (real-time)
+  // LOAD MESSAGES
   // ============================================================
   function loadMessages(friendId) {
     if (!currentUser) return;
 
-    // Show chat header
     chatHeader.style.display = 'flex';
     chatInputArea.style.display = 'flex';
 
-    // Get friend info
     db.collection('users').doc(friendId).get().then(doc => {
       if (doc.exists) {
         const data = doc.data();
@@ -701,7 +744,6 @@
       }
     });
 
-    // Clear messages
     chatMessages.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
 
     const chatId = [currentUser.uid, friendId].sort().join('_');
@@ -727,16 +769,12 @@
         });
         container.scrollTop = container.scrollHeight;
 
-        // Mark messages as read
         snapshot.forEach(doc => {
           const data = doc.data();
           if (data.receiverId === currentUser.uid && !data.read) {
             db.collection('messages').doc(doc.id).update({ read: true });
           }
         });
-
-        // Update unread badges in friends list
-        loadFriends();
       });
   }
 
@@ -781,17 +819,20 @@
   auth.onAuthStateChanged(async (user) => {
     if (user) {
       currentUser = user;
-      await loadFriends();
+      console.log('User logged in:', user.uid);
+      // Show loading state
+      friendsList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading friends...</div>';
       showChatPlaceholder();
+      await loadFriends();
     } else {
       window.location.href = 'login.html';
     }
   });
 
-  // Expose functions globally
   window.selectFriend = selectFriend;
   window.sendMessage = sendMessage;
   window.logout = logout;
+  window.loadFriends = loadFriends;
 </script>
 
 </body>
