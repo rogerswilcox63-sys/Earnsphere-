@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -310,6 +309,27 @@
     /* Hidden file input */
     #imageUploadInput { display: none; }
 
+    /* Progress bar for upload */
+    .upload-progress {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,.1);
+      border-radius: 2px;
+      margin: 8px 0;
+      overflow: hidden;
+      display: none;
+    }
+    .upload-progress .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 2px;
+    }
+    .upload-progress.active {
+      display: block;
+    }
+
     @media (max-width: 768px) {
       .navbar { padding: 0.6rem 1rem; }
       .settings-container { padding: 0 1rem; }
@@ -352,6 +372,9 @@
               <i class="fas fa-info-circle"></i> Click the camera icon to upload a photo
             </p>
           </div>
+        </div>
+        <div class="upload-progress" id="uploadProgress">
+          <div class="progress-bar" id="progressBar"></div>
         </div>
         <input type="file" id="imageUploadInput" accept="image/*" />
         <div id="imageMessage" class="message"></div>
@@ -486,6 +509,9 @@
     const deleteMessage = document.getElementById('deleteMessage');
     const imageMessage = document.getElementById('imageMessage');
 
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+
     let currentUserData = {};
     let currentUser = null;
 
@@ -548,7 +574,7 @@
     }
 
     // ============================================================
-    // PROFILE IMAGE UPLOAD
+    // PROFILE IMAGE UPLOAD - FIXED
     // ============================================================
     document.getElementById('imageUploadInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
@@ -563,40 +589,83 @@
       // Validate file size (max 2MB)
       if (file.size > 2 * 1024 * 1024) {
         showMessage(imageMessage, '⚠️ Image must be less than 2MB.', 'error');
+        e.target.value = '';
         return;
       }
 
       // Validate file type
-      if (!file.type.startsWith('image/')) {
-        showMessage(imageMessage, '⚠️ Please upload an image.', 'error');
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
+      if (!validTypes.includes(file.type)) {
+        showMessage(imageMessage, '⚠️ Please upload a valid image (JPEG, PNG, GIF, WEBP).', 'error');
+        e.target.value = '';
         return;
       }
 
       showMessage(imageMessage, '⏳ Uploading...', 'info');
+      
+      // Show progress bar
+      uploadProgress.classList.add('active');
+      progressBar.style.width = '0%';
 
       try {
-        const storageRef = storage.ref(`profile_images/${user.uid}`);
-        await storageRef.put(file);
-        const downloadURL = await storageRef.getDownloadURL();
+        // Create a unique filename with timestamp
+        const timestamp = Date.now();
+        const fileName = `profile_${user.uid}_${timestamp}.${file.name.split('.').pop()}`;
+        const storageRef = storage.ref(`profile_images/${user.uid}/${fileName}`);
+        
+        // Upload with progress tracking
+        const uploadTask = storageRef.put(file);
 
-        // Update Firestore
-        await db.collection('users').doc(user.uid).update({
-          profileImage: downloadURL,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        // Monitor upload progress
+        uploadTask.on('state_changed', 
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            progressBar.style.width = progress + '%';
+          },
+          (error) => {
+            console.error('Upload error:', error);
+            showMessage(imageMessage, '❌ Error uploading image. Please try again.', 'error');
+            uploadProgress.classList.remove('active');
+            progressBar.style.width = '0%';
+          },
+          async () => {
+            // Upload completed successfully
+            const downloadURL = await storageRef.getDownloadURL();
 
-        profileImage.src = downloadURL;
-        showMessage(imageMessage, '✅ Profile image updated!', 'success');
-        showToast('✅ Profile photo uploaded!', false);
-      } catch (e) {
-        console.error('Upload error:', e);
-        showMessage(imageMessage, '❌ Error uploading image. Please try again.', 'error');
+            // Update Firestore with the new image URL
+            await db.collection('users').doc(user.uid).set({
+              profileImage: downloadURL,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            // Update the UI
+            profileImage.src = downloadURL;
+            currentUserData.profileImage = downloadURL;
+            
+            showMessage(imageMessage, '✅ Profile image updated successfully!', 'success');
+            showToast('✅ Profile photo uploaded!', false);
+            
+            // Hide progress bar
+            uploadProgress.classList.remove('active');
+            progressBar.style.width = '0%';
+            
+            // Clear the file input
+            e.target.value = '';
+          }
+        );
+
+      } catch (error) {
+        console.error('Upload error:', error);
+        showMessage(imageMessage, '❌ Error uploading image: ' + error.message, 'error');
+        uploadProgress.classList.remove('active');
+        progressBar.style.width = '0%';
+        e.target.value = '';
       }
-
-      // Reset input
-      document.getElementById('imageUploadInput').value = '';
     });
 
+    // ============================================================
+    // REMOVE PROFILE IMAGE - FIXED
+    // ============================================================
     async function removeProfileImage() {
       const user = auth.currentUser;
       if (!user) {
@@ -607,18 +676,33 @@
       if (!confirm('Remove your profile picture?')) return;
 
       try {
+        // Remove from Firestore
         await db.collection('users').doc(user.uid).update({
           profileImage: firebase.firestore.FieldValue.delete(),
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
+        // Remove from Storage
+        try {
+          const storageRef = storage.ref(`profile_images/${user.uid}`);
+          const listResult = await storageRef.listAll();
+          for (const item of listResult.items) {
+            await item.delete();
+          }
+        } catch (storageError) {
+          console.log('No storage files to delete or error:', storageError);
+        }
+
+        // Reset to avatar
         const name = displayNameInput.value || 'User';
         profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=80`;
+        currentUserData.profileImage = null;
+        
         showMessage(imageMessage, '✅ Profile image removed.', 'success');
         showToast('✅ Photo removed.', false);
       } catch (e) {
         console.error('Remove error:', e);
-        showMessage(imageMessage, '❌ Error removing image.', 'error');
+        showMessage(imageMessage, '❌ Error removing image: ' + e.message, 'error');
       }
     }
 
@@ -650,10 +734,12 @@
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
       try {
+        // Update display name in Auth if changed
         if (newName !== user.displayName) {
           await user.updateProfile({ displayName: newName });
         }
 
+        // Update email if changed
         if (newEmail !== user.email) {
           try {
             await user.updateEmail(newEmail);
@@ -668,17 +754,20 @@
           }
         }
 
-        await db.collection('users').doc(user.uid).update({
+        // Update Firestore
+        await db.collection('users').doc(user.uid).set({
           displayName: newName,
           name: newName,
           email: newEmail,
           occupation: occupation,
           monthlyIncome: monthlyIncome,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        }, { merge: true });
 
+        // Update UI
         displayNameHeader.textContent = newName;
         emailHeader.textContent = newEmail;
+        document.getElementById('userName').textContent = newName;
 
         // Update avatar if no custom image
         if (!currentUserData.profileImage) {
@@ -772,19 +861,25 @@
       showMessage(deleteMessage, '⏳ Deleting your account...', 'info');
 
       try {
+        // Delete Firestore user document
         await db.collection('users').doc(user.uid).delete();
 
+        // Delete chat history
         const chatSnap = await db.collection('chat_history').where('userId', '==', user.uid).get();
         const batch = db.batch();
         chatSnap.forEach(doc => batch.delete(doc.ref));
         await batch.commit();
 
-        // Delete profile image from storage if exists
+        // Delete all profile images from storage
         try {
           const storageRef = storage.ref(`profile_images/${user.uid}`);
-          await storageRef.delete();
+          const listResult = await storageRef.listAll();
+          for (const item of listResult.items) {
+            await item.delete();
+          }
         } catch (e) { /* ignore */ }
 
+        // Delete the user account
         await user.delete();
 
         showMessage(deleteMessage, '✅ Account deleted successfully. Redirecting...', 'success');
