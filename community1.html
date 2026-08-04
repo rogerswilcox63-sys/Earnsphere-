@@ -286,9 +286,6 @@
     .post-card .post-actions-row button:hover {
       color: #3b82f6;
     }
-    .post-card .post-actions-row button.liked {
-      color: #ef4444;
-    }
 
     /* ===== COMMENTS ===== */
     .comments-section {
@@ -366,6 +363,126 @@
       cursor: pointer;
     }
 
+    /* ===== FRIENDS FEATURE ===== */
+    .friends-search {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .friends-search input {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      background: rgba(15,23,42,0.4);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: #f1f5f9;
+      font-size: 0.9rem;
+    }
+    .friends-search input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .friends-search button {
+      padding: 0.6rem 1.2rem;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .friend-request-card {
+      background: rgba(30,41,59,0.4);
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.6rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+    .friend-request-card .info {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .friend-request-card .info .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.7rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .friend-request-card .info .name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .friend-request-card .info .admin-badge {
+      font-size: 0.5rem;
+      color: #fbbf24;
+    }
+    .friend-request-card .actions {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .friend-request-card .actions button {
+      padding: 0.2rem 0.8rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .friend-request-card .actions .accept-btn {
+      background: #10b981;
+      color: #000;
+    }
+    .friend-request-card .actions .accept-btn:hover {
+      background: #059669;
+    }
+    .friend-request-card .actions .decline-btn {
+      background: #ef4444;
+      color: #fff;
+    }
+    .friend-request-card .actions .decline-btn:hover {
+      background: #dc2626;
+    }
+    .friend-request-card .status {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.6rem;
+      border-radius: 12px;
+    }
+    .friend-request-card .status.pending {
+      background: rgba(245,158,11,0.15);
+      color: #f59e0b;
+    }
+    .friend-request-card .status.accepted {
+      background: rgba(16,185,129,0.15);
+      color: #10b981;
+    }
+
+    .friends-section-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #94a3b8;
+      margin: 1rem 0 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      padding-bottom: 0.3rem;
+    }
+
     /* ===== EMPTY STATE ===== */
     .empty-state {
       text-align: center;
@@ -412,6 +529,8 @@
       .create-post .input-area { flex-direction: column; }
       .create-post .avatar { display: none; }
       .community-tabs .tab { font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+      .friend-request-card { flex-wrap: wrap; }
+      .friend-request-card .actions { width: 100%; justify-content: flex-end; }
     }
   </style>
 </head>
@@ -442,7 +561,6 @@
 
   <!-- TAB: FEED -->
   <div id="tab-feed">
-    <!-- Create Post -->
     <div class="create-post" id="createPostArea">
       <div class="input-area">
         <div class="avatar" id="userAvatar">U</div>
@@ -452,16 +570,30 @@
         <button class="post-btn" id="postBtn"><i class="fas fa-paper-plane"></i> Post</button>
       </div>
     </div>
-
-    <!-- Feed -->
     <div class="feed" id="feed"></div>
   </div>
 
   <!-- TAB: FRIENDS -->
   <div id="tab-friends" style="display:none;">
-    <div class="empty-state">
-      <i class="fas fa-user-friends"></i>
-      <p>Friends feature coming soon!<br />Invite your friends to EarnSphere and connect with them here.</p>
+    <!-- Search -->
+    <div class="friends-search">
+      <input type="text" id="friendSearchInput" placeholder="Search users by name or email..." />
+      <button onclick="searchUsers()"><i class="fas fa-search"></i> Search</button>
+    </div>
+
+    <!-- Search Results -->
+    <div id="searchResults" style="display:none; margin-bottom:1rem;"></div>
+
+    <!-- Pending Requests -->
+    <div id="pendingRequestsSection" style="display:none;">
+      <div class="friends-section-title"><i class="fas fa-clock"></i> Pending Requests</div>
+      <div id="pendingRequests"></div>
+    </div>
+
+    <!-- Your Friends -->
+    <div id="friendsListSection">
+      <div class="friends-section-title"><i class="fas fa-user-friends"></i> Your Friends</div>
+      <div id="friendsList"><div class="empty-state"><i class="fas fa-user-friends"></i><p>No friends yet. Search and add friends above!</p></div></div>
     </div>
   </div>
 
@@ -499,6 +631,7 @@
   let userData = {};
   let posts = [];
   let currentTab = 'feed';
+  let allUsers = [];
 
   const feed = document.getElementById('feed');
   const postInput = document.getElementById('postInput');
@@ -529,6 +662,7 @@
       document.getElementById('tab-friends').style.display = currentTab === 'friends' ? 'block' : 'none';
       document.getElementById('tab-admins').style.display = currentTab === 'admins' ? 'block' : 'none';
       if (currentTab === 'admins') loadAdmins();
+      if (currentTab === 'friends') loadFriends();
     });
   });
 
@@ -540,16 +674,10 @@
     try {
       const snap = await db.collection('users').where('isAdmin', '==', true).get();
       if (snap.empty) {
-        container.innerHTML = `
-          <i class="fas fa-crown"></i>
-          <p>No admins found.</p>
-        `;
+        container.innerHTML = `<i class="fas fa-crown"></i><p>No admins found.</p>`;
         return;
       }
-      let html = `
-        <div style="display:grid; gap:0.8rem; text-align:left; max-width:400px; margin:0 auto;">
-          <h3 style="color:#fbbf24; text-align:center; margin-bottom:0.5rem;">👑 Admins</h3>
-      `;
+      let html = `<div style="display:grid; gap:0.8rem; text-align:left; max-width:400px; margin:0 auto;"><h3 style="color:#fbbf24; text-align:center; margin-bottom:0.5rem;">👑 Admins</h3>`;
       snap.forEach(doc => {
         const data = doc.data();
         html += `
@@ -573,16 +701,6 @@
   }
 
   // ============================================================
-  // LOGOUT
-  // ============================================================
-  function logout() {
-    auth.signOut().then(() => {
-      localStorage.removeItem('earnsphere_user_data');
-      window.location.href = 'login.html';
-    });
-  }
-
-  // ============================================================
   // LOAD POSTS
   // ============================================================
   async function loadPosts() {
@@ -595,14 +713,12 @@
       posts = [];
       for (const doc of snap.docs) {
         const data = doc.data();
-        // Fetch user data for each post
         let user = { displayName: 'Unknown', isAdmin: false };
         try {
           const userDoc = await db.collection('users').doc(data.userId).get();
           if (userDoc.exists) user = userDoc.data();
         } catch (e) {}
 
-        // Load comments
         let comments = [];
         try {
           const commentSnap = await db.collection('posts').doc(doc.id).collection('comments')
@@ -634,12 +750,7 @@
       renderPosts();
     } catch (e) {
       console.error('Error loading posts:', e);
-      feed.innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-exclamation-circle"></i>
-          <p>Error loading feed. Please refresh.</p>
-        </div>
-      `;
+      feed.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Error loading feed. Please refresh.</p></div>`;
     }
   }
 
@@ -648,17 +759,12 @@
   // ============================================================
   function renderPosts() {
     if (!posts.length) {
-      feed.innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-newspaper"></i>
-          <p>No posts yet. Be the first to share something!</p>
-        </div>
-      `;
+      feed.innerHTML = `<div class="empty-state"><i class="fas fa-newspaper"></i><p>No posts yet. Be the first to share something!</p></div>`;
       return;
     }
 
     let html = '';
-    posts.forEach((post, index) => {
+    posts.forEach((post) => {
       const isAdmin = post.user.isAdmin === true;
       const timeStr = post.timestamp ? post.timestamp.toDate().toLocaleDateString('en-NG', {
         day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -787,6 +893,273 @@
   }
 
   // ============================================================
+  // FRIENDS FEATURE
+  // ============================================================
+  async function loadFriends() {
+    if (!currentUser) return;
+    await loadPendingRequests();
+    await loadFriendsList();
+  }
+
+  // ============================================================
+  // SEARCH USERS
+  // ============================================================
+  async function searchUsers() {
+    const query = document.getElementById('friendSearchInput').value.trim().toLowerCase();
+    const resultsDiv = document.getElementById('searchResults');
+    if (!query) { resultsDiv.style.display = 'none'; return; }
+
+    try {
+      const snap = await db.collection('users')
+        .orderBy('displayName')
+        .startAt(query)
+        .endAt(query + '\uf8ff')
+        .limit(10)
+        .get();
+
+      if (snap.empty) {
+        resultsDiv.innerHTML = `<div class="empty-state"><i class="fas fa-search"></i><p>No users found.</p></div>`;
+        resultsDiv.style.display = 'block';
+        return;
+      }
+
+      let html = '<div class="friends-section-title"><i class="fas fa-search"></i> Search Results</div>';
+      let found = false;
+      for (const doc of snap.docs) {
+        const data = doc.data();
+        const uid = doc.id;
+        if (uid === currentUser.uid) continue;
+
+        // Check if already friends
+        const friendStatus = await getFriendStatus(uid);
+        if (friendStatus === 'accepted') continue;
+
+        const isAdmin = data.isAdmin === true;
+        found = true;
+        html += `
+          <div class="friend-request-card">
+            <div class="info">
+              <div class="avatar" style="background:${isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}; color:#000;">
+                ${(data.displayName || 'U').charAt(0).toUpperCase()}
+              </div>
+              <span class="name">${data.displayName || 'Unknown'} ${isAdmin ? '<span class="admin-badge"><i class="fas fa-crown"></i></span>' : ''}</span>
+            </div>
+            <div class="actions">
+              ${friendStatus === 'pending' 
+                ? `<span class="status pending">Request sent</span>`
+                : `<button class="accept-btn" onclick="sendFriendRequest('${uid}')">Add Friend</button>`
+              }
+            </div>
+          </div>
+        `;
+      }
+
+      if (!found) {
+        html += `<div class="empty-state"><i class="fas fa-user-plus"></i><p>No new users to add.</p></div>`;
+      }
+      resultsDiv.innerHTML = html;
+      resultsDiv.style.display = 'block';
+    } catch (e) {
+      console.error(e);
+      showToast('❌ Error searching users.', 'error');
+    }
+  }
+
+  // ============================================================
+  // GET FRIEND STATUS
+  // ============================================================
+  async function getFriendStatus(targetUid) {
+    try {
+      const snap = await db.collection('friends')
+        .where('uid', '==', currentUser.uid)
+        .where('friendId', '==', targetUid)
+        .get();
+      if (!snap.empty) return snap.docs[0].data().status;
+
+      const snap2 = await db.collection('friends')
+        .where('uid', '==', targetUid)
+        .where('friendId', '==', currentUser.uid)
+        .get();
+      if (!snap2.empty) return snap2.docs[0].data().status;
+
+      return null;
+    } catch (e) { return null; }
+  }
+
+  // ============================================================
+  // SEND FRIEND REQUEST
+  // ============================================================
+  async function sendFriendRequest(targetUid) {
+    if (!currentUser) { showToast('Please log in.', 'error'); return; }
+    if (targetUid === currentUser.uid) { showToast('You cannot add yourself.', 'error'); return; }
+
+    try {
+      await db.collection('friends').add({
+        uid: currentUser.uid,
+        friendId: targetUid,
+        status: 'pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showToast('✅ Friend request sent!', 'success');
+      document.getElementById('searchResults').style.display = 'none';
+      document.getElementById('friendSearchInput').value = '';
+      await loadFriends();
+    } catch (e) {
+      console.error(e);
+      showToast('❌ Error sending request.', 'error');
+    }
+  }
+
+  // ============================================================
+  // LOAD PENDING REQUESTS
+  // ============================================================
+  async function loadPendingRequests() {
+    const container = document.getElementById('pendingRequests');
+    const section = document.getElementById('pendingRequestsSection');
+
+    try {
+      const snap = await db.collection('friends')
+        .where('friendId', '==', currentUser.uid)
+        .where('status', '==', 'pending')
+        .get();
+
+      if (snap.empty) {
+        section.style.display = 'none';
+        return;
+      }
+
+      section.style.display = 'block';
+      let html = '';
+      for (const doc of snap.docs) {
+        const data = doc.data();
+        const reqId = doc.id;
+        let user = { displayName: 'Unknown', isAdmin: false };
+        try {
+          const userDoc = await db.collection('users').doc(data.uid).get();
+          if (userDoc.exists) user = userDoc.data();
+        } catch (e) {}
+        const isAdmin = user.isAdmin === true;
+        html += `
+          <div class="friend-request-card">
+            <div class="info">
+              <div class="avatar" style="background:${isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}; color:#000;">
+                ${(user.displayName || 'U').charAt(0).toUpperCase()}
+              </div>
+              <span class="name">${user.displayName || 'Unknown'} ${isAdmin ? '<span class="admin-badge"><i class="fas fa-crown"></i></span>' : ''}</span>
+            </div>
+            <div class="actions">
+              <button class="accept-btn" onclick="acceptFriendRequest('${reqId}', '${data.uid}')">Accept</button>
+              <button class="decline-btn" onclick="declineFriendRequest('${reqId}')">Decline</button>
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+    } catch (e) {
+      console.error(e);
+      section.style.display = 'none';
+    }
+  }
+
+  // ============================================================
+  // ACCEPT FRIEND REQUEST
+  // ============================================================
+  async function acceptFriendRequest(requestId, friendUid) {
+    try {
+      await db.collection('friends').doc(requestId).update({
+        status: 'accepted',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showToast('✅ Friend request accepted!', 'success');
+      await loadFriends();
+    } catch (e) {
+      console.error(e);
+      showToast('❌ Error accepting request.', 'error');
+    }
+  }
+
+  // ============================================================
+  // DECLINE FRIEND REQUEST
+  // ============================================================
+  async function declineFriendRequest(requestId) {
+    try {
+      await db.collection('friends').doc(requestId).delete();
+      showToast('✅ Friend request declined.', 'info');
+      await loadFriends();
+    } catch (e) {
+      console.error(e);
+      showToast('❌ Error declining request.', 'error');
+    }
+  }
+
+  // ============================================================
+  // LOAD FRIENDS LIST
+  // ============================================================
+  async function loadFriendsList() {
+    const container = document.getElementById('friendsList');
+
+    try {
+      // Get friends where current user is the sender
+      const snap1 = await db.collection('friends')
+        .where('uid', '==', currentUser.uid)
+        .where('status', '==', 'accepted')
+        .get();
+
+      // Get friends where current user is the receiver
+      const snap2 = await db.collection('friends')
+        .where('friendId', '==', currentUser.uid)
+        .where('status', '==', 'accepted')
+        .get();
+
+      const friendIds = [];
+      snap1.forEach(doc => friendIds.push(doc.data().friendId));
+      snap2.forEach(doc => friendIds.push(doc.data().uid));
+
+      if (friendIds.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-user-friends"></i><p>No friends yet. Search and add friends above!</p></div>`;
+        return;
+      }
+
+      let html = '';
+      for (const uid of friendIds) {
+        try {
+          const userDoc = await db.collection('users').doc(uid).get();
+          if (userDoc.exists) {
+            const user = userDoc.data();
+            const isAdmin = user.isAdmin === true;
+            html += `
+              <div class="friend-request-card">
+                <div class="info">
+                  <div class="avatar" style="background:${isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}; color:#000;">
+                    ${(user.displayName || 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <span class="name">${user.displayName || 'Unknown'} ${isAdmin ? '<span class="admin-badge"><i class="fas fa-crown"></i></span>' : ''}</span>
+                </div>
+                <div class="status accepted">✅ Friends</div>
+              </div>
+            `;
+          }
+        } catch (e) {}
+      }
+
+      container.innerHTML = html || `<div class="empty-state"><i class="fas fa-user-friends"></i><p>No friends found.</p></div>`;
+    } catch (e) {
+      console.error(e);
+      container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Error loading friends.</p></div>`;
+    }
+  }
+
+  // ============================================================
+  // LOGOUT
+  // ============================================================
+  function logout() {
+    auth.signOut().then(() => {
+      localStorage.removeItem('earnsphere_user_data');
+      window.location.href = 'login.html';
+    });
+  }
+
+  // ============================================================
   // AUTH & INIT
   // ============================================================
   auth.onAuthStateChanged(async (user) => {
@@ -800,6 +1173,7 @@
         }
       } catch (e) { console.error(e); }
       await loadPosts();
+      await loadFriends();
     } else {
       window.location.href = 'login.html';
     }
@@ -809,6 +1183,12 @@
   window.toggleComments = toggleComments;
   window.addComment = addComment;
   window.toggleLike = toggleLike;
+  window.searchUsers = searchUsers;
+  window.sendFriendRequest = sendFriendRequest;
+  window.acceptFriendRequest = acceptFriendRequest;
+  window.declineFriendRequest = declineFriendRequest;
+  window.loadFriends = loadFriends;
+  window.loadAdmins = loadAdmins;
   window.logout = logout;
 </script>
 
