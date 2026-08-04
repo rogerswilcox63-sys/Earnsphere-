@@ -1,411 +1,1018 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Chat – EarnSphere</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-  <style>
-    /* (styles are the same as before – I'll keep them minimal) */
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-      min-height: 100vh;
-      color: #f1f5f9;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1.5rem 1rem;
-    }
-    .wrapper {
-      width: 100%;
-      max-width: 700px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 60px);
-    }
-    .navbar {
-      background: rgba(30,41,59,.8);
-      backdrop-filter: blur(12px);
-      padding: 0.8rem 1.5rem;
-      border-radius: 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .navbar .logo { font-size:1.4rem; font-weight:800; background:linear-gradient(135deg,#3b82f6,#10b981); -webkit-background-clip:text; background-clip:text; color:transparent; text-decoration:none; }
-    .navbar .logo i { margin-right:0.3rem; }
-    .navbar .nav-right { display:flex; align-items:center; gap:0.8rem; }
-    .navbar .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:0.35rem 0.9rem; border-radius:2rem; color:#3b82f6; cursor:pointer; font-size:0.8rem; }
-    .navbar .logout-btn:hover { background:rgba(59,130,246,.3); }
-    .navbar .back-link { color:#94a3b8; text-decoration:none; font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; }
-    .navbar .back-link:hover { color:#f1f5f9; }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Friends · Chat</title>
+    <style>
+        /* ─── reset & base ─── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .friend-list-container {
-      background: rgba(30,41,59,0.3);
-      border-radius: 1rem;
-      padding: 1rem;
-      border: 1px solid rgba(255,255,255,0.06);
-      margin-bottom: 0.5rem;
-    }
-    .friend-list-container .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    .friend-list-container .header h3 { color: #94a3b8; font-weight: 600; }
-    .refresh-btn {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #94a3b8;
-      padding: 0.2rem 0.8rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      font-size: 0.7rem;
-    }
-    .refresh-btn:hover { background:rgba(255,255,255,0.1); color:#f1f5f9; }
-    .friend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 0.7rem 0.8rem;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: 1px solid transparent;
-      margin-bottom: 0.3rem;
-    }
-    .friend-item:hover { background:rgba(255,255,255,0.04); }
-    .friend-item .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: #fff;
-    }
-    .friend-item .info { flex:1; }
-    .friend-item .info .name { font-weight:600; font-size:0.95rem; }
-    .friend-item .info .last-msg { font-size:0.75rem; color:#64748b; }
-    .debug-box {
-      background: rgba(0,0,0,0.3);
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      font-size: 0.7rem;
-      color: #94a3b8;
-      margin-top: 0.5rem;
-      font-family: monospace;
-      word-break: break-all;
-    }
-    .chat-area { display: none; flex:1; flex-direction:column; background:rgba(30,41,59,0.3); border-radius:1rem; border:1px solid rgba(255,255,255,0.06); overflow:hidden; margin-top:0.5rem; }
-    .chat-header { padding:0.8rem 1.2rem; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; gap:0.8rem; font-weight:600; }
-    .chat-header .avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#8b5cf6); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; color:#fff; }
-    .chat-messages { flex:1; padding:1rem 1.2rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.5rem; min-height:200px; }
-    .chat-messages .msg { max-width:75%; padding:0.6rem 0.9rem; border-radius:12px; word-wrap:break-word; line-height:1.5; font-size:0.9rem; }
-    .chat-messages .msg.sent { align-self:flex-end; background:#3b82f6; color:#fff; border-bottom-right-radius:4px; }
-    .chat-messages .msg.received { align-self:flex-start; background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:4px; }
-    .chat-messages .msg .time { font-size:0.6rem; opacity:0.6; display:block; margin-top:0.2rem; text-align:right; }
-    .chat-input { display:flex; gap:0.5rem; padding:0.8rem 1.2rem; border-top:1px solid rgba(255,255,255,0.06); background:rgba(15,23,42,0.3); }
-    .chat-input input { flex:1; padding:0.6rem 1rem; background:rgba(15,23,42,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:20px; color:#f1f5f9; font-size:0.9rem; outline:none; }
-    .chat-input input:focus { border-color:#3b82f6; }
-    .chat-input button { padding:0.5rem 1rem; background:linear-gradient(135deg,#3b82f6,#2563eb); border:none; border-radius:50%; color:#fff; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; }
-    .placeholder { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#64748b; padding:2rem; text-align:center; }
-    .placeholder i { font-size:3rem; color:#334155; margin-bottom:1rem; }
-    .loading { text-align:center; padding:1rem; color:#64748b; }
-    .loading i { animation:spin 1s linear infinite; margin-right:0.5rem; }
-    @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
-    .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:#1e293b; border:1px solid #334155; color:#f1f5f9; padding:10px 22px; border-radius:12px; font-size:13px; box-shadow:0 10px 40px rgba(0,0,0,0.7); opacity:0; transition:opacity 0.35s ease, transform 0.35s ease; pointer-events:none; z-index:9999; max-width:90%; font-weight:500; }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
-    .toast.success { border-left:4px solid #22c55e; }
-    .toast.error { border-left:4px solid #ef4444; }
-  </style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f2f2f7;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        /* ─── main app card ─── */
+        .app {
+            width: 100%;
+            max-width: 860px;
+            height: 92vh;
+            max-height: 700px;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* ─── sidebar (friends list) ─── */
+        .sidebar {
+            width: 280px;
+            min-width: 200px;
+            background: #f8f8fc;
+            border-right: 1px solid #e9e9ef;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 22px 20px 12px 20px;
+            border-bottom: 1px solid #e9e9ef;
+        }
+
+        .sidebar-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1c1c1e;
+            letter-spacing: -0.3px;
+        }
+
+        .sidebar-header .sub {
+            font-size: 13px;
+            color: #8e8e93;
+            margin-top: 2px;
+            font-weight: 400;
+        }
+
+        .friend-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0 12px 0;
+        }
+
+        .friend-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.15s, border-left 0.15s;
+            border-left: 3px solid transparent;
+            gap: 14px;
+        }
+
+        .friend-item:hover {
+            background: #efeff4;
+        }
+
+        .friend-item.active {
+            background: #e9e9f0;
+            border-left-color: #007aff;
+        }
+
+        .friend-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #d9d9e3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            color: #3a3a44;
+            flex-shrink: 0;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #d4d4e0, #c2c2d0);
+        }
+
+        .friend-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .friend-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .friend-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1c1c1e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .friend-status {
+            font-size: 13px;
+            color: #8e8e93;
+            margin-top: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .friend-status .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #34c759;
+            flex-shrink: 0;
+        }
+
+        .friend-status .dot.offline {
+            background: #c6c6c8;
+        }
+
+        .friend-item .msg-preview {
+            font-size: 13px;
+            color: #8e8e93;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+
+        /* ─── chat area ─── */
+        .chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            min-width: 0;
+        }
+
+        /* empty state */
+        .chat-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #8e8e93;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .chat-empty .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .chat-empty h3 {
+            font-weight: 500;
+            font-size: 18px;
+            color: #1c1c1e;
+            margin-bottom: 4px;
+        }
+
+        .chat-empty p {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+
+        /* chat header */
+        .chat-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e9e9ef;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #fafafc;
+            flex-shrink: 0;
+            min-height: 72px;
+        }
+
+        .chat-header .back-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #007aff;
+            padding: 4px 8px;
+        }
+
+        .chat-header .avatar-sm {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #d9d9e3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 15px;
+            color: #3a3a44;
+            flex-shrink: 0;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #d4d4e0, #c2c2d0);
+        }
+
+        .chat-header .chat-user {
+            font-weight: 600;
+            font-size: 17px;
+            color: #1c1c1e;
+        }
+
+        .chat-header .chat-user-status {
+            font-size: 13px;
+            color: #8e8e93;
+        }
+
+        .chat-header .spacer {
+            flex: 1;
+        }
+
+        /* messages container */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px 12px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: #fafafc;
+        }
+
+        .messages .msg {
+            max-width: 78%;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.45;
+            word-wrap: break-word;
+            position: relative;
+            animation: msgIn 0.25s ease;
+        }
+
+        @keyframes msgIn {
+            0% {
+                opacity: 0;
+                transform: translateY(8px) scale(0.97);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .messages .msg.sent {
+            align-self: flex-end;
+            background: #007aff;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .messages .msg.received {
+            align-self: flex-start;
+            background: #e9e9ef;
+            color: #1c1c1e;
+            border-bottom-left-radius: 4px;
+        }
+
+        .messages .msg .time {
+            font-size: 11px;
+            opacity: 0.65;
+            margin-top: 4px;
+            display: block;
+            text-align: right;
+            letter-spacing: 0.2px;
+        }
+
+        .messages .msg.received .time {
+            color: #5c5c62;
+        }
+
+        .messages .msg.sent .time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .messages .msg-separator {
+            text-align: center;
+            font-size: 12px;
+            color: #8e8e93;
+            padding: 8px 0 4px 0;
+            letter-spacing: 0.3px;
+        }
+
+        /* typing indicator */
+        .messages .typing {
+            align-self: flex-start;
+            background: #e9e9ef;
+            padding: 10px 18px;
+            border-radius: 20px;
+            border-bottom-left-radius: 4px;
+            font-size: 14px;
+            color: #5c5c62;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .messages .typing .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .messages .typing .dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #8e8e93;
+            animation: dotPulse 1.2s infinite;
+        }
+
+        .messages .typing .dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .messages .typing .dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotPulse {
+            0%,
+            60%,
+            100% {
+                opacity: 0.25;
+                transform: scale(0.9);
+            }
+            30% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* message input */
+        .input-area {
+            padding: 12px 20px 20px 20px;
+            border-top: 1px solid #e9e9ef;
+            background: #fafafc;
+            flex-shrink: 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-area .input-wrap {
+            flex: 1;
+            background: white;
+            border-radius: 24px;
+            border: 1px solid #d9d9e3;
+            padding: 4px 4px 4px 18px;
+            display: flex;
+            align-items: flex-end;
+            transition: border-color 0.2s;
+        }
+
+        .input-area .input-wrap:focus-within {
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+        }
+
+        .input-area .input-wrap textarea {
+            flex: 1;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 15px;
+            font-family: inherit;
+            padding: 10px 0;
+            line-height: 1.4;
+            max-height: 120px;
+            background: transparent;
+            color: #1c1c1e;
+        }
+
+        .input-area .input-wrap textarea::placeholder {
+            color: #8e8e93;
+        }
+
+        .input-area .input-wrap .send-btn {
+            background: #007aff;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.15s;
+            margin: 4px;
+        }
+
+        .input-area .input-wrap .send-btn:hover {
+            background: #0066d9;
+        }
+
+        .input-area .input-wrap .send-btn:active {
+            transform: scale(0.92);
+        }
+
+        .input-area .input-wrap .send-btn:disabled {
+            background: #c6c6c8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ─── responsive tweaks ─── */
+        @media (max-width: 640px) {
+            body {
+                padding: 0;
+            }
+            .app {
+                max-height: 100vh;
+                height: 100vh;
+                border-radius: 0;
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                min-width: unset;
+                border-right: none;
+                border-bottom: 1px solid #e9e9ef;
+                max-height: 180px;
+                flex-shrink: 0;
+            }
+            .sidebar-header {
+                padding: 14px 16px 8px 16px;
+            }
+            .sidebar-header h2 {
+                font-size: 18px;
+            }
+            .friend-list {
+                display: flex;
+                overflow-x: auto;
+                padding: 4px 12px 10px 12px;
+                gap: 6px;
+                flex-wrap: nowrap;
+            }
+            .friend-item {
+                flex-direction: column;
+                padding: 10px 12px;
+                min-width: 80px;
+                border-left: none;
+                border-radius: 12px;
+                background: #f0f0f5;
+                align-items: center;
+                text-align: center;
+                gap: 4px;
+                flex-shrink: 0;
+            }
+            .friend-item.active {
+                background: #d9d9e6;
+                border-left: none;
+            }
+            .friend-item .friend-info .friend-status,
+            .friend-item .msg-preview {
+                display: none;
+            }
+            .friend-item .friend-name {
+                font-size: 13px;
+            }
+            .friend-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+            .chat-header .back-btn {
+                display: block;
+            }
+            .chat-empty .icon {
+                font-size: 36px;
+            }
+            .messages {
+                padding: 12px 14px 8px 14px;
+            }
+            .messages .msg {
+                max-width: 88%;
+                font-size: 14px;
+                padding: 8px 14px;
+            }
+            .input-area {
+                padding: 8px 12px 14px 12px;
+            }
+            .input-area .input-wrap {
+                padding: 2px 2px 2px 14px;
+            }
+            .input-area .input-wrap textarea {
+                font-size: 14px;
+                padding: 8px 0;
+            }
+            .input-area .input-wrap .send-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+                margin: 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                max-height: 140px;
+            }
+            .friend-item {
+                min-width: 64px;
+                padding: 6px 8px;
+            }
+            .friend-avatar {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            .friend-item .friend-name {
+                font-size: 11px;
+            }
+            .chat-header {
+                padding: 10px 14px;
+                min-height: 56px;
+            }
+            .chat-header .chat-user {
+                font-size: 15px;
+            }
+            .chat-header .avatar-sm {
+                width: 32px;
+                height: 32px;
+                font-size: 13px;
+            }
+        }
+
+        /* scrollbar styling */
+        .friend-list::-webkit-scrollbar,
+        .messages::-webkit-scrollbar {
+            width: 4px;
+        }
+        .friend-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .friend-list::-webkit-scrollbar-thumb {
+            background: #d0d0d8;
+            border-radius: 8px;
+        }
+        .messages::-webkit-scrollbar-thumb {
+            background: #d0d0d8;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
 
-<div class="wrapper">
-  <nav class="navbar">
-    <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
-    <div class="nav-right">
-      <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> <span>Back</span></a>
-      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-    </div>
-  </nav>
-
-  <!-- FRIEND LIST -->
-  <div class="friend-list-container">
-    <div class="header">
-      <h3><i class="fas fa-user-friends"></i> Friends</h3>
-      <button class="refresh-btn" onclick="loadFriends()"><i class="fas fa-sync-alt"></i> Refresh</button>
-    </div>
-    <div id="friendList">
-      <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
-    </div>
-    <div id="debugInfo" class="debug-box">🔍 Debug: Waiting for data...</div>
-  </div>
-
-  <!-- CHAT AREA -->
-  <div class="chat-area" id="chatArea" style="display:none;">
-    <div class="chat-header" id="chatHeader">
-      <div class="avatar" id="chatAvatar">U</div>
-      <span class="name" id="chatName">Friend</span>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="placeholder">
-        <i class="fas fa-comment-dots"></i>
-        <p>Select a friend to start chatting</p>
-      </div>
-    </div>
-    <div class="chat-input">
-      <input type="text" id="messageInput" placeholder="Type a message..." />
-      <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-    </div>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-    authDomain: "earnspherehub-742e9.firebaseapp.com",
-    projectId: "earnspherehub-742e9",
-    storageBucket: "earnspherehub-742e9.firebasestorage.app",
-    messagingSenderId: "173538573377",
-    appId: "1:173538573377:web:6d8c748376afcb9096dac0"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  let currentUser = null;
-  let currentFriendId = null;
-  let chatUnsubscribe = null;
-  let friendList = [];
-
-  function showToast(msg, type='success') {
-    const t=document.getElementById('toast');
-    t.textContent=msg;
-    t.className='toast '+type;
-    void t.offsetWidth;
-    t.classList.add('show');
-    clearTimeout(t._hide);
-    t._hide=setTimeout(()=>t.classList.remove('show'),4000);
-  }
-
-  function logout() {
-    if(chatUnsubscribe) chatUnsubscribe();
-    auth.signOut().then(()=>{ window.location.href='login.html'; });
-  }
-
-  // ============================================================
-  // LOAD FRIENDS – EXACTLY THE SAME AS COMMUNITY
-  // ============================================================
-  async function loadFriends() {
-    if(!currentUser) {
-      document.getElementById('friendList').innerHTML = `<div class="loading">Not logged in</div>`;
-      document.getElementById('debugInfo').textContent = '🔍 No user logged in.';
-      return;
-    }
-
-    const list = document.getElementById('friendList');
-    const debug = document.getElementById('debugInfo');
-    list.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
-    debug.textContent = `🔍 Your UID: ${currentUser.uid}`;
-
-    try {
-      // Query as sender (exactly like community)
-      const snap1 = await db.collection('friends')
-        .where('uid', '==', currentUser.uid)
-        .where('status', '==', 'accepted')
-        .get();
-
-      // Query as receiver (exactly like community)
-      const snap2 = await db.collection('friends')
-        .where('friendId', '==', currentUser.uid)
-        .where('status', '==', 'accepted')
-        .get();
-
-      debug.textContent += `\nSender: ${snap1.size}, Receiver: ${snap2.size}`;
-
-      const friendIds = [];
-      snap1.forEach(doc => {
-        const data = doc.data();
-        friendIds.push(data.friendId);
-        debug.textContent += `\nSender doc: friendId=${data.friendId}`;
-      });
-      snap2.forEach(doc => {
-        const data = doc.data();
-        friendIds.push(data.uid);
-        debug.textContent += `\nReceiver doc: uid=${data.uid}`;
-      });
-
-      if(friendIds.length === 0) {
-        list.innerHTML = `<div style="text-align:center; padding:1rem; color:#64748b;">
-          <i class="fas fa-user-friends" style="font-size:2rem; display:block; margin-bottom:0.5rem; color:#334155;"></i>
-          No friends yet. Add friends from the Community page.
-        </div>`;
-        return;
-      }
-
-      // Get user details for each friend
-      let html = '';
-      for(const uid of friendIds) {
-        try {
-          const doc = await db.collection('users').doc(uid).get();
-          if(!doc.exists) continue;
-          const data = doc.data();
-          const isAdmin = data.isAdmin === true;
-          const avatarChar = (data.displayName || 'U').charAt(0).toUpperCase();
-          html += `
-            <div class="friend-item" onclick="selectFriend('${uid}')">
-              <div class="avatar" style="background:${isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}; color:${isAdmin ? '#000' : '#fff'};">
-                ${avatarChar}
-              </div>
-              <div class="info">
-                <div class="name">${data.displayName || 'Unknown'} ${isAdmin ? '👑' : ''}</div>
-                <div class="last-msg">Click to chat</div>
-              </div>
+    <div class="app" id="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Friends</h2>
+                <div class="sub" id="friendCount">—</div>
             </div>
-          `;
-        } catch(e) {
-          console.warn('Error loading user:', uid, e);
+            <div class="friend-list" id="friendList">
+                <!-- populated by JS -->
+            </div>
+        </aside>
+
+        <!-- CHAT -->
+        <section class="chat" id="chat">
+            <!-- chat header (hidden when empty) -->
+            <div class="chat-header" id="chatHeader" style="display:none;">
+                <button class="back-btn" id="backBtn" aria-label="Back">‹</button>
+                <div class="avatar-sm" id="chatAvatar">J</div>
+                <div>
+                    <div class="chat-user" id="chatUserName">Joyce</div>
+                    <div class="chat-user-status" id="chatUserStatus">Online</div>
+                </div>
+                <div class="spacer"></div>
+            </div>
+
+            <!-- messages -->
+            <div class="messages" id="messages">
+                <!-- empty state -->
+                <div class="chat-empty" id="emptyState">
+                    <div class="icon">💬</div>
+                    <h3>Select a friend</h3>
+                    <p>Choose someone from the list to start chatting</p>
+                </div>
+            </div>
+
+            <!-- input -->
+            <div class="input-area" id="inputArea">
+                <div class="input-wrap">
+                    <textarea id="msgInput" rows="1" placeholder="Type a message..." disabled></textarea>
+                    <button class="send-btn" id="sendBtn" disabled aria-label="Send">➤</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // ─── DATA ──────────────────────────────────────────────────────────────
+
+        const friends = [{
+            id: 'f1',
+            name: 'Joyce Nwokoma',
+            status: 'online',
+            avatar: 'J',
+            color: '#b8a9c9',
+            messages: [
+                { from: 'them', text: 'Hey! How are you doing?', time: '10:32 AM' },
+                { from: 'me', text: 'I\'m great, thanks! You?', time: '10:33 AM' },
+                { from: 'them', text: 'All good here! Just working on the new project.', time: '10:35 AM' },
+                { from: 'me', text: 'Sounds exciting! Let me know if you need any help.', time: '10:36 AM' },
+            ]
+        }, {
+            id: 'f2',
+            name: 'Michael Adebayo',
+            status: 'online',
+            avatar: 'M',
+            color: '#7ec8e3',
+            messages: [
+                { from: 'them', text: 'Are we still on for lunch?', time: '11:20 AM' },
+                { from: 'me', text: 'Absolutely! Where should we go?', time: '11:22 AM' },
+            ]
+        }, {
+            id: 'f3',
+            name: 'Sarah Johnson',
+            status: 'offline',
+            avatar: 'S',
+            color: '#f5a3a3',
+            messages: [
+                { from: 'them', text: 'Thanks for the invite! I\'ll be there.', time: 'Yesterday' },
+                { from: 'me', text: 'Perfect, see you then! 🎉', time: 'Yesterday' },
+                { from: 'them', text: 'Should I bring anything?', time: 'Yesterday' },
+            ]
+        }, {
+            id: 'f4',
+            name: 'David Okafor',
+            status: 'online',
+            avatar: 'D',
+            color: '#a8d5a2',
+            messages: [
+                { from: 'them', text: 'Check out the new design draft.', time: '9:15 AM' },
+                { from: 'me', text: 'Looking good! I love the color scheme.', time: '9:18 AM' },
+                { from: 'them', text: 'Thanks! I\'ll push the final version later.', time: '9:20 AM' },
+            ]
+        }, {
+            id: 'f5',
+            name: 'Grace Eze',
+            status: 'offline',
+            avatar: 'G',
+            color: '#e8b4d8',
+            messages: [
+                { from: 'them', text: 'Happy birthday! 🎂', time: 'Aug 2' },
+                { from: 'me', text: 'Thank you so much! 🥳', time: 'Aug 2' },
+            ]
+        }, {
+            id: 'f6',
+            name: 'Tunde Balogun',
+            status: 'online',
+            avatar: 'T',
+            color: '#f5c542',
+            messages: [
+                { from: 'them', text: 'Meeting moved to 3 PM.', time: '1:45 PM' },
+                { from: 'me', text: 'Got it. I\'ll update the calendar.', time: '1:46 PM' },
+            ]
+        }, ];
+
+        // ─── STATE ─────────────────────────────────────────────────────────────
+
+        let activeFriendId = null; // null = no friend selected
+        let messages = {}; // friendId -> array of {from:'me'|'them', text, time}
+
+        // init messages from friend data
+        friends.forEach(f => {
+            messages[f.id] = f.messages.map(m => ({
+                from: m.from === 'me' ? 'me' : 'them',
+                text: m.text,
+                time: m.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }));
+            // ensure at least one message if none
+            if (messages[f.id].length === 0) {
+                messages[f.id].push({
+                    from: 'them',
+                    text: `Hi! Let's chat.`,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+            }
+        });
+
+        // ─── DOM refs ──────────────────────────────────────────────────────────
+
+        const friendListEl = document.getElementById('friendList');
+        const messagesEl = document.getElementById('messages');
+        const emptyState = document.getElementById('emptyState');
+        const chatHeader = document.getElementById('chatHeader');
+        const chatAvatar = document.getElementById('chatAvatar');
+        const chatUserName = document.getElementById('chatUserName');
+        const chatUserStatus = document.getElementById('chatUserStatus');
+        const msgInput = document.getElementById('msgInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const backBtn = document.getElementById('backBtn');
+        const friendCount = document.getElementById('friendCount');
+
+        // ─── helpers ──────────────────────────────────────────────────────────
+
+        function getFriend(id) {
+            return friends.find(f => f.id === id);
         }
-      }
-      list.innerHTML = html || `<div style="color:#64748b;">No friends found.</div>`;
 
-    } catch(err) {
-      console.error('Load friends error:', err);
-      list.innerHTML = `<div style="color:#ef4444;">Error: ${err.message}</div>`;
-      debug.textContent += `\n❌ Error: ${err.message}`;
-      showToast('❌ Error loading friends.', 'error');
-    }
-  }
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
 
-  // ============================================================
-  // SELECT FRIEND
-  // ============================================================
-  function selectFriend(friendId) {
-    if(chatUnsubscribe) chatUnsubscribe();
-    currentFriendId = friendId;
-    document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active'));
-    const el = document.querySelector(`.friend-item[onclick="selectFriend('${friendId}')"]`);
-    if(el) el.classList.add('active');
+        function getCurrentTime() {
+            return formatTime(new Date());
+        }
 
-    // Show chat area
-    document.getElementById('chatArea').style.display = 'flex';
+        // ─── render friends list ─────────────────────────────────────────────
 
-    // Update header
-    db.collection('users').doc(friendId).get().then(doc => {
-      if(doc.exists) {
-        const data = doc.data();
-        const isAdmin = data.isAdmin === true;
-        document.getElementById('chatAvatar').textContent = (data.displayName || 'U').charAt(0).toUpperCase();
-        document.getElementById('chatAvatar').style.background = isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)';
-        document.getElementById('chatAvatar').style.color = isAdmin ? '#000' : '#fff';
-        document.getElementById('chatName').textContent = data.displayName || 'Unknown';
-      }
-    });
+        function renderFriends() {
+            friendListEl.innerHTML = '';
+            friends.forEach(f => {
+                const div = document.createElement('div');
+                div.className = `friend-item${activeFriendId === f.id ? ' active' : ''}`;
+                div.dataset.friendId = f.id;
 
-    loadMessages(friendId);
-  }
+                // avatar
+                const avatar = document.createElement('div');
+                avatar.className = 'friend-avatar';
+                avatar.textContent = f.avatar;
+                avatar.style.background = `linear-gradient(135deg, ${f.color}, ${adjustColor(f.color, -20)})`;
 
-  // ============================================================
-  // LOAD MESSAGES
-  // ============================================================
-  function loadMessages(friendId) {
-    const messages = document.getElementById('chatMessages');
-    const chatId = [currentUser.uid, friendId].sort().join('_');
+                // info
+                const info = document.createElement('div');
+                info.className = 'friend-info';
 
-    if(chatUnsubscribe) chatUnsubscribe();
+                const name = document.createElement('div');
+                name.className = 'friend-name';
+                name.textContent = f.name;
 
-    chatUnsubscribe = db.collection('messages')
-      .where('chatId', '==', chatId)
-      .orderBy('timestamp', 'asc')
-      .onSnapshot(snapshot => {
-        const container = messages;
-        container.innerHTML = '';
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const isSent = data.senderId === currentUser.uid;
-          const timeStr = data.timestamp ? data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-          container.innerHTML += `
-            <div class="msg ${isSent ? 'sent' : 'received'}">
-              ${data.message}
-              <span class="time">${timeStr}</span>
-            </div>
-          `;
+                const status = document.createElement('div');
+                status.className = 'friend-status';
+                const dot = document.createElement('span');
+                dot.className = `dot${f.status === 'offline' ? ' offline' : ''}`;
+                const statusText = document.createTextNode(f.status === 'online' ? 'Online' : 'Offline');
+                status.appendChild(dot);
+                status.appendChild(statusText);
+
+                // preview
+                const preview = document.createElement('div');
+                preview.className = 'msg-preview';
+                const lastMsg = messages[f.id]?.length > 0 ? messages[f.id][messages[f.id].length - 1] : null;
+                preview.textContent = lastMsg ? (lastMsg.from === 'me' ? `You: ${lastMsg.text}` : lastMsg.text) :
+                'No messages yet';
+
+                info.appendChild(name);
+                info.appendChild(status);
+                info.appendChild(preview);
+
+                div.appendChild(avatar);
+                div.appendChild(info);
+
+                div.addEventListener('click', () => selectFriend(f.id));
+                friendListEl.appendChild(div);
+            });
+
+            friendCount.textContent = `${friends.length} friends`;
+        }
+
+        function adjustColor(hex, amount) {
+            // simple darken/lighten for gradient
+            let r = parseInt(hex.slice(1, 2), 16) * 17 || parseInt(hex.slice(1, 3), 16);
+            let g = parseInt(hex.slice(2, 3), 16) * 17 || parseInt(hex.slice(3, 5), 16);
+            let b = parseInt(hex.slice(3, 4), 16) * 17 || parseInt(hex.slice(5, 7), 16);
+            r = Math.max(0, Math.min(255, r + amount));
+            g = Math.max(0, Math.min(255, g + amount));
+            b = Math.max(0, Math.min(255, b + amount));
+            return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+        }
+
+        // ─── select friend ────────────────────────────────────────────────────
+
+        function selectFriend(friendId) {
+            if (activeFriendId === friendId) return;
+            activeFriendId = friendId;
+            renderFriends();
+            renderChat();
+            // focus input
+            msgInput.disabled = false;
+            sendBtn.disabled = false;
+            msgInput.focus();
+            // scroll to bottom
+            setTimeout(() => {
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }, 50);
+        }
+
+        // ─── render chat ──────────────────────────────────────────────────────
+
+        function renderChat() {
+            if (!activeFriendId) {
+                // show empty state
+                emptyState.style.display = 'flex';
+                chatHeader.style.display = 'none';
+                msgInput.disabled = true;
+                sendBtn.disabled = true;
+                // clear messages (except empty state)
+                messagesEl.querySelectorAll('.msg, .msg-separator, .typing').forEach(el => el.remove());
+                return;
+            }
+
+            const friend = getFriend(activeFriendId);
+            if (!friend) return;
+
+            // header
+            chatHeader.style.display = 'flex';
+            chatAvatar.textContent = friend.avatar;
+            chatAvatar.style.background = `linear-gradient(135deg, ${friend.color}, ${adjustColor(friend.color, -20)})`;
+            chatUserName.textContent = friend.name;
+            chatUserStatus.textContent = friend.status === 'online' ? 'Online' : 'Offline';
+
+            // hide empty state
+            emptyState.style.display = 'none';
+
+            // render messages
+            const msgs = messages[activeFriendId] || [];
+            // remove old messages (keep empty state if present, but we hide it)
+            messagesEl.querySelectorAll('.msg, .msg-separator, .typing').forEach(el => el.remove());
+
+            if (msgs.length === 0) {
+                const sep = document.createElement('div');
+                sep.className = 'msg-separator';
+                sep.textContent = 'No messages yet — say hello!';
+                messagesEl.appendChild(sep);
+            } else {
+                let lastDate = '';
+                msgs.forEach((m, idx) => {
+                    // date separator if time changes day (simplified: just show time)
+                    const msgTime = m.time || formatTime(new Date());
+                    const msgEl = document.createElement('div');
+                    msgEl.className = `msg ${m.from === 'me' ? 'sent' : 'received'}`;
+                    msgEl.textContent = m.text;
+                    const timeSpan = document.createElement('span');
+                    timeSpan.className = 'time';
+                    timeSpan.textContent = msgTime;
+                    msgEl.appendChild(timeSpan);
+                    messagesEl.appendChild(msgEl);
+                });
+            }
+
+            // enable input
+            msgInput.disabled = false;
+            sendBtn.disabled = false;
+
+            // scroll to bottom
+            setTimeout(() => {
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }, 20);
+        }
+
+        // ─── send message ─────────────────────────────────────────────────────
+
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (!text || !activeFriendId) return;
+
+            const friend = getFriend(activeFriendId);
+            if (!friend) return;
+
+            // add message to state
+            const newMsg = {
+                from: 'me',
+                text: text,
+                time: getCurrentTime()
+            };
+            messages[activeFriendId].push(newMsg);
+
+            // clear input
+            msgInput.value = '';
+            msgInput.style.height = 'auto';
+
+            // re-render
+            renderChat();
+
+            // simulate reply after 1-2s
+            const replyDelay = 800 + Math.random() * 1200;
+            const typingEl = document.createElement('div');
+            typingEl.className = 'typing';
+            typingEl.innerHTML = `
+                <span>${friend.name}</span>
+                <span class="dots">
+                    <span>·</span><span>·</span><span>·</span>
+                </span>
+            `;
+            messagesEl.appendChild(typingEl);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+
+            setTimeout(() => {
+                // remove typing indicator
+                if (typingEl.parentNode) typingEl.remove();
+
+                // auto-reply
+                const replies = [
+                    'That\'s interesting! Tell me more.',
+                    'Haha, I see! 😄',
+                    'Got it. Thanks for sharing!',
+                    'Really? That\'s awesome!',
+                    'I agree with you on that.',
+                    'Let me think about that…',
+                    'Sure, no problem!',
+                    'Oh, I didn\'t know that!',
+                    'Sounds good to me.',
+                    '👍 Nice!',
+                    'You\'re welcome!',
+                    'I\'ll get back to you on that.',
+                    'Cool! 😎',
+                    'That makes sense.',
+                    'Thanks for letting me know.'
+                ];
+                const replyText = replies[Math.floor(Math.random() * replies.length)];
+
+                const replyMsg = {
+                    from: 'them',
+                    text: replyText,
+                    time: getCurrentTime()
+                };
+                messages[activeFriendId].push(replyMsg);
+
+                // re-render without losing scroll
+                renderChat();
+
+                // update friend list preview
+                renderFriends();
+
+            }, replyDelay);
+        }
+
+        // ─── event listeners ──────────────────────────────────────────────────
+
+        // send button
+        sendBtn.addEventListener('click', sendMessage);
+
+        // enter to send (shift+enter for newline)
+        msgInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
         });
-        container.scrollTop = container.scrollHeight;
 
-        // Mark as read
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          if(data.receiverId === currentUser.uid && !data.read) {
-            db.collection('messages').doc(doc.id).update({ read: true });
-          }
+        // auto-resize textarea
+        msgInput.addEventListener('input', () => {
+            msgInput.style.height = 'auto';
+            msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
         });
-      });
-  }
 
-  // ============================================================
-  // SEND MESSAGE
-  // ============================================================
-  async function sendMessage() {
-    const input = document.getElementById('messageInput');
-    const text = input.value.trim();
-    if(!text || !currentFriendId) return;
+        // back button (mobile)
+        backBtn.addEventListener('click', () => {
+            activeFriendId = null;
+            renderFriends();
+            renderChat();
+            msgInput.disabled = true;
+            sendBtn.disabled = true;
+        });
 
-    const chatId = [currentUser.uid, currentFriendId].sort().join('_');
-    try {
-      await db.collection('messages').add({
-        chatId: chatId,
-        senderId: currentUser.uid,
-        receiverId: currentFriendId,
-        message: text,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        read: false
-      });
-      input.value = '';
-    } catch(e) {
-      showToast('❌ Error sending message.', 'error');
-    }
-  }
+        // ─── init ─────────────────────────────────────────────────────────────
 
-  document.getElementById('messageInput').addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') { e.preventDefault(); sendMessage(); }
-  });
+        // start with no friend selected
+        activeFriendId = null;
+        renderFriends();
+        renderChat();
+        msgInput.disabled = true;
+        sendBtn.disabled = true;
 
-  // ============================================================
-  // AUTH
-  // ============================================================
-  auth.onAuthStateChanged(async (user) => {
-    if(user) {
-      currentUser = user;
-      // First load friends
-      await loadFriends();
-    } else {
-      window.location.href = 'login.html';
-    }
-  });
+        // ─── optional: click outside to deselect? no, we keep it simple ─────
 
-  window.loadFriends = loadFriends;
-  window.selectFriend = selectFriend;
-  window.sendMessage = sendMessage;
-  window.logout = logout;
-</script>
+        console.log('🚀 Chat app ready! Select a friend to start messaging.');
+    </script>
 
 </body>
 </html>
