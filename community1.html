@@ -10,6 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
+    /* All your existing styles (keep unchanged) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
@@ -41,7 +42,6 @@
       flex-direction: column;
     }
 
-    /* ===== NAVBAR ===== */
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
@@ -92,7 +92,6 @@
     }
     .navbar .back-link:hover { color: #f1f5f9; }
 
-    /* ===== COMMUNITY TABS ===== */
     .community-tabs {
       display: flex;
       gap: 0.3rem;
@@ -124,7 +123,6 @@
     }
     .community-tabs .tab i { margin-right: 0.3rem; }
 
-    /* ===== CREATE POST ===== */
     .create-post {
       background: rgba(30,41,59,0.5);
       backdrop-filter: blur(6px);
@@ -198,7 +196,6 @@
       transform: none;
     }
 
-    /* ===== POSTS FEED ===== */
     .feed {
       display: flex;
       flex-direction: column;
@@ -287,7 +284,6 @@
       color: #3b82f6;
     }
 
-    /* ===== COMMENTS ===== */
     .comments-section {
       margin-top: 0.8rem;
       padding-top: 0.8rem;
@@ -363,7 +359,6 @@
       cursor: pointer;
     }
 
-    /* ===== FRIENDS FEATURE ===== */
     .friends-search {
       display: flex;
       gap: 0.5rem;
@@ -483,7 +478,6 @@
       padding-bottom: 0.3rem;
     }
 
-    /* ===== EMPTY STATE ===== */
     .empty-state {
       text-align: center;
       padding: 3rem 1.5rem;
@@ -498,7 +492,6 @@
       font-size: 0.95rem;
     }
 
-    /* ===== TOAST ===== */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -577,7 +570,7 @@
   <div id="tab-friends" style="display:none;">
     <!-- Search -->
     <div class="friends-search">
-      <input type="text" id="friendSearchInput" placeholder="Search users by name or email..." />
+      <input type="text" id="friendSearchInput" placeholder="Search users by name..." />
       <button onclick="searchUsers()"><i class="fas fa-search"></i> Search</button>
     </div>
 
@@ -893,76 +886,84 @@
   }
 
   // ============================================================
-  // FRIENDS FEATURE
+  // FRIENDS FEATURE (UPDATED SEARCH)
   // ============================================================
-  async function loadFriends() {
-    if (!currentUser) return;
-    await loadPendingRequests();
-    await loadFriendsList();
+  // Cache all users for searching (load once)
+  let cachedUsers = [];
+
+  async function loadAllUsersForSearch() {
+    if (cachedUsers.length > 0) return cachedUsers;
+    try {
+      const snap = await db.collection('users').get();
+      cachedUsers = [];
+      snap.forEach(doc => {
+        const data = doc.data();
+        cachedUsers.push({
+          uid: doc.id,
+          displayName: data.displayName || data.name || 'Unknown',
+          email: data.email || '',
+          isAdmin: data.isAdmin === true
+        });
+      });
+      return cachedUsers;
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
   }
 
   // ============================================================
-  // SEARCH USERS
+  // SEARCH USERS (CLIENT-SIDE)
   // ============================================================
   async function searchUsers() {
     const query = document.getElementById('friendSearchInput').value.trim().toLowerCase();
     const resultsDiv = document.getElementById('searchResults');
     if (!query) { resultsDiv.style.display = 'none'; return; }
 
-    try {
-      const snap = await db.collection('users')
-        .orderBy('displayName')
-        .startAt(query)
-        .endAt(query + '\uf8ff')
-        .limit(10)
-        .get();
-
-      if (snap.empty) {
-        resultsDiv.innerHTML = `<div class="empty-state"><i class="fas fa-search"></i><p>No users found.</p></div>`;
-        resultsDiv.style.display = 'block';
-        return;
-      }
-
-      let html = '<div class="friends-section-title"><i class="fas fa-search"></i> Search Results</div>';
-      let found = false;
-      for (const doc of snap.docs) {
-        const data = doc.data();
-        const uid = doc.id;
-        if (uid === currentUser.uid) continue;
-
-        // Check if already friends
-        const friendStatus = await getFriendStatus(uid);
-        if (friendStatus === 'accepted') continue;
-
-        const isAdmin = data.isAdmin === true;
-        found = true;
-        html += `
-          <div class="friend-request-card">
-            <div class="info">
-              <div class="avatar" style="background:${isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}; color:#000;">
-                ${(data.displayName || 'U').charAt(0).toUpperCase()}
-              </div>
-              <span class="name">${data.displayName || 'Unknown'} ${isAdmin ? '<span class="admin-badge"><i class="fas fa-crown"></i></span>' : ''}</span>
-            </div>
-            <div class="actions">
-              ${friendStatus === 'pending' 
-                ? `<span class="status pending">Request sent</span>`
-                : `<button class="accept-btn" onclick="sendFriendRequest('${uid}')">Add Friend</button>`
-              }
-            </div>
-          </div>
-        `;
-      }
-
-      if (!found) {
-        html += `<div class="empty-state"><i class="fas fa-user-plus"></i><p>No new users to add.</p></div>`;
-      }
-      resultsDiv.innerHTML = html;
-      resultsDiv.style.display = 'block';
-    } catch (e) {
-      console.error(e);
-      showToast('❌ Error searching users.', 'error');
+    // Load users if not cached
+    if (cachedUsers.length === 0) {
+      await loadAllUsersForSearch();
     }
+
+    // Filter users (exclude self)
+    const filtered = cachedUsers.filter(u => 
+      u.uid !== currentUser.uid &&
+      (u.displayName.toLowerCase().includes(query) || 
+       u.email.toLowerCase().includes(query))
+    );
+
+    if (filtered.length === 0) {
+      resultsDiv.innerHTML = `<div class="empty-state"><i class="fas fa-search"></i><p>No users found. Try a different search.</p></div>`;
+      resultsDiv.style.display = 'block';
+      return;
+    }
+
+    // Build results
+    let html = '<div class="friends-section-title"><i class="fas fa-search"></i> Search Results</div>';
+    for (const user of filtered) {
+      const friendStatus = await getFriendStatus(user.uid);
+      const isAdmin = user.isAdmin === true;
+      html += `
+        <div class="friend-request-card">
+          <div class="info">
+            <div class="avatar" style="background:${isAdmin ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}; color:#000;">
+              ${user.displayName.charAt(0).toUpperCase()}
+            </div>
+            <span class="name">${user.displayName} ${isAdmin ? '<span class="admin-badge"><i class="fas fa-crown"></i></span>' : ''}</span>
+          </div>
+          <div class="actions">
+            ${friendStatus === 'pending' 
+              ? `<span class="status pending">Request sent</span>`
+              : friendStatus === 'accepted'
+              ? `<span class="status accepted">✅ Friends</span>`
+              : `<button class="accept-btn" onclick="sendFriendRequest('${user.uid}')">Add Friend</button>`
+            }
+          </div>
+        </div>
+      `;
+    }
+    resultsDiv.innerHTML = html;
+    resultsDiv.style.display = 'block';
   }
 
   // ============================================================
@@ -1099,13 +1100,11 @@
     const container = document.getElementById('friendsList');
 
     try {
-      // Get friends where current user is the sender
       const snap1 = await db.collection('friends')
         .where('uid', '==', currentUser.uid)
         .where('status', '==', 'accepted')
         .get();
 
-      // Get friends where current user is the receiver
       const snap2 = await db.collection('friends')
         .where('friendId', '==', currentUser.uid)
         .where('status', '==', 'accepted')
@@ -1147,6 +1146,16 @@
       console.error(e);
       container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Error loading friends.</p></div>`;
     }
+  }
+
+  // ============================================================
+  // LOAD FRIENDS (MAIN)
+  // ============================================================
+  async function loadFriends() {
+    if (!currentUser) return;
+    await loadAllUsersForSearch();
+    await loadPendingRequests();
+    await loadFriendsList();
   }
 
   // ============================================================
