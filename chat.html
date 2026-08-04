@@ -1,3 +1,4 @@
+<!-- ===== PASTE THIS INTO chat.html (replace entire file) ===== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,9 +11,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
+    /* (same styles as before – I'll keep it minimal) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
       min-height: 100vh;
       color: #f1f5f9;
@@ -20,96 +22,33 @@
       flex-direction: column;
       align-items: center;
       padding: 1.5rem 1rem;
-      position: relative;
-    }
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.08) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 80%, rgba(16,185,129,.08) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 0;
     }
     .wrapper {
       width: 100%;
       max-width: 900px;
-      position: relative;
-      z-index: 1;
       flex: 1;
       display: flex;
       flex-direction: column;
       height: calc(100vh - 80px);
-      min-height: 500px;
     }
-
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
-      box-shadow: 0 4px 12px rgba(0,0,0,.3);
       padding: 0.8rem 1.5rem;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,.1);
-      border-radius: 1rem;
-      margin-bottom: 1rem;
-    }
-    .navbar .logo {
-      font-size: 1.4rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #3b82f6, #10b981);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-decoration: none;
-    }
-    .navbar .logo i { margin-right: 0.3rem; }
-    .navbar .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-    }
-    .navbar .logout-btn {
-      background: rgba(59,130,246,.2);
-      border: 1px solid rgba(59,130,246,.3);
-      padding: 0.35rem 0.9rem;
-      border-radius: 2rem;
-      font-weight: 500;
-      color: #3b82f6;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: all 0.3s;
-    }
-    .navbar .logout-btn:hover { background: rgba(59,130,246,.3); }
-    .navbar .back-link {
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: color 0.3s;
-    }
-    .navbar .back-link:hover { color: #f1f5f9; }
-
-    /* Refresh button */
-    .refresh-btn {
-      background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
-      color: #94a3b8;
-      padding: 0.3rem 0.8rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      font-size: 0.7rem;
-      transition: all 0.2s;
-      font-family: inherit;
     }
-    .refresh-btn:hover {
-      background: rgba(255,255,255,0.1);
-      color: #f1f5f9;
-    }
-
+    .navbar .logo { font-size:1.4rem; font-weight:800; background:linear-gradient(135deg,#3b82f6,#10b981); -webkit-background-clip:text; background-clip:text; color:transparent; text-decoration:none; }
+    .navbar .logo i { margin-right:0.3rem; }
+    .navbar .nav-right { display:flex; align-items:center; gap:0.8rem; }
+    .navbar .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:0.35rem 0.9rem; border-radius:2rem; color:#3b82f6; cursor:pointer; font-size:0.8rem; }
+    .navbar .logout-btn:hover { background:rgba(59,130,246,.3); }
+    .navbar .back-link { color:#94a3b8; text-decoration:none; font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; }
+    .navbar .back-link:hover { color:#f1f5f9; }
     .chat-container {
       display: flex;
       flex: 1;
@@ -120,7 +59,6 @@
       overflow: hidden;
       min-height: 400px;
     }
-
     .friends-sidebar {
       width: 280px;
       background: rgba(15,23,42,0.3);
@@ -136,9 +74,8 @@
       font-size: 0.9rem;
       color: #94a3b8;
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
       justify-content: space-between;
+      align-items: center;
     }
     .friends-sidebar .sidebar-header .count {
       background: rgba(255,255,255,0.05);
@@ -147,12 +84,22 @@
       font-size: 0.7rem;
       color: #64748b;
     }
+    .refresh-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #94a3b8;
+      padding: 0.3rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.7rem;
+    }
+    .refresh-btn:hover { background:rgba(255,255,255,0.1); color:#f1f5f9; }
     .friends-list {
       flex: 1;
       overflow-y: auto;
       padding: 0.5rem;
     }
-    .friends-list .friend-item {
+    .friend-item {
       display: flex;
       align-items: center;
       gap: 0.8rem;
@@ -162,14 +109,8 @@
       transition: all 0.3s;
       border: 1px solid transparent;
     }
-    .friends-list .friend-item:hover {
-      background: rgba(255,255,255,0.04);
-    }
-    .friends-list .friend-item.active {
-      background: rgba(59,130,246,0.12);
-      border-color: rgba(59,130,246,0.2);
-    }
-    .friends-list .friend-item .avatar {
+    .friend-item:hover { background:rgba(255,255,255,0.04); }
+    .friend-item .avatar {
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -182,58 +123,14 @@
       color: #fff;
       flex-shrink: 0;
     }
-    .friends-list .friend-item .avatar.admin {
+    .friend-item .avatar.admin {
       background: linear-gradient(135deg, #fbbf24, #f59e0b);
       color: #000;
     }
-    .friends-list .friend-item .info {
-      flex: 1;
-      min-width: 0;
-    }
-    .friends-list .friend-item .info .name {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #f1f5f9;
-    }
-    .friends-list .friend-item .info .name .admin-badge {
-      font-size: 0.5rem;
-      color: #fbbf24;
-      margin-left: 0.2rem;
-    }
-    .friends-list .friend-item .info .last-msg {
-      font-size: 0.75rem;
-      color: #64748b;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .friends-list .friend-item .unread-badge {
-      background: #3b82f6;
-      color: #fff;
-      font-size: 0.6rem;
-      font-weight: 700;
-      padding: 0.1rem 0.5rem;
-      border-radius: 12px;
-      flex-shrink: 0;
-    }
-    .friends-list .friend-item .time {
-      font-size: 0.6rem;
-      color: #64748b;
-      flex-shrink: 0;
-    }
-    .empty-friends {
-      text-align: center;
-      padding: 2rem 1rem;
-      color: #64748b;
-      font-size: 0.9rem;
-    }
-    .empty-friends i {
-      font-size: 2rem;
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #334155;
-    }
-
+    .friend-item .info { flex:1; min-width:0; }
+    .friend-item .info .name { font-weight:600; font-size:0.9rem; color:#f1f5f9; }
+    .friend-item .info .last-msg { font-size:0.75rem; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .friend-item .unread-badge { background:#3b82f6; color:#fff; font-size:0.6rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:12px; }
     .chat-area {
       flex: 1;
       display: flex;
@@ -259,18 +156,6 @@
       font-weight: 700;
       font-size: 0.8rem;
       color: #fff;
-      flex-shrink: 0;
-    }
-    .chat-area .chat-header .avatar.admin {
-      background: linear-gradient(135deg, #fbbf24, #f59e0b);
-      color: #000;
-    }
-    .chat-area .chat-header .name {
-      flex: 1;
-    }
-    .chat-area .chat-header .online-status {
-      font-size: 0.7rem;
-      color: #10b981;
     }
     .chat-messages {
       flex: 1;
@@ -307,9 +192,6 @@
       margin-top: 0.2rem;
       text-align: right;
     }
-    .chat-messages .msg.sent .time { color: rgba(255,255,255,0.7); }
-    .chat-messages .msg.received .time { color: #94a3b8; }
-
     .chat-area .chat-input {
       display: flex;
       gap: 0.5rem;
@@ -326,14 +208,8 @@
       color: #f1f5f9;
       font-size: 0.9rem;
       outline: none;
-      font-family: inherit;
     }
-    .chat-area .chat-input input:focus {
-      border-color: #3b82f6;
-    }
-    .chat-area .chat-input input::placeholder {
-      color: #64748b;
-    }
+    .chat-area .chat-input input:focus { border-color:#3b82f6; }
     .chat-area .chat-input button {
       padding: 0.5rem 1rem;
       background: linear-gradient(135deg, #3b82f6, #2563eb);
@@ -346,14 +222,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s;
-      flex-shrink: 0;
     }
-    .chat-area .chat-input button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 15px rgba(59,130,246,0.3);
-    }
-
     .chat-placeholder {
       flex: 1;
       display: flex;
@@ -364,64 +233,23 @@
       padding: 2rem;
       text-align: center;
     }
-    .chat-placeholder i {
-      font-size: 3rem;
-      color: #334155;
-      margin-bottom: 1rem;
-    }
-
-    .loading-spinner {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem;
-      color: #64748b;
-    }
-    .loading-spinner i {
-      animation: spin 1s linear infinite;
-      margin-right: 0.5rem;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #f1f5f9;
-      padding: 10px 22px;
-      border-radius: 12px;
-      font-size: 13px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-      opacity: 0;
-      transition: opacity 0.35s ease, transform 0.35s ease;
-      pointer-events: none;
-      z-index: 9999;
-      max-width: 90%;
-      font-weight: 500;
-    }
+    .chat-placeholder i { font-size:3rem; color:#334155; margin-bottom:1rem; }
+    .loading-spinner { display:flex; justify-content:center; align-items:center; padding:2rem; color:#64748b; }
+    .loading-spinner i { animation:spin 1s linear infinite; margin-right:0.5rem; }
+    @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+    .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:#1e293b; border:1px solid #334155; color:#f1f5f9; padding:10px 22px; border-radius:12px; font-size:13px; box-shadow:0 10px 40px rgba(0,0,0,0.7); opacity:0; transition:opacity 0.35s ease, transform 0.35s ease; pointer-events:none; z-index:9999; max-width:90%; font-weight:500; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
-    .toast.success { border-left: 4px solid #22c55e; }
-    .toast.error { border-left: 4px solid #ef4444; }
-    .toast.info { border-left: 4px solid #3b82f6; }
-
-    @media (max-width: 768px) {
-      .wrapper { height: calc(100vh - 60px); min-height: 400px; }
-      .friends-sidebar { width: 100%; max-height: 200px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
-      .chat-container { flex-direction: column; }
-      .chat-placeholder { min-height: 200px; }
+    .toast.success { border-left:4px solid #22c55e; }
+    .toast.error { border-left:4px solid #ef4444; }
+    .toast.info { border-left:4px solid #3b82f6; }
+    @media (max-width:768px) {
+      .friends-sidebar { width:100%; max-height:200px; border-right:none; border-bottom:1px solid rgba(255,255,255,0.06); }
+      .chat-container { flex-direction:column; }
     }
   </style>
 </head>
 <body>
-
 <div class="wrapper">
-  <!-- NAVBAR -->
   <nav class="navbar">
     <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
     <div class="nav-right">
@@ -430,9 +258,7 @@
     </div>
   </nav>
 
-  <!-- CHAT CONTAINER -->
   <div class="chat-container">
-    <!-- Friends Sidebar -->
     <div class="friends-sidebar">
       <div class="sidebar-header">
         <span><i class="fas fa-user-friends"></i> Friends</span>
@@ -446,7 +272,6 @@
       </div>
     </div>
 
-    <!-- Chat Area -->
     <div class="chat-area">
       <div class="chat-header" id="chatHeader" style="display:none;">
         <div class="avatar" id="chatAvatar">U</div>
@@ -470,9 +295,6 @@
 <div id="toast" class="toast"></div>
 
 <script>
-  // ============================================================
-  // FIREBASE CONFIG
-  // ============================================================
   const firebaseConfig = {
     apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
     authDomain: "earnspherehub-742e9.firebaseapp.com",
@@ -485,308 +307,167 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // ============================================================
-  // GLOBALS
-  // ============================================================
   let currentUser = null;
-  let friends = [];
   let currentFriendId = null;
   let chatUnsubscribe = null;
-  let friendUnsubscribe = null;
 
-  const friendsList = document.getElementById('friendsList');
-  const chatMessages = document.getElementById('chatMessages');
-  const chatHeader = document.getElementById('chatHeader');
-  const chatInputArea = document.getElementById('chatInputArea');
-  const messageInput = document.getElementById('messageInput');
-  const friendCount = document.getElementById('friendCount');
-
-  // ============================================================
-  // TOAST
-  // ============================================================
-  function showToast(msg, type = 'success') {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.className = 'toast ' + type;
-    void toast.offsetWidth;
-    toast.classList.add('show');
-    clearTimeout(toast._hide);
-    toast._hide = setTimeout(() => toast.classList.remove('show'), 4000);
+  function showToast(msg, type='success') {
+    const t=document.getElementById('toast');
+    t.textContent=msg;
+    t.className='toast '+type;
+    void t.offsetWidth;
+    t.classList.add('show');
+    clearTimeout(t._hide);
+    t._hide=setTimeout(()=>t.classList.remove('show'),4000);
   }
 
-  // ============================================================
-  // LOGOUT
-  // ============================================================
   function logout() {
-    if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
-    if (friendUnsubscribe) { friendUnsubscribe(); friendUnsubscribe = null; }
-    auth.signOut().then(() => {
-      localStorage.removeItem('earnsphere_user_data');
-      window.location.href = 'login.html';
-    });
+    if(chatUnsubscribe) chatUnsubscribe();
+    auth.signOut().then(()=>{ window.location.href='login.html'; });
   }
 
-  // ============================================================
-  // GET FRIEND STATUS
-  // ============================================================
-  async function getFriendStatus(targetUid) {
+  async function loadFriends() {
+    if(!currentUser) { console.warn('No user'); return; }
+    const list = document.getElementById('friendsList');
+    list.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+
     try {
-      const snap = await db.collection('friends')
+      // Query as sender
+      const snap1 = await db.collection('friends')
         .where('uid', '==', currentUser.uid)
-        .where('friendId', '==', targetUid)
+        .where('status', '==', 'accepted')
         .get();
-      if (!snap.empty) return snap.docs[0].data().status;
 
+      // Query as receiver
       const snap2 = await db.collection('friends')
-        .where('uid', '==', targetUid)
         .where('friendId', '==', currentUser.uid)
+        .where('status', '==', 'accepted')
         .get();
-      if (!snap2.empty) return snap2.docs[0].data().status;
 
-      return null;
-    } catch (e) { return null; }
-  }
+      console.log('Sender friends:', snap1.size);
+      console.log('Receiver friends:', snap2.size);
 
-  // ============================================================
-  // LOAD FRIENDS (with real-time updates) - FIXED
-  // ============================================================
-  function loadFriends() {
-    if (!currentUser) {
-      console.warn('No current user');
-      return;
-    }
+      const friendIds = [];
+      snap1.forEach(doc => friendIds.push(doc.data().friendId));
+      snap2.forEach(doc => friendIds.push(doc.data().uid));
 
-    if (friendUnsubscribe) {
-      friendUnsubscribe();
-      friendUnsubscribe = null;
-    }
+      if(friendIds.length === 0) {
+        list.innerHTML = `<div class="empty-friends"><i class="fas fa-user-friends"></i><p>No friends yet. Go to Community and add friends!</p></div>`;
+        document.getElementById('friendCount').textContent='0';
+        return;
+      }
 
-    console.log('Loading friends for user:', currentUser.uid);
+      document.getElementById('friendCount').textContent=friendIds.length;
 
-    // Query where current user is the sender
-    const q1 = db.collection('friends')
-      .where('uid', '==', currentUser.uid)
-      .where('status', '==', 'accepted');
-
-    // Query where current user is the receiver
-    const q2 = db.collection('friends')
-      .where('friendId', '==', currentUser.uid)
-      .where('status', '==', 'accepted');
-
-    let allFriends = [];
-
-    const unsub1 = q1.onSnapshot((snapshot) => {
-      console.log('q1 snapshot size:', snapshot.size);
-      const results = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        console.log('q1 friend found:', data);
-        results.push({ uid: data.friendId, direction: 'sent' });
-      });
-      allFriends = results;
-      // Also get q2
-      const unsub2 = q2.onSnapshot((snap2) => {
-        console.log('q2 snapshot size:', snap2.size);
-        const results2 = [];
-        snap2.forEach(doc => {
+      let html = '';
+      for(const uid of friendIds) {
+        try {
+          const doc = await db.collection('users').doc(uid).get();
+          if(!doc.exists) continue;
           const data = doc.data();
-          console.log('q2 friend found:', data);
-          results2.push({ uid: data.uid, direction: 'received' });
-        });
-        // Combine unique friends
-        const combined = [...allFriends, ...results2];
-        const unique = combined.filter((v, i, a) => a.findIndex(t => t.uid === v.uid) === i);
-        console.log('Total unique friends:', unique.length);
-        renderFriends(unique);
-      });
-      friendUnsubscribe = () => { unsub1(); unsub2(); };
-    }, (error) => {
-      console.error('q1 error:', error);
-      friendsList.innerHTML = `<div class="empty-friends"><i class="fas fa-exclamation-circle"></i><p>Error loading friends: ${error.message}</p></div>`;
-    });
-  }
-
-  // ============================================================
-  // RENDER FRIENDS
-  // ============================================================
-  async function renderFriends(friendIds) {
-    console.log('Rendering friends:', friendIds.length);
-
-    if (!friendIds.length) {
-      friendsList.innerHTML = `
-        <div class="empty-friends">
-          <i class="fas fa-user-friends"></i>
-          <p>No friends yet.<br />Go to Community and add friends!</p>
-        </div>
-      `;
-      friendCount.textContent = '0';
-      return;
-    }
-
-    friendCount.textContent = friendIds.length;
-
-    let html = '';
-    for (const { uid } of friendIds) {
-      try {
-        console.log('Loading user data for:', uid);
-        const doc = await db.collection('users').doc(uid).get();
-        if (!doc.exists) {
-          console.warn('User document not found for:', uid);
-          continue;
-        }
-        const data = doc.data();
-        const isAdmin = data.isAdmin === true;
-        const avatarChar = (data.displayName || 'U').charAt(0).toUpperCase();
-        const avatarClass = isAdmin ? 'avatar admin' : 'avatar';
-
-        // Get last message
-        const chatId = [currentUser.uid, uid].sort().join('_');
-        const lastMsgSnap = await db.collection('messages')
-          .where('chatId', '==', chatId)
-          .orderBy('timestamp', 'desc')
-          .limit(1)
-          .get();
-
-        let lastMsg = 'No messages yet';
-        let lastTime = '';
-        let unreadCount = 0;
-
-        if (!lastMsgSnap.empty) {
-          const msgData = lastMsgSnap.docs[0].data();
-          lastMsg = msgData.message;
-          const ts = msgData.timestamp ? msgData.timestamp.toDate() : new Date();
-          lastTime = ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        // Count unread messages
-        const unreadSnap = await db.collection('messages')
-          .where('chatId', '==', chatId)
-          .where('receiverId', '==', currentUser.uid)
-          .where('read', '==', false)
-          .get();
-        unreadCount = unreadSnap.size;
-
-        html += `
-          <div class="friend-item ${currentFriendId === uid ? 'active' : ''}" onclick="selectFriend('${uid}')">
-            <div class="${avatarClass}">${avatarChar}</div>
-            <div class="info">
-              <div class="name">${data.displayName || 'Unknown'} ${isAdmin ? '<span class="admin-badge"><i class="fas fa-crown"></i></span>' : ''}</div>
-              <div class="last-msg">${lastMsg}</div>
+          const isAdmin = data.isAdmin === true;
+          const avatarChar = (data.displayName || 'U').charAt(0).toUpperCase();
+          const avatarClass = isAdmin ? 'avatar admin' : 'avatar';
+          // Get last message
+          const chatId = [currentUser.uid, uid].sort().join('_');
+          const lastMsgSnap = await db.collection('messages')
+            .where('chatId', '==', chatId)
+            .orderBy('timestamp', 'desc')
+            .limit(1)
+            .get();
+          let lastMsg = 'No messages yet';
+          let lastTime = '';
+          if(!lastMsgSnap.empty) {
+            const msgData = lastMsgSnap.docs[0].data();
+            lastMsg = msgData.message;
+            const ts = msgData.timestamp ? msgData.timestamp.toDate() : new Date();
+            lastTime = ts.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+          }
+          const unreadSnap = await db.collection('messages')
+            .where('chatId', '==', chatId)
+            .where('receiverId', '==', currentUser.uid)
+            .where('read', '==', false)
+            .get();
+          const unreadCount = unreadSnap.size;
+          html += `
+            <div class="friend-item" onclick="selectFriend('${uid}')">
+              <div class="${avatarClass}">${avatarChar}</div>
+              <div class="info">
+                <div class="name">${data.displayName || 'Unknown'} ${isAdmin ? '<span class="admin-badge"><i class="fas fa-crown"></i></span>' : ''}</div>
+                <div class="last-msg">${lastMsg}</div>
+              </div>
+              ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ''}
+              <span class="time">${lastTime}</span>
             </div>
-            ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ''}
-            <span class="time">${lastTime}</span>
-          </div>
-        `;
-      } catch (e) {
-        console.error('Error loading friend:', uid, e);
+          `;
+        } catch(e) { console.error('Error loading friend:', uid, e); }
       }
-    }
-    friendsList.innerHTML = html || `
-      <div class="empty-friends">
-        <i class="fas fa-user-friends"></i>
-        <p>No friends found.</p>
-      </div>
-    `;
-
-    if (currentFriendId) {
-      const stillFriend = friendIds.some(f => f.uid === currentFriendId);
-      if (!stillFriend) {
-        currentFriendId = null;
-        showChatPlaceholder();
-      } else {
-        loadMessages(currentFriendId);
-      }
+      list.innerHTML = html || `<div class="empty-friends"><i class="fas fa-user-friends"></i><p>No friends found.</p></div>`;
+    } catch(err) {
+      console.error('Load friends error:', err);
+      list.innerHTML = `<div class="empty-friends"><i class="fas fa-exclamation-circle"></i><p>Error: ${err.message}</p></div>`;
+      showToast('❌ Error loading friends. Check console.', 'error');
     }
   }
 
-  // ============================================================
-  // SELECT FRIEND
-  // ============================================================
   function selectFriend(friendId) {
-    if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+    if(chatUnsubscribe) chatUnsubscribe();
     currentFriendId = friendId;
     loadMessages(friendId);
-    document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.friend-item').forEach(el=>el.classList.remove('active'));
     document.querySelector(`.friend-item[onclick="selectFriend('${friendId}')"]`)?.classList.add('active');
   }
 
-  // ============================================================
-  // SHOW CHAT PLACEHOLDER
-  // ============================================================
-  function showChatPlaceholder() {
-    chatHeader.style.display = 'none';
-    chatInputArea.style.display = 'none';
-    chatMessages.innerHTML = `
-      <div class="chat-placeholder">
-        <i class="fas fa-comment-dots"></i>
-        <p>Select a friend to start chatting</p>
-      </div>
-    `;
-  }
-
-  // ============================================================
-  // LOAD MESSAGES
-  // ============================================================
   function loadMessages(friendId) {
-    if (!currentUser) return;
-
-    chatHeader.style.display = 'flex';
-    chatInputArea.style.display = 'flex';
-
+    const header = document.getElementById('chatHeader');
+    const inputArea = document.getElementById('chatInputArea');
+    const messages = document.getElementById('chatMessages');
+    header.style.display='flex';
+    inputArea.style.display='flex';
     db.collection('users').doc(friendId).get().then(doc => {
-      if (doc.exists) {
-        const data = doc.data();
-        const isAdmin = data.isAdmin === true;
-        const avatarChar = (data.displayName || 'U').charAt(0).toUpperCase();
-        document.getElementById('chatAvatar').textContent = avatarChar;
-        document.getElementById('chatAvatar').className = isAdmin ? 'avatar admin' : 'avatar';
-        document.getElementById('chatName').textContent = data.displayName || 'Unknown';
+      if(doc.exists) {
+        const data=doc.data();
+        const isAdmin=data.isAdmin===true;
+        const avatarChar=(data.displayName||'U').charAt(0).toUpperCase();
+        document.getElementById('chatAvatar').textContent=avatarChar;
+        document.getElementById('chatAvatar').className=isAdmin?'avatar admin':'avatar';
+        document.getElementById('chatName').textContent=data.displayName||'Unknown';
       }
     });
-
-    chatMessages.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
-
-    const chatId = [currentUser.uid, friendId].sort().join('_');
-
-    if (chatUnsubscribe) chatUnsubscribe();
-
+    messages.innerHTML='<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
+    const chatId=[currentUser.uid, friendId].sort().join('_');
     chatUnsubscribe = db.collection('messages')
       .where('chatId', '==', chatId)
       .orderBy('timestamp', 'asc')
-      .onSnapshot((snapshot) => {
-        const container = chatMessages;
-        container.innerHTML = '';
+      .onSnapshot(snapshot => {
+        const container = messages;
+        container.innerHTML='';
         snapshot.forEach(doc => {
-          const data = doc.data();
-          const isSent = data.senderId === currentUser.uid;
-          const timeStr = data.timestamp ? data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          const data=doc.data();
+          const isSent=data.senderId===currentUser.uid;
+          const timeStr=data.timestamp?data.timestamp.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
           container.innerHTML += `
-            <div class="msg ${isSent ? 'sent' : 'received'}">
+            <div class="msg ${isSent?'sent':'received'}">
               ${data.message}
               <span class="time">${timeStr}</span>
             </div>
           `;
         });
-        container.scrollTop = container.scrollHeight;
-
+        container.scrollTop=container.scrollHeight;
         snapshot.forEach(doc => {
-          const data = doc.data();
-          if (data.receiverId === currentUser.uid && !data.read) {
+          const data=doc.data();
+          if(data.receiverId===currentUser.uid && !data.read) {
             db.collection('messages').doc(doc.id).update({ read: true });
           }
         });
       });
   }
 
-  // ============================================================
-  // SEND MESSAGE
-  // ============================================================
   async function sendMessage() {
-    const text = messageInput.value.trim();
-    if (!text || !currentFriendId) return;
-
-    const chatId = [currentUser.uid, currentFriendId].sort().join('_');
-
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if(!text || !currentFriendId) return;
+    const chatId=[currentUser.uid, currentFriendId].sort().join('_');
     try {
       await db.collection('messages').add({
         chatId: chatId,
@@ -796,44 +477,28 @@
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         read: false
       });
-      messageInput.value = '';
-    } catch (e) {
-      console.error(e);
-      showToast('❌ Error sending message.', 'error');
-    }
+      input.value='';
+    } catch(e) { showToast('❌ Error sending message.', 'error'); }
   }
 
-  // ============================================================
-  // ENTER KEY TO SEND
-  // ============================================================
-  messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      sendMessage();
-    }
+  document.getElementById('messageInput').addEventListener('keydown', (e) => {
+    if(e.key==='Enter') { e.preventDefault(); sendMessage(); }
   });
 
-  // ============================================================
-  // AUTH & INIT
-  // ============================================================
-  auth.onAuthStateChanged(async (user) => {
-    if (user) {
-      currentUser = user;
-      console.log('User logged in:', user.uid);
-      // Show loading state
-      friendsList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading friends...</div>';
-      showChatPlaceholder();
-      await loadFriends();
+  auth.onAuthStateChanged(user => {
+    if(user) {
+      currentUser=user;
+      console.log('Logged in:', user.uid);
+      loadFriends();
     } else {
-      window.location.href = 'login.html';
+      window.location.href='login.html';
     }
   });
 
-  window.selectFriend = selectFriend;
-  window.sendMessage = sendMessage;
-  window.logout = logout;
-  window.loadFriends = loadFriends;
+  window.loadFriends=loadFriends;
+  window.selectFriend=selectFriend;
+  window.sendMessage=sendMessage;
+  window.logout=logout;
 </script>
-
 </body>
 </html>
