@@ -48,6 +48,21 @@
     .navbar .back-link { color:#94a3b8; text-decoration:none; font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; }
     .navbar .back-link:hover { color:#f1f5f9; }
 
+    .ad-container {
+      max-width: 728px;
+      margin: 12px auto;
+      padding: 12px;
+      background: rgba(30, 41, 59, 0.4);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
     .chat-area {
       flex: 1;
       display: flex;
@@ -86,6 +101,7 @@
       flex-direction: column;
       gap: 0.5rem;
       min-height: 300px;
+      max-height: 500px;
     }
     .chat-messages .msg {
       max-width: 75%;
@@ -151,21 +167,6 @@
     .loading i { animation:spin 1s linear infinite; margin-right:0.5rem; }
     @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
 
-    .ad-container {
-      max-width: 728px;
-      margin: 20px auto;
-      padding: 12px;
-      background: rgba(30, 41, 59, 0.4);
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      text-align: center;
-      min-height: 90px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-    }
-
     .toast {
       position: fixed;
       bottom: 30px;
@@ -188,6 +189,7 @@
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
     .toast.success { border-left:4px solid #22c55e; }
     .toast.error { border-left:4px solid #ef4444; }
+    .toast.info { border-left:4px solid #3b82f6; }
   </style>
 </head>
 <body>
@@ -195,12 +197,12 @@
   <nav class="navbar">
     <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
     <div class="nav-right">
-      <a href="chat.html" class="back-link"><i class="fas fa-arrow-left"></i> <span>Back to Friends</span></a>
+      <a href="chat.html" class="back-link"><i class="fas fa-arrow-left"></i> <span>Back</span></a>
       <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
   </nav>
 
-  <!-- ===== MONDIAD BANNER AD ===== -->
+  <!-- AD 1 -->
   <div class="ad-container">
     <script async src="https://ss.mrmnd.com/banner.js"></script>
     <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
@@ -213,8 +215,8 @@
     </div>
     <div class="chat-messages" id="chatMessages">
       <div style="text-align:center; padding:2rem; color:#64748b;">
-        <i class="fas fa-comment-dots" style="font-size:2rem; display:block; margin-bottom:0.5rem; color:#334155;"></i>
-        <p>Send a message</p>
+        <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+        <p style="margin-top:0.5rem;">Loading messages...</p>
       </div>
     </div>
     <div class="chat-input">
@@ -223,27 +225,19 @@
     </div>
   </div>
 
-  <!-- ===== MONDIAD BANNER AD 2 ===== -->
+  <!-- AD 2 -->
   <div class="ad-container">
     <script async src="https://ss.mrmnd.com/banner.js"></script>
     <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
   </div>
 </div>
 
-<!-- ===== MONDIAD POP-UNDER ===== -->
+<!-- ===== MONDIAD ADS ===== -->
 <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
-
-<!-- ===== MONDIAD STATIC ===== -->
 <script async src="https://ss.mrmnd.com/static/50a5a986-052e-4ac4-acea-2d9bc37b53f3.js"></script>
-
-<!-- ===== MONDIAD NATIVE ===== -->
 <script async src="https://ss.mrmnd.com/native.js"></script>
 <div data-mndazid="3e2075d4-e0ca-4589-b3a6-57960eb2fcd0"></div>
-
-<!-- ===== MONDIAD DYNAMIC ===== -->
 <script async src="https://ss.mrmnd.com/dynamic.js" data-mnddynid="a26ab055-a0eb-469b-98b1-ce863bec9ba7"></script>
-
-<!-- ===== MONDIAD INTERSTITIAL ===== -->
 <script async src="https://ss.mrmnd.com/interstitial.js" data-mndintid="c60da3d3-0ed9-41fc-bf0d-23b11a6002f0"></script>
 
 <div id="toast" class="toast"></div>
@@ -280,42 +274,43 @@
     auth.signOut().then(()=>{ window.location.href='login.html'; });
   }
 
-  async function initChat() {
-    const params = new URLSearchParams(window.location.search);
-    const friendUid = params.get('uid');
-    if (!friendUid) {
-      document.getElementById('chatMessages').innerHTML = '<div style="color:#ef4444; text-align:center; padding:2rem;">No friend specified.</div>';
-      return;
-    }
+  // ============================================================
+  // GENERATE CHAT ID
+  // ============================================================
+  function getChatId(uid1, uid2) {
+    return [uid1, uid2].sort().join('_');
+  }
 
-    currentFriendId = friendUid;
+  // ============================================================
+  // LOAD MESSAGES
+  // ============================================================
+  function loadMessages() {
+    if (!currentUser || !currentFriendId) return;
 
-    try {
-      const doc = await db.collection('users').doc(friendUid).get();
-      if (!doc.exists) {
-        document.getElementById('chatMessages').innerHTML = '<div style="color:#ef4444; text-align:center; padding:2rem;">Friend not found.</div>';
-        return;
-      }
-      const data = doc.data();
-      const isAdmin = data.isAdmin === true;
-      const avatarChar = (data.displayName || 'U').charAt(0).toUpperCase();
-      document.getElementById('chatAvatar').textContent = avatarChar;
-      document.getElementById('chatAvatar').className = isAdmin ? 'avatar admin' : 'avatar';
-      document.getElementById('chatName').textContent = data.displayName || 'Unknown';
-    } catch (e) {
-      console.error(e);
-      showToast('Error loading friend info.', 'error');
-    }
+    const chatId = getChatId(currentUser.uid, currentFriendId);
+    console.log('📨 Loading messages for chatId:', chatId);
+
+    const messagesDiv = document.getElementById('chatMessages');
 
     if (chatUnsubscribe) chatUnsubscribe();
-    const chatId = [currentUser.uid, friendUid].sort().join('_');
-    const messagesDiv = document.getElementById('chatMessages');
+
     chatUnsubscribe = db.collection('messages')
       .where('chatId', '==', chatId)
       .orderBy('timestamp', 'asc')
-      .onSnapshot(snapshot => {
+      .onSnapshot((snapshot) => {
         const container = messagesDiv;
         container.innerHTML = '';
+
+        if (snapshot.empty) {
+          container.innerHTML = `
+            <div style="text-align:center; padding:2rem; color:#64748b;">
+              <i class="fas fa-comment-dots" style="font-size:2rem; display:block; margin-bottom:0.5rem; color:#334155;"></i>
+              <p>No messages yet. Say hello! 👋</p>
+            </div>
+          `;
+          return;
+        }
+
         snapshot.forEach(doc => {
           const data = doc.data();
           const isSent = data.senderId === currentUser.uid;
@@ -327,22 +322,51 @@
             </div>
           `;
         });
+
+        // Scroll to bottom
         container.scrollTop = container.scrollHeight;
+
+        // Mark messages as read
         snapshot.forEach(doc => {
           const data = doc.data();
           if (data.receiverId === currentUser.uid && !data.read) {
             db.collection('messages').doc(doc.id).update({ read: true });
           }
         });
+      }, (error) => {
+        console.error('❌ Snapshot error:', error);
+        messagesDiv.innerHTML = `
+          <div style="text-align:center; padding:2rem; color:#ef4444;">
+            <i class="fas fa-exclamation-circle" style="font-size:2rem; display:block; margin-bottom:0.5rem;"></i>
+            <p>Error loading messages: ${error.message}</p>
+          </div>
+        `;
+        showToast('❌ Error loading messages.', 'error');
       });
   }
 
+  // ============================================================
+  // SEND MESSAGE
+  // ============================================================
   async function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
-    if (!text || !currentFriendId || !currentUser) return;
+    if (!text) {
+      showToast('Please type a message.', 'info');
+      return;
+    }
+    if (!currentFriendId) {
+      showToast('No friend selected.', 'error');
+      return;
+    }
+    if (!currentUser) {
+      showToast('Please log in.', 'error');
+      return;
+    }
 
-    const chatId = [currentUser.uid, currentFriendId].sort().join('_');
+    const chatId = getChatId(currentUser.uid, currentFriendId);
+    console.log('📤 Sending to chatId:', chatId, 'Message:', text);
+
     try {
       await db.collection('messages').add({
         chatId: chatId,
@@ -354,23 +378,82 @@
       });
       input.value = '';
     } catch (e) {
-      showToast('❌ Error sending message.', 'error');
+      console.error('❌ Send error:', e);
+      showToast('❌ Error sending: ' + e.message, 'error');
     }
   }
 
+  // ============================================================
+  // INIT CHAT
+  // ============================================================
+  async function initChat() {
+    const params = new URLSearchParams(window.location.search);
+    const friendUid = params.get('uid');
+
+    if (!friendUid) {
+      document.getElementById('chatMessages').innerHTML = `
+        <div style="text-align:center; padding:2rem; color:#ef4444;">
+          <i class="fas fa-exclamation-circle" style="font-size:2rem; display:block; margin-bottom:0.5rem;"></i>
+          <p>No friend specified.</p>
+        </div>
+      `;
+      return;
+    }
+
+    currentFriendId = friendUid;
+    console.log('👤 Friend UID:', friendUid);
+
+    // Load friend info
+    try {
+      const doc = await db.collection('users').doc(friendUid).get();
+      if (!doc.exists) {
+        document.getElementById('chatMessages').innerHTML = `
+          <div style="text-align:center; padding:2rem; color:#ef4444;">
+            <i class="fas fa-user-slash" style="font-size:2rem; display:block; margin-bottom:0.5rem;"></i>
+            <p>Friend not found.</p>
+          </div>
+        `;
+        return;
+      }
+      const data = doc.data();
+      const isAdmin = data.isAdmin === true;
+      const avatarChar = (data.displayName || 'U').charAt(0).toUpperCase();
+      document.getElementById('chatAvatar').textContent = avatarChar;
+      document.getElementById('chatAvatar').className = isAdmin ? 'avatar admin' : 'avatar';
+      document.getElementById('chatName').textContent = data.displayName || 'Unknown';
+    } catch (e) {
+      console.error('Error loading friend:', e);
+      showToast('Error loading friend info.', 'error');
+    }
+
+    // Load messages
+    loadMessages();
+  }
+
+  // ============================================================
+  // ENTER KEY
+  // ============================================================
   document.getElementById('messageInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      sendMessage();
+    }
   });
 
+  // ============================================================
+  // AUTH
+  // ============================================================
   auth.onAuthStateChanged(async (user) => {
     if (user) {
       currentUser = user;
+      console.log('✅ Logged in as:', user.uid);
       await initChat();
     } else {
       window.location.href = 'login.html';
     }
   });
 
+  // Expose functions globally
   window.sendMessage = sendMessage;
   window.logout = logout;
 </script>
