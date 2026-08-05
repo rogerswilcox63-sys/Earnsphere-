@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const OpenAI = require('openai'); // CHANGED: Use OpenAI SDK
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,12 +25,12 @@ app.use(cors({
 
 app.use(express.json({ limit: '50mb' }));
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY; // CHANGED
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET;
 const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
 
-if (!GROQ_API_KEY) {
-  console.error('❌ GROQ_API_KEY is missing!');
+if (!OPENAI_API_KEY) { // CHANGED
+  console.error('❌ OPENAI_API_KEY is missing!');
   process.exit(1);
 }
 if (!PAYSTACK_SECRET) {
@@ -39,9 +40,9 @@ if (!RUNWAY_API_KEY) {
   console.warn('⚠️ RUNWAY_API_KEY is missing. Video generation will not work.');
 }
 
-const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY }); // CHANGED
 const PAYSTACK_URL = 'https://api.paystack.co';
-const DEFAULT_MODEL = 'openai/gpt-oss-120b';
+const DEFAULT_MODEL = 'gpt-4o-mini'; // CHANGED: gpt-4o or gpt-4o-mini
 
 // ============================================================
 // HEALTH CHECK
@@ -51,12 +52,12 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================================
-// AI CHAT ENDPOINT (Groq)
+// AI CHAT ENDPOINT (OpenAI GPT-4o-mini)
 // ============================================================
 app.post('/api/grok', async (req, res) => {
   const { message, history, image, model } = req.body;
 
-  if (!message && !image) {
+  if (!message &&!image) {
     return res.status(400).json({ error: 'Message or image is required.' });
   }
 
@@ -64,13 +65,12 @@ app.post('/api/grok', async (req, res) => {
   const selectedModel = model || DEFAULT_MODEL;
 
   const historyMessages = (history || [])
-    .slice(-15)
-    .map(h => ({
-      role: h.role === 'user' ? 'user' : 'assistant',
+   .slice(-15)
+   .map(h => ({
+      role: h.role === 'user'? 'user' : 'assistant',
       content: h.text || ''
     }));
 
-  // ---- SYSTEM PROMPT WITH THINKING INSTRUCTIONS ----
   const systemMessage = `You are SphereAI, a friendly, motivational Nigerian assistant for EarnSphere Hub.
 
 **ABOUT EARNSPHERE:**
@@ -94,90 +94,52 @@ EarnSphere is a Nigerian rewards platform where users earn real money (₦) by c
 - If a user asks you to generate a video, respond with exactly this format: [VIDEO: the user's prompt]
 - Do not add any extra text before or after the tag.
 - The prompt should be a concise description (max 100 characters).
-- Example: User says "Generate an image of a dog" → you reply with "[IMAGE: a dog]"
-- Example: User says "Make a video of a car driving" → you reply with "[VIDEO: a car driving]"
-- If the user asks for something vague, ask them for a clearer description.
 
 **THINKING PROCESS:**
-- When you need to reason about a problem, show your thinking process inside [THINK: ...] tags BEFORE giving your final answer.
-- The thinking should be clear, step-by-step reasoning in plain English.
+- When you need to reason about a problem, show your thinking process inside [THINK:...] tags BEFORE giving your final answer.
 - After the thinking, give your final answer as a separate paragraph.
-- Example format:
-  [THINK: I need to consider the user's question about withdrawals. First, I check the minimum withdrawal amount. Then I think about the verification process. Finally, I prepare a clear response.]
-  Your final answer goes here...
-
-**CODE FORMATTING:**
-- For any code you provide, use markdown code fences with the language name: 
-  \`\`\`javascript
-  console.log('Hello');
-  \`\`\`
-- This will be displayed as a formatted code block.
 
 **INSTRUCTIONS FOR YOU:**
 - Detect the user's language and reply in that same language (English, Pidgin, Yoruba, Igbo, Hausa, etc.).
 - Always be encouraging, helpful, and slightly playful.
-- Keep responses concise but informative.
-- Always end with an uplifting note.
-- If a user asks about a specific task, give clear, accurate details.
-- If the user shares their balance or task count, use that to give personalized advice.
+- Always end with an uplifting note.`;
 
-Now, assist the user with their questions about EarnSphere!`;
+  let payloadMessages = [
+    { role: 'system', content: systemMessage },
+   ...historyMessages
+  ];
 
   const hasImage = image && image.startsWith('data:image');
-  let payload;
 
   if (hasImage) {
-    const visionModel = 'llama-3.2-90b-vision-preview';
-    payload = {
-      model: visionModel,
-      messages: [
-        ...historyMessages,
-        { role: 'user', content: [
-          { type: 'text', text: systemMessage + '\n\nUser: ' + sanitisedMessage },
-          { type: 'image_url', image_url: { url: image } }
-        ]}
-      ],
-      temperature: 0.8,
-      max_tokens: 1200,
-      top_p: 0.9,
-      tool_choice: 'none'
-    };
+    payloadMessages.push({
+      role: 'user',
+      content: [
+        { type: 'text', text: sanitisedMessage || 'Analyze this image.' },
+        { type: 'image_url', image_url: { url: image } }
+      ]
+    });
   } else {
-    payload = {
-      model: selectedModel,
-      messages: [
-        { role: 'system', content: systemMessage },
-        ...historyMessages,
-        { role: 'user', content: sanitisedMessage || 'Hello!' }
-      ],
-      temperature: 0.8,
-      max_tokens: 1200,
-      top_p: 0.9,
-      tool_choice: 'none'
-    };
+    payloadMessages.push({
+      role: 'user',
+      content: sanitisedMessage || 'Hello!'
+    });
   }
 
   try {
-    const response = await fetch(GROQ_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_API_KEY}`
-      },
-      body: JSON.stringify(payload)
+    const response = await openai.chat.completions.create({ // CHANGED
+      model: selectedModel,
+      messages: payloadMessages,
+      temperature: 0.8,
+      max_tokens: 1200,
+      top_p: 0.9
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      console.error('Groq API error:', data);
-      return res.status(response.status).json({ error: data.error?.message || 'Groq API error' });
-    }
-
-    const reply = data.choices?.[0]?.message?.content || 'I no get response o, but I dey try!';
+    const reply = response.choices?.[0]?.message?.content || 'I no get response o, but I dey try!';
     res.json({ reply });
   } catch (error) {
-    console.error('Internal error:', error);
-    res.status(500).json({ error: 'AI service temporarily unavailable.' });
+    console.error('OpenAI Error:', error); // CHANGED
+    res.status(500).json({ error: error.message || 'AI service temporarily unavailable.' });
   }
 });
 
@@ -206,10 +168,10 @@ app.get('/api/banks', async (req, res) => {
 
 app.get('/api/resolve-account', async (req, res) => {
   const { account_number, bank_code } = req.query;
-  if (!account_number || !bank_code) {
+  if (!account_number ||!bank_code) {
     return res.status(400).json({ status: false, message: 'Account number and bank code are required' });
   }
-  if (account_number.length !== 10) {
+  if (account_number.length!== 10) {
     return res.status(400).json({ status: false, message: 'Account number must be 10 digits' });
   }
   if (!PAYSTACK_SECRET) {
@@ -236,7 +198,7 @@ app.get('/api/resolve-account', async (req, res) => {
 // ============================================================
 app.post('/api/generate-image', async (req, res) => {
   const { prompt } = req.body;
-  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+  if (!prompt || typeof prompt!== 'string' || prompt.trim().length === 0) {
     return res.status(400).json({ error: 'Prompt is required.' });
   }
   const sanitisedPrompt = prompt.trim().slice(0, 500);
@@ -261,7 +223,7 @@ app.post('/api/generate-image', async (req, res) => {
 app.post('/api/generate-video', async (req, res) => {
   const { prompt } = req.body;
 
-  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+  if (!prompt || typeof prompt!== 'string' || prompt.trim().length === 0) {
     return res.status(400).json({ error: 'Prompt is required.' });
   }
 
@@ -349,7 +311,7 @@ app.post('/api/generate-video', async (req, res) => {
 // ============================================================
 app.post('/api/fetch', async (req, res) => {
   const { url } = req.body;
-  if (!url || typeof url !== 'string') {
+  if (!url || typeof url!== 'string') {
     return res.status(400).json({ error: 'URL is required.' });
   }
 
