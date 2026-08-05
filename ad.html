@@ -1,552 +1,470 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Watch an Ad - EarnSphere</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js">
-    </script>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watch an Ad - EarnSphere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            min-height: 100vh;
-            color: #f1f5f9;
-            padding: 2rem 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: rgba(30, 41, 59, .6);
-            backdrop-filter: blur(12px);
-            border-radius: 1rem;
-            padding: 2rem 1.5rem;
-            border: 1px solid rgba(255, 255, 255, .1);
-            text-align: center;
-            position: relative;
-        }
-
-        .back-link {
-            color: #3b82f6;
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 1rem;
-            float: left;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-        .back-link:hover {
-            color: #60a5fa;
-            text-decoration: underline;
-        }
-
-        h1 {
-            font-size: 1.6rem;
-            font-weight: 800;
-            margin-bottom: 0.25rem;
-            letter-spacing: -0.5px;
-        }
-        h1 i {
-            color: #f59e0b;
-            margin-right: 0.4rem;
-        }
-
-        .sub-text {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .reward-badge {
-            background: rgba(16, 185, 129, .2);
-            color: #10b981;
-            padding: .35rem 1rem;
-            border-radius: 2rem;
-            font-size: .85rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            margin: 0.75rem 0 1rem 0;
-            border: 1px solid rgba(16, 185, 129, .15);
-        }
-
-        .ad-container {
-            max-width: 728px;
-            margin: 1rem auto;
-            padding: 12px;
-            background: rgba(30, 41, 59, 0.4);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            min-height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .timer-text {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #f59e0b;
-            margin: 1.2rem 0;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .timer-text i {
-            font-size: 1.8rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            border: none;
-            color: #fff;
-            padding: 0.9rem 1.5rem;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            margin-top: .5rem;
-            transition: all 0.25s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-        }
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
-        }
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-            box-shadow: none !important;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
-        }
-        .btn-success:hover:not(:disabled) {
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            color: #f1f5f9;
-            box-shadow: none;
-        }
-        .btn-outline:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.6rem;
-            margin-top: 0.5rem;
-        }
-
-        .toast {
-            background: rgba(30, 41, 59, .95);
-            padding: 1rem 1.5rem;
-            border-radius: .5rem;
-            border-left: 4px solid #10b981;
-            color: #fff;
-            animation: slideIn 0.35s ease;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            max-width: 90%;
-            font-weight: 500;
-            backdrop-filter: blur(8px);
-        }
-        .toast-error {
-            border-left-color: #ef4444;
-        }
-        .toast-warning {
-            border-left-color: #f59e0b;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .ad-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            color: #94a3b8;
-            font-size: 0.9rem;
-            padding: 0.5rem 0;
-        }
-        .ad-loading .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2.5px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.3rem 0.9rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 0.3rem;
-        }
-        .status-badge.completed {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.15);
-        }
-        .status-badge.pending {
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
-            border: 1px solid rgba(245, 158, 11, 0.15);
-        }
-
-        /* ---- responsive tweaks ---- */
-        @media (max-width: 480px) {
-            body {
-                padding: 1rem 0.5rem;
-            }
-            .container {
-                padding: 1.5rem 1rem;
-            }
-            h1 {
-                font-size: 1.3rem;
-            }
-            .timer-text {
-                font-size: 1.8rem;
-            }
-        }
-    </style>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: rgba(30, 41, 59, .6);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      padding: 2rem 1.5rem;
+      border: 1px solid rgba(255, 255, 255, .1);
+      text-align: center;
+      position: relative;
+    }
+    .back-link {
+      color: #3b82f6;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 1rem;
+      float: left;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #60a5fa; text-decoration: underline; }
+    h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.25rem; letter-spacing: -0.5px; }
+    h1 i { color: #f59e0b; margin-right: 0.4rem; }
+    .sub-text { color: #94a3b8; font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .reward-badge {
+      background: rgba(16, 185, 129, .2);
+      color: #10b981;
+      padding: .35rem 1rem;
+      border-radius: 2rem;
+      font-size: .85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0.75rem 0 1rem 0;
+      border: 1px solid rgba(16, 185, 129, .15);
+    }
+    .ad-container {
+      max-width: 728px;
+      margin: 1rem auto;
+      padding: 12px;
+      background: rgba(30, 41, 59, 0.4);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      min-height: 90px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      overflow: hidden;
+      transition: opacity 0.4s ease;
+    }
+    .ad-container.visible { display: flex; }
+    .ad-container img { max-width: 100%; height: auto; }
+    .timer-text {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #f59e0b;
+      margin: 1.2rem 0;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .timer-text i { font-size: 1.8rem; }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border: none;
+      color: #fff;
+      padding: 0.9rem 1.5rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-top: .5rem;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+    .btn-success:hover:not(:disabled) {
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+    .toast {
+      background: rgba(30, 41, 59, .95);
+      padding: 1rem 1.5rem;
+      border-radius: .5rem;
+      border-left: 4px solid #10b981;
+      color: #fff;
+      animation: slideIn 0.35s ease;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 90%;
+      font-weight: 500;
+      backdrop-filter: blur(8px);
+    }
+    .toast-error { border-left-color: #ef4444; }
+    .toast-warning { border-left-color: #f59e0b; }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.9rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 0.3rem;
+    }
+    .status-badge.completed {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.15);
+    }
+    .status-badge.pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.15);
+    }
+    .status-badge.waiting {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.15);
+    }
+    .ad-container [data-mndazid] { width: 100%; }
+    .ad-container .mnd-native-ad { display: block; width: 100%; }
+    .ad-container .mnd-native-ad a { display: block; width: 100%; }
+    .ad-container .mnd-native-ad img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    @media (max-width: 480px) {
+      body { padding: 1rem 0.5rem; }
+      .container { padding: 1.5rem 1rem; }
+      h1 { font-size: 1.3rem; }
+      .timer-text { font-size: 1.8rem; }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back</a>
-        <h1><i class="fas fa-play-circle"></i> Watch an Ad</h1>
-        <p class="sub-text">Watch a short ad and earn <strong style="color:#f1f5f9;">₦50</strong>!</p>
-        <div class="reward-badge"><i class="fas fa-coins"></i> Reward: ₦50 per day</div>
+<div class="container">
+  <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back</a>
+  <h1><i class="fas fa-play-circle"></i> Watch an Ad</h1>
+  <p class="sub-text">Watch a short ad and earn <strong style="color:#f1f5f9;">₦50</strong>!</p>
+  <div class="reward-badge"><i class="fas fa-coins"></i> Reward: ₦50 per day</div>
 
-        <!-- ===== MONDIAD BANNER (same as dashboard) ===== -->
-        <div class="ad-container">
-            <script async src="https://ss.mrmnd.com/banner.js">
-            </script>
-            <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
-        </div>
+  <!-- ===== NATIVE AD CONTAINER (hidden initially) ===== -->
+  <div class="ad-container" id="nativeAdContainer">
+    <div data-mndazid="3e2075d4-e0ca-4589-b3a6-57960eb2fcd0"></div>
+  </div>
 
-        <!-- ===== TIMER ===== -->
-        <div id="timerDisplay" class="timer-text">
-            <i class="fas fa-hourglass-half"></i>
-            <span id="timerSeconds">10</span> seconds
-        </div>
+  <!-- ===== TIMER ===== -->
+  <div id="timerDisplay" class="timer-text">
+    <i class="fas fa-hourglass-half"></i>
+    <span id="timerSeconds">10</span> seconds
+  </div>
 
-        <!-- ===== BUTTONS ===== -->
-        <div class="btn-group">
-            <button class="btn-primary" id="startBtn" onclick="watchAd()">
-                <i class="fas fa-play"></i> Start Watching
-            </button>
-            <button class="btn-primary btn-success" id="claimBtn" style="display:none;" onclick="claimReward()">
-                <i class="fas fa-check-circle"></i> Claim ₦50
-            </button>
-        </div>
+  <!-- ===== BUTTONS ===== -->
+  <div class="btn-group">
+    <button class="btn-primary" id="startBtn" onclick="watchAd()">
+      <i class="fas fa-play"></i> Start Watching
+    </button>
+    <button class="btn-primary btn-success" id="claimBtn" style="display:none;" onclick="claimReward()">
+      <i class="fas fa-check-circle"></i> Claim ₦50
+    </button>
+  </div>
 
-        <!-- ===== status badge ===== -->
-        <div id="statusBadge" class="status-badge pending" style="margin-top:1rem;">
-            <i class="fas fa-clock"></i> Ready
-        </div>
-    </div>
+  <!-- ===== status badge ===== -->
+  <div id="statusBadge" class="status-badge waiting" style="margin-top:1rem;">
+    <i class="fas fa-clock"></i> Ready
+  </div>
+</div>
 
-    <script>
-        // ============================================================
-        //  FIREBASE CONFIG
-        // ============================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-            authDomain: "earnspherehub-742e9.firebaseapp.com",
-            projectId: "earnspherehub-742e9",
-            storageBucket: "earnspherehub-742e9.firebasestorage.app",
-            messagingSenderId: "173538573377",
-            appId: "1:173538573377:web:6d8c748376afcb9096dac0"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+<!-- ===== MONDIAD NATIVE AD SCRIPT ===== -->
+<script async src="https://ss.mrmnd.com/native.js"></script>
 
-        // ============================================================
-        //  STATE
-        // ============================================================
-        let userData = { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTasks: {} };
-        let adTimer = null;
-        let seconds = 10;
-        let isAdLoaded = false; // track if we've already loaded the mrmnd ad
+<script>
+  // ============================================================
+  //  FIREBASE CONFIG
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+    authDomain: "earnspherehub-742e9.firebaseapp.com",
+    projectId: "earnspherehub-742e9",
+    storageBucket: "earnspherehub-742e9.firebasestorage.app",
+    messagingSenderId: "173538573377",
+    appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-        // ============================================================
-        //  DOM REFS
-        // ============================================================
-        const startBtn = document.getElementById('startBtn');
-        const claimBtn = document.getElementById('claimBtn');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const timerSeconds = document.getElementById('timerSeconds');
-        const statusBadge = document.getElementById('statusBadge');
+  // ============================================================
+  //  STATE
+  // ============================================================
+  let userData = { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTasks: {} };
+  let adTimer = null;
+  let seconds = 10;
+  let isAdReady = false; // whether countdown finished and ad is shown
 
-        // ============================================================
-        //  TOAST HELPER
-        // ============================================================
-        function showToast(msg, type = '') {
-            const toast = document.createElement('div');
-            toast.className = `toast${type ? ' toast-' + type : ''}`;
-            toast.innerHTML = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 3800);
+  // ============================================================
+  //  DOM REFS
+  // ============================================================
+  const startBtn = document.getElementById('startBtn');
+  const claimBtn = document.getElementById('claimBtn');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const timerSeconds = document.getElementById('timerSeconds');
+  const statusBadge = document.getElementById('statusBadge');
+  const nativeContainer = document.getElementById('nativeAdContainer');
+
+  // ============================================================
+  //  TOAST
+  // ============================================================
+  function showToast(msg, type = '') {
+    const toast = document.createElement('div');
+    toast.className = `toast${type ? ' toast-' + type : ''}`;
+    toast.innerHTML = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3800);
+  }
+
+  // ============================================================
+  //  DATE HELPERS
+  // ============================================================
+  function getTodayDateString() {
+    return new Date().toISOString().split('T')[0];
+  }
+  function isCompletedToday(taskId) {
+    if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
+    const d = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
+    return d === getTodayDateString();
+  }
+
+  // ============================================================
+  //  LOAD USER DATA
+  // ============================================================
+  async function loadUserData(uid) {
+    try {
+      const doc = await db.collection('users').doc(uid).get();
+      if (doc.exists) {
+        userData = doc.data();
+        const taskId = 'extra_ad';
+        if (isCompletedToday(taskId)) {
+          startBtn.disabled = true;
+          startBtn.innerHTML = '<i class="fas fa-check-circle"></i> Completed Today';
+          statusBadge.className = 'status-badge completed';
+          statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Already claimed today';
+          nativeContainer.classList.remove('visible');
+          timerDisplay.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;"></i> Done for today';
+          claimBtn.style.display = 'none';
         }
+      }
+    } catch (e) {
+      console.warn('loadUserData error:', e);
+    }
+  }
 
-        // ============================================================
-        //  DATE HELPERS
-        // ============================================================
-        function getTodayDateString() {
-            return new Date().toISOString().split('T')[0];
-        }
+  // ============================================================
+  //  WATCH AD – starts the 10‑second countdown
+  // ============================================================
+  function watchAd() {
+    if (startBtn.disabled) return;
 
-        function isCompletedToday(taskId) {
-            if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
-            const d = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
-            return d === getTodayDateString();
-        }
+    // reset
+    isAdReady = false;
+    seconds = 10;
+    timerSeconds.textContent = seconds;
+    timerDisplay.innerHTML = `<i class="fas fa-hourglass-half"></i> <span id="timerSeconds">${seconds}</span> seconds`;
 
-        // ============================================================
-        //  LOAD USER DATA
-        // ============================================================
-        async function loadUserData(uid) {
-            try {
-                const doc = await db.collection('users').doc(uid).get();
-                if (doc.exists) {
-                    userData = doc.data();
-                    const taskId = 'extra_ad';
-                    if (isCompletedToday(taskId)) {
-                        startBtn.disabled = true;
-                        startBtn.innerHTML = '<i class="fas fa-check-circle"></i> Completed Today';
-                        statusBadge.className = 'status-badge completed';
-                        statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Already claimed today';
-                    }
-                }
-            } catch (e) {
-                console.warn('loadUserData error:', e);
-            }
-        }
+    startBtn.disabled = true;
+    startBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Watching...';
+    statusBadge.className = 'status-badge pending';
+    statusBadge.innerHTML = '<i class="fas fa-eye"></i> Watching ad...';
 
-        // ============================================================
-        //  DYNAMICALLY LOAD THE MRMND AD SCRIPT
-        //  This is the key: the user's ad script loads & "opens" after countdown
-        // ============================================================
-        function loadMrmndAd() {
-            if (isAdLoaded) return;
-            isAdLoaded = true;
+    claimBtn.style.display = 'none';
 
-            // Show a subtle loading indicator in the ad container
-            const container = document.querySelector('.ad-container');
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'ad-loading';
-            loadingDiv.id = 'mrmndLoading';
-            loadingDiv.innerHTML = `<span class="spinner"></span> Loading ad...`;
-            container.appendChild(loadingDiv);
+    if (adTimer) clearInterval(adTimer);
 
-            // Create and inject the script
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://ss.mrmnd.com/static/50a5a986-052e-4ac4-acea-2d9bc37b53f3.js';
-            script.onload = function() {
-                // Ad loaded – remove loading indicator
-                const ld = document.getElementById('mrmndLoading');
-                if (ld) ld.remove();
-                console.log('✅ MRMND ad script loaded & executed.');
-                // The ad page should now be "open" (pop-up, interstitial, etc.)
-                showToast('📢 Ad page opened — thank you!', '');
-            };
-            script.onerror = function() {
-                const ld = document.getElementById('mrmndLoading');
-                if (ld) ld.remove();
-                console.warn('⚠️ MRMND ad script failed to load.');
-                showToast('⚠️ Ad could not load. Please try again.', 'warning');
-            };
-            document.head.appendChild(script);
-        }
+    adTimer = setInterval(() => {
+      seconds--;
+      timerSeconds.textContent = seconds;
+      timerDisplay.innerHTML =
+        `<i class="fas fa-hourglass-half"></i> <span id="timerSeconds">${seconds}</span> seconds`;
 
-        // ============================================================
-        //  WATCH AD – starts the 10‑second countdown
-        // ============================================================
-        function watchAd() {
-            if (startBtn.disabled) return;
+      if (seconds <= 0) {
+        clearInterval(adTimer);
+        adTimer = null;
 
-            // reset
-            seconds = 10;
-            timerSeconds.textContent = seconds;
-            timerDisplay.innerHTML = `<i class="fas fa-hourglass-half"></i> <span id="timerSeconds">${seconds}</span> seconds`;
+        // ---- COUNTDOWN COMPLETE ----
+        timerDisplay.innerHTML = `<i class="fas fa-check-circle" style="color:#10b981;"></i> Ad Complete!`;
 
-            startBtn.disabled = true;
-            startBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Watching...';
-            statusBadge.className = 'status-badge pending';
-            statusBadge.innerHTML = '<i class="fas fa-eye"></i> Watching ad...';
+        // Show the native ad container
+        nativeContainer.classList.add('visible');
+        isAdReady = true;
+        statusBadge.className = 'status-badge completed';
+        statusBadge.innerHTML = '<i class="fas fa-gift"></i> Ad ready – click "Claim ₦50" to visit ad and earn!';
 
-            claimBtn.style.display = 'none';
+        // Show claim button
+        startBtn.style.display = 'none';
+        claimBtn.style.display = 'block';
 
-            if (adTimer) clearInterval(adTimer);
+        // (Optional) Adcash pop-under
+        try {
+          if (typeof aclib !== 'undefined' && typeof aclib.runPop === 'function') {
+            aclib.runPop({ zoneId: '11871326' });
+          }
+        } catch (e) { /* ignore */ }
+      }
+    }, 1000);
+  }
 
-            adTimer = setInterval(() => {
-                seconds--;
-                timerSeconds.textContent = seconds;
-                timerDisplay.innerHTML =
-                    `<i class="fas fa-hourglass-half"></i> <span id="timerSeconds">${seconds}</span> seconds`;
+  // ============================================================
+  //  CLAIM REWARD – opens the ad page, then credits the user
+  // ============================================================
+  async function claimReward() {
+    const user = auth.currentUser;
+    if (!user) {
+      showToast('⚠️ Please log in first.', 'warning');
+      return;
+    }
 
-                if (seconds <= 0) {
-                    clearInterval(adTimer);
-                    adTimer = null;
+    // Must have completed the countdown (ad shown)
+    if (!isAdReady) {
+      showToast('⏳ Please watch the full ad first.', 'warning');
+      return;
+    }
 
-                    // ---- COUNTDOWN COMPLETE ----
-                    timerDisplay.innerHTML = `<i class="fas fa-check-circle" style="color:#10b981;"></i> Ad Complete!`;
+    // Reload user data to check if already claimed today
+    await loadUserData(user.uid);
+    const taskId = 'extra_ad';
+    if (isCompletedToday(taskId)) {
+      showToast('⚠️ You already claimed your ad reward today!', 'warning');
+      return;
+    }
 
-                    // 🔥 LOAD THE MRMND AD SCRIPT – this "opens" the ad page
-                    loadMrmndAd();
+    // --- Step 1: Open the native ad link in a new tab ---
+    try {
+      const container = nativeContainer;
+      // Find the first anchor inside the ad container
+      const anchor = container.querySelector('a');
+      if (anchor && anchor.href) {
+        window.open(anchor.href, '_blank');
+        showToast('🔗 Ad page opened in new tab', '');
+        statusBadge.innerHTML = '<i class="fas fa-external-link-alt"></i> Ad opened – processing reward...';
+      } else {
+        // No link found – maybe ad hasn't rendered. Still allow claiming?
+        // We'll show a warning but proceed.
+        showToast('⚠️ Ad link not found. Claiming anyway.', 'warning');
+      }
+    } catch (e) {
+      console.warn('Error opening ad link:', e);
+      showToast('⚠️ Could not open ad page, but you can still claim.', 'warning');
+    }
 
-                    // Show claim button
-                    startBtn.style.display = 'none';
-                    claimBtn.style.display = 'block';
-                    statusBadge.className = 'status-badge completed';
-                    statusBadge.innerHTML = '<i class="fas fa-gift"></i> Ready to claim!';
-                }
-            }, 1000);
-        }
+    // --- Step 2: Process reward ---
+    if (!userData.completedTasks) userData.completedTasks = {};
+    userData.completedTasks[taskId] = Date.now();
+    const reward = 50;
+    userData.balance = (userData.balance || 0) + reward;
+    userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+    userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
 
-        // ============================================================
-        //  CLAIM REWARD
-        // ============================================================
-        async function claimReward() {
-            const user = auth.currentUser;
-            if (!user) {
-                showToast('⚠️ Please log in first.', 'warning');
-                return;
-            }
+    try {
+      claimBtn.disabled = true;
+      claimBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...';
+      statusBadge.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
 
-            // Reload user data to check if already claimed today
-            await loadUserData(user.uid);
-            const taskId = 'extra_ad';
-            if (isCompletedToday(taskId)) {
-                showToast('⚠️ You already claimed your ad reward today!', 'warning');
-                return;
-            }
+      await db.collection('users').doc(user.uid).set(userData, { merge: true });
 
-            // Prepare data
-            if (!userData.completedTasks) userData.completedTasks = {};
-            userData.completedTasks[taskId] = Date.now();
-            const reward = 50;
-            userData.balance = (userData.balance || 0) + reward;
-            userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-            userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+      showToast(`🎉 Ad reward claimed! +₦${reward} earned!`, '');
+      statusBadge.className = 'status-badge completed';
+      statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Claimed successfully!';
 
-            try {
-                claimBtn.disabled = true;
-                claimBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...';
-                statusBadge.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
+      // Redirect to dashboard after a moment
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1400);
 
-                await db.collection('users').doc(user.uid).set(userData, { merge: true });
+    } catch (error) {
+      console.error('Claim error:', error);
+      showToast('⚠️ Error claiming reward. Please try again.', 'error');
+      claimBtn.disabled = false;
+      claimBtn.innerHTML = '<i class="fas fa-check-circle"></i> Claim ₦50';
+      statusBadge.className = 'status-badge pending';
+      statusBadge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try again';
+    }
+  }
 
-                // Also trigger Adcash pop-under (as originally in the code)
-                try {
-                    if (typeof aclib !== 'undefined' && typeof aclib.runPop === 'function') {
-                        aclib.runPop({ zoneId: '11871326' });
-                    }
-                } catch (e) { /* ignore */ }
+  // ============================================================
+  //  AUTH STATE
+  // ============================================================
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      await loadUserData(user.uid);
+    } else {
+      startBtn.disabled = true;
+      startBtn.innerHTML = '<i class="fas fa-lock"></i> Please log in';
+      statusBadge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Not logged in';
+    }
+  });
 
-                showToast(`🎉 Ad reward claimed! +₦${reward} earned!`, '');
+  // ============================================================
+  //  CLEANUP
+  // ============================================================
+  window.addEventListener('beforeunload', function() {
+    if (adTimer) clearInterval(adTimer);
+  });
 
-                // Redirect to dashboard after a moment
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1400);
-
-            } catch (error) {
-                console.error('Claim error:', error);
-                showToast('⚠️ Error claiming reward. Please try again.', 'error');
-                claimBtn.disabled = false;
-                claimBtn.innerHTML = '<i class="fas fa-check-circle"></i> Claim ₦50';
-                statusBadge.className = 'status-badge pending';
-                statusBadge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try again';
-            }
-        }
-
-        // ============================================================
-        //  AUTH STATE
-        // ============================================================
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                await loadUserData(user.uid);
-            } else {
-                // Not logged in – show a message
-                startBtn.disabled = true;
-                startBtn.innerHTML = '<i class="fas fa-lock"></i> Please log in';
-                statusBadge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Not logged in';
-            }
-        });
-
-        // ============================================================
-        //  CLEANUP TIMER ON UNLOAD
-        // ============================================================
-        window.addEventListener('beforeunload', function() {
-            if (adTimer) clearInterval(adTimer);
-        });
-
-        console.log('✅ EarnSphere – Watch Ad page ready.');
-        console.log('📢 MRMND ad will load automatically after the 10‑second countdown.');
-    </script>
-
+  console.log('✅ EarnSphere – Watch Ad page ready (Claim button opens ad).');
+  console.log('📢 After countdown, click "Claim ₦50" to open the ad page and get your reward.');
+</script>
 </body>
 </html>
