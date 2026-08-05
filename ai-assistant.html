@@ -238,10 +238,8 @@
     .msg .attachments .attach-item .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .msg .attachments .attach-item .size { color:#94a3b8; font-size:0.65rem; }
     .msg .attachments .attach-item video { width:120px; height:80px; object-fit:cover; border-radius:4px; background:#0f172a; }
-    .msg .generated-image { margin-top:8px; max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,.1); }
-    .msg .generated-image img { width:100%; max-height:400px; object-fit:contain; border-radius:8px; background:#0f172a; }
-    .msg .generated-video { margin-top:8px; max-width:100%; }
-    .msg .generated-video video { width:100%; max-height:300px; border-radius:8px; border:1px solid rgba(255,255,255,.1); background:#0f172a; }
+    .msg .generated-media { margin-top:8px; max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,.1); }
+    .msg .generated-media img { width:100%; max-height:400px; object-fit:contain; border-radius:8px; background:#0f172a; }
     .msg .download-link { display:inline-block; margin-top:4px; font-size:0.8rem; color:#3b82f6; text-decoration:none; }
     .msg .download-link:hover { text-decoration:underline; }
     .msg .prompt-label { font-size:0.75rem; color:#94a3b8; margin-top:4px; }
@@ -526,9 +524,12 @@
 
     function getSessionTitle(messages) {
       if (!messages || messages.length === 0) return 'New Chat';
-      const first = messages[0];
-      const text = first.text || 'New Chat';
-      return text.length > 30 ? text.substring(0, 30) + '…' : text;
+      const first = messages.find(m => m.role === 'user');
+      if (first) {
+        const text = first.text || 'New Chat';
+        return text.length > 30 ? text.substring(0, 30) + '…' : text;
+      }
+      return 'New Chat';
     }
 
     // ============================================================
@@ -577,11 +578,12 @@
         const data = await response.json();
 
         if (!response.ok || !data.url) {
-          containerDiv.textContent = `❌ Failed to generate image. ${data.error || 'Please try again.'}`;
+          containerDiv.innerHTML = `❌ Failed to generate image. ${data.error || 'Please try again.'}`;
           return;
         }
 
-        containerDiv.textContent = '🖼️ Image generated:';
+        // Clear existing content but keep the container
+        containerDiv.innerHTML = '';
         
         const mediaContainer = document.createElement('div');
         mediaContainer.className = 'generated-media';
@@ -682,25 +684,25 @@
           const parts = renderContent(content);
           const container = document.createElement('div');
           
-          parts.forEach(part => {
-            if (part.type === 'text') {
-              if (part.content.trim()) {
-                const linkified = linkifyText(part.content);
-                const wrapper = document.createElement('span');
-                wrapper.innerHTML = linkified;
-                container.appendChild(wrapper);
-              }
-            } else if (part.type === 'code') {
-              const codeBlock = createCodeBlockElement(part.language, part.content);
-              container.appendChild(codeBlock);
-            }
-          });
-
           if (parts.length === 0 && content.trim()) {
             const linkified = linkifyText(content);
             const wrapper = document.createElement('span');
             wrapper.innerHTML = linkified;
             container.appendChild(wrapper);
+          } else {
+            parts.forEach(part => {
+              if (part.type === 'text') {
+                if (part.content.trim()) {
+                  const linkified = linkifyText(part.content);
+                  const wrapper = document.createElement('span');
+                  wrapper.innerHTML = linkified;
+                  container.appendChild(wrapper);
+                }
+              } else if (part.type === 'code') {
+                const codeBlock = createCodeBlockElement(part.language, part.content);
+                container.appendChild(codeBlock);
+              }
+            });
           }
 
           div.appendChild(container);
@@ -717,8 +719,14 @@
 
         // Handle image generation
         if (generationPrompt) {
+          // Create a container for the generated image
+          const imgContainer = document.createElement('div');
+          imgContainer.style.marginTop = '8px';
+          imgContainer.textContent = '🖼️ Generating image...';
+          div.appendChild(imgContainer);
+          
           setTimeout(() => {
-            generateAndShowImage(generationPrompt, div);
+            generateAndShowImage(generationPrompt, imgContainer);
           }, 100);
         }
       }
@@ -925,6 +933,8 @@
 
     async function saveMessageToSession(sessionId, role, text, attachmentsList = null, generated = null, model = null) {
       if (!sessionId || !currentUser) return;
+      if (sessionId.startsWith('local_')) return;
+      
       const msg = {
         role: role,
         text: text || '',
@@ -1041,8 +1051,8 @@
               date = d.toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             } catch (e) { /* ignore */ }
           }
-          const preview = data.messages && data.messages.length > 0 ?
-            (data.messages[0].text || '') : '';
+          const messages = data.messages || [];
+          const preview = messages.length > 0 ? (messages[0].text || '') : '';
           html += `
             <div class="session-item" data-id="${doc.id}">
               <div class="title">${title}</div>
@@ -1162,7 +1172,7 @@
       attachments = [];
       renderAttachmentPreview();
 
-      if (currentSessionMessages.length === 1 && !currentSessionId.startsWith('local_')) {
+      if (currentSessionMessages.length >= 2 && !currentSessionId.startsWith('local_')) {
         const title = getSessionTitle(currentSessionMessages);
         await updateSessionTitle(currentSessionId, title);
         await loadSessionList();
@@ -1258,6 +1268,9 @@
     // TYPING INDICATOR
     // ============================================================
     function showTyping() {
+      // Remove existing typing indicator
+      hideTyping();
+      
       const div = document.createElement('div');
       div.className = 'typing-indicator';
       div.id = 'typingIndicator';
@@ -1376,6 +1389,7 @@
     clearBtn.addEventListener('click', clearCurrentChat);
     clearAllHistoryBtn.addEventListener('click', clearAllHistory);
 
+    // Drag and drop
     const chatContainer = document.querySelector('.chat-container');
     chatContainer.addEventListener('dragover', (e) => {
       e.preventDefault();
