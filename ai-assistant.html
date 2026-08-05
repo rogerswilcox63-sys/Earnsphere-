@@ -6,6 +6,7 @@
   <title>SphereAI - EarnSphere Nigeria</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- highlight.js for code syntax highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -58,25 +59,9 @@
       font-size: 0.75rem;
       cursor: pointer;
       outline: none;
-      max-width: 160px;
     }
     .model-selector select:focus { border-color: #3b82f6; }
     .model-selector select option { background: #1e293b; }
-    .model-selector .model-badge {
-      font-size: 0.6rem;
-      padding: 0.1rem 0.5rem;
-      border-radius: 1rem;
-      background: rgba(16,185,129,.2);
-      color: #10b981;
-      font-weight: 600;
-      white-space: nowrap;
-      border: 1px solid rgba(16,185,129,.3);
-    }
-    .model-selector .model-badge.vision {
-      background: rgba(59,130,246,.2);
-      color: #3b82f6;
-      border-color: rgba(59,130,246,.3);
-    }
 
     .messages-wrapper { flex:1; overflow-y:auto; padding:0.8rem 0.3rem 0.3rem; display:flex; flex-direction:column; gap:0.6rem; scroll-behavior:smooth; }
     .messages-wrapper::-webkit-scrollbar { width:4px; }
@@ -90,7 +75,7 @@
     .msg .time { font-size:0.6rem; color:rgba(255,255,255,.4); display:block; margin-top:3px; }
     .msg.user .time { color:rgba(255,255,255,.5); }
 
-    /* ===== THINKING SECTION ===== */
+    /* ===== THINKING SECTION (DeepSeek style) ===== */
     .thinking-section {
       margin: 4px 0 8px 0;
       background: rgba(59,130,246,.06);
@@ -147,19 +132,6 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-bottom: 4px;
-    }
-
-    /* ===== MODEL TAG ===== */
-    .msg .model-tag {
-      font-size: 0.6rem;
-      color: #64748b;
-      margin-top: 4px;
-      display: block;
-      font-weight: 500;
-      letter-spacing: 0.03em;
-    }
-    .msg .model-tag i {
-      margin-right: 3px;
     }
 
     /* ===== CLICKABLE LINKS ===== */
@@ -238,8 +210,10 @@
     .msg .attachments .attach-item .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .msg .attachments .attach-item .size { color:#94a3b8; font-size:0.65rem; }
     .msg .attachments .attach-item video { width:120px; height:80px; object-fit:cover; border-radius:4px; background:#0f172a; }
-    .msg .generated-media { margin-top:8px; max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,.1); }
-    .msg .generated-media img { width:100%; max-height:400px; object-fit:contain; border-radius:8px; background:#0f172a; }
+    .msg .generated-image { margin-top:8px; max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,.1); }
+    .msg .generated-image img { width:100%; max-height:400px; object-fit:contain; border-radius:8px; background:#0f172a; }
+    .msg .generated-video { margin-top:8px; max-width:100%; }
+    .msg .generated-video video { width:100%; max-height:300px; border-radius:8px; border:1px solid rgba(255,255,255,.1); background:#0f172a; }
     .msg .download-link { display:inline-block; margin-top:4px; font-size:0.8rem; color:#3b82f6; text-decoration:none; }
     .msg .download-link:hover { text-decoration:underline; }
     .msg .prompt-label { font-size:0.75rem; color:#94a3b8; margin-top:4px; }
@@ -306,8 +280,7 @@
       .chat-header .info h1 { font-size:1rem; }
       .history-sidebar { width:280px; left:-320px; }
       .model-selector { font-size:0.7rem; }
-      .model-selector select { font-size:0.7rem; padding:0.1rem 0.3rem; max-width:120px; }
-      .model-selector .model-badge { display: none; }
+      .model-selector select { font-size:0.7rem; padding:0.1rem 0.3rem; }
     }
     @media (max-width:480px) {
       .chat-header .info p { display:none; }
@@ -339,7 +312,7 @@
       <div class="avatar"><i class="fas fa-brain"></i></div>
       <div class="info">
         <h1>SphereAI Assistant</h1>
-        <p>Powered by Groq | Vision + Text</p>
+        <p>Remembers your conversations</p>
       </div>
       <div class="status">
         <span class="dot"></span> Active
@@ -347,14 +320,10 @@
       <div class="model-selector">
         <i class="fas fa-microchip" style="color:#3b82f6;"></i>
         <select id="modelSelector">
-          <option value="llama-4-maverick">🚀 Llama 4 Maverick (Vision)</option>
-          <option value="llama-4-scout">📡 Llama 4 Scout (Vision 1M)</option>
-          <option value="llama-3.2-90b">👁️ Llama 3.2 90B (Vision)</option>
-          <option value="llama-3.2-11b">👁️ Llama 3.2 11B (Vision)</option>
-          <option value="llama-3.3-70b">📝 Llama 3.3 70B (Text)</option>
-          <option value="mixtral-8x7b">⚡ Mixtral 8x7B (Text)</option>
+          <option value="openai/gpt-oss-20b">⚡ 20B (Fast)</option>
+          <option value="openai/gpt-oss-120b" selected>🚀 120B (Best)</option>
+          <option value="qwen/qwen3.6-27b">🧠 Qwen 3.6 27B</option>
         </select>
-        <span class="model-badge vision" id="modelBadge">👁️ Vision</span>
       </div>
       <div class="actions">
         <button class="primary" id="newChatBtn" title="New Chat"><i class="fas fa-plus"></i></button>
@@ -435,7 +404,6 @@
     const newChatBtn = document.getElementById('newChatBtn');
     const clearBtn = document.getElementById('clearBtn');
     const modelSelector = document.getElementById('modelSelector');
-    const modelBadge = document.getElementById('modelBadge');
 
     // ============================================================
     // STATE
@@ -449,42 +417,18 @@
     const COLLECTION_NAME = 'chat_history';
     const STORAGE_KEY = 'sphereai_selected_model';
 
-    // Vision-capable models on Groq
-    const VISION_MODELS = ['llama-4-maverick', 'llama-4-scout', 'llama-3.2-90b', 'llama-3.2-11b'];
-    
-    // Model info for display
-    const MODEL_INFO = {
-      'llama-4-maverick': { label: 'Llama 4 Maverick', badge: '👁️ Vision', vision: true },
-      'llama-4-scout': { label: 'Llama 4 Scout', badge: '👁️ Vision 1M', vision: true },
-      'llama-3.2-90b': { label: 'Llama 3.2 90B', badge: '👁️ Vision', vision: true },
-      'llama-3.2-11b': { label: 'Llama 3.2 11B', badge: '👁️ Vision', vision: true },
-      'llama-3.3-70b': { label: 'Llama 3.3 70B', badge: '📝 Text', vision: false },
-      'mixtral-8x7b': { label: 'Mixtral 8x7B', badge: '⚡ Text', vision: false }
-    };
-
     function loadSelectedModel() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved && modelSelector.querySelector(`option[value="${saved}"]`)) {
         modelSelector.value = saved;
       } else {
-        modelSelector.value = 'llama-4-maverick';
-        localStorage.setItem(STORAGE_KEY, 'llama-4-maverick');
-      }
-      updateModelBadge();
-    }
-
-    function updateModelBadge() {
-      const val = modelSelector.value;
-      const info = MODEL_INFO[val];
-      if (info) {
-        modelBadge.textContent = info.badge;
-        modelBadge.className = 'model-badge' + (info.vision ? ' vision' : '');
+        modelSelector.value = 'openai/gpt-oss-120b';
+        localStorage.setItem(STORAGE_KEY, 'openai/gpt-oss-120b');
       }
     }
 
     modelSelector.addEventListener('change', () => {
       localStorage.setItem(STORAGE_KEY, modelSelector.value);
-      updateModelBadge();
     });
 
     // ============================================================
@@ -524,12 +468,9 @@
 
     function getSessionTitle(messages) {
       if (!messages || messages.length === 0) return 'New Chat';
-      const first = messages.find(m => m.role === 'user');
-      if (first) {
-        const text = first.text || 'New Chat';
-        return text.length > 30 ? text.substring(0, 30) + '…' : text;
-      }
-      return 'New Chat';
+      const first = messages[0];
+      const text = first.text || 'New Chat';
+      return text.length > 30 ? text.substring(0, 30) + '…' : text;
     }
 
     // ============================================================
@@ -565,11 +506,15 @@
     }
 
     // ============================================================
-    // GENERATE AND SHOW IMAGE (Pollinations.ai - FREE)
+    // GENERATE AND SHOW MEDIA
     // ============================================================
-    async function generateAndShowImage(prompt, containerDiv) {
+    async function generateAndShowMedia(prompt, type, containerDiv) {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/generate-image`, {
+        const endpoint = type === 'image' 
+          ? `${API_BASE_URL}/api/generate-image` 
+          : `${API_BASE_URL}/api/generate-video`;
+
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt })
@@ -578,27 +523,35 @@
         const data = await response.json();
 
         if (!response.ok || !data.url) {
-          containerDiv.innerHTML = `❌ Failed to generate image. ${data.error || 'Please try again.'}`;
+          containerDiv.textContent = `❌ Failed to generate ${type}. ${data.error || 'Please try again.'}`;
           return;
         }
 
-        // Clear existing content but keep the container
-        containerDiv.innerHTML = '';
+        containerDiv.textContent = type === 'image' ? '🖼️ Image generated:' : '🎬 Video generated:';
         
         const mediaContainer = document.createElement('div');
         mediaContainer.className = 'generated-media';
-        const img = document.createElement('img');
-        img.src = data.url;
-        img.alt = prompt;
-        img.style.maxWidth = '100%';
-        img.style.borderRadius = '8px';
-        mediaContainer.appendChild(img);
+        if (type === 'image') {
+          const img = document.createElement('img');
+          img.src = data.url;
+          img.alt = prompt;
+          img.style.maxWidth = '100%';
+          img.style.borderRadius = '8px';
+          mediaContainer.appendChild(img);
+        } else {
+          const video = document.createElement('video');
+          video.src = data.url;
+          video.controls = true;
+          video.style.maxWidth = '100%';
+          video.style.borderRadius = '8px';
+          mediaContainer.appendChild(video);
+        }
 
         const download = document.createElement('a');
         download.href = data.url;
-        download.download = `generated-image.png`;
+        download.download = `generated-${type}.${type === 'image' ? 'png' : 'mp4'}`;
         download.className = 'download-link';
-        download.textContent = '📥 Download Image';
+        download.textContent = `📥 Download ${type}`;
         mediaContainer.appendChild(download);
 
         const promptLabel = document.createElement('div');
@@ -608,33 +561,43 @@
 
         containerDiv.appendChild(mediaContainer);
       } catch (error) {
-        containerDiv.textContent = `⚠️ Error generating image: ${error.message}`;
+        containerDiv.textContent = `⚠️ Error generating ${type}: ${error.message}`;
       }
     }
 
     // ============================================================
-    // ADD MESSAGE TO DOM
+    // ADD MESSAGE TO DOM (DeepSeek-style thinking + clickable links)
     // ============================================================
-    function addMessageToDOM(text, sender = 'user', attachmentsList = null, timestamp = null, generated = null, modelInfo = null) {
+    function addMessageToDOM(text, sender = 'user', attachmentsList = null, timestamp = null, generated = null) {
       const div = document.createElement('div');
       div.className = `msg ${sender}`;
 
+      // For user messages, just show text
       if (sender === 'user') {
         const textNode = document.createTextNode(text);
         div.appendChild(textNode);
       } else {
-        // Parse image generation request
+        // For bot messages, parse thinking and code blocks
         const imageMatch = text.match(/\[IMAGE:\s*(.*?)\]/);
+        const videoMatch = text.match(/\[VIDEO:\s*(.*?)\]/);
+
         let displayText = text;
         let generationPrompt = null;
+        let generationType = null;
 
         if (imageMatch) {
           generationPrompt = imageMatch[1].trim();
+          generationType = 'image';
           displayText = displayText.replace(/\[IMAGE:.*?\]/, '').trim();
           if (!displayText) displayText = '🖼️ Generating image...';
+        } else if (videoMatch) {
+          generationPrompt = videoMatch[1].trim();
+          generationType = 'video';
+          displayText = displayText.replace(/\[VIDEO:.*?\]/, '').trim();
+          if (!displayText) displayText = '🎬 Generating video...';
         }
 
-        // Parse thinking
+        // Parse thinking (DeepSeek style)
         const thinkMatch = displayText.match(/\[THINK:\s*([\s\S]*?)\]/);
         let thinking = null;
         let content = displayText;
@@ -644,7 +607,10 @@
           content = displayText.replace(/\[THINK:\s*[\s\S]*?\]/, '').trim();
         }
 
-        // Add thinking section
+        // If no thinking tag, try to detect if there's a reasoning section
+        // Some models might output reasoning without tags – we'll just treat the whole thing as content
+
+        // Add thinking section (DeepSeek style)
         if (thinking) {
           const thinkDiv = document.createElement('div');
           thinkDiv.className = 'thinking-section';
@@ -662,6 +628,9 @@
             if (contentEl) {
               contentEl.classList.toggle('open');
               arrow.classList.toggle('open');
+              toggle.innerHTML = contentEl.classList.contains('open') 
+                ? `<i class="fas fa-brain"></i><span>Thought for a few seconds</span><span class="arrow open">▼</span>`
+                : `<i class="fas fa-brain"></i><span>Thought for a few seconds</span><span class="arrow">▼</span>`;
             }
           });
           thinkDiv.appendChild(toggle);
@@ -679,54 +648,41 @@
           div.appendChild(thinkDiv);
         }
 
-        // Render main content
+        // Render the main content with code blocks and clickable links
         if (content) {
           const parts = renderContent(content);
           const container = document.createElement('div');
           
+          parts.forEach(part => {
+            if (part.type === 'text') {
+              if (part.content.trim()) {
+                // Convert plain text with links to clickable
+                const linkified = linkifyText(part.content);
+                const wrapper = document.createElement('span');
+                wrapper.innerHTML = linkified;
+                container.appendChild(wrapper);
+              }
+            } else if (part.type === 'code') {
+              const codeBlock = createCodeBlockElement(part.language, part.content);
+              container.appendChild(codeBlock);
+            }
+          });
+
+          // If no parts, just add the text
           if (parts.length === 0 && content.trim()) {
             const linkified = linkifyText(content);
             const wrapper = document.createElement('span');
             wrapper.innerHTML = linkified;
             container.appendChild(wrapper);
-          } else {
-            parts.forEach(part => {
-              if (part.type === 'text') {
-                if (part.content.trim()) {
-                  const linkified = linkifyText(part.content);
-                  const wrapper = document.createElement('span');
-                  wrapper.innerHTML = linkified;
-                  container.appendChild(wrapper);
-                }
-              } else if (part.type === 'code') {
-                const codeBlock = createCodeBlockElement(part.language, part.content);
-                container.appendChild(codeBlock);
-              }
-            });
           }
 
           div.appendChild(container);
         }
 
-        // Add model info tag
-        if (modelInfo) {
-          const tag = document.createElement('span');
-          tag.className = 'model-tag';
-          const info = MODEL_INFO[modelInfo] || { label: modelInfo, badge: '⚡' };
-          tag.innerHTML = `<i class="fas fa-microchip"></i> ${info.label} ${info.badge}`;
-          div.appendChild(tag);
-        }
-
-        // Handle image generation
-        if (generationPrompt) {
-          // Create a container for the generated image
-          const imgContainer = document.createElement('div');
-          imgContainer.style.marginTop = '8px';
-          imgContainer.textContent = '🖼️ Generating image...';
-          div.appendChild(imgContainer);
-          
+        // Handle image/video generation
+        if (generationPrompt && (sender === 'bot' || sender === 'assistant')) {
           setTimeout(() => {
-            generateAndShowImage(generationPrompt, imgContainer);
+            generateAndShowMedia(generationPrompt, generationType, div);
           }, 100);
         }
       }
@@ -795,16 +751,20 @@
     }
 
     // ============================================================
-    // LINKIFY TEXT
+    // LINKIFY TEXT (convert emails, phone numbers, URLs to clickable)
     // ============================================================
     function linkifyText(text) {
+      // Escape HTML first
       let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+      // Email links: support@domain.com
       html = html.replace(/\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g, 
         '<a href="mailto:$1" target="_blank">$1</a>');
 
+      // Phone links: +234 7012814071, 07012814071, 08012345678
       html = html.replace(/\b(\+?234[-\s]?[0-9]{10}|0[789][01][0-9]{8})\b/g, 
         (match) => {
+          // Clean the number for tel: link
           let clean = match.replace(/[\s\-]/g, '');
           if (clean.startsWith('0')) {
             clean = '+234' + clean.substring(1);
@@ -814,6 +774,7 @@
           return `<a href="tel:${clean}" target="_blank">${match}</a>`;
         });
 
+      // URLs: http://, https://, www.
       html = html.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/g, 
         (match) => {
           let url = match;
@@ -827,7 +788,7 @@
     }
 
     // ============================================================
-    // RENDER CONTENT
+    // RENDER CONTENT (split text and code blocks)
     // ============================================================
     function renderContent(text) {
       const codeBlockRegex = /```(\w+)?\s*([\s\S]*?)```/g;
@@ -878,6 +839,7 @@
             copyBtn.classList.remove('copied');
           }, 2000);
         }).catch(() => {
+          // Fallback
           const textarea = document.createElement('textarea');
           textarea.value = code;
           document.body.appendChild(textarea);
@@ -910,7 +872,7 @@
     }
 
     // ============================================================
-    // SESSION FUNCTIONS
+    // SESSION FUNCTIONS (Firestore)
     // ============================================================
     async function createNewSession() {
       if (!currentUser) return null;
@@ -931,16 +893,13 @@
       }
     }
 
-    async function saveMessageToSession(sessionId, role, text, attachmentsList = null, generated = null, model = null) {
+    async function saveMessageToSession(sessionId, role, text, attachmentsList = null, generated = null) {
       if (!sessionId || !currentUser) return;
-      if (sessionId.startsWith('local_')) return;
-      
       const msg = {
         role: role,
         text: text || '',
         attachments: attachmentsList || [],
         generated: generated || null,
-        model: model || null,
         timestamp: Date.now()
       };
       try {
@@ -973,16 +932,15 @@
         currentSessionMessages = messages;
         currentSessionId = sessionId;
         if (messages.length === 0) {
-          const welcome = { role: 'bot', text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant powered by Groq\'s Llama 4 Maverick. I can read images and help you with anything about earning, tasks, or just talk! No wahala.', attachments: [], timestamp: Date.now(), model: 'llama-4-maverick' };
+          const welcome = { role: 'bot', text: '👋 How you dey? I\'m SphereAI...', attachments: [], timestamp: Date.now() };
           currentSessionMessages.push(welcome);
-          addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp, null, welcome.model);
-          await saveMessageToSession(sessionId, 'bot', welcome.text, [], null, 'llama-4-maverick');
+          addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+          await saveMessageToSession(sessionId, 'bot', welcome.text, []);
         } else {
           messages.forEach(msg => {
             try {
               const generated = msg.generated || null;
-              const model = msg.model || 'llama-4-maverick';
-              addMessageToDOM(msg.text || '', msg.role || 'bot', msg.attachments || [], msg.timestamp || Date.now(), generated, model);
+              addMessageToDOM(msg.text || '', msg.role || 'bot', msg.attachments || [], msg.timestamp || Date.now(), generated);
             } catch (e) {
               console.warn('Error parsing message:', e);
             }
@@ -1051,8 +1009,8 @@
               date = d.toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             } catch (e) { /* ignore */ }
           }
-          const messages = data.messages || [];
-          const preview = messages.length > 0 ? (messages[0].text || '') : '';
+          const preview = data.messages && data.messages.length > 0 ?
+            (data.messages[0].text || '') : '';
           html += `
             <div class="session-item" data-id="${doc.id}">
               <div class="title">${title}</div>
@@ -1093,26 +1051,24 @@
         currentSessionId = newId;
         const welcome = {
           role: 'bot',
-          text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant powered by Groq\'s Llama 4 Maverick. I can read images and help you with anything about earning, tasks, or just talk! No wahala.',
+          text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
           attachments: [],
-          timestamp: Date.now(),
-          model: 'llama-4-maverick'
+          timestamp: Date.now()
         };
         currentSessionMessages.push(welcome);
-        addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp, null, welcome.model);
-        await saveMessageToSession(newId, 'bot', welcome.text, [], null, 'llama-4-maverick');
+        addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
+        await saveMessageToSession(newId, 'bot', welcome.text, []);
         await updateSessionTitle(newId, 'New Chat');
       } else {
         currentSessionId = 'local_' + Date.now();
         const welcome = {
           role: 'bot',
-          text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant powered by Groq\'s Llama 4 Maverick. I can read images and help you with anything about earning, tasks, or just talk! No wahala.',
+          text: '👋 How you dey? I\'m SphereAI, your personal hustler assistant. Ask me anything about earning, tasks, or just talk! No wahala.',
           attachments: [],
-          timestamp: Date.now(),
-          model: 'llama-4-maverick'
+          timestamp: Date.now()
         };
         currentSessionMessages.push(welcome);
-        addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp, null, welcome.model);
+        addMessageToDOM(welcome.text, 'bot', welcome.attachments, welcome.timestamp);
         showToast('⚠️ Using local mode. Messages will not be saved to history.', false);
       }
       closeSidebarPanel();
@@ -1172,7 +1128,7 @@
       attachments = [];
       renderAttachmentPreview();
 
-      if (currentSessionMessages.length >= 2 && !currentSessionId.startsWith('local_')) {
+      if (currentSessionMessages.length === 1 && !currentSessionId.startsWith('local_')) {
         const title = getSessionTitle(currentSessionMessages);
         await updateSessionTitle(currentSessionId, title);
         await loadSessionList();
@@ -1186,17 +1142,7 @@
           text: h.text || ''
         }));
 
-        let selectedModel = modelSelector.value;
-
-        // If image attached and model doesn't support vision, auto-switch
-        if (imageData && !VISION_MODELS.includes(selectedModel)) {
-          const oldModel = selectedModel;
-          selectedModel = 'llama-4-maverick';
-          showToast(`⚠️ ${MODEL_INFO[oldModel]?.label || oldModel} doesn't support images. Switched to Llama 4 Maverick.`, false);
-          modelSelector.value = selectedModel;
-          updateModelBadge();
-          localStorage.setItem(STORAGE_KEY, selectedModel);
-        }
+        const selectedModel = modelSelector.value;
 
         const payload = {
           message: text || 'I sent an attachment.',
@@ -1216,34 +1162,29 @@
 
         if (!response.ok) {
           const errMsg = data.error || `Server error (${response.status})`;
-          if (data.suggested_models) {
-            showToast(`💡 Use one of these vision models: ${data.suggested_models.join(', ')}`, true);
-          }
           const reply = `😅 Oops! My brain no dey work right now. ${errMsg} No wahala, I go soon reset.`;
-          addMessageToDOM(reply, 'bot', [], Date.now(), null, selectedModel);
-          currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now(), model: selectedModel });
+          addMessageToDOM(reply, 'bot');
+          currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
           if (!currentSessionId.startsWith('local_')) {
-            await saveMessageToSession(currentSessionId, 'bot', reply, [], null, selectedModel);
+            await saveMessageToSession(currentSessionId, 'bot', reply, []);
           }
           return;
         }
 
         const reply = data.reply || 'I no get response o, but I dey try!';
-        const usedModel = data.model || selectedModel;
-        addMessageToDOM(reply, 'bot', [], Date.now(), null, usedModel);
-        currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now(), model: usedModel });
+        addMessageToDOM(reply, 'bot');
+        currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
         if (!currentSessionId.startsWith('local_')) {
-          await saveMessageToSession(currentSessionId, 'bot', reply, [], null, usedModel);
+          await saveMessageToSession(currentSessionId, 'bot', reply, []);
         }
 
       } catch (error) {
         hideTyping();
-        const selectedModel = modelSelector.value;
         const reply = `😅 Oops! My brain no dey work right now. ${error.message || 'Try again later.'} No wahala, I go soon reset.`;
-        addMessageToDOM(reply, 'bot', [], Date.now(), null, selectedModel);
-        currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now(), model: selectedModel });
+        addMessageToDOM(reply, 'bot');
+        currentSessionMessages.push({ role: 'bot', text: reply, attachments: [], timestamp: Date.now() });
         if (!currentSessionId.startsWith('local_')) {
-          await saveMessageToSession(currentSessionId, 'bot', reply, [], null, selectedModel);
+          await saveMessageToSession(currentSessionId, 'bot', reply, []);
         }
       } finally {
         isSending = false;
@@ -1268,9 +1209,6 @@
     // TYPING INDICATOR
     // ============================================================
     function showTyping() {
-      // Remove existing typing indicator
-      hideTyping();
-      
       const div = document.createElement('div');
       div.className = 'typing-indicator';
       div.id = 'typingIndicator';
@@ -1335,17 +1273,6 @@
           dataURL: dataURL
         });
         renderAttachmentPreview();
-        
-        // Auto-switch to vision model if image attached
-        if (isImage) {
-          const currentModel = modelSelector.value;
-          if (!VISION_MODELS.includes(currentModel)) {
-            modelSelector.value = 'llama-4-maverick';
-            updateModelBadge();
-            localStorage.setItem(STORAGE_KEY, 'llama-4-maverick');
-            showToast(`👁️ Switched to Llama 4 Maverick for image analysis`, false);
-          }
-        }
       };
       reader.readAsDataURL(file);
       return true;
@@ -1389,7 +1316,6 @@
     clearBtn.addEventListener('click', clearCurrentChat);
     clearAllHistoryBtn.addEventListener('click', clearAllHistory);
 
-    // Drag and drop
     const chatContainer = document.querySelector('.chat-container');
     chatContainer.addEventListener('dragover', (e) => {
       e.preventDefault();
