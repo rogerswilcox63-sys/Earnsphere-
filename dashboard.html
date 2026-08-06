@@ -9,7 +9,12 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+  <!-- ===== ADDED: quge5 ad script ===== -->
+  <script src="https://quge5.com/88/tag.min.js" data-zone="267382" async data-cfasync="false"></script>
+
   <style>
+    /* (all existing styles unchanged) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -592,7 +597,7 @@
     <p style="margin-top:1rem;font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
-  <!-- ===== ALL ADS ===== -->
+  <!-- ===== ALL ADS (including quge5) ===== -->
   <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
   <script async src="https://ss.mrmnd.com/ctatic/9ea83a71-e6b6-4ebc-ae22-cb0df1870ae7.js"></script>
   <script async src="https://ss.mrmnd.com/native.js"></script>
@@ -601,11 +606,15 @@
   <script async src="https://ss.mrmnd.com/interstitial.js" data-mndintid="c60da3d3-0ed9-41fc-bf0d-23b11a6002f0"></script>
   <script async src="https://ss.mrmnd.com/static/50a5a986-052e-4ac4-acea-2d9bc37b53f3.js"></script>
 
+  <!-- ===== ADDED: quge5 ad script (also loaded in head) ===== -->
+  <!-- (already in head, but we keep it here for completeness) -->
+
   <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
   <script type="text/javascript"> aclib.runAutoTag({ zoneId: 'rcnic8lxix' }); </script>
   <script type="text/javascript"> aclib.runPop({ zoneId: '11871326' }); </script>
 
   <script>
+    // (all existing JavaScript remains unchanged)
     // ============================================================
     // HAMBURGER MENU TOGGLE
     // ============================================================
@@ -658,10 +667,10 @@
       socialLastCompleted: 0,
       appLastCompleted: 0,
       extraLastCompleted: 0,
-      lastActive: null,          // NEW
-      status: 'active',          // 'active', 'suspended', 'banned'
+      lastActive: null,
+      status: 'active',
       suspensionReason: null,
-      taskTimestamps: []         // for rapid task detection
+      taskTimestamps: []
     };
 
     // ============================================================
@@ -740,10 +749,10 @@
     // ===== INACTIVITY CHECK =====
     function checkInactivity() {
       const lastActive = userData.lastActive;
-      if (!lastActive) return false; // new user, no inactivity
+      if (!lastActive) return false;
       const now = Date.now();
       const diffDays = (now - lastActive) / (1000 * 60 * 60 * 24);
-      return diffDays >= 30; // 30 days or more
+      return diffDays >= 30;
     }
 
     // ===== RAPID TASK CHECK =====
@@ -753,9 +762,9 @@
       if (recent.length >= 5) {
         const first = recent[0];
         const last = recent[recent.length - 1];
-        const timeDiff = (last - first) / 1000 / 60; // minutes
+        const timeDiff = (last - first) / 1000 / 60;
         if (timeDiff < 5) {
-          return true; // 5 tasks in under 5 minutes -> suspend
+          return true;
         }
       }
       return false;
@@ -887,20 +896,18 @@
     }
 
     // ============================================================
-    // TASK COMPLETION (with auto-suspension)
+    // TASK COMPLETION
     // ============================================================
     async function completeSurveyTask(taskId, reward) {
       if (isTaskCompleted(taskId)) { showToast('⚠️ You already completed this survey.'); return; }
       const surveyCount = getSurveyCountToday();
       if (surveyCount >= 2) { showToast('⚠️ You have reached the daily limit of 2 surveys.'); return; }
 
-      // Record timestamp
       const now = Date.now();
       if (!userData.taskTimestamps) userData.taskTimestamps = [];
       userData.taskTimestamps.push(now);
       if (userData.taskTimestamps.length > 5) userData.taskTimestamps.shift();
 
-      // Rapid task check
       if (checkRapidTaskCompletion()) {
         userData.status = 'suspended';
         userData.suspensionReason = 'Completed 5 tasks within 5 minutes – possible automated activity.';
@@ -914,7 +921,6 @@
         return;
       }
 
-      // Continue with normal completion
       const survey = getSurveyTasks().find(t => t.id === taskId);
       if (survey && survey.link) { window.open(survey.link, '_blank'); }
       if (!userData.completedTasks) userData.completedTasks = {};
@@ -929,13 +935,11 @@
       showToast(`🎉 Survey completed! +₦${reward} earned!`);
     }
 
-    // Also update category tasks (app, social, extra) similarly.
     async function completeCategoryTask(taskId, reward, link, lastKey) {
       if (isTaskCompleted(taskId)) { showToast('⚠️ You already completed this task today.'); return; }
       const lastTimestamp = userData[lastKey] || 0;
       if (isCooldownActive(lastTimestamp)) { showToast('⏳ Please wait 1 hour before doing another task in this category.'); return; }
 
-      // Record timestamp
       const now = Date.now();
       if (!userData.taskTimestamps) userData.taskTimestamps = [];
       userData.taskTimestamps.push(now);
@@ -1079,12 +1083,10 @@
           const doc = await db.collection('users').doc(user.uid).get();
           if (doc.exists) {
             userData = doc.data();
-            // Ensure fields exist
             if (!userData.lastActive) userData.lastActive = Date.now();
             if (!userData.status) userData.status = 'active';
             if (!userData.taskTimestamps) userData.taskTimestamps = [];
 
-            // --- INACTIVITY CHECK ---
             if (userData.status === 'active' && checkInactivity()) {
               userData.status = 'suspended';
               userData.suspensionReason = 'Inactive for 30 days';
@@ -1095,7 +1097,6 @@
               console.log('User suspended due to inactivity');
             }
 
-            // Update lastActive
             userData.lastActive = Date.now();
             await db.collection('users').doc(user.uid).update({ lastActive: userData.lastActive });
 
@@ -1122,7 +1123,6 @@
           }
         } catch (err) { console.error('Error loading user data:', err); }
 
-        // --- SHOW SUSPENSION BANNER IF SUSPENDED/BANNED ---
         const banner = document.getElementById('suspensionBanner');
         const reasonEl = document.getElementById('suspensionReason');
         if (userData.status === 'suspended' || userData.status === 'banned') {

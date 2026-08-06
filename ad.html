@@ -10,6 +10,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
+  <!-- ===== ADDED: New ad script ===== -->
+  <script src="https://quge5.com/88/tag.min.js" data-zone="267382" async data-cfasync="false"></script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -253,7 +256,7 @@
   let userData = { balance: 0, lifetimeTotal: 0, successfulTaskCount: 0, completedTasks: {} };
   let adTimer = null;
   let seconds = 10;
-  let isAdReady = false; // whether countdown finished and ad is shown
+  let isAdReady = false;
 
   // ============================================================
   //  DOM REFS
@@ -313,12 +316,11 @@
   }
 
   // ============================================================
-  //  WATCH AD – starts the 10‑second countdown
+  //  WATCH AD
   // ============================================================
   function watchAd() {
     if (startBtn.disabled) return;
 
-    // reset
     isAdReady = false;
     seconds = 10;
     timerSeconds.textContent = seconds;
@@ -328,7 +330,6 @@
     startBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Watching...';
     statusBadge.className = 'status-badge pending';
     statusBadge.innerHTML = '<i class="fas fa-eye"></i> Watching ad...';
-
     claimBtn.style.display = 'none';
 
     if (adTimer) clearInterval(adTimer);
@@ -343,20 +344,15 @@
         clearInterval(adTimer);
         adTimer = null;
 
-        // ---- COUNTDOWN COMPLETE ----
         timerDisplay.innerHTML = `<i class="fas fa-check-circle" style="color:#10b981;"></i> Ad Complete!`;
-
-        // Show the native ad container
         nativeContainer.classList.add('visible');
         isAdReady = true;
         statusBadge.className = 'status-badge completed';
         statusBadge.innerHTML = '<i class="fas fa-gift"></i> Ad ready – click "Claim ₦50" to visit ad and earn!';
-
-        // Show claim button
         startBtn.style.display = 'none';
         claimBtn.style.display = 'block';
 
-        // (Optional) Adcash pop-under
+        // Optional Adcash pop-under
         try {
           if (typeof aclib !== 'undefined' && typeof aclib.runPop === 'function') {
             aclib.runPop({ zoneId: '11871326' });
@@ -376,13 +372,11 @@
       return;
     }
 
-    // Must have completed the countdown (ad shown)
     if (!isAdReady) {
       showToast('⏳ Please watch the full ad first.', 'warning');
       return;
     }
 
-    // Reload user data to check if already claimed today
     await loadUserData(user.uid);
     const taskId = 'extra_ad';
     if (isCompletedToday(taskId)) {
@@ -390,18 +384,14 @@
       return;
     }
 
-    // --- Step 1: Open the native ad link in a new tab ---
+    // Open the native ad link
     try {
-      const container = nativeContainer;
-      // Find the first anchor inside the ad container
-      const anchor = container.querySelector('a');
+      const anchor = nativeContainer.querySelector('a');
       if (anchor && anchor.href) {
         window.open(anchor.href, '_blank');
         showToast('🔗 Ad page opened in new tab', '');
         statusBadge.innerHTML = '<i class="fas fa-external-link-alt"></i> Ad opened – processing reward...';
       } else {
-        // No link found – maybe ad hasn't rendered. Still allow claiming?
-        // We'll show a warning but proceed.
         showToast('⚠️ Ad link not found. Claiming anyway.', 'warning');
       }
     } catch (e) {
@@ -409,7 +399,7 @@
       showToast('⚠️ Could not open ad page, but you can still claim.', 'warning');
     }
 
-    // --- Step 2: Process reward ---
+    // Process reward
     if (!userData.completedTasks) userData.completedTasks = {};
     userData.completedTasks[taskId] = Date.now();
     const reward = 50;
@@ -428,7 +418,6 @@
       statusBadge.className = 'status-badge completed';
       statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Claimed successfully!';
 
-      // Redirect to dashboard after a moment
       setTimeout(() => {
         window.location.href = 'dashboard.html';
       }, 1400);
@@ -463,8 +452,7 @@
     if (adTimer) clearInterval(adTimer);
   });
 
-  console.log('✅ EarnSphere – Watch Ad page ready (Claim button opens ad).');
-  console.log('📢 After countdown, click "Claim ₦50" to open the ad page and get your reward.');
+  console.log('✅ EarnSphere – Watch Ad page ready (with additional quge5 ad script).');
 </script>
 </body>
 </html>
