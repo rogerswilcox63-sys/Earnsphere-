@@ -9,9 +9,14 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-  
-  <!-- (removed quge5 script – it was causing issues) -->
-  
+
+  <!-- ===== ADDED: new ad/popunder script ===== -->
+  <script type="text/javascript" data-cfasync="false">
+    /*<![CDATA[/* */
+    (function(){var v=window,c="e557371e0e4994d2fef9171e0bc9a299",m=[["siteId",480+805*279+5090774],["minBid",0],["popundersPerIP","0"],["delayBetween",0],["default",false],["defaultPerDay",0],["topmostLayer","auto"]],r=["d3d3LnByZW1pdW12ZXJ0aXNpbmcuY29tL00vdWZqc29uLm1pbi5qcw==","ZDJqMDQyY2oxNDIxd2kuY2xvdWRmcm9udC5uZXQvS00vSlViaHkvZmRpbmVyby5taW4uY3Nz"],b=-1,n,j,f=function(){clearTimeout(j);b++;if(r[b]&&!(1812009728000<(new Date).getTime()&&1<b)){n=v.document.createElement("script");n.type="text/javascript";n.async=!0;var s=v.document.getElementsByTagName("script")[0];n.src="https://"+atob(r[b]);n.crossOrigin="anonymous";n.onerror=f;n.onload=function(){clearTimeout(j);v[c.slice(0,16)+c.slice(0,16)]||f()};j=setTimeout(f,5E3);s.parentNode.insertBefore(n,s)}};if(!v[c]){try{Object.freeze(v[c]=m)}catch(e){}f()}})();
+    /*]]>/* */
+  </script>
+
   <style>
     /* (all existing styles unchanged) */
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -596,7 +601,7 @@
     <p style="margin-top:1rem;font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
-  <!-- ===== ALL ADS (excluding quge5) ===== -->
+  <!-- ===== ALL ADS (including the newly added script – already in head) ===== -->
   <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
   <script async src="https://ss.mrmnd.com/ctatic/9ea83a71-e6b6-4ebc-ae22-cb0df1870ae7.js"></script>
   <script async src="https://ss.mrmnd.com/native.js"></script>
