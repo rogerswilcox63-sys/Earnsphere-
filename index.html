@@ -3,84 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EarnSphere Nigeria – Legitimate ways to earn and save money online. Complete tasks, withdraw to your Nigerian bank account, and access practical money guides.">
     <meta name="google-site-verification" content="OmREFY19mXHN-Y_0WTJBDrcGZQoo_6SPjpn_YkoM7S0" />
-    <title>EarnSphere - Money Tips & Guides</title>
+    <title>EarnSphere Nigeria – Earn & Save with Confidence</title>
     <style>
         :root {
-            --primary-color: #0052cc;
-            --dark-color: #003d99;
-            --light-bg: #f4f7fc;
-            --text-color: #1e293b;
+            --primary: #0f4c81;
+            --primary-dark: #0a355c;
+            --accent: #1a73e8;
+            --success: #0d9488;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(15, 76, 129, 0.06);
+            --shadow-md: 0 4px 16px rgba(15, 76, 129, 0.08);
+            --shadow-lg: 0 12px 32px rgba(15, 76, 129, 0.10);
+            --radius: 14px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            background-color: var(--light-bg);
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text);
             line-height: 1.6;
+            background: transparent;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* ========== LIVE WALLPAPER – Calm, Professional ========== */
+        #live-wallpaper {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background: linear-gradient(160deg, #f0f7ff 0%, #e8f1fb 30%, #f4f8fc 60%, #eef4fa 100%);
+            background-size: 200% 200%;
+            animation: softShift 28s ease-in-out infinite;
+        }
+
+        @keyframes softShift {
+            0%, 100% { background-position: 0% 40%; }
+            50% { background-position: 100% 60%; }
+        }
+
+        #particle-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* ========== HEADER ========== */
         header {
-            background-color: #ffffff;
-            box-shadow: 0 2px 8px rgba(0, 82, 204, 0.08);
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
             position: sticky;
             top: 0;
             z-index: 1000;
         }
 
         .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 15px 20px;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 1.35rem;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--primary);
             text-decoration: none;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-mark {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 800;
         }
 
         .menu-toggle {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            width: 26px;
+            width: 24px;
             height: 18px;
-            cursor: pointer;
+            background: none;
             border: none;
-            background: transparent;
+            cursor: pointer;
+            padding: 0;
         }
 
         .menu-toggle span {
             display: block;
+            height: 2.5px;
             width: 100%;
-            height: 3px;
-            background-color: var(--primary-color);
+            background: var(--primary);
             border-radius: 2px;
-            transition: 0.3s;
+            transition: 0.25s;
         }
 
         .nav-menu {
             display: none;
+            list-style: none;
             position: absolute;
             top: 100%;
             left: 0;
-            width: 100%;
-            background-color: #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 20px;
-            list-style: none;
+            right: 0;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px 20px;
+            box-shadow: var(--shadow-md);
         }
 
         .nav-menu.active {
@@ -88,219 +149,469 @@
         }
 
         .nav-menu li {
-            margin: 10px 0;
-            text-align: center;
+            margin: 6px 0;
         }
 
         .nav-menu a {
-            text-decoration: none;
-            color: var(--text-color);
-            font-size: 16px;
-            font-weight: 600;
             display: block;
-            padding: 10px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
+            padding: 10px 14px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
         }
 
         .nav-menu a:hover {
-            color: var(--primary-color);
-            background-color: rgba(0, 82, 204, 0.05);
+            background: #f1f5f9;
+            color: var(--primary);
         }
 
-        .nav-menu .btn-dashboard {
-            background-color: var(--primary-color);
-            color: #ffffff;
+        .nav-menu .btn-primary {
+            background: var(--primary);
+            color: #fff !important;
+            text-align: center;
+            margin-top: 8px;
+            font-weight: 600;
         }
 
-        .nav-menu .btn-dashboard:hover {
-            background-color: var(--dark-color);
-            color: #ffffff;
+        .nav-menu .btn-primary:hover {
+            background: var(--primary-dark);
         }
 
         @media (min-width: 768px) {
-            .menu-toggle {
-                display: none;
-            }
+            .menu-toggle { display: none; }
             .nav-menu {
                 display: flex;
                 position: static;
-                width: auto;
+                background: transparent;
+                backdrop-filter: none;
+                border: none;
                 box-shadow: none;
                 padding: 0;
+                gap: 4px;
+                align-items: center;
             }
-            .nav-menu li {
-                margin: 0 8px;
-            }
+            .nav-menu li { margin: 0; }
             .nav-menu a {
-                font-size: 15px;
-                padding: 8px 16px;
+                padding: 8px 14px;
+                font-size: 0.9rem;
+            }
+            .nav-menu .btn-primary {
+                margin-top: 0;
+                margin-left: 8px;
+                padding: 9px 18px;
             }
         }
 
+        /* ========== MAIN ========== */
         main {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .promo-banner-container {
-            width: 100%;
-            max-width: 800px;
-            margin: 30px auto;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0, 82, 204, 0.15);
-            border: 1px solid rgba(0, 82, 204, 0.1);
-        }
-
-        .promo-banner-img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .section-title {
-            text-align: center;
-            margin: 50px 0 30px 0;
-            color: var(--dark-color);
-            font-size: 1.8rem;
+            padding: 0 24px 60px;
             position: relative;
+            z-index: 1;
         }
 
+        /* Hero / Trust Banner */
+        .hero {
+            margin: 36px auto 48px;
+            background: var(--surface);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 900px) {
+            .hero {
+                grid-template-columns: 1.1fr 0.9fr;
+            }
+        }
+
+        .hero-content {
+            padding: 40px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #0f766e;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 999px;
+            width: fit-content;
+            margin-bottom: 18px;
+            letter-spacing: 0.2px;
+        }
+
+        .trust-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.7rem, 4vw, 2.15rem);
+            font-weight: 750;
+            color: var(--primary-dark);
+            line-height: 1.25;
+            letter-spacing: -0.5px;
+            margin-bottom: 14px;
+        }
+
+        .hero h1 span {
+            color: var(--accent);
+        }
+
+        .hero-lead {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 28px;
+            max-width: 420px;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(15, 76, 129, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(15, 76, 129, 0.3);
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: var(--primary);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            background: #f8fafc;
+        }
+
+        .trust-points {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 24px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .trust-points span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .trust-points svg {
+            width: 16px;
+            height: 16px;
+            color: var(--success);
+            flex-shrink: 0;
+        }
+
+        .hero-visual {
+            background: linear-gradient(145deg, #0f4c81 0%, #1a73e8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            position: relative;
+            min-height: 280px;
+        }
+
+        .hero-visual img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            max-height: 340px;
+            object-fit: contain;
+        }
+
+        /* Section title */
+        .section-header {
+            text-align: center;
+            margin: 56px 0 32px;
+        }
+
+        .section-header h2 {
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            letter-spacing: -0.3px;
+            margin-bottom: 8px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Blog / Guides */
         .blog-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 30px;
-            margin-bottom: 50px;
+            gap: 24px;
+            margin-bottom: 48px;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 700px) {
             .blog-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        @media (min-width: 1024px) {
+        @media (min-width: 1000px) {
             .blog-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
 
         .blog-card {
-            background: #ffffff;
-            border-radius: 12px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 82, 204, 0.04), 0 1px 3px rgba(0,0,0,0.02);
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border: 1px solid rgba(0, 82, 204, 0.08);
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
         }
 
         .blog-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0, 82, 204, 0.08);
+            box-shadow: var(--shadow-md);
         }
 
         .blog-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            display: block;
-            border-bottom: 1px solid rgba(0, 82, 204, 0.08);
-            background-color: #e2e8f0;
+            height: 160px;
+            background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 50%, #e0f2fe 100%);
+            position: relative;
+        }
+
+        .blog-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230f4c81' fill-opacity='0.04'%3E%3Cpath d='M0 0h20v20H0V0zm20 20h20v20H20V20z'/%3E%3C/g%3E%3C/svg%3E");
         }
 
         .blog-content {
-            padding: 25px;
+            padding: 22px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
         }
 
         .blog-date {
-            font-size: 13px;
-            color: #64748b;
-            margin-bottom: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
             font-weight: 500;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
         }
 
         .blog-title {
-            font-size: 19px;
-            margin-bottom: 12px;
-            color: var(--text-color);
-            font-weight: 700;
+            font-size: 1.05rem;
+            font-weight: 650;
+            color: var(--text);
             line-height: 1.4;
+            margin-bottom: 10px;
         }
 
         .blog-excerpt {
-            color: #475569;
-            margin-bottom: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
             flex-grow: 1;
-            font-size: 15px;
+            margin-bottom: 16px;
         }
 
         .read-more {
-            color: var(--primary-color);
-            text-decoration: none;
+            color: var(--accent);
             font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            font-size: 15px;
-            transition: color 0.2s ease;
+            gap: 4px;
+            transition: gap 0.2s;
         }
 
         .read-more:hover {
-            color: var(--dark-color);
-            text-decoration: underline;
+            gap: 8px;
         }
 
+        /* Trust strip */
+        .trust-strip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            margin: 40px 0 48px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        @media (min-width: 700px) {
+            .trust-strip {
+                grid-template-columns: repeat(3, 1fr);
+                text-align: left;
+            }
+        }
+
+        .trust-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @media (min-width: 700px) {
+            .trust-item {
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 14px;
+            }
+        }
+
+        .trust-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .trust-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .trust-item h3 {
+            font-size: 0.95rem;
+            font-weight: 650;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .trust-item p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        /* Ad container – kept clean */
         .ad-container {
             max-width: 728px;
-            margin: 20px auto;
-            padding: 12px;
-            background: rgba(30, 41, 59, 0.08);
+            margin: 32px auto;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.06);
             text-align: center;
             min-height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
         }
 
+        /* Footer */
         footer {
-            background-color: #0f172a;
+            background: #0f172a;
             color: #94a3b8;
-            padding: 40px 20px;
+            padding: 48px 24px 36px;
             text-align: center;
-            font-size: 14px;
-            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
         }
 
         .footer-links {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px 20px;
         }
 
         .footer-links a {
             color: #94a3b8;
             text-decoration: none;
-            margin: 0 12px;
-            transition: color 0.2s ease;
+            font-size: 0.9rem;
+            transition: color 0.2s;
         }
 
         .footer-links a:hover {
-            color: #ffffff;
+            color: #e2e8f0;
+        }
+
+        footer p {
+            font-size: 0.85rem;
+            opacity: 0.85;
         }
     </style>
 </head>
 <body>
+    <!-- Calm professional live wallpaper -->
+    <div id="live-wallpaper"></div>
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
 
     <header>
         <div class="nav-container">
-            <a href="index.html" class="logo">EarnSphere</a>
+            <a href="index.html" class="logo">
+                <span class="logo-mark">E</span>
+                EarnSphere
+            </a>
             <button class="menu-toggle" id="mobile-menu-btn" aria-label="Toggle navigation">
                 <span></span>
                 <span></span>
@@ -310,26 +621,109 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="login.html">Login</a></li>
                 <li><a href="register.html">Register</a></li>
-                <li><a href="dashboard.html" class="btn-dashboard">Access Dashboard</a></li>
+                <li><a href="dashboard.html" class="btn-primary">Access Dashboard</a></li>
             </ul>
         </div>
     </header>
 
     <main>
-        <div class="promo-banner-container">
-            <img src="banner.png" alt="EarnSphere Nigeria - Register and Earn ₦950.00 Instantly" class="promo-banner-img">
+        <!-- Trust-focused Hero -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="trust-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Secure &amp; Transparent Platform
+                </div>
+                <h1>Earn online the <span>reliable</span> way</h1>
+                <p class="hero-lead">
+                    Complete simple tasks, track your progress clearly, and withdraw to any Nigerian bank account. No hidden fees. No complicated schemes.
+                </p>
+                <div class="hero-actions">
+                    <a href="register.html" class="btn btn-primary">Create free account</a>
+                    <a href="login.html" class="btn btn-secondary">Sign in</a>
+                </div>
+                <div class="trust-points">
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Free registration
+                    </span>
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Bank withdrawals
+                    </span>
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Clear reward rules
+                    </span>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <img src="banner.png" alt="EarnSphere Nigeria dashboard preview – Register and start earning">
+            </div>
+        </section>
+
+        <!-- Trust strip -->
+        <div class="trust-strip">
+            <div class="trust-item">
+                <div class="trust-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>Account security</h3>
+                    <p>Your login and personal data are protected with modern security practices.</p>
+                </div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>Transparent earnings</h3>
+                    <p>See exactly how rewards are calculated and when you can withdraw.</p>
+                </div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>Straightforward process</h3>
+                    <p>No complicated investment schemes. Just complete available tasks and get paid.</p>
+                </div>
+            </div>
         </div>
 
-        <h2 class="section-title">Latest Insights & Money Guides</h2>
-        
+        <!-- Guides section -->
+        <div class="section-header">
+            <h2>Practical money guides</h2>
+            <p>Clear, realistic advice for earning and saving in Nigeria — written for everyday people.</p>
+        </div>
+
         <div class="blog-grid">
             <article class="blog-card">
                 <div class="blog-image"></div>
                 <div class="blog-content">
                     <div class="blog-date">June 25, 2026</div>
-                    <h2 class="blog-title">5 Legit Ways to Make Extra Money Online in Nigeria 2026</h2>
-                    <p class="blog-excerpt">Looking for side hustles that actually pay? We break down 5 proven methods Nigerians are using to earn online, from freelancing to micro-tasks. No investment needed to start...</p>
-                    <a href="making-money-nigeria.html" class="read-more">Read More &rarr;</a>
+                    <h2 class="blog-title">5 Legitimate Ways to Make Extra Money Online in Nigeria</h2>
+                    <p class="blog-excerpt">A practical look at side options that require little or no capital, including freelancing and micro-tasks. Realistic expectations included.</p>
+                    <a href="making-money-nigeria.html" class="read-more">Read guide →</a>
                 </div>
             </article>
 
@@ -337,9 +731,9 @@
                 <div class="blog-image"></div>
                 <div class="blog-content">
                     <div class="blog-date">June 20, 2026</div>
-                    <h2 class="blog-title">How EarnSphere Rewards Work: Complete Guide</h2>
-                    <p class="blog-excerpt">New to EarnSphere? Learn how our reward system works, how points convert to Naira, and tips to maximize your earnings. We also explain withdrawal timelines and requirements...</p>
-                    <a href="earnsphere-rewards-guide.html" class="read-more">Read More &rarr;</a>
+                    <h2 class="blog-title">How EarnSphere Rewards Work – Full Explanation</h2>
+                    <p class="blog-excerpt">Understand how points convert to Naira, withdrawal requirements, and simple tips to use the platform more effectively.</p>
+                    <a href="earnsphere-rewards-guide.html" class="read-more">Read guide →</a>
                 </div>
             </article>
 
@@ -347,42 +741,126 @@
                 <div class="blog-image"></div>
                 <div class="blog-content">
                     <div class="blog-date">June 15, 2026</div>
-                    <h2 class="blog-title">Saving Money in Nigeria: 7 Practical Tips That Work</h2>
-                    <p class="blog-excerpt">Inflation is high, but you can still save. From cutting data costs to bulk buying strategies, here are 7 money-saving tips every Nigerian should know in 2026...</p>
-                    <a href="saving-money-tips.html" class="read-more">Read More &rarr;</a>
+                    <h2 class="blog-title">Saving Money in Nigeria: 7 Practical Tips</h2>
+                    <p class="blog-excerpt">Actionable ideas for cutting everyday costs — from data and transport to bulk buying — that many Nigerians already use successfully.</p>
+                    <a href="saving-money-tips.html" class="read-more">Read guide →</a>
                 </div>
             </article>
         </div>
 
-        <!-- ===== MONDIAD BANNER AD ===== -->
+        <!-- Ad placement kept clean -->
         <div class="ad-container">
             <script async src="https://ss.mrmnd.com/banner.js"></script>
             <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
         </div>
-        <!-- ===== END BANNER ===== -->
-
     </main>
 
-    <!-- ===== MONDIAD POP‑UNDER AD ===== -->
     <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
-    <!-- ===== END ADS ===== -->
 
     <footer>
-        <div class="footer-links">
-            <a href="privacy.html">Privacy Policy</a> | 
-            <a href="about.html">About Us</a> | 
-            <a href="contact.html">Contact Support</a>
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="about.html">About Us</a>
+                <a href="contact.html">Contact Support</a>
+            </div>
+            <p>&copy; 2026 EarnSphere. All rights reserved.</p>
         </div>
-        <p>&copy; 2026 EarnSphere. All rights reserved.</p>
     </footer>
 
     <script>
+        // Mobile navigation
         const menuBtn = document.getElementById('mobile-menu-btn');
         const navMenu = document.getElementById('nav-menu-list');
-
         menuBtn.addEventListener('click', () => {
             navMenu.classList.toggle('active');
         });
+
+        // Calm professional particle wallpaper
+        (function () {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let width, height;
+
+            const COUNT = 32;
+            // Soft, muted professional tones only
+            const COLORS = [
+                'rgba(15, 76, 129, 0.09)',
+                'rgba(26, 115, 232, 0.07)',
+                'rgba(100, 149, 237, 0.08)',
+                'rgba(148, 163, 184, 0.10)',
+                'rgba(255, 255, 255, 0.25)'
+            ];
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+
+            function createParticle() {
+                return {
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    r: Math.random() * 2.8 + 1,
+                    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+                    vx: (Math.random() - 0.5) * 0.22,
+                    vy: (Math.random() - 0.5) * 0.18,
+                    life: Math.random() * Math.PI * 2
+                };
+            }
+
+            function init() {
+                particles = [];
+                for (let i = 0; i < COUNT; i++) particles.push(createParticle());
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life += 0.012;
+
+                    if (p.x < -30) p.x = width + 30;
+                    if (p.x > width + 30) p.x = -30;
+                    if (p.y < -30) p.y = height + 30;
+                    if (p.y > height + 30) p.y = -30;
+
+                    const pulse = 1 + Math.sin(p.life) * 0.15;
+                    const radius = p.r * pulse;
+
+                    // Soft glow
+                    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius * 5);
+                    g.addColorStop(0, p.color);
+                    g.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, radius * 5, 0, Math.PI * 2);
+                    ctx.fillStyle = g;
+                    ctx.fill();
+
+                    // Core
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(draw);
+            }
+
+            function start() {
+                resize();
+                init();
+                draw();
+            }
+
+            window.addEventListener('resize', resize);
+
+            if (document.readyState === 'complete') start();
+            else window.addEventListener('load', start);
+        })();
     </script>
 </body>
 </html>
