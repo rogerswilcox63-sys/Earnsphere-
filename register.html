@@ -572,7 +572,7 @@
     }
 
     // ============================================
-    // CREDIT REFERRER
+    // CREDIT REFERRER (unchanged)
     // ============================================
     async function creditReferrer(refCode) {
       if (!refCode) return;
@@ -605,7 +605,7 @@
     }
 
     // ============================================
-    // SAVE USER TO FIRESTORE
+    // SAVE USER TO FIRESTORE – with ₦950 welcome bonus
     // ============================================
     async function saveUserToFirestore(user, fullName, refCode) {
       const newReferralCode = generateReferralCode(user.uid);
@@ -616,20 +616,22 @@
         displayName: fullName || user.displayName || 'User',
         referralCode: newReferralCode,
         referredBy: refCode || null,
-        balance: 0,
-        lifetimeTotal: 0,
+        balance: 950,                    // 🎉 Welcome bonus
+        lifetimeTotal: 950,              // also track lifetime
+        welcomeBonusClaimed: true,       // flag to avoid double bonus
         successfulTaskCount: 0,
         completedTaskIds: [],
         totalReferrals: 0,
-        totalEarned: 0,
+        totalEarned: 950,                // for reporting
         pendingBonus: 0,
-        wallet: 0,
+        wallet: 950,
         emailVerified: user.emailVerified || false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       };
 
       await db.collection('users').doc(user.uid).set(userData);
       debugInfo.innerHTML += `<br>✅ Your referral code: <strong style="color:#4ade80;">${newReferralCode}</strong>`;
+      debugInfo.innerHTML += `<br>🎉 Welcome bonus: <strong style="color:#f59e0b;">+₦950</strong> added to your balance!`;
       
       if (refCode) {
         await creditReferrer(refCode);
@@ -639,7 +641,7 @@
     }
 
     // ============================================
-    // EMAIL VERIFICATION FUNCTIONS
+    // EMAIL VERIFICATION FUNCTIONS (unchanged)
     // ============================================
     function showVerificationBanner(email) {
       console.log('📧 Showing verification banner for:', email);
@@ -722,7 +724,7 @@
           showToast('✅ Email verified! Redirecting to onboarding...', 'success');
           hideVerificationBanner();
           setTimeout(() => {
-            window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
+            window.location.href = 'onboarding.html';
           }, 1500);
         } else {
           showToast('❌ Email not verified yet. Please check your inbox and click the verification link.', 'warning');
@@ -748,7 +750,7 @@
     }
 
     // ============================================
-    // FORGOT PASSWORD
+    // FORGOT PASSWORD (unchanged)
     // ============================================
     function openForgotPassword() {
       if (verificationBanner.classList.contains('show')) {
@@ -801,7 +803,7 @@
     });
 
     // ============================================
-    // EMAIL REGISTRATION WITH VERIFICATION
+    // EMAIL REGISTRATION WITH VERIFICATION + BONUS
     // ============================================
     document.getElementById('emailForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -833,8 +835,9 @@
         await user.sendEmailVerification();
         console.log('📧 Verification email sent to:', email);
         
-        // Save user to Firestore
+        // Save user to Firestore with ₦950 bonus
         await saveUserToFirestore(user, fullName, storedReferralCode);
+        showToast('🎉 Welcome! +₦950 bonus added to your balance!', 'success');
         
         // Show verification banner
         showVerificationBanner(email);
@@ -860,7 +863,7 @@
     });
 
     // ============================================
-    // PHONE REGISTRATION
+    // PHONE REGISTRATION + BONUS
     // ============================================
     let confirmationResult = null;
 
@@ -957,10 +960,11 @@
         
         const fullName = document.getElementById('phoneFullName').value.trim();
         await saveUserToFirestore(user, fullName, storedReferralCode);
+        showToast('🎉 Welcome! +₦950 bonus added to your balance!', 'success');
         
         showToast('✅ Phone verified and account created!', 'success');
         setTimeout(() => { 
-          window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
+          window.location.href = 'onboarding.html';
         }, 2000);
         
       } catch (err) {
@@ -975,7 +979,7 @@
     }
 
     // ============================================
-    // GOOGLE REGISTRATION
+    // GOOGLE REGISTRATION + BONUS
     // ============================================
     async function signInWithGoogle() {
       if (verificationBanner.classList.contains('show')) {
@@ -994,13 +998,14 @@
         
         if (!doc.exists) {
           await saveUserToFirestore(user, user.displayName, storedReferralCode);
+          showToast('🎉 Welcome! +₦950 bonus added to your balance!', 'success');
           showToast('✅ Google account linked!', 'success');
         } else {
           showToast('✅ Welcome back!', 'success');
         }
         
         setTimeout(() => { 
-          window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
+          window.location.href = 'onboarding.html';
         }, 1500);
         
       } catch (err) {
@@ -1017,25 +1022,23 @@
         console.log('👤 User detected:', user.email, 'Verified:', user.emailVerified);
         
         if (user.emailVerified) {
-          // User is verified - redirect to onboarding (they can skip if already completed)
           try {
             const userRef = db.collection('users').doc(user.uid);
             await userRef.update({ emailVerified: true });
           } catch (e) {}
-          window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
+          window.location.href = 'onboarding.html';
         } else if (user.email && !user.emailVerified) {
-          // User exists but email not verified - show banner
           showVerificationBanner(user.email);
         } else {
-          // Phone or Google user - redirect to onboarding
-          window.location.href = 'onboarding.html'; // ← CHANGED: now redirects to onboarding
+          // Phone or Google user – already verified
+          window.location.href = 'onboarding.html';
         }
       } else {
         console.log('👤 No user logged in');
       }
     });
 
-    console.log('✅ Register page loaded');
+    console.log('✅ Register page loaded – welcome bonus set to ₦950');
   </script>
 
 </body>
