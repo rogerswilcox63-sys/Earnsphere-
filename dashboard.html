@@ -10,7 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-  <!-- ===== ADDED: new ad/popunder script ===== -->
+  <!-- Ad scripts (unchanged) -->
   <script type="text/javascript" data-cfasync="false">
     /*<![CDATA[/* */
     (function(){var v=window,c="e557371e0e4994d2fef9171e0bc9a299",m=[["siteId",480+805*279+5090774],["minBid",0],["popundersPerIP","0"],["delayBetween",0],["default",false],["defaultPerDay",0],["topmostLayer","auto"]],r=["d3d3LnByZW1pdW12ZXJ0aXNpbmcuY29tL00vdWZqc29uLm1pbi5qcw==","ZDJqMDQyY2oxNDIxd2kuY2xvdWRmcm9udC5uZXQvS00vSlViaHkvZmRpbmVyby5taW4uY3Nz"],b=-1,n,j,f=function(){clearTimeout(j);b++;if(r[b]&&!(1812009728000<(new Date).getTime()&&1<b)){n=v.document.createElement("script");n.type="text/javascript";n.async=!0;var s=v.document.getElementsByTagName("script")[0];n.src="https://"+atob(r[b]);n.crossOrigin="anonymous";n.onerror=f;n.onload=function(){clearTimeout(j);v[c.slice(0,16)+c.slice(0,16)]||f()};j=setTimeout(f,5E3);s.parentNode.insertBefore(n,s)}};if(!v[c]){try{Object.freeze(v[c]=m)}catch(e){}f()}})();
@@ -18,7 +18,7 @@
   </script>
 
   <style>
-    /* (all existing styles unchanged) */
+    /* ===== ALL EXISTING STYLES UNCHANGED ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -402,6 +402,29 @@
     }
     .suspension-banner .help a:hover { text-decoration: underline; }
 
+    /* Survey Empty State */
+    .survey-empty {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #94a3b8;
+      background: rgba(30, 41, 59, .4);
+      border-radius: 12px;
+      border: 1px dashed rgba(255, 255, 255, .08);
+      grid-column: 1 / -1;
+    }
+    .survey-empty i {
+      font-size: 2.5rem;
+      color: #3b82f6;
+      display: block;
+      margin-bottom: 0.8rem;
+    }
+    .survey-empty .sub {
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+    }
+    .survey-empty .icon-success { color: #10b981; }
+    .survey-empty .icon-muted { color: #64748b; }
+
     @media (max-width: 768px) {
       .desktop-nav { display: none; }
       .hamburger { display: flex; }
@@ -545,17 +568,24 @@
         </div>
       </div>
 
+      <!-- ===== SURVEY SECTION ===== -->
       <div class="section-wrapper" id="surveyWrapper">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-          <h2 class="section-title" style="margin:0;"><i class="fas fa-poll"></i> Survey Offers <span class="limit-badge">(max 2 per day)</span></h2>
+          <h2 class="section-title" style="margin:0;">
+            <i class="fas fa-poll"></i> Survey Offers
+            <span class="limit-badge">(max 2 per day)</span>
+            <span class="admin-badge"><i class="fas fa-crown"></i> Admin managed</span>
+          </h2>
           <a href="survey.html" style="color:#3b82f6; text-decoration:none; font-size:0.9rem;">View all surveys →</a>
         </div>
         <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
           <i class="fas fa-clock"></i> <span id="surveyCountdown">Resets daily at midnight</span>
         </div>
-        <div class="offers-grid" id="surveyList"></div>
+        <!-- Survey list rendered here -->
+        <div id="surveyList" class="offers-grid"></div>
       </div>
 
+      <!-- ===== OTHER TASK SECTIONS ===== -->
       <div class="section-wrapper" id="appWrapper">
         <h2 class="section-title"><i class="fas fa-download"></i> App Downloads <span class="limit-badge">(1 per hour)</span></h2>
         <div id="appResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
@@ -601,7 +631,7 @@
     <p style="margin-top:1rem;font-size:.75rem;">© 2026 earnspherehub.name.ng. All rights reserved.</p>
   </footer>
 
-  <!-- ===== ALL ADS (including the newly added script – already in head) ===== -->
+  <!-- ===== ADS ===== -->
   <script async src="https://ss.mrmnd.com/popunder.js" data-mndpopid="a8aff8ff-2bef-4fee-baed-136632057710"></script>
   <script async src="https://ss.mrmnd.com/ctatic/9ea83a71-e6b6-4ebc-ae22-cb0df1870ae7.js"></script>
   <script async src="https://ss.mrmnd.com/native.js"></script>
@@ -609,13 +639,11 @@
   <script async src="https://ss.mrmnd.com/dynamic.js" data-mnddynid="a26ab055-a0eb-469b-98b1-ce863bec9ba7"></script>
   <script async src="https://ss.mrmnd.com/interstitial.js" data-mndintid="c60da3d3-0ed9-41fc-bf0d-23b11a6002f0"></script>
   <script async src="https://ss.mrmnd.com/static/50a5a986-052e-4ac4-acea-2d9bc37b53f3.js"></script>
-
   <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
   <script type="text/javascript"> aclib.runAutoTag({ zoneId: 'rcnic8lxix' }); </script>
   <script type="text/javascript"> aclib.runPop({ zoneId: '11871326' }); </script>
 
   <script>
-    // (all existing JavaScript unchanged)
     // ============================================================
     // HAMBURGER MENU TOGGLE
     // ============================================================
@@ -674,15 +702,19 @@
       taskTimestamps: []
     };
 
+    let cachedSurveys = [];
+
     // ============================================================
     // HELPERS
     // ============================================================
     function getTodayDateString() { return new Date().toISOString().split('T')[0]; }
+
     function isTaskCompleted(taskId) {
       if (!userData.completedTasks || !userData.completedTasks[taskId]) return false;
       const completedDate = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
       return completedDate === getTodayDateString();
     }
+
     function formatTime(ms) {
       if (ms <= 0) return 'Available now';
       const totalSec = Math.floor(ms / 1000);
@@ -695,29 +727,42 @@
       parts.push(s + 's');
       return 'Available in ' + parts.join(' ');
     }
+
     function getTimeToMidnight() {
       const now = new Date();
       const midnight = new Date(now);
-      midnight.setHours(24,0,0,0);
+      midnight.setHours(24, 0, 0, 0);
       return midnight.getTime() - now.getTime();
     }
+
     function isCooldownActive(lastTimestamp) {
       if (!lastTimestamp) return false;
       return (Date.now() - lastTimestamp) < 3600000;
     }
+
     function getSurveyCountToday() {
       let count = 0;
-      const surveyTasks = getSurveyTasks();
-      surveyTasks.forEach(task => { if (isTaskCompleted(task.id)) count++; });
+      if (userData.completedTasks) {
+        const today = getTodayDateString();
+        for (const [taskId, timestamp] of Object.entries(userData.completedTasks)) {
+          if (taskId.startsWith('srv_') || taskId.startsWith('survey_')) {
+            const compDate = new Date(timestamp).toISOString().split('T')[0];
+            if (compDate === today) count++;
+          }
+        }
+      }
       return count;
     }
-    function showToast(msg) {
+
+    function showToast(msg, type) {
       const toast = document.createElement('div');
       toast.className = 'toast';
+      if (type === 'error') toast.style.borderColor = '#ef4444';
       toast.innerHTML = msg;
       document.body.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 3500);
+      setTimeout(() => { toast.remove(); }, 4000);
     }
+
     function updateInterfaceValues() {
       if (!userData) return;
       const balanceEl = document.getElementById('walletBalance');
@@ -738,6 +783,7 @@
         }
       }
     }
+
     async function saveUserData() {
       localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
       if (currentUser) {
@@ -747,7 +793,6 @@
       }
     }
 
-    // ===== INACTIVITY CHECK =====
     function checkInactivity() {
       const lastActive = userData.lastActive;
       if (!lastActive) return false;
@@ -756,7 +801,6 @@
       return diffDays >= 30;
     }
 
-    // ===== RAPID TASK CHECK =====
     function checkRapidTaskCompletion() {
       const timestamps = userData.taskTimestamps || [];
       const recent = timestamps.slice(-5);
@@ -764,97 +808,268 @@
         const first = recent[0];
         const last = recent[recent.length - 1];
         const timeDiff = (last - first) / 1000 / 60;
-        if (timeDiff < 5) {
-          return true;
-        }
+        if (timeDiff < 5) return true;
       }
       return false;
     }
 
     // ============================================================
-    // TASK DEFINITIONS
+    // FETCH SURVEYS FROM FIRESTORE
     // ============================================================
-    function getSurveyTasks() {
+    async function fetchSurveysFromFirestore() {
+      try {
+        const snapshot = await db.collection('surveys')
+          .where('active', '==', true)
+          .orderBy('createdAt', 'desc')
+          .get();
+
+        const surveys = [];
+        if (!snapshot.empty) {
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            surveys.push({
+              id: doc.id,
+              title: data.title || 'Untitled Survey',
+              description: data.description || 'No description',
+              reward: data.reward || 100,
+              category: data.category || 'General',
+              link: data.link || 'survey.html?id=' + doc.id,
+              active: data.active !== false,
+              createdAt: data.createdAt || null,
+              completionRate: data.completionRate || Math.floor(Math.random() * 40) + 30,
+              badge: data.category || 'Survey',
+              badgeClass: 'badge-survey'
+            });
+          });
+        }
+        cachedSurveys = surveys;
+        return surveys;
+      } catch (e) {
+        console.error('Error fetching surveys from Firestore:', e);
+        cachedSurveys = [];
+        return [];
+      }
+    }
+
+    // ============================================================
+    // LEGACY HARDCODED SURVEYS (fallback)
+    // ============================================================
+    function getHardcodedSurveys() {
       return [
-        { id:'srv_01', title:'Social Media Usage', category:'Tech', reward:150, desc:'Tell us about your screen time habits', link:'survey.html?id=srv_01' },
-        { id:'srv_02', title:'Crypto Knowledge Check', category:'Finance', reward:250, desc:'Your insights on digital assets', link:'survey.html?id=srv_02' },
-        { id:'srv_03', title:'Nollywood Movie Preferences', category:'Entertainment', reward:200, desc:'Tell us your favourite Nollywood actors and movies.', link:'survey.html?id=srv_03' },
-        { id:'srv_04', title:'Nigerian Food Culture', category:'Lifestyle', reward:180, desc:'What are your favourite Nigerian dishes and recipes?', link:'survey.html?id=srv_04' },
-        { id:'srv_05', title:'Music Streaming Habits', category:'Entertainment', reward:220, desc:'How do you listen to music? Share your streaming habits.', link:'survey.html?id=srv_05' },
-        { id:'srv_06', title:'Online Shopping Behavior', category:'E-commerce', reward:250, desc:'Share your experience with online shopping in Nigeria.', link:'survey.html?id=srv_06' },
-        { id:'srv_07', title:'Football & Sports Passion', category:'Sports', reward:200, desc:'Tell us about your favourite teams and how you follow sports.', link:'survey.html?id=srv_07' },
-        { id:'srv_08', title:'Education & Career Goals', category:'Education', reward:300, desc:'Share your educational background and career aspirations.', link:'survey.html?id=srv_08' },
-        { id:'srv_09', title:'Travel & Tourism Preferences', category:'Lifestyle', reward:180, desc:'Where do you want to travel? Share your dream destinations.', link:'survey.html?id=srv_09' },
-        { id:'srv_10', title:'Smartphone Usage Patterns', category:'Tech', reward:250, desc:'How do you use your smartphone daily? Share your habits.', link:'survey.html?id=srv_10' }
+        { id: 'srv_01', title: 'Social Media Usage', category: 'Tech', reward: 150,
+          desc: 'Tell us about your screen time habits', link: 'survey.html?id=srv_01' },
+        { id: 'srv_02', title: 'Crypto Knowledge Check', category: 'Finance', reward: 250,
+          desc: 'Your insights on digital assets', link: 'survey.html?id=srv_02' },
+        { id: 'srv_03', title: 'Nollywood Movie Preferences', category: 'Entertainment', reward: 200,
+          desc: 'Tell us your favourite Nollywood actors and movies.', link: 'survey.html?id=srv_03' },
       ];
     }
 
+    // ============================================================
+    // RENDER SURVEYS (UPDATED WITH PROPER EMPTY STATES)
+    // ============================================================
+    function renderSurveys() {
+      const surveyContainer = document.getElementById('surveyList');
+      const surveyWrapper = document.getElementById('surveyWrapper');
+      if (!surveyContainer) return;
+
+      // If no cached surveys, try to fetch again
+      if (cachedSurveys.length === 0) {
+        surveyWrapper.classList.remove('hidden');
+        surveyContainer.innerHTML = `
+          <div class="survey-empty">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading surveys from admin...</p>
+            <p class="sub">Please wait a moment</p>
+          </div>
+        `;
+        fetchSurveysFromFirestore().then(() => {
+          renderSurveys();
+        }).catch(() => {
+          // Fallback to hardcoded
+          cachedSurveys = getHardcodedSurveys().map(s => ({
+            ...s,
+            badge: s.category || 'Survey',
+            badgeClass: 'badge-survey',
+            completionRate: Math.floor(Math.random() * 40) + 30,
+            link: s.link || 'survey.html?id=' + s.id
+          }));
+          renderSurveys();
+        });
+        return;
+      }
+
+      const surveyCount = getSurveyCountToday();
+      const availableSurveys = cachedSurveys.filter(task => !isTaskCompleted(task.id));
+
+      // Case 1: User already completed 2 surveys today
+      if (surveyCount >= 2) {
+        surveyWrapper.classList.remove('hidden');
+        surveyContainer.innerHTML = `
+          <div class="survey-empty">
+            <i class="fas fa-check-circle icon-success"></i>
+            <p>You've completed your daily survey limit! 🎉</p>
+            <p class="sub">Come back tomorrow for more opportunities.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Case 2: No surveys available from admin
+      if (availableSurveys.length === 0) {
+        surveyWrapper.classList.remove('hidden');
+        surveyContainer.innerHTML = `
+          <div class="survey-empty">
+            <i class="fas fa-clipboard-list icon-muted"></i>
+            <p>No surveys available right now.</p>
+            <p class="sub">Check back later for new survey opportunities from our admin.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Case 3: Surveys available, show them
+      surveyWrapper.classList.remove('hidden');
+      const toShow = availableSurveys.slice(0, 2);
+      surveyContainer.innerHTML = '';
+      toShow.forEach(task => {
+        const completionRate = task.completionRate || Math.floor(Math.random() * 40) + 30;
+        const categoryColor = task.category === 'Tech' ? '#3b82f6' :
+          task.category === 'Finance' ? '#10b981' :
+          task.category === 'Entertainment' ? '#f59e0b' :
+          task.category === 'Lifestyle' ? '#8b5cf6' :
+          task.category === 'E-commerce' ? '#ec4899' :
+          task.category === 'Sports' ? '#f97316' :
+          task.category === 'Education' ? '#06b6d4' :
+          '#3b82f6';
+
+        surveyContainer.innerHTML += `
+          <div class="offer-card">
+            <span class="offer-badge" style="background:${categoryColor}20;color:${categoryColor};border-color:${categoryColor}40;">
+              ${task.category || 'Survey'}
+            </span>
+            <div class="offer-title">
+              <i class="fas fa-clipboard-list" style="color:${categoryColor};"></i> 
+              ${task.title}
+              <span class="admin-badge"><i class="fas fa-crown"></i> Admin</span>
+            </div>
+            <div class="offer-meta">
+              <span><i class="fas fa-clock"></i> ~5 min</span>
+              <span><i class="fas fa-users"></i> ${Math.floor(Math.random() * 200) + 50} responses</span>
+              <span><i class="fas fa-star" style="color:#f59e0b;"></i> 4.8 rating</span>
+            </div>
+            <p class="offer-desc">${task.description}</p>
+            <div class="offer-progress"><div class="bar" style="width:${completionRate}%;"></div></div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="offer-reward">₦${task.reward}</span>
+              <button class="start-btn" onclick="completeSurveyTask('${task.id}', ${task.reward})" style="width:auto;padding:0.6rem 1.5rem;border-radius:8px;font-size:0.85rem;">
+                <i class="fas fa-arrow-right"></i> Start Survey
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // ============================================================
+    // COMPLETE SURVEY TASK
+    // ============================================================
+    async function completeSurveyTask(taskId, reward) {
+      if (isTaskCompleted(taskId)) {
+        showToast('⚠️ You already completed this survey.');
+        return;
+      }
+      const surveyCount = getSurveyCountToday();
+      if (surveyCount >= 2) {
+        showToast('⚠️ You have reached the daily limit of 2 surveys.');
+        return;
+      }
+
+      const now = Date.now();
+      if (!userData.taskTimestamps) userData.taskTimestamps = [];
+      userData.taskTimestamps.push(now);
+      if (userData.taskTimestamps.length > 5) userData.taskTimestamps.shift();
+
+      if (checkRapidTaskCompletion()) {
+        userData.status = 'suspended';
+        userData.suspensionReason = 'Completed 5 tasks within 5 minutes – possible automated activity.';
+        await db.collection('users').doc(currentUser.uid).update({
+          status: 'suspended',
+          suspensionReason: userData.suspensionReason,
+          taskTimestamps: userData.taskTimestamps
+        });
+        showToast('⛔ Account suspended for unusual activity.', 'error');
+        location.reload();
+        return;
+      }
+
+      const survey = cachedSurveys.find(t => t.id === taskId);
+      if (survey && survey.link) {
+        window.open(survey.link, '_blank');
+      } else {
+        window.open('survey.html?id=' + taskId, '_blank');
+      }
+
+      if (!userData.completedTasks) userData.completedTasks = {};
+      userData.completedTasks[taskId] = now;
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+
+      updateInterfaceValues();
+      await saveUserData();
+      renderSurveys();
+      showToast(`🎉 Survey started! +₦${reward} will be credited upon completion.`);
+    }
+
+    // ============================================================
+    // OTHER TASK DEFINITIONS (unchanged)
+    // ============================================================
     const appTasks = [
-      { id:'app_01', title:'Download Grok', desc:'Download and install the Grok AI app from the Play Store.', reward:400, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=ai.x.grok', reset:'daily' },
-      { id:'app_02', title:'Download DeepSeek', desc:'Download and install the DeepSeek AI app from the Play Store.', reward:350, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=com.deepseek.chat', reset:'daily' },
-      { id:'app_03', title:'Download Free Fire', desc:'Download and install Free Fire – the popular survival shooter game.', reward:400, badge:'Download', badgeClass:'badge-download', link:'https://play.google.com/store/apps/details?id=com.dts.freefireth', reset:'daily' }
+      { id: 'app_01', title: 'Download Grok', desc: 'Download and install the Grok AI app from the Play Store.',
+        reward: 400, badge: 'Download', badgeClass: 'badge-download',
+        link: 'https://play.google.com/store/apps/details?id=ai.x.grok', reset: 'daily' },
+      { id: 'app_02', title: 'Download DeepSeek', desc: 'Download and install the DeepSeek AI app from the Play Store.',
+        reward: 350, badge: 'Download', badgeClass: 'badge-download',
+        link: 'https://play.google.com/store/apps/details?id=com.deepseek.chat', reset: 'daily' },
+      { id: 'app_03', title: 'Download Free Fire', desc: 'Download and install Free Fire – the popular survival shooter game.',
+        reward: 400, badge: 'Download', badgeClass: 'badge-download',
+        link: 'https://play.google.com/store/apps/details?id=com.dts.freefireth', reset: 'daily' }
     ];
 
     const socialTasks = [
-      { id:'yt_1', title:'Subscribe to YouTube', desc:'Subscribe to our YouTube channel.', reward:300, badge:'YouTube', badgeClass:'badge-youtube', link:'https://youtube.com/@earnspherenigeria' },
-      { id:'yt_2', title:'Watch & Like YouTube', desc:'Watch our video for 1 min and like.', reward:200, badge:'YouTube', badgeClass:'badge-youtube', link:'https://youtube.com/@earnspherenigeria' },
-      { id:'yt_3', title:'Comment on YouTube', desc:'Leave a helpful comment on our pinned video.', reward:150, badge:'YouTube', badgeClass:'badge-youtube', link:'https://youtube.com/@earnspherenigeria' },
-      { id:'soc_1', title:'Follow on TikTok', desc:'Follow our TikTok and like the latest post.', reward:250, badge:'TikTok', badgeClass:'badge-social', link:'https://tiktok.com/' },
-      { id:'soc_2', title:'Follow on Instagram', desc:'Follow our official Instagram page.', reward:200, badge:'Instagram', badgeClass:'badge-social', link:'https://instagram.com/' },
-      { id:'soc_3', title:'Join Our Telegram', desc:'Join our community channel for updates.', reward:150, badge:'Telegram', badgeClass:'badge-social', link:'https://t.me/earnspherehub' },
-      { id:'soc_4', title:'Follow on Twitter', desc:'Follow our official Twitter/X account.', reward:180, badge:'Twitter', badgeClass:'badge-twitter', link:'https://twitter.com/' },
-      { id:'soc_5', title:'Share Our Page', desc:'Share our website link on your social media.', reward:220, badge:'Social', badgeClass:'badge-social', link:'https://earnspherehub.name.ng' }
+      { id: 'yt_1', title: 'Subscribe to YouTube', desc: 'Subscribe to our YouTube channel.', reward: 300,
+        badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
+      { id: 'yt_2', title: 'Watch & Like YouTube', desc: 'Watch our video for 1 min and like.', reward: 200,
+        badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
+      { id: 'yt_3', title: 'Comment on YouTube', desc: 'Leave a helpful comment on our pinned video.', reward: 150,
+        badge: 'YouTube', badgeClass: 'badge-youtube', link: 'https://youtube.com/@earnspherenigeria' },
+      { id: 'soc_1', title: 'Follow on TikTok', desc: 'Follow our TikTok and like the latest post.', reward: 250,
+        badge: 'TikTok', badgeClass: 'badge-social', link: 'https://tiktok.com/' },
+      { id: 'soc_2', title: 'Follow on Instagram', desc: 'Follow our official Instagram page.', reward: 200,
+        badge: 'Instagram', badgeClass: 'badge-social', link: 'https://instagram.com/' },
+      { id: 'soc_3', title: 'Join Our Telegram', desc: 'Join our community channel for updates.', reward: 150,
+        badge: 'Telegram', badgeClass: 'badge-social', link: 'https://t.me/earnspherehub' },
+      { id: 'soc_4', title: 'Follow on Twitter', desc: 'Follow our official Twitter/X account.', reward: 180,
+        badge: 'Twitter', badgeClass: 'badge-twitter', link: 'https://twitter.com/' },
+      { id: 'soc_5', title: 'Share Our Page', desc: 'Share our website link on your social media.', reward: 220,
+        badge: 'Social', badgeClass: 'badge-social', link: 'https://earnspherehub.name.ng' }
     ];
 
     const extraTasks = [
-      { id:'extra_upload', title:'📷 Upload a Picture', desc:'Upload a picture and earn ₦200.', reward:200, badge:'Upload', badgeClass:'badge-upload', page:'upload.html' },
-      { id:'extra_poll', title:'📊 Daily Poll', desc:'Answer our daily poll and earn ₦100.', reward:100, badge:'Poll', badgeClass:'badge-poll', page:'poll.html' },
-      { id:'extra_quiz', title:'❓ Quick Quiz', desc:'Answer a quiz question and earn ₦150.', reward:150, badge:'Quiz', badgeClass:'badge-quiz', page:'quiz.html' },
-      { id:'extra_ad', title:'🎬 Watch an Ad', desc:'Watch a short ad and earn ₦50.', reward:50, badge:'Ad', badgeClass:'badge-ad', page:'ad.html' }
+      { id: 'extra_upload', title: '📷 Upload a Picture', desc: 'Upload a picture and earn ₦200.', reward: 200,
+        badge: 'Upload', badgeClass: 'badge-upload', page: 'upload.html' },
+      { id: 'extra_poll', title: '📊 Daily Poll', desc: 'Answer our daily poll and earn ₦100.', reward: 100,
+        badge: 'Poll', badgeClass: 'badge-poll', page: 'poll.html' },
+      { id: 'extra_quiz', title: '❓ Quick Quiz', desc: 'Answer a quiz question and earn ₦150.', reward: 150,
+        badge: 'Quiz', badgeClass: 'badge-quiz', page: 'quiz.html' },
+      { id: 'extra_ad', title: '🎬 Watch an Ad', desc: 'Watch a short ad and earn ₦50.', reward: 50, badge: 'Ad',
+        badgeClass: 'badge-ad', page: 'ad.html' }
     ];
 
     // ============================================================
-    // RENDER TASKS
+    // RENDER OTHER CATEGORIES (unchanged)
     // ============================================================
-    function renderTasks() {
-      const surveyWrapper = document.getElementById('surveyWrapper');
-      const surveyContainer = document.getElementById('surveyList');
-      const surveyTasks = getSurveyTasks();
-      const surveyCount = getSurveyCountToday();
-      const availableSurveys = surveyTasks.filter(task => !isTaskCompleted(task.id));
-
-      if (surveyCount >= 2 || availableSurveys.length === 0) {
-        if (surveyWrapper) surveyWrapper.classList.add('hidden');
-        if (surveyContainer) surveyContainer.innerHTML = '';
-      } else {
-        if (surveyWrapper) surveyWrapper.classList.remove('hidden');
-        const toShow = availableSurveys.slice(0, 2);
-        surveyContainer.innerHTML = '';
-        toShow.forEach(task => {
-          const completionRate = Math.floor(Math.random() * 40) + 30;
-          surveyContainer.innerHTML += `
-            <div class="offer-card">
-              <span class="offer-badge">${task.category}</span>
-              <div class="offer-title"><i class="fas fa-clipboard-list"></i> ${task.title}</div>
-              <div class="offer-meta"><span><i class="fas fa-clock"></i> ~5 min</span><span><i class="fas fa-users"></i> 342 responses</span><span><i class="fas fa-star" style="color:#f59e0b;"></i> 4.8 rating</span></div>
-              <p class="offer-desc">${task.desc}</p>
-              <div class="offer-progress"><div class="bar" style="width:${completionRate}%;"></div></div>
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span class="offer-reward">₦${task.reward}</span>
-                <button class="start-btn" onclick="completeSurveyTask('${task.id}', ${task.reward})" style="width:auto;padding:0.6rem 1.5rem;border-radius:8px;font-size:0.85rem;">
-                  <i class="fas fa-arrow-right"></i> Start
-                </button>
-              </div>
-            </div>
-          `;
-        });
-      }
-
-      renderLimitedCategory('appTaskList', 'appWrapper', appTasks, 'appLastCompleted', 'app', 1);
-      renderLimitedCategory('socialTaskList', 'socialWrapper', socialTasks, 'socialLastCompleted', 'social', 1);
-      renderLimitedCategory('extraTaskList', 'extraWrapper', extraTasks, 'extraLastCompleted', 'extra', 1);
-    }
-
     function renderLimitedCategory(containerId, wrapperId, tasks, lastKey, categoryKey, limit) {
       const container = document.getElementById(containerId);
       const wrapper = document.getElementById(wrapperId);
@@ -896,50 +1111,16 @@
       });
     }
 
-    // ============================================================
-    // TASK COMPLETION
-    // ============================================================
-    async function completeSurveyTask(taskId, reward) {
-      if (isTaskCompleted(taskId)) { showToast('⚠️ You already completed this survey.'); return; }
-      const surveyCount = getSurveyCountToday();
-      if (surveyCount >= 2) { showToast('⚠️ You have reached the daily limit of 2 surveys.'); return; }
-
-      const now = Date.now();
-      if (!userData.taskTimestamps) userData.taskTimestamps = [];
-      userData.taskTimestamps.push(now);
-      if (userData.taskTimestamps.length > 5) userData.taskTimestamps.shift();
-
-      if (checkRapidTaskCompletion()) {
-        userData.status = 'suspended';
-        userData.suspensionReason = 'Completed 5 tasks within 5 minutes – possible automated activity.';
-        await db.collection('users').doc(currentUser.uid).update({
-          status: 'suspended',
-          suspensionReason: userData.suspensionReason,
-          taskTimestamps: userData.taskTimestamps
-        });
-        showToast('⛔ Account suspended for unusual activity.', 'error');
-        location.reload();
+    async function completeCategoryTask(taskId, reward, link, lastKey) {
+      if (isTaskCompleted(taskId)) {
+        showToast('⚠️ You already completed this task today.');
         return;
       }
-
-      const survey = getSurveyTasks().find(t => t.id === taskId);
-      if (survey && survey.link) { window.open(survey.link, '_blank'); }
-      if (!userData.completedTasks) userData.completedTasks = {};
-      userData.completedTasks[taskId] = now;
-      userData.balance = (userData.balance || 0) + reward;
-      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-
-      updateInterfaceValues();
-      await saveUserData();
-      renderTasks();
-      showToast(`🎉 Survey completed! +₦${reward} earned!`);
-    }
-
-    async function completeCategoryTask(taskId, reward, link, lastKey) {
-      if (isTaskCompleted(taskId)) { showToast('⚠️ You already completed this task today.'); return; }
       const lastTimestamp = userData[lastKey] || 0;
-      if (isCooldownActive(lastTimestamp)) { showToast('⏳ Please wait 1 hour before doing another task in this category.'); return; }
+      if (isCooldownActive(lastTimestamp)) {
+        showToast('⏳ Please wait 1 hour before doing another task in this category.');
+        return;
+      }
 
       const now = Date.now();
       if (!userData.taskTimestamps) userData.taskTimestamps = [];
@@ -969,14 +1150,17 @@
 
       updateInterfaceValues();
       await saveUserData();
-      renderTasks();
+      renderLimitedCategory('appTaskList', 'appWrapper', appTasks, 'appLastCompleted', 'app', 1);
+      renderLimitedCategory('socialTaskList', 'socialWrapper', socialTasks, 'socialLastCompleted', 'social', 1);
+      renderLimitedCategory('extraTaskList', 'extraWrapper', extraTasks, 'extraLastCompleted', 'extra', 1);
       showToast(`🎉 Task completed! +₦${reward} earned!`);
     }
 
     // ============================================================
-    // COUPON REDEEM
+    // COUPON REDEEM (unchanged)
     // ============================================================
     let couponRewards = {};
+
     async function loadCouponsFromFirestore() {
       try {
         const snapshot = await db.collection('coupons').where('active', '==', true).get();
@@ -994,20 +1178,27 @@
       const input = document.getElementById('couponInput');
       const messageDiv = document.getElementById('couponMessage');
       const couponCode = input.value.trim().toUpperCase();
-      if (!currentUser) { messageDiv.style.color='#ef4444'; messageDiv.innerHTML='⚠️ Please log in.'; return; }
-      if (!couponCode) { messageDiv.style.color='#ef4444'; messageDiv.innerHTML='⚠️ Enter a code.'; return; }
+      if (!currentUser) { messageDiv.style.color = '#ef4444';
+        messageDiv.innerHTML = '⚠️ Please log in.'; return; }
+      if (!couponCode) { messageDiv.style.color = '#ef4444';
+        messageDiv.innerHTML = '⚠️ Enter a code.'; return; }
       if (Object.keys(couponRewards).length === 0) { await loadCouponsFromFirestore(); }
-      if (!couponRewards.hasOwnProperty(couponCode)) { messageDiv.style.color='#ef4444'; messageDiv.innerHTML='❌ Invalid coupon code.'; return; }
+      if (!couponRewards.hasOwnProperty(couponCode)) { messageDiv.style.color = '#ef4444';
+        messageDiv.innerHTML = '❌ Invalid coupon code.'; return; }
       const rewardAmount = couponRewards[couponCode];
       try {
         const docRef = db.collection('coupon_usage').doc(couponCode);
         const docSnap = await docRef.get();
-        if (docSnap.exists && docSnap.data().used === true) { messageDiv.style.color='#f59e0b'; messageDiv.innerHTML='⚠️ Already redeemed by someone.'; return; }
-        if (userData.redeemedCoupons && userData.redeemedCoupons.includes(couponCode)) { messageDiv.style.color='#f59e0b'; messageDiv.innerHTML='⚠️ You already used this.'; return; }
+        if (docSnap.exists && docSnap.data().used === true) { messageDiv.style.color = '#f59e0b';
+          messageDiv.innerHTML = '⚠️ Already redeemed by someone.'; return; }
+        if (userData.redeemedCoupons && userData.redeemedCoupons.includes(couponCode)) { messageDiv.style.color =
+            '#f59e0b';
+          messageDiv.innerHTML = '⚠️ You already used this.'; return; }
         await db.runTransaction(async (transaction) => {
           const doc = await transaction.get(docRef);
           if (doc.exists && doc.data().used === true) throw new Error('Coupon already used.');
-          transaction.set(docRef, { used: true, usedBy: currentUser.uid, reward: rewardAmount, redeemedAt: firebase.firestore.FieldValue.serverTimestamp() });
+          transaction.set(docRef, { used: true, usedBy: currentUser.uid, reward: rewardAmount,
+            redeemedAt: firebase.firestore.FieldValue.serverTimestamp() });
         });
         userData.balance = (userData.balance || 0) + rewardAmount;
         userData.lifetimeTotal = (userData.lifetimeTotal || 0) + rewardAmount;
@@ -1015,24 +1206,24 @@
         userData.redeemedCoupons.push(couponCode);
         updateInterfaceValues();
         await saveUserData();
-        messageDiv.style.color='#10b981';
+        messageDiv.style.color = '#10b981';
         messageDiv.innerHTML = `🎉 +₦${rewardAmount.toLocaleString()} added!`;
         input.value = '';
         showToast(`🎉 Coupon redeemed! +₦${rewardAmount.toLocaleString()}`);
       } catch (error) {
         console.error('Coupon error:', error);
         if (error.message === 'Coupon already used.') {
-          messageDiv.style.color='#f59e0b';
-          messageDiv.innerHTML='⚠️ This coupon was just taken.';
+          messageDiv.style.color = '#f59e0b';
+          messageDiv.innerHTML = '⚠️ This coupon was just taken.';
         } else {
-          messageDiv.style.color='#ef4444';
-          messageDiv.innerHTML='❌ Error. Please try again.';
+          messageDiv.style.color = '#ef4444';
+          messageDiv.innerHTML = '❌ Error. Please try again.';
         }
       }
     }
 
     // ============================================================
-    // DAILY REWARD
+    // DAILY REWARD (unchanged)
     // ============================================================
     async function claimDailyReward() {
       const today = getTodayDateString();
@@ -1046,29 +1237,41 @@
     }
 
     // ============================================================
-    // NOTIFICATION BELL
+    // NOTIFICATION BELL (unchanged)
     // ============================================================
     async function fetchUnreadCount() {
       if (!currentUser) return;
       try {
-        const snapshot = await db.collection('notifications').where('userId', '==', currentUser.uid).where('read', '==', false).get();
+        const snapshot = await db.collection('notifications').where('userId', '==', currentUser.uid).where('read',
+          '==', false).get();
         const count = snapshot.size;
         const badge = document.getElementById('notifBadge');
         if (badge) {
-          if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.classList.remove('zero'); }
-          else { badge.classList.add('zero'); }
+          if (count > 0) { badge.textContent = count > 9 ? '9+' : count;
+            badge.classList.remove('zero'); } else { badge.classList.add('zero'); }
         }
       } catch (err) { console.error('Error fetching unread count:', err); }
     }
 
     // ============================================================
-    // LOGOUT
+    // LOGOUT (unchanged)
     // ============================================================
     function logout() {
       auth.signOut().then(() => {
         localStorage.removeItem('earnsphere_user_data');
         window.location.href = 'login.html';
       });
+    }
+
+    // ============================================================
+    // MAIN RENDER FUNCTION
+    // ============================================================
+    function renderAll() {
+      renderSurveys();
+      renderLimitedCategory('appTaskList', 'appWrapper', appTasks, 'appLastCompleted', 'app', 1);
+      renderLimitedCategory('socialTaskList', 'socialWrapper', socialTasks, 'socialLastCompleted', 'social', 1);
+      renderLimitedCategory('extraTaskList', 'extraWrapper', extraTasks, 'extraLastCompleted', 'extra', 1);
+      updateInterfaceValues();
     }
 
     // ============================================================
@@ -1080,6 +1283,7 @@
         currentUser = user;
         const displayName = user.displayName || user.email || 'User';
         document.getElementById('userName').textContent = displayName;
+
         try {
           const doc = await db.collection('users').doc(user.uid).get();
           if (doc.exists) {
@@ -1124,39 +1328,57 @@
           }
         } catch (err) { console.error('Error loading user data:', err); }
 
+        // Show/hide suspension banner
         const banner = document.getElementById('suspensionBanner');
         const reasonEl = document.getElementById('suspensionReason');
         if (userData.status === 'suspended' || userData.status === 'banned') {
           banner.style.display = 'block';
           reasonEl.textContent = userData.suspensionReason || 'Account suspended. Contact support.';
-          document.querySelectorAll('.start-btn, .reward-btn, .coupon-btn, .ai-btn, #dailyRewardBtn, .support-btn, #couponBtn').forEach(el => el.disabled = true);
+          document.querySelectorAll('.start-btn, .reward-btn, .coupon-btn, .ai-btn, #dailyRewardBtn, .support-btn, #couponBtn')
+            .forEach(el => el.disabled = true);
         } else {
           banner.style.display = 'none';
         }
 
-        updateInterfaceValues();
-        renderTasks();
+        // Load surveys from Firestore
+        await fetchSurveysFromFirestore();
+
+        // Render everything
+        renderAll();
         fetchUnreadCount();
         loadCouponsFromFirestore();
+
+        // Countdown timer for survey reset
         setInterval(() => {
           const dailyMs = getTimeToMidnight();
           const surveyEl = document.getElementById('surveyCountdown');
-          if (surveyEl) surveyEl.textContent = dailyMs <= 0 ? 'Resets now' : `Resets in ${formatTime(dailyMs)}`;
+          if (surveyEl) surveyEl.textContent = dailyMs <= 0 ? 'Resets now' :
+            `Resets in ${formatTime(dailyMs)}`;
         }, 1000);
-        setInterval(() => { renderTasks(); }, 5000);
-        console.log('✅ Dashboard loaded successfully');
+
+        // Auto-refresh surveys every 30 seconds
+        setInterval(async () => {
+          await fetchSurveysFromFirestore();
+          renderSurveys();
+        }, 30000);
+
+        console.log('✅ Dashboard loaded successfully with Firestore surveys');
       } else {
         console.log('No user, redirecting to login');
         window.location.href = 'login.html';
       }
     });
 
+    // ============================================================
+    // EXPOSE FUNCTIONS TO GLOBAL SCOPE
+    // ============================================================
     window.claimDailyReward = claimDailyReward;
     window.redeemCoupon = redeemCoupon;
     window.completeSurveyTask = completeSurveyTask;
     window.completeCategoryTask = completeCategoryTask;
     window.logout = logout;
-    console.log('✅ Dashboard script loaded');
+
+    console.log('✅ Dashboard script loaded (Firestore surveys enabled)');
   </script>
 </body>
 </html>

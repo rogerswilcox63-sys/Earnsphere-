@@ -10,134 +10,438 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
+    /* ===== MATCH DASHBOARD STYLES ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Inter', sans-serif; background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%); min-height:100vh; color:#f1f5f9; }
-    #app { max-width:1400px; margin:0 auto; padding:1.5rem; }
-    .navbar { background:rgba(30,41,59,.8); backdrop-filter:blur(12px); padding:1rem 1.5rem; border-radius:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem; border:1px solid rgba(255,255,255,.08); }
-    .logo { font-size:1.3rem; font-weight:800; background:linear-gradient(135deg,#3b82f6,#10b981); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .nav-links a { color:#cbd5e1; text-decoration:none; padding:0.35rem 0.8rem; border-radius:0.5rem; font-size:0.85rem; transition:all .3s; }
-    .nav-links a:hover, .nav-links a.active { color:#3b82f6; background:rgba(59,130,246,.15); }
-    .logout-btn { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); padding:0.35rem 0.9rem; border-radius:2rem; color:#3b82f6; cursor:pointer; font-size:0.8rem; transition:.3s; }
-    .logout-btn:hover { background:rgba(59,130,246,.3); }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    #app {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
 
-    .tabs { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
-    .tab-btn { padding:0.6rem 1.2rem; border-radius:0.75rem; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color:#94a3b8; font-weight:600; cursor:pointer; transition:.3s; }
-    .tab-btn.active { background:rgba(59,130,246,.2); border-color:#3b82f6; color:#f1f5f9; }
-    .tab-btn:hover { background:rgba(255,255,255,.1); }
+    /* ===== NAVBAR (matches dashboard) ===== */
+    .navbar {
+      background: rgba(30,41,59,.8);
+      backdrop-filter: blur(12px);
+      padding: 0.8rem 1.5rem;
+      border-radius: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .navbar .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-decoration: none;
+    }
+    .navbar .logo i { margin-right: 0.3rem; }
+    .navbar .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .navbar .logout-btn {
+      background: rgba(59,130,246,.2);
+      border: 1px solid rgba(59,130,246,.3);
+      padding: 0.35rem 0.9rem;
+      border-radius: 2rem;
+      font-weight: 500;
+      color: #3b82f6;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+    .navbar .logout-btn:hover { background: rgba(59,130,246,.3); }
+    #adminName {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin-right: 0.5rem;
+    }
+    .nav-links {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 0.35rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: #3b82f6;
+      background: rgba(59,130,246,.15);
+    }
 
-    .tab-content { display:none; background:rgba(30,41,59,.6); backdrop-filter:blur(12px); border-radius:1rem; padding:1.5rem; border:1px solid rgba(255,255,255,.1); margin-top:0.5rem; }
-    .tab-content.active { display:block; }
+    /* ===== TABS (glassmorphic) ===== */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .tab-btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.75rem;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #94a3b8;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.85rem;
+      backdrop-filter: blur(4px);
+    }
+    .tab-btn.active {
+      background: rgba(59,130,246,.2);
+      border-color: #3b82f6;
+      color: #f1f5f9;
+    }
+    .tab-btn:hover {
+      background: rgba(255,255,255,.1);
+    }
 
-    .table-wrapper { overflow-x:auto; margin-top:1rem; }
-    table { width:100%; border-collapse:collapse; font-size:0.9rem; }
-    th, td { padding:0.8rem 0.6rem; text-align:left; border-bottom:1px solid rgba(255,255,255,.06); }
-    th { color:#94a3b8; font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; }
-    td { color:#e2e8f0; }
+    /* ===== TAB CONTENT ===== */
+    .tab-content {
+      display: none;
+      background: rgba(30,41,59,.6);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,.1);
+      margin-top: 0.5rem;
+    }
+    .tab-content.active { display: block; }
 
-    .badge { padding:0.2rem 0.6rem; border-radius:2rem; font-size:0.7rem; font-weight:600; text-transform:uppercase; }
-    .badge-active { background:#10b981; color:#000; }
-    .badge-inactive { background:#ef4444; color:#fff; }
-    .badge-pending { background:#f59e0b; color:#000; }
-    .badge-approved { background:#3b82f6; color:#fff; }
-    .badge-paid { background:#10b981; color:#fff; }
-    .badge-rejected { background:#ef4444; color:#fff; }
-    .badge-claimed { background:#10b981; color:#000; }
-    .badge-unclaimed { background:#f59e0b; color:#000; }
-    .badge-locked { background:#64748b; color:#fff; }
+    /* ===== TABLE ===== */
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 0.8rem 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    th {
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    td {
+      color: #e2e8f0;
+    }
 
-    .admin-form, .search-box { display:flex; flex-wrap:wrap; gap:0.8rem; align-items:flex-end; margin-bottom:1rem; }
-    .admin-form .form-group, .search-box input { flex:1 1 180px; min-width:140px; }
-    .admin-form label { display:block; font-size:0.8rem; color:#94a3b8; margin-bottom:0.2rem; }
-    .admin-form input, .admin-form textarea, .admin-form select, .search-box input { width:100%; padding:0.6rem 0.8rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.5rem; color:#f1f5f9; font-size:0.9rem; font-family:inherit; }
-    .admin-form textarea { resize:vertical; }
-    .admin-form input:focus, .admin-form textarea:focus { outline:none; border-color:#3b82f6; }
+    /* ===== BADGES ===== */
+    .badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 2rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-active { background: #10b981; color: #000; }
+    .badge-inactive { background: #ef4444; color: #fff; }
+    .badge-pending { background: #f59e0b; color: #000; }
+    .badge-approved { background: #3b82f6; color: #fff; }
+    .badge-paid { background: #10b981; color: #fff; }
+    .badge-rejected { background: #ef4444; color: #fff; }
+    .badge-survey { background: rgba(139,92,246,.25); color: #a78bfa; }
+    .admin-badge {
+      font-size: 0.6rem;
+      background: rgba(139,92,246,.25);
+      color: #a78bfa;
+      padding: 0.15rem 0.6rem;
+      border-radius: 12px;
+      border: 1px solid rgba(139,92,246,.2);
+      margin-left: 0.5rem;
+      font-weight: 600;
+    }
 
-    .btn { padding:0.6rem 1.2rem; border:none; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.85rem; transition:.2s; }
-    .btn-success { background:#10b981; color:#fff; }
-    .btn-success:hover { background:#059669; }
-    .btn-danger { background:#ef4444; color:#fff; }
-    .btn-danger:hover { background:#dc2626; }
-    .btn-primary { background:#3b82f6; color:#fff; }
-    .btn-primary:hover { background:#2563eb; }
-    .btn-warning { background:#f59e0b; color:#000; }
-    .btn-warning:hover { background:#d97706; }
-    .btn-sm { padding:0.25rem 0.6rem; font-size:0.75rem; }
-    .btn:disabled { opacity:0.5; cursor:not-allowed; }
+    /* ===== FORMS ===== */
+    .admin-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+    }
+    .admin-form .form-group {
+      flex: 1 1 180px;
+      min-width: 140px;
+    }
+    .admin-form label {
+      display: block;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.2rem;
+    }
+    .admin-form input,
+    .admin-form textarea,
+    .admin-form select {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      background: rgba(15,23,42,.6);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 0.5rem;
+      color: #f1f5f9;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    .admin-form textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .admin-form input:focus,
+    .admin-form textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
 
-    .user-detail { background:rgba(15,23,42,.4); padding:1rem; border-radius:0.75rem; margin:1rem 0; display:none; }
-    .user-detail.show { display:block; }
-    .user-detail .row { display:flex; flex-wrap:wrap; gap:0.5rem; margin:0.3rem 0; }
-    .user-detail .label { color:#94a3b8; width:120px; }
-    .user-detail .value { color:#f1f5f9; font-weight:600; }
+    /* ===== BUTTONS ===== */
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-success:hover { background: #059669; transform: scale(1.02); }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; transform: scale(1.02); }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover { background: #2563eb; transform: scale(1.02); }
+    .btn-warning { background: #f59e0b; color: #000; }
+    .btn-warning:hover { background: #d97706; transform: scale(1.02); }
+    .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    .balance-control { display:flex; flex-wrap:wrap; gap:0.8rem; align-items:center; margin-top:0.5rem; }
-    .balance-control input { width:150px; padding:0.5rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.5rem; color:#f1f5f9; }
-    .balance-control input:focus { outline:none; border-color:#3b82f6; }
+    /* ===== STATS CARDS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .stat-card {
+      background: rgba(15,23,42,.4);
+      padding: 0.8rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .stat-card .stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+    .stat-card .stat-label {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
 
-    .task-control { margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,.08); }
-    .task-control h4 { color:#94a3b8; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem; }
-    .task-control .task-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:0.5rem; margin:0.5rem 0; }
-    .task-control .task-item { background:rgba(15,23,42,.4); border:1px solid rgba(255,255,255,.06); border-radius:0.5rem; padding:0.5rem; display:flex; flex-direction:column; gap:0.3rem; }
-    .task-control .task-item .task-header { display:flex; justify-content:space-between; align-items:center; }
-    .task-control .task-item .task-name { font-weight:600; font-size:0.85rem; }
-    .task-control .task-item .task-count { display:flex; align-items:center; gap:0.3rem; }
-    .task-control .task-item .task-count input { width:60px; padding:0.2rem 0.3rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.3rem; color:#f1f5f9; text-align:center; font-size:0.8rem; }
-    .task-control .task-item .task-actions { display:flex; gap:0.3rem; justify-content:flex-end; margin-top:0.3rem; }
-    .task-control .task-item .task-actions button { padding:0.15rem 0.4rem; font-size:0.65rem; }
-    .task-control .task-item .task-type { font-size:0.7rem; color:#94a3b8; }
-    .task-control .task-item .task-reward { font-size:0.7rem; color:#10b981; }
+    /* ===== DEMO BANNER ===== */
+    .demo-banner {
+      background: rgba(245,158,11,.12);
+      border: 1px solid rgba(245,158,11,.2);
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      color: #f59e0b;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
-    .clickable-row { cursor:pointer; transition:background 0.2s; }
-    .clickable-row:hover { background:rgba(59,130,246,.1); }
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(8px);
+      z-index: 9998;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: rgba(30,41,59,.95);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 600px;
+      width: 92%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal h3 {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .modal .form-group {
+      margin-bottom: 0.8rem;
+    }
+    .modal .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.2rem;
+    }
+    .modal .form-group input,
+    .modal .form-group select,
+    .modal .form-group textarea {
+      width: 100%;
+      padding: 0.5rem;
+      background: rgba(15,23,42,.6);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 0.5rem;
+      color: #f1f5f9;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .modal .form-group textarea { min-height: 80px; resize: vertical; }
+    .modal .modal-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
 
-    .pagination { display:flex; gap:0.5rem; justify-content:center; margin-top:1rem; flex-wrap:wrap; }
-    .pagination button { padding:0.3rem 0.8rem; border:1px solid rgba(255,255,255,.1); background:rgba(15,23,42,.6); color:#94a3b8; border-radius:0.5rem; cursor:pointer; transition:.2s; }
-    .pagination button.active { background:#3b82f6; color:#fff; border-color:#3b82f6; }
-    .pagination button:hover:not(.active) { background:rgba(255,255,255,.05); }
-    .pagination button:disabled { opacity:0.4; cursor:not-allowed; }
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ef4444;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s;
+      max-width: 90%;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; }
+    .toast.success { background: #10b981; }
 
-    .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#ef4444; color:#fff; padding:10px 20px; border-radius:8px; z-index:9999; opacity:0; transition:opacity 0.3s; max-width:90%; }
-    .toast.show { opacity:1; }
-    .toast.success { background:#10b981; }
+    /* ===== SURVEY PREVIEW ===== */
+    .survey-preview {
+      background: rgba(15,23,42,.3);
+      border-radius: 0.5rem;
+      padding: 0.8rem;
+      margin-top: 0.5rem;
+      border: 1px dashed rgba(255,255,255,.06);
+    }
+    .survey-preview h4 {
+      color: #94a3b8;
+      font-size: 0.8rem;
+      margin-bottom: 0.3rem;
+    }
+    .survey-preview .preview-card {
+      background: rgba(30,41,59,.5);
+      border-radius: 0.5rem;
+      padding: 0.8rem;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .survey-preview .preview-card .title {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .survey-preview .preview-card .desc {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin: 0.2rem 0;
+    }
+    .survey-preview .preview-card .meta {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: #64748b;
+      flex-wrap: wrap;
+    }
+    .survey-preview .preview-card .reward {
+      color: #10b981;
+      font-weight: 700;
+    }
 
-    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(8px); z-index:9998; display:none; align-items:center; justify-content:center; }
-    .modal-overlay.show { display:flex; }
-    .modal { background:rgba(30,41,59,.95); border:1px solid rgba(255,255,255,.1); border-radius:1rem; padding:2rem; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; }
-    .modal h3 { margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
-    .modal .form-group { margin-bottom:0.8rem; }
-    .modal .form-group label { display:block; font-size:0.8rem; color:#94a3b8; margin-bottom:0.2rem; }
-    .modal .form-group input, .modal .form-group select { width:100%; padding:0.5rem; background:rgba(15,23,42,.6); border:1px solid rgba(255,255,255,.1); border-radius:0.5rem; color:#f1f5f9; }
-    .modal .modal-actions { display:flex; gap:0.5rem; justify-content:flex-end; margin-top:1rem; }
-
-    .image-preview { display:none; max-width:200px; margin-top:0.5rem; border-radius:0.5rem; border:1px solid rgba(255,255,255,.1); overflow:hidden; }
-    .image-preview img { width:100%; height:auto; display:block; }
-
-    .demo-banner { background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.2); border-radius:0.5rem; padding:0.5rem 1rem; margin-bottom:1rem; color:#f59e0b; font-size:0.8rem; display:flex; align-items:center; gap:0.5rem; }
-
-    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:0.5rem; margin-bottom:1rem; }
-    .stat-card { background:rgba(15,23,42,.4); padding:0.8rem; border-radius:0.5rem; text-align:center; }
-    .stat-card .stat-number { font-size:1.5rem; font-weight:700; color:#3b82f6; }
-    .stat-card .stat-label { font-size:0.7rem; color:#94a3b8; text-transform:uppercase; }
-
-    @media (max-width:768px) { .navbar { flex-direction:column; text-align:center; } .admin-form .form-group { flex:1 1 100%; } .tabs .tab-btn { flex:1; text-align:center; } .task-control .task-grid { grid-template-columns:1fr; } }
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .navbar { flex-direction: column; text-align: center; }
+      .admin-form .form-group { flex: 1 1 100%; }
+      .tabs .tab-btn { flex: 1; text-align: center; font-size: 0.75rem; padding: 0.4rem 0.6rem; }
+      .modal { padding: 1.2rem; }
+    }
   </style>
 </head>
 <body>
 <div id="app">
+  <!-- NAVBAR (matches dashboard) -->
   <nav class="navbar">
-    <div class="logo"><i class="fas fa-coins"></i> EarnSphere Admin</div>
+    <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere Admin</a>
     <div class="nav-links">
       <a href="dashboard.html">Dashboard</a>
       <a href="admin.html" class="active">Admin</a>
       <a href="ai-assistant.html"><i class="fas fa-robot"></i> AI</a>
     </div>
-    <div><span id="adminName" style="color:#94a3b8;margin-right:1rem;">Admin</span><button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+    <div class="nav-right">
+      <span id="adminName">Admin</span>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
   </nav>
 
+  <!-- TABS -->
   <div class="tabs">
-    <button class="tab-btn active" data-tab="coupons"><i class="fas fa-ticket-alt"></i> Coupons</button>
+    <button class="tab-btn active" data-tab="surveys"><i class="fas fa-poll"></i> Surveys</button>
+    <button class="tab-btn" data-tab="coupons"><i class="fas fa-ticket-alt"></i> Coupons</button>
     <button class="tab-btn" data-tab="tasks"><i class="fas fa-tasks"></i> Tasks</button>
     <button class="tab-btn" data-tab="users"><i class="fas fa-users"></i> Users</button>
     <button class="tab-btn" data-tab="payouts"><i class="fas fa-credit-card"></i> Payouts</button>
@@ -146,8 +450,91 @@
     <button class="tab-btn" data-tab="suspensions"><i class="fas fa-ban"></i> Suspensions</button>
   </div>
 
-  <!-- COUPONS -->
-  <div class="tab-content active" id="tab-coupons">
+  <!-- ============================================================ -->
+  <!-- TAB: SURVEYS (admin manages surveys for dashboard)            -->
+  <!-- ============================================================ -->
+  <div class="tab-content active" id="tab-surveys">
+    <h2 style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+      <i class="fas fa-poll" style="color:#8b5cf6;"></i> Manage Surveys
+      <span style="font-size:0.8rem;color:#94a3b8;font-weight:400;">(these appear on user dashboards)</span>
+    </h2>
+
+    <div class="stats-grid" id="surveyStats">
+      <div class="stat-card"><div class="stat-number" id="totalSurveys">0</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-number" id="activeSurveys">0</div><div class="stat-label">Active</div></div>
+      <div class="stat-card"><div class="stat-number" id="inactiveSurveys">0</div><div class="stat-label">Inactive</div></div>
+    </div>
+
+    <!-- Add Survey Form -->
+    <div style="background:rgba(15,23,42,.3);padding:1rem;border-radius:0.75rem;margin-bottom:1.5rem;">
+      <h4 style="color:#94a3b8;margin-bottom:0.8rem;"><i class="fas fa-plus-circle"></i> Create New Survey</h4>
+      <div class="admin-form" id="surveyForm">
+        <div class="form-group" style="flex:2 1 200px;"><label>Title *</label><input type="text" id="surveyTitle" placeholder="e.g. Social Media Habits" /></div>
+        <div class="form-group" style="flex:1 1 140px;"><label>Category</label>
+          <select id="surveyCategory">
+            <option value="Tech">Tech</option>
+            <option value="Finance">Finance</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="E-commerce">E-commerce</option>
+            <option value="Sports">Sports</option>
+            <option value="Education">Education</option>
+            <option value="General" selected>General</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1 1 120px;"><label>Reward (₦) *</label><input type="number" id="surveyReward" placeholder="150" /></div>
+        <div class="form-group" style="flex:1 1 120px;"><label>Max per day</label><input type="number" id="surveyMaxPerDay" value="2" min="1" max="10" /></div>
+        <div class="form-group" style="flex:1 1 140px;"><label>Status</label>
+          <select id="surveyStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select>
+        </div>
+        <div class="form-group" style="flex:3 1 300px;"><label>Description</label><textarea id="surveyDescription" rows="2" placeholder="Brief description of the survey..."></textarea></div>
+        <div class="form-group" style="flex:1 1 200px;"><label>Link (optional)</label><input type="url" id="surveyLink" placeholder="https://..." /></div>
+        <div class="form-group" style="flex:0 0 auto;display:flex;align-items:flex-end;gap:0.5rem;">
+          <button class="btn btn-success" id="addSurveyBtn"><i class="fas fa-plus"></i> Add Survey</button>
+          <button class="btn btn-warning" id="resetSurveyFormBtn" type="button"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+      </div>
+      <!-- Live Preview -->
+      <div class="survey-preview" id="surveyPreview">
+        <h4><i class="fas fa-eye"></i> Live Preview</h4>
+        <div class="preview-card">
+          <div class="title" id="previewTitle">Survey Title</div>
+          <div class="desc" id="previewDesc">Description will appear here...</div>
+          <div class="meta">
+            <span id="previewCategory" class="badge badge-survey">General</span>
+            <span class="reward" id="previewReward">₦150</span>
+            <span style="color:#64748b;">Max: <span id="previewMax">2</span>/day</span>
+            <span style="color:#64748b;" id="previewStatus">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Survey List -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Reward</th>
+            <th>Max/Day</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th style="min-width:180px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="surveyTableBody">
+          <tr><td colspan="7" style="text-align:center;color:#64748b;">Loading surveys...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB: COUPONS                                                  -->
+  <!-- ============================================================ -->
+  <div class="tab-content" id="tab-coupons">
     <h2><i class="fas fa-ticket-alt"></i> Manage Coupons</h2>
     <div class="admin-form">
       <div class="form-group"><label>Code</label><input type="text" id="couponCode" placeholder="e.g. FREEMONEY" style="text-transform:uppercase;" /></div>
@@ -159,19 +546,17 @@
     </div>
   </div>
 
-  <!-- TASKS MANAGEMENT -->
+  <!-- ============================================================ -->
+  <!-- TAB: TASKS                                                    -->
+  <!-- ============================================================ -->
   <div class="tab-content" id="tab-tasks">
     <h2><i class="fas fa-tasks"></i> Manage Tasks</h2>
-    
-    <!-- Stats -->
     <div class="stats-grid" id="taskStats">
       <div class="stat-card"><div class="stat-number" id="totalTasks">0</div><div class="stat-label">Total Tasks</div></div>
       <div class="stat-card"><div class="stat-number" id="activeTasks">0</div><div class="stat-label">Active Tasks</div></div>
       <div class="stat-card"><div class="stat-number" id="taskTypes">0</div><div class="stat-label">Task Types</div></div>
     </div>
-
-    <!-- Add Task Form -->
-    <div class="admin-form" style="background:rgba(15,23,42,.3); padding:1rem; border-radius:0.75rem; margin-bottom:1rem;">
+    <div class="admin-form" style="background:rgba(15,23,42,.3);padding:1rem;border-radius:0.75rem;margin-bottom:1rem;">
       <div class="form-group"><label>Task Name</label><input type="text" id="taskName" placeholder="Daily Survey" /></div>
       <div class="form-group"><label>Category</label>
         <select id="taskCategory">
@@ -186,60 +571,47 @@
       <div class="form-group"><label>Max Per Day</label><input type="number" id="taskMaxPerDay" placeholder="2" value="1" /></div>
       <button class="btn btn-success" id="addTaskBtn"><i class="fas fa-plus"></i> Add Task</button>
     </div>
-
-    <!-- Task List -->
     <div class="table-wrapper">
-      <table>
-        <thead><tr><th>Name</th><th>Category</th><th>Reward</th><th>Max/Day</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody id="taskTableBody"><tr><td colspan="6" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody>
-      </table>
+      <table><thead><tr><th>Name</th><th>Category</th><th>Reward</th><th>Max/Day</th><th>Status</th><th>Actions</th></tr></thead><tbody id="taskTableBody"><tr><td colspan="6" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody></table>
     </div>
   </div>
 
-  <!-- USERS -->
+  <!-- ============================================================ -->
+  <!-- TAB: USERS                                                    -->
+  <!-- ============================================================ -->
   <div class="tab-content" id="tab-users">
     <h2><i class="fas fa-users"></i> Manage Users</h2>
     <div class="demo-banner" id="userDemoBanner"><i class="fas fa-info-circle"></i> No users found.</div>
-    <div class="search-box">
-      <input type="text" id="userSearchInput" placeholder="Search by name, email, or UID..." />
+    <div class="search-box" style="display:flex;flex-wrap:wrap;gap:0.8rem;margin-bottom:1rem;">
+      <input type="text" id="userSearchInput" placeholder="Search by name, email, or UID..." style="flex:1;min-width:150px;padding:0.6rem;background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1);border-radius:0.5rem;color:#f1f5f9;" />
       <button class="btn btn-primary" id="searchUserBtn"><i class="fas fa-search"></i> Search</button>
       <button class="btn btn-secondary" id="clearSearchBtn" style="background:rgba(255,255,255,.1);color:#94a3b8;">Clear</button>
     </div>
     <div class="table-wrapper">
       <table><thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Tasks</th><th>Joined</th></tr></thead><tbody id="userTableBody"><tr><td colspan="5" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody></table>
     </div>
-    <div class="pagination" id="paginationControls"></div>
-    <div class="user-detail" id="userDetail">
+    <div class="pagination" id="paginationControls" style="display:flex;gap:0.5rem;justify-content:center;margin-top:1rem;flex-wrap:wrap;"></div>
+    <div class="user-detail" id="userDetail" style="display:none;background:rgba(15,23,42,.4);padding:1rem;border-radius:0.75rem;margin:1rem 0;">
       <h3><i class="fas fa-user-circle"></i> User Details</h3>
-      <div class="row"><span class="label">Name:</span><span class="value" id="detailName">—</span></div>
-      <div class="row"><span class="label">Email:</span><span class="value" id="detailEmail">—</span></div>
-      <div class="row"><span class="label">Balance:</span><span class="value" id="detailBalance">₦0.00</span></div>
-      <div class="row"><span class="label">Tasks:</span><span class="value" id="detailTasks">0</span></div>
-      <div class="row"><span class="label">UID:</span><span class="value" id="detailUid" style="font-size:0.8rem;color:#94a3b8;">—</span></div>
-      
-      <div class="balance-control">
+      <div class="row" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:0.3rem 0;"><span style="color:#94a3b8;width:120px;">Name:</span><span class="value" id="detailName" style="color:#f1f5f9;font-weight:600;">—</span></div>
+      <div class="row" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:0.3rem 0;"><span style="color:#94a3b8;width:120px;">Email:</span><span class="value" id="detailEmail" style="color:#f1f5f9;font-weight:600;">—</span></div>
+      <div class="row" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:0.3rem 0;"><span style="color:#94a3b8;width:120px;">Balance:</span><span class="value" id="detailBalance" style="color:#f1f5f9;font-weight:600;">₦0.00</span></div>
+      <div class="row" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:0.3rem 0;"><span style="color:#94a3b8;width:120px;">Tasks:</span><span class="value" id="detailTasks" style="color:#f1f5f9;font-weight:600;">0</span></div>
+      <div class="row" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:0.3rem 0;"><span style="color:#94a3b8;width:120px;">UID:</span><span class="value" id="detailUid" style="color:#f1f5f9;font-weight:600;font-size:0.8rem;color:#94a3b8;">—</span></div>
+      <div class="balance-control" style="display:flex;flex-wrap:wrap;gap:0.8rem;align-items:center;margin-top:0.5rem;">
         <span style="color:#94a3b8;">Adjust balance:</span>
-        <input type="number" id="balanceAmount" placeholder="Amount" />
+        <input type="number" id="balanceAmount" placeholder="Amount" style="width:150px;padding:0.5rem;background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1);border-radius:0.5rem;color:#f1f5f9;" />
         <button class="btn btn-success btn-sm" id="addBalanceBtn"><i class="fas fa-plus"></i> Add</button>
         <button class="btn btn-danger btn-sm" id="subtractBalanceBtn"><i class="fas fa-minus"></i> Subtract</button>
         <button class="btn btn-warning btn-sm" id="setBalanceBtn"><i class="fas fa-edit"></i> Set</button>
       </div>
-
-      <!-- User Task Management -->
-      <div class="task-control" id="userTaskControl">
-        <h4><i class="fas fa-clipboard-list"></i> User's Task Progress</h4>
-        <div id="userTaskList"><p style="color:#94a3b8;font-size:0.85rem;">Select a user to manage their tasks</p></div>
-        <div style="margin-top:0.5rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
-          <button class="btn btn-primary btn-sm" id="refreshUserTasks"><i class="fas fa-sync"></i> Refresh</button>
-          <button class="btn btn-success btn-sm" id="resetUserTasks"><i class="fas fa-undo"></i> Reset All Tasks</button>
-        </div>
-      </div>
-
       <button class="btn btn-danger" id="deleteUserBtn" style="margin-top:1rem;"><i class="fas fa-trash-alt"></i> Delete User</button>
     </div>
   </div>
 
-  <!-- PAYOUTS -->
+  <!-- ============================================================ -->
+  <!-- TAB: PAYOUTS                                                  -->
+  <!-- ============================================================ -->
   <div class="tab-content" id="tab-payouts">
     <h2><i class="fas fa-credit-card"></i> Payout Requests</h2>
     <div class="demo-banner" id="payoutDemoBanner"><i class="fas fa-info-circle"></i> No payout requests.</div>
@@ -248,99 +620,93 @@
     </div>
   </div>
 
-  <!-- NOTIFICATIONS -->
+  <!-- ============================================================ -->
+  <!-- TAB: NOTIFICATIONS                                            -->
+  <!-- ============================================================ -->
   <div class="tab-content" id="tab-notifications">
     <h2><i class="fas fa-bullhorn"></i> Send Notification</h2>
     <div class="demo-banner"><i class="fas fa-info-circle"></i> Notifications appear in users' bell icon.</div>
-    <div class="email-settings">
-      <h4 style="margin-bottom:0.5rem;"><i class="fas fa-envelope"></i> EmailJS Configuration</h4>
-      <div class="form-group"><label>Service ID</label><input type="text" id="emailServiceId" value="service_7cd1v06" /></div>
-      <div class="form-group"><label>Template ID</label><input type="text" id="emailTemplateId" value="template_2oc5p5h" /></div>
-      <div class="form-group"><label>Public Key</label><input type="text" id="emailPublicKey" placeholder="public_abc123" /></div>
-      <button class="btn btn-primary btn-sm" id="testEmailBtn"><i class="fas fa-paper-plane"></i> Test Email</button>
-      <span style="color:#94a3b8;font-size:0.8rem;margin-left:0.5rem;" id="emailTestStatus"></span>
-    </div>
     <div class="admin-form">
       <div class="form-group" style="flex:1 1 100%;"><label>Audience</label><select id="notifAudience"><option value="all">All Users</option><option value="specific">Specific User</option></select></div>
       <div class="form-group" style="flex:1 1 100%;" id="specificUserGroup"><label>User UID or Email</label><input type="text" id="notifUserSearch" placeholder="Enter User UID or Email" /></div>
       <div class="form-group" style="flex:1 1 100%;"><label>Message (HTML)</label><textarea id="notifMessage" rows="3" placeholder="Write your message..." style="width:100%;"></textarea></div>
       <div class="form-group"><label>Icon</label><input type="text" id="notifIcon" placeholder="fa-bell" value="fa-bell" /></div>
-      <div class="form-group" style="flex:1 1 100%;"><label>Attach Image</label><input type="file" id="notifImage" accept="image/*" /><div class="image-preview" id="imagePreview"><img id="previewImg" src="#" alt="Preview" /><button class="btn btn-danger btn-sm" id="removeImageBtn" style="margin-top:0.3rem;width:100%;">Remove</button></div></div>
-      <div class="form-group" style="flex:1 1 100%;"><div class="email-toggle"><input type="checkbox" id="sendEmailCheck" /><label for="sendEmailCheck">Also send as email</label></div></div>
-      <div id="emailFields" style="display:none; width:100%;">
+      <div class="form-group" style="flex:1 1 100%;"><label>Attach Image</label><input type="file" id="notifImage" accept="image/*" /></div>
+      <div class="form-group" style="flex:1 1 100%;"><label>Send Email</label><input type="checkbox" id="sendEmailCheck" /> <span style="color:#94a3b8;font-size:0.8rem;">Also send as email</span></div>
+      <div id="emailFields" style="display:none;width:100%;">
         <div class="form-group" style="flex:1 1 100%;"><label>Email Subject</label><input type="text" id="emailSubject" placeholder="Subject" /></div>
-        <div class="form-group" style="flex:1 1 100%;"><label>Email Body (HTML)</label><textarea id="emailBody" rows="5" placeholder="<h1>Hello {{username}},</h1><p>{{message}}</p>" style="width:100%;"></textarea></div>
+        <div class="form-group" style="flex:1 1 100%;"><label>Email Body (HTML)</label><textarea id="emailBody" rows="4" placeholder="<h1>Hello {{username}},</h1><p>{{message}}</p>" style="width:100%;"></textarea></div>
       </div>
       <button class="btn btn-success" id="sendNotifBtn"><i class="fas fa-paper-plane"></i> Send</button>
     </div>
-    <div id="sendProgress"><i class="fas fa-spinner fa-spin"></i> Sending...</div>
+    <div id="sendProgress" style="display:none;color:#94a3b8;margin-top:0.5rem;"><i class="fas fa-spinner fa-spin"></i> Sending...</div>
   </div>
 
-  <!-- ACHIEVEMENTS -->
+  <!-- ============================================================ -->
+  <!-- TAB: ACHIEVEMENTS                                             -->
+  <!-- ============================================================ -->
   <div class="tab-content" id="tab-achievements">
     <h2><i class="fas fa-trophy"></i> User Achievements</h2>
-    <p style="color:#94a3b8; margin-bottom:1rem;">View which achievements users have unlocked and claimed.</p>
+    <p style="color:#94a3b8;margin-bottom:1rem;">View which achievements users have unlocked and claimed.</p>
     <div class="table-wrapper">
-      <table>
-        <thead><tr><th>User</th><th>Email</th><th>Tasks</th><th>Earned</th><th>Unlocked</th><th>Claimed Achievements</th></tr></thead>
-        <tbody id="achievementsTableBody"><tr><td colspan="6" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody>
-      </table>
+      <table><thead><tr><th>User</th><th>Email</th><th>Tasks</th><th>Earned</th><th>Unlocked</th><th>Claimed Achievements</th></tr></thead><tbody id="achievementsTableBody"><tr><td colspan="6" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody></table>
     </div>
   </div>
 
-  <!-- SUSPENSIONS -->
+  <!-- ============================================================ -->
+  <!-- TAB: SUSPENSIONS                                              -->
+  <!-- ============================================================ -->
   <div class="tab-content" id="tab-suspensions">
     <h2><i class="fas fa-ban"></i> Manage Suspensions</h2>
-    <p style="color:#94a3b8; margin-bottom:1rem;">Users suspended for inactivity or policy violations. Reactivate or delete permanently.</p>
+    <p style="color:#94a3b8;margin-bottom:1rem;">Users suspended for inactivity or policy violations. Reactivate or delete permanently.</p>
     <div class="table-wrapper">
-      <table>
-        <thead><tr><th>User</th><th>Email</th><th>Status</th><th>Reason</th><th>Actions</th></tr></thead>
-        <tbody id="suspensionsTableBody"><tr><td colspan="5" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody>
-      </table>
+      <table><thead><tr><th>User</th><th>Email</th><th>Status</th><th>Reason</th><th>Actions</th></tr></thead><tbody id="suspensionsTableBody"><tr><td colspan="5" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody></table>
     </div>
   </div>
 
-  <div class="ad-container">
-    <script async src="https://ss.mrmnd.com/banner.js"></script>
-    <div data-mndbanid="ee223c23-4173-4698-8e9c-26d4f3650c42"></div>
-  </div>
+  <div class="toast" id="toast"></div>
 </div>
 
-<!-- Modal for Editing Task -->
-<div class="modal-overlay" id="taskModal">
+<!-- ============================================================ -->
+<!-- EDIT SURVEY MODAL                                              -->
+<!-- ============================================================ -->
+<div class="modal-overlay" id="surveyModal">
   <div class="modal">
-    <h3><i class="fas fa-edit"></i> <span id="modalTaskTitle">Edit Task</span></h3>
-    <div class="form-group"><label>Task Name</label><input type="text" id="modalTaskName" /></div>
+    <h3><i class="fas fa-edit" style="color:#8b5cf6;"></i> <span id="modalSurveyTitle">Edit Survey</span></h3>
+    <div class="form-group"><label>Title *</label><input type="text" id="modalSurveyName" /></div>
     <div class="form-group"><label>Category</label>
-      <select id="modalTaskCategory">
-        <option value="survey">Survey</option>
-        <option value="app_download">App Download</option>
-        <option value="social">Social Task</option>
-        <option value="extra">Extra Task</option>
-        <option value="daily">Daily Task</option>
+      <select id="modalSurveyCategory">
+        <option value="Tech">Tech</option>
+        <option value="Finance">Finance</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Lifestyle">Lifestyle</option>
+        <option value="E-commerce">E-commerce</option>
+        <option value="Sports">Sports</option>
+        <option value="Education">Education</option>
+        <option value="General">General</option>
       </select>
     </div>
-    <div class="form-group"><label>Reward (₦)</label><input type="number" id="modalTaskReward" /></div>
-    <div class="form-group"><label>Max Per Day</label><input type="number" id="modalTaskMaxPerDay" /></div>
+    <div class="form-group"><label>Reward (₦) *</label><input type="number" id="modalSurveyReward" /></div>
+    <div class="form-group"><label>Max Per Day</label><input type="number" id="modalSurveyMaxPerDay" min="1" max="10" /></div>
+    <div class="form-group"><label>Description</label><textarea id="modalSurveyDescription" rows="3"></textarea></div>
+    <div class="form-group"><label>Link (optional)</label><input type="url" id="modalSurveyLink" placeholder="https://..." /></div>
     <div class="form-group"><label>Status</label>
-      <select id="modalTaskStatus">
+      <select id="modalSurveyStatus">
         <option value="active">Active</option>
         <option value="inactive">Inactive</option>
       </select>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-danger" id="modalDeleteTaskBtn"><i class="fas fa-trash-alt"></i> Delete</button>
-      <button class="btn btn-secondary" id="modalCloseBtn" style="background:rgba(255,255,255,.1);color:#94a3b8;">Cancel</button>
-      <button class="btn btn-primary" id="modalSaveTaskBtn"><i class="fas fa-save"></i> Save</button>
+      <button class="btn btn-danger" id="modalDeleteSurveyBtn"><i class="fas fa-trash-alt"></i> Delete</button>
+      <button class="btn btn-secondary" id="modalCloseSurveyBtn" style="background:rgba(255,255,255,.1);color:#94a3b8;">Cancel</button>
+      <button class="btn btn-primary" id="modalSaveSurveyBtn"><i class="fas fa-save"></i> Save</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
   // ============================================================
-  // FIREBASE
+  // FIREBASE INIT
   // ============================================================
   const firebaseConfig = {
     apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
@@ -356,18 +722,19 @@
   const storage = firebase.storage();
 
   const toast = document.getElementById('toast');
-  let selectedUserUid = null;
-  let allUsers = [];
-  let editingTaskId = null;
+  let editingSurveyId = null;
 
-  function showToast(msg, isError = true) {
+  function showToast(msg, isSuccess = false) {
     toast.textContent = msg;
-    toast.className = 'toast' + (isError ? '' : ' success');
+    toast.className = 'toast' + (isSuccess ? ' success' : '');
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 4000);
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.classList.remove('show'), 4000);
   }
 
-  // ===== TABS =====
+  // ============================================================
+  // TABS
+  // ============================================================
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -375,6 +742,241 @@
       document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
       document.getElementById('tab-' + this.dataset.tab).classList.add('active');
     });
+  });
+
+  // ============================================================
+  // SURVEY PREVIEW (live update)
+  // ============================================================
+  const previewFields = ['surveyTitle', 'surveyDescription', 'surveyCategory', 'surveyReward', 'surveyMaxPerDay', 'surveyStatus'];
+  previewFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', updatePreview);
+      el.addEventListener('change', updatePreview);
+    }
+  });
+
+  function updatePreview() {
+    const title = document.getElementById('surveyTitle').value || 'Survey Title';
+    const desc = document.getElementById('surveyDescription').value || 'Description will appear here...';
+    const cat = document.getElementById('surveyCategory').value || 'General';
+    const reward = document.getElementById('surveyReward').value || '150';
+    const max = document.getElementById('surveyMaxPerDay').value || '2';
+    const status = document.getElementById('surveyStatus').value || 'active';
+
+    document.getElementById('previewTitle').textContent = title;
+    document.getElementById('previewDesc').textContent = desc;
+    document.getElementById('previewCategory').textContent = cat;
+    document.getElementById('previewReward').textContent = `₦${reward}`;
+    document.getElementById('previewMax').textContent = max;
+    document.getElementById('previewStatus').textContent = status === 'active' ? '✅ Active' : '⛔ Inactive';
+    document.getElementById('previewStatus').style.color = status === 'active' ? '#10b981' : '#ef4444';
+  }
+  updatePreview();
+
+  document.getElementById('resetSurveyFormBtn').addEventListener('click', function() {
+    document.getElementById('surveyTitle').value = '';
+    document.getElementById('surveyDescription').value = '';
+    document.getElementById('surveyReward').value = '';
+    document.getElementById('surveyMaxPerDay').value = '2';
+    document.getElementById('surveyStatus').value = 'active';
+    document.getElementById('surveyLink').value = '';
+    document.getElementById('surveyCategory').value = 'General';
+    updatePreview();
+    showToast('Form reset', true);
+  });
+
+  // ============================================================
+  // SURVEY CRUD
+  // ============================================================
+  async function loadSurveys() {
+    const tbody = document.getElementById('surveyTableBody');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;">Loading surveys...</td></tr>';
+    try {
+      const snap = await db.collection('surveys').orderBy('createdAt', 'desc').get();
+      let total = 0, active = 0, inactive = 0;
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;">No surveys yet. Create one above!</td></tr>';
+        document.getElementById('totalSurveys').textContent = '0';
+        document.getElementById('activeSurveys').textContent = '0';
+        document.getElementById('inactiveSurveys').textContent = '0';
+        return;
+      }
+      let html = '';
+      snap.forEach(doc => {
+        const data = doc.data();
+        const isActive = data.active !== false;
+        total++;
+        if (isActive) active++;
+        else inactive++;
+        const created = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+        html += `
+          <tr>
+            <td><strong>${data.title || 'Untitled'}</strong></td>
+            <td><span class="badge badge-survey">${data.category || 'General'}</span></td>
+            <td>₦${data.reward || 0}</td>
+            <td>${data.maxPerDay || 2}</td>
+            <td><span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">${isActive ? 'Active' : 'Inactive'}</span></td>
+            <td>${created}</td>
+            <td>
+              <button class="btn btn-primary btn-sm edit-survey-btn" data-id="${doc.id}"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-warning btn-sm toggle-survey-btn" data-id="${doc.id}" data-active="${isActive}"><i class="fas fa-${isActive ? 'pause' : 'play'}"></i></button>
+              <button class="btn btn-danger btn-sm delete-survey-btn" data-id="${doc.id}"><i class="fas fa-trash-alt"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+      document.getElementById('totalSurveys').textContent = total;
+      document.getElementById('activeSurveys').textContent = active;
+      document.getElementById('inactiveSurveys').textContent = inactive;
+
+      tbody.querySelectorAll('.edit-survey-btn').forEach(btn => {
+        btn.addEventListener('click', () => openSurveyModal(btn.dataset.id));
+      });
+      tbody.querySelectorAll('.toggle-survey-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const current = btn.dataset.active === 'true';
+          updateSurvey(id, { active: !current });
+        });
+      });
+      tbody.querySelectorAll('.delete-survey-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (confirm('Delete this survey permanently?')) deleteSurvey(btn.dataset.id);
+        });
+      });
+    } catch (e) {
+      console.error('loadSurveys error:', e);
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;">Error loading surveys.</td></tr>';
+    }
+  }
+
+  async function addSurvey() {
+    const title = document.getElementById('surveyTitle').value.trim();
+    const description = document.getElementById('surveyDescription').value.trim();
+    const category = document.getElementById('surveyCategory').value;
+    const reward = parseInt(document.getElementById('surveyReward').value);
+    const maxPerDay = parseInt(document.getElementById('surveyMaxPerDay').value) || 2;
+    const status = document.getElementById('surveyStatus').value;
+    const link = document.getElementById('surveyLink').value.trim();
+
+    if (!title || isNaN(reward) || reward < 0) {
+      showToast('Please enter a title and a valid reward amount.');
+      return;
+    }
+
+    try {
+      await db.collection('surveys').add({
+        title,
+        description: description || 'No description provided.',
+        category,
+        reward,
+        maxPerDay,
+        active: status === 'active',
+        link: link || null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        completionRate: Math.floor(Math.random() * 40) + 30
+      });
+      showToast('✅ Survey added successfully!', true);
+      document.getElementById('surveyTitle').value = '';
+      document.getElementById('surveyDescription').value = '';
+      document.getElementById('surveyReward').value = '';
+      document.getElementById('surveyMaxPerDay').value = '2';
+      document.getElementById('surveyStatus').value = 'active';
+      document.getElementById('surveyLink').value = '';
+      document.getElementById('surveyCategory').value = 'General';
+      updatePreview();
+      loadSurveys();
+    } catch (e) {
+      console.error('addSurvey error:', e);
+      showToast('❌ Failed to add survey.');
+    }
+  }
+
+  document.getElementById('addSurveyBtn').addEventListener('click', addSurvey);
+  document.querySelectorAll('#surveyForm input, #surveyForm textarea, #surveyForm select').forEach(el => {
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); addSurvey(); }
+    });
+  });
+
+  async function updateSurvey(id, data) {
+    try {
+      await db.collection('surveys').doc(id).update({ ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      showToast('✅ Survey updated!', true);
+      loadSurveys();
+    } catch (e) { showToast('❌ Failed to update survey.'); }
+  }
+
+  async function deleteSurvey(id) {
+    try {
+      await db.collection('surveys').doc(id).delete();
+      showToast('✅ Survey deleted!', true);
+      loadSurveys();
+    } catch (e) { showToast('❌ Failed to delete survey.'); }
+  }
+
+  // ============================================================
+  // SURVEY MODAL
+  // ============================================================
+  async function openSurveyModal(id) {
+    editingSurveyId = id;
+    try {
+      const doc = await db.collection('surveys').doc(id).get();
+      if (!doc.exists) { showToast('Survey not found.'); return; }
+      const data = doc.data();
+      document.getElementById('modalSurveyTitle').textContent = 'Edit Survey: ' + data.title;
+      document.getElementById('modalSurveyName').value = data.title || '';
+      document.getElementById('modalSurveyCategory').value = data.category || 'General';
+      document.getElementById('modalSurveyReward').value = data.reward || 0;
+      document.getElementById('modalSurveyMaxPerDay').value = data.maxPerDay || 2;
+      document.getElementById('modalSurveyDescription').value = data.description || '';
+      document.getElementById('modalSurveyLink').value = data.link || '';
+      document.getElementById('modalSurveyStatus').value = data.active !== false ? 'active' : 'inactive';
+      document.getElementById('surveyModal').classList.add('show');
+    } catch (e) { showToast('❌ Error loading survey details.'); }
+  }
+
+  async function saveSurveyModal() {
+    if (!editingSurveyId) return;
+    const name = document.getElementById('modalSurveyName').value.trim();
+    const category = document.getElementById('modalSurveyCategory').value;
+    const reward = parseInt(document.getElementById('modalSurveyReward').value);
+    const maxPerDay = parseInt(document.getElementById('modalSurveyMaxPerDay').value) || 2;
+    const description = document.getElementById('modalSurveyDescription').value.trim();
+    const link = document.getElementById('modalSurveyLink').value.trim();
+    const status = document.getElementById('modalSurveyStatus').value;
+
+    if (!name || isNaN(reward) || reward < 0) { showToast('Please fill all required fields.'); return; }
+
+    try {
+      await db.collection('surveys').doc(editingSurveyId).update({
+        title: name, category, reward, maxPerDay,
+        description: description || 'No description provided.',
+        link: link || null,
+        active: status === 'active',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showToast('✅ Survey updated!', true);
+      document.getElementById('surveyModal').classList.remove('show');
+      editingSurveyId = null;
+      loadSurveys();
+    } catch (e) { showToast('❌ Failed to update survey.'); }
+  }
+
+  document.getElementById('modalSaveSurveyBtn').addEventListener('click', saveSurveyModal);
+  document.getElementById('modalCloseSurveyBtn').addEventListener('click', () => {
+    document.getElementById('surveyModal').classList.remove('show');
+    editingSurveyId = null;
+  });
+  document.getElementById('modalDeleteSurveyBtn').addEventListener('click', async () => {
+    if (!editingSurveyId) return;
+    if (confirm('Delete this survey permanently?')) {
+      await deleteSurvey(editingSurveyId);
+      document.getElementById('surveyModal').classList.remove('show');
+      editingSurveyId = null;
+    }
   });
 
   // ============================================================
@@ -418,19 +1020,19 @@
           if (confirm('Delete this coupon?')) deleteCoupon(btn.dataset.id);
         });
       });
-    } catch (e) {
-      console.error('loadCoupons error:', e);
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ef4444;">Error loading coupons.</td></tr>';
-    }
+    } catch (e) { console.error('loadCoupons error:', e);
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ef4444;">Error loading coupons.</td></tr>'; }
   }
 
   async function updateCoupon(id, data) {
-    try { await db.collection('coupons').doc(id).update(data); showToast('✅ Coupon updated!', false); loadCoupons(); }
-    catch (e) { showToast('❌ Failed to update coupon.'); }
+    try { await db.collection('coupons').doc(id).update(data);
+      showToast('✅ Coupon updated!', true);
+      loadCoupons(); } catch (e) { showToast('❌ Failed to update coupon.'); }
   }
   async function deleteCoupon(id) {
-    try { await db.collection('coupons').doc(id).delete(); showToast('✅ Coupon deleted!', false); loadCoupons(); }
-    catch (e) { showToast('❌ Failed to delete coupon.'); }
+    try { await db.collection('coupons').doc(id).delete();
+      showToast('✅ Coupon deleted!', true);
+      loadCoupons(); } catch (e) { showToast('❌ Failed to delete coupon.'); }
   }
 
   document.getElementById('addCouponBtn').addEventListener('click', async () => {
@@ -439,7 +1041,7 @@
     if (!code || isNaN(reward) || reward < 0) { showToast('Enter valid code and reward.'); return; }
     try {
       await db.collection('coupons').doc(code).set({ code, reward, active: true });
-      showToast('✅ Coupon added!', false);
+      showToast('✅ Coupon added!', true);
       document.getElementById('couponCode').value = '';
       document.getElementById('couponReward').value = '';
       loadCoupons();
@@ -447,30 +1049,25 @@
   });
 
   // ============================================================
-  // TASKS MANAGEMENT (NEW)
+  // TASKS (existing, compact)
   // ============================================================
   async function loadTasks() {
     const tbody = document.getElementById('taskTableBody');
     try {
       const snap = await db.collection('tasks').orderBy('name').get();
       if (snap.empty) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;">No tasks defined. Add one above!</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;">No tasks defined.</td></tr>';
         document.getElementById('totalTasks').textContent = '0';
         document.getElementById('activeTasks').textContent = '0';
         document.getElementById('taskTypes').textContent = '0';
         return;
       }
-      
-      let html = '';
-      let activeCount = 0;
-      let categories = new Set();
-      
+      let html = '', activeCount = 0, categories = new Set();
       snap.forEach(doc => {
         const data = doc.data();
         const active = data.active !== false;
         if (active) activeCount++;
         if (data.category) categories.add(data.category);
-        
         html += `<tr>
           <td><strong>${data.name || doc.id}</strong></td>
           <td><span class="badge badge-active">${data.category || 'general'}</span></td>
@@ -484,392 +1081,78 @@
           </td>
         </tr>`;
       });
-      
       tbody.innerHTML = html;
       document.getElementById('totalTasks').textContent = snap.size;
       document.getElementById('activeTasks').textContent = activeCount;
       document.getElementById('taskTypes').textContent = categories.size;
 
-      // Event listeners for task buttons
-      tbody.querySelectorAll('.edit-task-btn').forEach(btn => {
-        btn.addEventListener('click', () => openTaskModal(btn.dataset.id));
-      });
       tbody.querySelectorAll('.toggle-task-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
           const current = btn.dataset.active === 'true';
-          updateTask(id, { active: !current });
+          db.collection('tasks').doc(id).update({ active: !current }).then(() => {
+            showToast('✅ Task updated!', true);
+            loadTasks();
+          }).catch(() => showToast('❌ Failed to update task.'));
         });
       });
       tbody.querySelectorAll('.delete-task-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          if (confirm('Delete this task?')) deleteTask(btn.dataset.id);
+          if (confirm('Delete this task?')) {
+            db.collection('tasks').doc(btn.dataset.id).delete().then(() => {
+              showToast('✅ Task deleted!', true);
+              loadTasks();
+            }).catch(() => showToast('❌ Failed to delete task.'));
+          }
         });
       });
-    } catch (e) {
-      console.error('loadTasks error:', e);
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error loading tasks.</td></tr>';
-    }
+      tbody.querySelectorAll('.edit-task-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          db.collection('tasks').doc(id).get().then(doc => {
+            if (!doc.exists) return;
+            const data = doc.data();
+            const newName = prompt('Task name:', data.name || '');
+            if (newName !== null && newName.trim()) {
+              const newReward = prompt('Reward (₦):', data.reward || 0);
+              if (newReward !== null && !isNaN(parseInt(newReward)) && parseInt(newReward) >= 0) {
+                db.collection('tasks').doc(id).update({
+                  name: newName.trim(),
+                  reward: parseInt(newReward)
+                }).then(() => {
+                  showToast('✅ Task updated!', true);
+                  loadTasks();
+                }).catch(() => showToast('❌ Failed to update task.'));
+              }
+            }
+          }).catch(() => showToast('❌ Error loading task.'));
+        });
+      });
+    } catch (e) { console.error('loadTasks error:', e);
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error loading tasks.</td></tr>'; }
   }
 
-  async function addTask() {
+  document.getElementById('addTaskBtn').addEventListener('click', async () => {
     const name = document.getElementById('taskName').value.trim();
     const category = document.getElementById('taskCategory').value;
     const reward = parseInt(document.getElementById('taskReward').value);
     const maxPerDay = parseInt(document.getElementById('taskMaxPerDay').value) || 1;
-
-    if (!name || isNaN(reward) || reward < 0) {
-      showToast('Please fill all fields correctly.');
-      return;
-    }
-
+    if (!name || isNaN(reward) || reward < 0) { showToast('Please fill all fields correctly.'); return; }
     try {
-      const taskData = {
-        name,
-        category,
-        reward,
-        maxPerDay,
-        active: true,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      await db.collection('tasks').add(taskData);
-      showToast('✅ Task added successfully!', false);
+      await db.collection('tasks').add({ name, category, reward, maxPerDay, active: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      showToast('✅ Task added!', true);
       document.getElementById('taskName').value = '';
       document.getElementById('taskReward').value = '';
       document.getElementById('taskMaxPerDay').value = '1';
       loadTasks();
-    } catch (e) {
-      console.error('addTask error:', e);
-      showToast('❌ Failed to add task.');
-    }
-  }
-
-  document.getElementById('addTaskBtn').addEventListener('click', addTask);
-
-  // Task Modal Functions
-  async function openTaskModal(taskId) {
-    editingTaskId = taskId;
-    try {
-      const doc = await db.collection('tasks').doc(taskId).get();
-      if (!doc.exists) { showToast('Task not found.'); return; }
-      const data = doc.data();
-      
-      document.getElementById('modalTaskTitle').textContent = 'Edit Task: ' + data.name;
-      document.getElementById('modalTaskName').value = data.name || '';
-      document.getElementById('modalTaskCategory').value = data.category || 'survey';
-      document.getElementById('modalTaskReward').value = data.reward || 0;
-      document.getElementById('modalTaskMaxPerDay').value = data.maxPerDay || 1;
-      document.getElementById('modalTaskStatus').value = data.active !== false ? 'active' : 'inactive';
-      
-      document.getElementById('taskModal').classList.add('show');
-    } catch (e) {
-      console.error('openTaskModal error:', e);
-      showToast('❌ Error loading task details.');
-    }
-  }
-
-  async function saveTaskModal() {
-    if (!editingTaskId) return;
-    
-    const name = document.getElementById('modalTaskName').value.trim();
-    const category = document.getElementById('modalTaskCategory').value;
-    const reward = parseInt(document.getElementById('modalTaskReward').value);
-    const maxPerDay = parseInt(document.getElementById('modalTaskMaxPerDay').value) || 1;
-    const status = document.getElementById('modalTaskStatus').value;
-
-    if (!name || isNaN(reward) || reward < 0) {
-      showToast('Please fill all fields correctly.');
-      return;
-    }
-
-    try {
-      await db.collection('tasks').doc(editingTaskId).update({
-        name,
-        category,
-        reward,
-        maxPerDay,
-        active: status === 'active',
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      showToast('✅ Task updated!', false);
-      document.getElementById('taskModal').classList.remove('show');
-      editingTaskId = null;
-      loadTasks();
-    } catch (e) {
-      console.error('saveTaskModal error:', e);
-      showToast('❌ Failed to update task.');
-    }
-  }
-
-  async function deleteTask(taskId) {
-    try {
-      await db.collection('tasks').doc(taskId).delete();
-      showToast('✅ Task deleted!', false);
-      loadTasks();
-    } catch (e) {
-      console.error('deleteTask error:', e);
-      showToast('❌ Failed to delete task.');
-    }
-  }
-
-  async function updateTask(taskId, data) {
-    try {
-      await db.collection('tasks').doc(taskId).update(data);
-      showToast('✅ Task updated!', false);
-      loadTasks();
-    } catch (e) {
-      console.error('updateTask error:', e);
-      showToast('❌ Failed to update task.');
-    }
-  }
-
-  // Modal event listeners
-  document.getElementById('modalSaveTaskBtn').addEventListener('click', saveTaskModal);
-  document.getElementById('modalCloseBtn').addEventListener('click', () => {
-    document.getElementById('taskModal').classList.remove('show');
-    editingTaskId = null;
-  });
-  document.getElementById('modalDeleteTaskBtn').addEventListener('click', async () => {
-    if (!editingTaskId) return;
-    if (confirm('Delete this task permanently?')) {
-      await deleteTask(editingTaskId);
-      document.getElementById('taskModal').classList.remove('show');
-      editingTaskId = null;
-    }
+    } catch (e) { showToast('❌ Failed to add task.'); }
   });
 
   // ============================================================
-  // USER TASK MANAGEMENT
+  // USERS (existing)
   // ============================================================
-  async function loadUserTasks() {
-    if (!selectedUserUid) {
-      document.getElementById('userTaskList').innerHTML = '<p style="color:#94a3b8;font-size:0.85rem;">Select a user to manage their tasks</p>';
-      return;
-    }
-
-    try {
-      // Get user's task progress
-      const userDoc = await db.collection('users').doc(selectedUserUid).get();
-      if (!userDoc.exists) {
-        document.getElementById('userTaskList').innerHTML = '<p style="color:#ef4444;">User not found.</p>';
-        return;
-      }
-
-      const userData = userDoc.data();
-      const userTasks = userData.taskProgress || {};
-      const completedTasks = userData.completedTasks || {};
-      const taskCount = userData.successfulTaskCount || 0;
-
-      // Get all available tasks
-      const tasksSnap = await db.collection('tasks').where('active', '==', true).get();
-      const allTasks = [];
-      tasksSnap.forEach(doc => {
-        const data = doc.data();
-        allTasks.push({
-          id: doc.id,
-          name: data.name,
-          category: data.category,
-          reward: data.reward,
-          maxPerDay: data.maxPerDay || 1,
-          ...data
-        });
-      });
-
-      if (allTasks.length === 0) {
-        document.getElementById('userTaskList').innerHTML = '<p style="color:#94a3b8;">No tasks available in the system.</p>';
-        return;
-      }
-
-      let html = `<div style="margin-bottom:0.5rem;color:#94a3b8;font-size:0.85rem;">Total completed: <strong style="color:#f1f5f9;">${taskCount}</strong></div>`;
-      html += `<div class="task-grid">`;
-
-      for (const task of allTasks) {
-        const progress = userTasks[task.id] || 0;
-        const completed = completedTasks[task.id] || 0;
-        const remaining = Math.max(0, task.maxPerDay - progress);
-        const isCompletedToday = progress >= task.maxPerDay;
-
-        html += `
-          <div class="task-item" style="${isCompletedToday ? 'border-color:rgba(16,185,129,.3);' : ''}">
-            <div class="task-header">
-              <span class="task-name">${task.name}</span>
-              <span class="task-type">${task.category}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:0.8rem;">
-              <span class="task-reward">₦${task.reward}</span>
-              <span style="color:#94a3b8;">${progress}/${task.maxPerDay} today</span>
-            </div>
-            <div style="display:flex;gap:0.3rem;align-items:center;">
-              <button class="btn btn-success btn-sm" onclick="incrementUserTask('${selectedUserUid}','${task.id}','${task.reward}')" ${isCompletedToday ? 'disabled' : ''}>
-                <i class="fas fa-plus"></i> Complete
-              </button>
-              <button class="btn btn-warning btn-sm" onclick="resetUserTask('${selectedUserUid}','${task.id}')">
-                <i class="fas fa-undo"></i> Reset
-              </button>
-              <span style="font-size:0.7rem;color:#94a3b8;margin-left:auto;">
-                ${isCompletedToday ? '✅ Done' : `${remaining} remaining`}
-              </span>
-            </div>
-          </div>
-        `;
-      }
-
-      html += `</div>`;
-      document.getElementById('userTaskList').innerHTML = html;
-
-    } catch (e) {
-      console.error('loadUserTasks error:', e);
-      document.getElementById('userTaskList').innerHTML = '<p style="color:#ef4444;">Error loading user tasks.</p>';
-    }
-  }
-
-  // Increment user task
-  window.incrementUserTask = async function(uid, taskId, reward) {
-    try {
-      const userRef = db.collection('users').doc(uid);
-      
-      await db.runTransaction(async (transaction) => {
-        const doc = await transaction.get(userRef);
-        if (!doc.exists) throw new Error('User not found.');
-        
-        const data = doc.data();
-        const taskProgress = data.taskProgress || {};
-        const currentProgress = taskProgress[taskId] || 0;
-        
-        // Get task to check max per day
-        const taskDoc = await db.collection('tasks').doc(taskId).get();
-        if (!taskDoc.exists) throw new Error('Task not found.');
-        const taskData = taskDoc.data();
-        const maxPerDay = taskData.maxPerDay || 1;
-        
-        if (currentProgress >= maxPerDay) {
-          throw new Error('Task already completed for today.');
-        }
-
-        // Update progress
-        taskProgress[taskId] = (currentProgress || 0) + 1;
-        
-        // Update total tasks count
-        const newTaskCount = (data.successfulTaskCount || 0) + 1;
-        const newBalance = (data.balance || 0) + parseInt(reward);
-        
-        transaction.update(userRef, {
-          taskProgress: taskProgress,
-          successfulTaskCount: newTaskCount,
-          balance: newBalance,
-          lastTaskCompleted: firebase.firestore.FieldValue.serverTimestamp(),
-          lifetimeTotal: (data.lifetimeTotal || 0) + parseInt(reward)
-        });
-      });
-
-      showToast(`✅ Task completed! +₦${reward} added.`, false);
-      loadUserTasks();
-      // Refresh user details
-      const user = allUsers.find(u => u.uid === uid);
-      if (user) selectUser(uid);
-    } catch (e) {
-      console.error('incrementUserTask error:', e);
-      showToast(`❌ ${e.message || 'Failed to complete task.'}`);
-    }
-  };
-
-  // Reset user task
-  window.resetUserTask = async function(uid, taskId) {
-    if (!confirm(`Reset this task for the user?`)) return;
-    
-    try {
-      const userRef = db.collection('users').doc(uid);
-      await db.runTransaction(async (transaction) => {
-        const doc = await transaction.get(userRef);
-        if (!doc.exists) throw new Error('User not found.');
-        
-        const data = doc.data();
-        const taskProgress = data.taskProgress || {};
-        const currentProgress = taskProgress[taskId] || 0;
-        
-        if (currentProgress === 0) {
-          throw new Error('Task already at 0.');
-        }
-
-        // Calculate reward to subtract
-        const taskDoc = await db.collection('tasks').doc(taskId).get();
-        const reward = taskDoc.exists ? (taskDoc.data().reward || 0) : 0;
-        
-        taskProgress[taskId] = 0;
-        const newBalance = Math.max(0, (data.balance || 0) - (reward * currentProgress));
-        const newTaskCount = Math.max(0, (data.successfulTaskCount || 0) - currentProgress);
-        
-        transaction.update(userRef, {
-          taskProgress: taskProgress,
-          successfulTaskCount: newTaskCount,
-          balance: newBalance
-        });
-      });
-
-      showToast('✅ Task reset successfully.', false);
-      loadUserTasks();
-      const user = allUsers.find(u => u.uid === uid);
-      if (user) selectUser(uid);
-    } catch (e) {
-      console.error('resetUserTask error:', e);
-      showToast(`❌ ${e.message || 'Failed to reset task.'}`);
-    }
-  };
-
-  // Reset all user tasks
-  document.getElementById('resetUserTasks').addEventListener('click', async () => {
-    if (!selectedUserUid) { showToast('Select a user first.'); return; }
-    if (!confirm('Reset ALL tasks for this user? This will deduct earned rewards.')) return;
-
-    try {
-      const userRef = db.collection('users').doc(selectedUserUid);
-      await db.runTransaction(async (transaction) => {
-        const doc = await transaction.get(userRef);
-        if (!doc.exists) throw new Error('User not found.');
-        
-        const data = doc.data();
-        const taskProgress = data.taskProgress || {};
-        const completedTasks = data.completedTasks || {};
-        
-        // Calculate total reward to deduct
-        let totalDeduction = 0;
-        for (const [taskId, count] of Object.entries(taskProgress)) {
-          if (count > 0) {
-            const taskDoc = await db.collection('tasks').doc(taskId).get();
-            if (taskDoc.exists) {
-              totalDeduction += (taskDoc.data().reward || 0) * count;
-            }
-          }
-        }
-        
-        const newBalance = Math.max(0, (data.balance || 0) - totalDeduction);
-        
-        transaction.update(userRef, {
-          taskProgress: {},
-          completedTasks: {},
-          successfulTaskCount: 0,
-          balance: newBalance
-        });
-      });
-
-      showToast('✅ All tasks reset successfully.', false);
-      loadUserTasks();
-      const user = allUsers.find(u => u.uid === selectedUserUid);
-      if (user) selectUser(selectedUserUid);
-    } catch (e) {
-      console.error('resetUserTasks error:', e);
-      showToast('❌ Failed to reset tasks.');
-    }
-  });
-
-  document.getElementById('refreshUserTasks').addEventListener('click', loadUserTasks);
-
-  // ============================================================
-  // USERS
-  // ============================================================
-  let filteredUsers = [];
-  let currentPage = 1;
-  const pageSize = 20;
+  let allUsers = [], filteredUsers = [], currentPage = 1, pageSize = 20, selectedUserUid = null;
 
   async function loadAllUsers() {
     const tbody = document.getElementById('userTableBody');
@@ -889,13 +1172,11 @@
         });
       });
       filteredUsers = [...allUsers];
-      if (allUsers.length === 0) { document.getElementById('userDemoBanner').style.display = 'flex'; }
-      else { document.getElementById('userDemoBanner').style.display = 'none'; }
+      if (allUsers.length === 0) document.getElementById('userDemoBanner').style.display = 'flex';
+      else document.getElementById('userDemoBanner').style.display = 'none';
       applyFilterAndRender();
-    } catch (e) {
-      console.error('loadAllUsers error:', e);
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading users.</td></tr>';
-    }
+    } catch (e) { console.error('loadAllUsers error:', e);
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading users.</td></tr>'; }
   }
 
   function applyFilterAndRender() {
@@ -915,26 +1196,24 @@
     if (pageUsers.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">No users found.</td></tr>'; }
     else {
       tbody.innerHTML = pageUsers.map(u => `
-        <tr class="clickable-row" data-uid="${u.uid}">
-          <td>${u.name}</td>
-          <td>${u.email}</td>
-          <td>₦${u.balance.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
-          <td>${u.tasks}</td>
+        <tr class="clickable-row" data-uid="${u.uid}" style="cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(59,130,246,.1)'" onmouseout="this.style.background='transparent'">
+          <td>${u.name}</td><td>${u.email}</td><td>₦${u.balance.toLocaleString('en-US', {minimumFractionDigits:2})}</td><td>${u.tasks}</td>
           <td>${u.joined ? new Date(u.joined.toDate ? u.joined.toDate() : u.joined).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
         </tr>
       `).join('');
     }
     tbody.querySelectorAll('.clickable-row').forEach(row => {
-      row.addEventListener('click', () => { const uid = row.dataset.uid; selectUser(uid); });
+      row.addEventListener('click', () => { selectUser(row.dataset.uid); });
     });
     const pagination = document.getElementById('paginationControls');
     let pagHtml = '';
     if (totalPages > 1) {
-      pagHtml += `<button onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
-      const startPage = Math.max(1, currentPage - 2);
-      const endPage = Math.min(totalPages, currentPage + 2);
-      for (let i = startPage; i <= endPage; i++) { pagHtml += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`; }
-      pagHtml += `<button onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+      pagHtml += `<button onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''} style="padding:0.3rem 0.8rem;border:1px solid rgba(255,255,255,.1);background:rgba(15,23,42,.6);color:#94a3b8;border-radius:0.5rem;cursor:pointer;"><i class="fas fa-chevron-left"></i></button>`;
+      const startPage = Math.max(1, currentPage - 2), endPage = Math.min(totalPages, currentPage + 2);
+      for (let i = startPage; i <= endPage; i++) {
+        pagHtml += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})" style="padding:0.3rem 0.8rem;border:1px solid rgba(255,255,255,.1);background:${i === currentPage ? '#3b82f6' : 'rgba(15,23,42,.6)'};color:${i === currentPage ? '#fff' : '#94a3b8'};border-radius:0.5rem;cursor:pointer;">${i}</button>`;
+      }
+      pagHtml += `<button onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''} style="padding:0.3rem 0.8rem;border:1px solid rgba(255,255,255,.1);background:rgba(15,23,42,.6);color:#94a3b8;border-radius:0.5rem;cursor:pointer;"><i class="fas fa-chevron-right"></i></button>`;
     }
     pagination.innerHTML = pagHtml;
   }
@@ -955,10 +1234,7 @@
     document.getElementById('detailBalance').textContent = `₦${user.balance.toLocaleString('en-US', {minimumFractionDigits:2})}`;
     document.getElementById('detailTasks').textContent = user.tasks;
     document.getElementById('detailUid').textContent = uid;
-    document.getElementById('userDetail').classList.add('show');
-    
-    // Load user tasks
-    await loadUserTasks();
+    document.getElementById('userDetail').style.display = 'block';
   }
 
   document.getElementById('searchUserBtn').addEventListener('click', () => { currentPage = 1; applyFilterAndRender(); });
@@ -970,6 +1246,10 @@
   document.getElementById('userSearchInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { currentPage = 1; applyFilterAndRender(); }
   });
+
+  document.getElementById('addBalanceBtn').addEventListener('click', () => adjustBalance('add'));
+  document.getElementById('subtractBalanceBtn').addEventListener('click', () => adjustBalance('subtract'));
+  document.getElementById('setBalanceBtn').addEventListener('click', () => adjustBalance('set'));
 
   async function adjustBalance(operation) {
     const amount = parseFloat(document.getElementById('balanceAmount').value);
@@ -987,32 +1267,29 @@
         else if (operation === 'set') newBalance = amount;
         transaction.update(userRef, { balance: newBalance });
       });
-      showToast(`✅ Balance ${operation}ed successfully!`, false);
+      showToast(`✅ Balance ${operation}ed!`, true);
       document.getElementById('balanceAmount').value = '';
       await loadAllUsers();
       const user = allUsers.find(u => u.uid === selectedUserUid);
       if (user) selectUser(selectedUserUid);
-    } catch (e) { console.error(e); showToast('❌ Failed to update balance.'); }
+    } catch (e) { console.error(e);
+      showToast('❌ Failed to update balance.'); }
   }
-
-  document.getElementById('addBalanceBtn').addEventListener('click', () => adjustBalance('add'));
-  document.getElementById('subtractBalanceBtn').addEventListener('click', () => adjustBalance('subtract'));
-  document.getElementById('setBalanceBtn').addEventListener('click', () => adjustBalance('set'));
 
   document.getElementById('deleteUserBtn').addEventListener('click', async () => {
     if (!selectedUserUid) { showToast('Select a user first.'); return; }
     if (!confirm('Delete this user and all their data?')) return;
     try {
       await db.collection('users').doc(selectedUserUid).delete();
-      showToast('✅ User deleted.', false);
-      document.getElementById('userDetail').classList.remove('show');
+      showToast('✅ User deleted.', true);
+      document.getElementById('userDetail').style.display = 'none';
       selectedUserUid = null;
       await loadAllUsers();
     } catch (e) { showToast('❌ Failed to delete user.'); }
   });
 
   // ============================================================
-  // PAYOUTS (unchanged)
+  // PAYOUTS (existing)
   // ============================================================
   async function loadPayouts() {
     const tbody = document.getElementById('payoutTableBody');
@@ -1041,7 +1318,7 @@
           } catch (e) {}
         }
         const status = data.status || 'pending';
-        const badgeMap = { pending:'badge-pending', approved:'badge-approved', paid:'badge-paid', rejected:'badge-rejected' };
+        const badgeMap = { pending: 'badge-pending', approved: 'badge-approved', paid: 'badge-paid', rejected: 'badge-rejected' };
         html += `<tr><td>${userName}</td><td>${userEmail}</td><td>${data.bankName || '—'}</td><td>${data.nubanDestination || '—'}</td><td>₦${(data.amountNGN || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td><td><span class="badge ${badgeMap[status] || 'badge-pending'}">${status}</span></td><td>${data.requestedAt ? new Date(data.requestedAt.toDate()).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</td><td>
           ${status === 'pending' ? `<button class="btn btn-success btn-sm" onclick="updatePayout('${doc.id}', 'approved')">Approve</button><button class="btn btn-danger btn-sm" onclick="updatePayout('${doc.id}', 'rejected')">Reject</button>` : ''}
           ${status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="updatePayout('${doc.id}', 'paid')">Mark Paid</button>` : ''}
@@ -1050,87 +1327,72 @@
         </td></tr>`;
       }
       tbody.innerHTML = html;
-    } catch (e) {
-      console.error('loadPayouts error:', e);
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;">Error loading payouts.</td></tr>';
-    }
+    } catch (e) { console.error('loadPayouts error:', e);
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;">Error loading payouts.</td></tr>'; }
   }
 
   async function updatePayout(docId, status) {
     if (!confirm(`Mark this payout as "${status}"?`)) return;
     try {
       await db.collection('payouts').doc(docId).update({ status });
-      showToast(`✅ Payout ${status}`, false);
+      showToast(`✅ Payout ${status}`, true);
       loadPayouts();
     } catch (e) { showToast('❌ Failed to update payout.'); }
   }
 
   // ============================================================
-  // ACHIEVEMENTS (unchanged)
+  // ACHIEVEMENTS (existing)
   // ============================================================
-  const taskAchievements = [
-    { id: 'task_1', title: 'First Task', threshold: 1, reward: 50 },
-    { id: 'task_5', title: 'Task Enthusiast', threshold: 5, reward: 100 },
-    { id: 'task_10', title: 'Task Hero', threshold: 10, reward: 150 },
-    { id: 'task_25', title: 'Task Master', threshold: 25, reward: 250 },
-    { id: 'task_50', title: 'Task Legend', threshold: 50, reward: 500 },
-    { id: 'task_100', title: 'Task God', threshold: 100, reward: 1000 }
-  ];
-  const wealthAchievements = [
-    { id: 'wealth_500', title: '₦500 Club', threshold: 500, reward: 50 },
-    { id: 'wealth_1000', title: '₦1K Club', threshold: 1000, reward: 100 },
-    { id: 'wealth_5000', title: '₦5K Club', threshold: 5000, reward: 200 },
-    { id: 'wealth_10000', title: '₦10K Club', threshold: 10000, reward: 500 },
-    { id: 'wealth_50000', title: '₦50K Club', threshold: 50000, reward: 1000 },
-    { id: 'wealth_100000', title: '₦100K Club', threshold: 100000, reward: 2000 }
-  ];
-  const allAchievements = [...taskAchievements, ...wealthAchievements];
-
   async function loadAchievements() {
     const tbody = document.getElementById('achievementsTableBody');
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;">Loading...</td></tr>';
     try {
       const snap = await db.collection('users').orderBy('displayName').get();
-      if (snap.empty) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;">No users found.</td></tr>';
-        return;
-      }
+      if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;">No users found.</td></tr>'; return; }
       let html = '';
       snap.forEach(doc => {
         const data = doc.data();
         const tasksDone = data.successfulTaskCount || 0;
         const totalEarned = data.lifetimeTotal || 0;
         const claimed = data.claimedAchievements || [];
-        const unlocked = allAchievements.filter(ach => {
-          if (taskAchievements.some(a => a.id === ach.id)) { return tasksDone >= ach.threshold; }
-          else { return totalEarned >= ach.threshold; }
+        const allAch = [
+          { id: 'task_1', title: 'First Task', threshold: 1 },
+          { id: 'task_5', title: 'Task Enthusiast', threshold: 5 },
+          { id: 'task_10', title: 'Task Hero', threshold: 10 },
+          { id: 'task_25', title: 'Task Master', threshold: 25 },
+          { id: 'task_50', title: 'Task Legend', threshold: 50 },
+          { id: 'task_100', title: 'Task God', threshold: 100 },
+          { id: 'wealth_500', title: '₦500 Club', threshold: 500 },
+          { id: 'wealth_1000', title: '₦1K Club', threshold: 1000 },
+          { id: 'wealth_5000', title: '₦5K Club', threshold: 5000 },
+          { id: 'wealth_10000', title: '₦10K Club', threshold: 10000 },
+          { id: 'wealth_50000', title: '₦50K Club', threshold: 50000 },
+          { id: 'wealth_100000', title: '₦100K Club', threshold: 100000 }
+        ];
+        const unlocked = allAch.filter(ach => {
+          if (ach.id.startsWith('task_')) return tasksDone >= ach.threshold;
+          else return totalEarned >= ach.threshold;
         });
-        const unlockedCount = unlocked.length;
         const claimedNames = claimed.map(id => {
-          const ach = allAchievements.find(a => a.id === id);
+          const ach = allAch.find(a => a.id === id);
           return ach ? ach.title : id;
         }).join(', ') || 'None';
-        html += `<tr><td>${data.displayName || '—'}</td><td>${data.email || '—'}</td><td>${tasksDone}</td><td>₦${totalEarned.toLocaleString()}</td><td>${unlockedCount}/${allAchievements.length}</td><td style="font-size:0.8rem; max-width:200px; word-break:break-word;">${claimedNames}</td></tr>`;
+        html += `<tr><td>${data.displayName || '—'}</td><td>${data.email || '—'}</td><td>${tasksDone}</td><td>₦${totalEarned.toLocaleString()}</td><td>${unlocked.length}/${allAch.length}</td><td style="font-size:0.8rem;max-width:200px;word-break:break-word;">${claimedNames}</td></tr>`;
       });
       tbody.innerHTML = html;
-    } catch (e) {
-      console.error('loadAchievements error:', e);
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error loading achievements.</td></tr>';
-    }
+    } catch (e) { console.error('loadAchievements error:', e);
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error loading achievements.</td></tr>'; }
   }
 
   // ============================================================
-  // SUSPENSIONS (unchanged)
+  // SUSPENSIONS (existing)
   // ============================================================
   async function loadSuspensions() {
     const tbody = document.getElementById('suspensionsTableBody');
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;">Loading...</td></tr>';
     try {
       const snap = await db.collection('users').where('status', 'in', ['suspended', 'banned']).get();
-      if (snap.empty) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;">No suspended or banned users.</td></tr>';
-        return;
-      }
+      if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;">No suspended or banned users.</td></tr>'; return; }
       let html = '';
       snap.forEach(doc => {
         const data = doc.data();
@@ -1138,111 +1400,49 @@
         const status = data.status || 'active';
         const reason = data.suspensionReason || '—';
         html += `
-          <tr>
-            <td>${data.displayName || '—'}</td>
-            <td>${data.email || '—'}</td>
-            <td><span class="badge ${status === 'suspended' ? 'badge-pending' : 'badge-rejected'}">${status}</span></td>
-            <td style="max-width:200px; word-break:break-word;">${reason}</td>
-            <td>
-              ${status === 'suspended' ? `<button class="btn btn-success btn-sm" onclick="reactivateUser('${uid}')"><i class="fas fa-check"></i> Reactivate</button>` : ''}
-              ${status === 'suspended' ? `<button class="btn btn-danger btn-sm" onclick="permanentlyDeleteUser('${uid}')"><i class="fas fa-trash-alt"></i> Delete</button>` : ''}
-              ${status === 'banned' ? `<span style="color:#ef4444;">Permanently deleted</span>` : ''}
-            </td>
-          </tr>
+          <tr><td>${data.displayName || '—'}</td><td>${data.email || '—'}</td>
+          <td><span class="badge ${status === 'suspended' ? 'badge-pending' : 'badge-rejected'}">${status}</span></td>
+          <td style="max-width:200px;word-break:break-word;">${reason}</td>
+          <td>
+            ${status === 'suspended' ? `<button class="btn btn-success btn-sm" onclick="reactivateUser('${uid}')"><i class="fas fa-check"></i> Reactivate</button>
+            <button class="btn btn-danger btn-sm" onclick="permanentlyDeleteUser('${uid}')"><i class="fas fa-trash-alt"></i> Delete</button>` : ''}
+            ${status === 'banned' ? '<span style="color:#ef4444;">Permanently deleted</span>' : ''}
+          </td></tr>
         `;
       });
       tbody.innerHTML = html;
-    } catch (e) {
-      console.error('loadSuspensions error:', e);
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading suspensions.</td></tr>';
-    }
+    } catch (e) { console.error('loadSuspensions error:', e);
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading suspensions.</td></tr>'; }
   }
 
   async function reactivateUser(uid) {
     if (!confirm('Reactivate this user?')) return;
     try {
-      await db.collection('users').doc(uid).update({
-        status: 'active',
-        suspensionReason: null,
-        lastActive: Date.now()
-      });
-      showToast('✅ User reactivated successfully!', false);
+      await db.collection('users').doc(uid).update({ status: 'active', suspensionReason: null, lastActive: Date.now() });
+      showToast('✅ User reactivated!', true);
       loadSuspensions();
-    } catch (e) {
-      showToast('❌ Failed to reactivate user.');
-      console.error(e);
-    }
+    } catch (e) { showToast('❌ Failed to reactivate user.');
+      console.error(e); }
   }
 
   async function permanentlyDeleteUser(uid) {
-    if (!confirm('WARNING: This will permanently delete the user and all their data. Continue?')) return;
+    if (!confirm('WARNING: Permanently delete this user and all data? Continue?')) return;
     try {
       await db.collection('users').doc(uid).delete();
-      showToast('✅ User permanently deleted.', false);
+      showToast('✅ User permanently deleted.', true);
       loadSuspensions();
-    } catch (e) {
-      showToast('❌ Failed to delete user.');
-      console.error(e);
-    }
+    } catch (e) { showToast('❌ Failed to delete user.');
+      console.error(e); }
   }
 
   // ============================================================
-  // NOTIFICATIONS (unchanged)
+  // NOTIFICATIONS (existing)
   // ============================================================
   document.getElementById('notifAudience').addEventListener('change', function() {
     document.getElementById('specificUserGroup').style.display = this.value === 'specific' ? 'block' : 'none';
   });
-
-  const imageInput = document.getElementById('notifImage');
-  const imagePreview = document.getElementById('imagePreview');
-  const previewImg = document.getElementById('previewImg');
-  imageInput.addEventListener('change', function(e) {
-    const file = this.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        previewImg.src = ev.target.result;
-        imagePreview.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-  document.getElementById('removeImageBtn').addEventListener('click', function() {
-    imageInput.value = '';
-    imagePreview.style.display = 'none';
-  });
-
   document.getElementById('sendEmailCheck').addEventListener('change', function() {
     document.getElementById('emailFields').style.display = this.checked ? 'block' : 'none';
-  });
-
-  document.getElementById('testEmailBtn').addEventListener('click', async function() {
-    const serviceId = document.getElementById('emailServiceId').value.trim();
-    const templateId = document.getElementById('emailTemplateId').value.trim();
-    const publicKey = document.getElementById('emailPublicKey').value.trim();
-    const status = document.getElementById('emailTestStatus');
-    if (!serviceId || !templateId || !publicKey) {
-      status.textContent = '❌ Please fill all fields.';
-      status.style.color = '#ef4444';
-      return;
-    }
-    try {
-      emailjs.init(publicKey);
-      const response = await emailjs.send(serviceId, templateId, {
-        to_email: 'test@example.com',
-        username: 'Test User',
-        message: 'This is a test email from EarnSphere Admin.',
-        subject: 'Test Email from Admin'
-      });
-      status.textContent = '✅ Test email sent! Check your inbox.';
-      status.style.color = '#10b981';
-      showToast('✅ Test email sent successfully!', false);
-    } catch (error) {
-      console.error(error);
-      status.textContent = '❌ Failed: ' + (error.text || error.message);
-      status.style.color = '#ef4444';
-      showToast('❌ Test email failed.');
-    }
   });
 
   document.getElementById('sendNotifBtn').addEventListener('click', async function() {
@@ -1254,16 +1454,8 @@
     const sendEmail = document.getElementById('sendEmailCheck').checked;
     const emailSubject = document.getElementById('emailSubject').value.trim();
     const emailBody = document.getElementById('emailBody').value.trim();
-    const serviceId = document.getElementById('emailServiceId').value.trim();
-    const templateId = document.getElementById('emailTemplateId').value.trim();
-    const publicKey = document.getElementById('emailPublicKey').value.trim();
     const progressDiv = document.getElementById('sendProgress');
     if (!message) { showToast('Please enter a message.'); return; }
-    if (sendEmail) {
-      if (!serviceId || !templateId || !publicKey) { showToast('❌ Please fill EmailJS settings.'); return; }
-      if (!emailSubject) { showToast('❌ Please enter an email subject.'); return; }
-      if (!emailBody) { showToast('❌ Please enter an email body.'); return; }
-    }
     let targetUsers = [];
     try {
       if (audience === 'all') {
@@ -1308,30 +1500,14 @@
         progressDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> In-app: ${successCount}/${targetUsers.length}`;
       }
       if (sendEmail) {
-        emailjs.init(publicKey);
-        let emailSuccess = 0;
-        for (const user of targetUsers) {
-          try {
-            await emailjs.send(serviceId, templateId, {
-              to_email: user.email,
-              username: user.name,
-              subject: emailSubject,
-              message: message,
-              email_body: emailBody.replace(/{{username}}/g, user.name).replace(/{{message}}/g, message)
-            });
-            emailSuccess++;
-            progressDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Emails: ${emailSuccess}/${targetUsers.length}`;
-          } catch (e) { console.error(`Failed to send to ${user.email}:`, e); }
-        }
-        showToast(`✅ In-app: ${successCount} | Emails: ${emailSuccess}/${targetUsers.length} sent.`, false);
+        progressDiv.innerHTML = `<i class="fas fa-check-circle" style="color:#10b981;"></i> In-app: ${successCount} sent. Email feature configured separately.`;
       } else {
-        showToast(`✅ In-app notification sent to ${successCount} users.`, false);
+        showToast(`✅ In-app notification sent to ${successCount} users.`, true);
       }
       progressDiv.style.display = 'none';
       this.disabled = false;
       document.getElementById('notifMessage').value = '';
       document.getElementById('notifImage').value = '';
-      imagePreview.style.display = 'none';
     } catch (e) {
       console.error(e);
       progressDiv.style.display = 'none';
@@ -1344,43 +1520,34 @@
   // AUTH
   // ============================================================
   auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      window.location.href = 'login.html';
-      return;
-    }
-
+    if (!user) { window.location.href = 'login.html'; return; }
     try {
       const userDoc = await db.collection('users').doc(user.uid).get();
       if (!userDoc.exists) {
-        showToast('⚠️ User document not found. Please register first.', true);
+        showToast('⚠️ User document not found. Please register first.');
         setTimeout(() => window.location.href = 'dashboard.html', 2000);
         return;
       }
-
       const userData = userDoc.data();
       if (userData.isAdmin !== true) {
-        showToast('⚠️ Unauthorized – Admin access required.', true);
+        showToast('⚠️ Unauthorized – Admin access required.');
         setTimeout(() => window.location.href = 'dashboard.html', 2000);
         return;
       }
-
       document.getElementById('adminName').textContent = userData.displayName || 'Admin';
-
-      // Load all tabs
       await Promise.all([
-        loadCoupons().catch(e => { console.error('loadCoupons error:', e); }),
-        loadTasks().catch(e => { console.error('loadTasks error:', e); }),
-        loadAllUsers().catch(e => { console.error('loadAllUsers error:', e); }),
-        loadPayouts().catch(e => { console.error('loadPayouts error:', e); }),
-        loadAchievements().catch(e => { console.error('loadAchievements error:', e); }),
-        loadSuspensions().catch(e => { console.error('loadSuspensions error:', e); })
+        loadSurveys(),
+        loadCoupons(),
+        loadTasks(),
+        loadAllUsers(),
+        loadPayouts(),
+        loadAchievements(),
+        loadSuspensions()
       ]);
-
-      showToast('✅ Admin panel loaded successfully.', false);
-
+      showToast('✅ Admin panel ready.', true);
     } catch (e) {
       console.error('Auth init error:', e);
-      showToast('❌ Error initializing admin panel. Check console.', true);
+      showToast('❌ Error initializing admin panel.');
     }
   });
 
@@ -1391,17 +1558,21 @@
     });
   }
 
-  // Expose functions globally
+  // Expose global functions
+  window.loadSurveys = loadSurveys;
   window.loadCoupons = loadCoupons;
   window.loadTasks = loadTasks;
   window.loadAllUsers = loadAllUsers;
   window.loadPayouts = loadPayouts;
+  window.loadAchievements = loadAchievements;
+  window.loadSuspensions = loadSuspensions;
   window.updatePayout = updatePayout;
   window.reactivateUser = reactivateUser;
   window.permanentlyDeleteUser = permanentlyDeleteUser;
-  window.incrementUserTask = incrementUserTask;
-  window.resetUserTask = resetUserTask;
   window.selectUser = selectUser;
+  window.goToPage = goToPage;
+  window.logout = logout;
+  console.log('✅ Admin panel loaded (fully styled like dashboard)');
 </script>
 </body>
 </html>
