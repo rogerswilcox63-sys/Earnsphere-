@@ -619,7 +619,7 @@
             user-select: none;
         }
 
-        /* -- Add question button (floating) -- */
+        /* -- Add question button -- */
         .gf-add-btn-wrap {
             padding: 0.5rem 2rem 1.5rem 2rem;
             display: flex;
@@ -977,6 +977,12 @@
                                 <option value="inactive">Inactive</option>
                             </select>
                         </div>
+                        <!-- ===== NEW LINK FIELD ===== -->
+                        <div class="gf-setting" style="flex:2 1 250px;">
+                            <label>Link</label>
+                            <input type="url" id="gfLink" placeholder="https://example.com/survey (optional)" style="min-width:200px;" />
+                        </div>
+                        <!-- ===== END NEW LINK FIELD ===== -->
                     </div>
                 </div>
 
@@ -1368,6 +1374,7 @@
             document.getElementById('gfReward').value = '';
             document.getElementById('gfMaxPerDay').value = '2';
             document.getElementById('gfStatus').value = 'active';
+            document.getElementById('gfLink').value = '';   // Reset link field
             gfQuestions = [];
             renderGFQuestions();
             document.getElementById('gfSaveText').textContent = 'Save Survey';
@@ -1400,6 +1407,7 @@
             const reward = parseInt(document.getElementById('gfReward').value);
             const maxPerDay = parseInt(document.getElementById('gfMaxPerDay').value) || 2;
             const status = document.getElementById('gfStatus').value;
+            const link = document.getElementById('gfLink').value.trim();   // Get link
 
             if (!title) { showToast('Please enter a survey title.'); return; }
             if (isNaN(reward) || reward < 0) { showToast('Please enter a valid reward.'); return; }
@@ -1413,6 +1421,7 @@
                 maxPerDay,
                 active: status === 'active',
                 questions: gfQuestions,
+                link: link || '',          // Store link (empty string if not provided)
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
@@ -1453,6 +1462,7 @@
                 document.getElementById('gfReward').value = data.reward || '';
                 document.getElementById('gfMaxPerDay').value = data.maxPerDay || 2;
                 document.getElementById('gfStatus').value = data.active !== false ? 'active' : 'inactive';
+                document.getElementById('gfLink').value = data.link || '';   // Load link
                 gfQuestions = (data.questions && Array.isArray(data.questions)) ? data.questions : [];
                 renderGFQuestions();
 
@@ -2161,7 +2171,7 @@
         window.logout = logout;
         window.goToPage = goToPage;
         window.selectUser = selectUser;
-        console.log('✅ Admin panel loaded with Google Forms style survey builder.');
+        console.log('✅ Admin panel loaded with Google Forms style survey builder and link field.');
     </script>
 </body>
 </html>
