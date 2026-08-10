@@ -10,7 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-  <!-- Ad scripts (unchanged) -->
+  <!-- Ad scripts (keep yours) -->
   <script type="text/javascript" data-cfasync="false">
     /*<![CDATA[/* */
     (function(){var v=window,c="e557371e0e4994d2fef9171e0bc9a299",m=[["siteId",480+805*279+5090774],["minBid",0],["popundersPerIP","0"],["delayBetween",0],["default",false],["defaultPerDay",0],["topmostLayer","auto"]],r=["d3d3LnByZW1pdW12ZXJ0aXNpbmcuY29tL00vdWZqc29uLm1pbi5qcw==","ZDJqMDQyY2oxNDIxd2kuY2xvdWRmcm9udC5uZXQvS00vSlViaHkvZmRpbmVyby5taW4uY3Nz"],b=-1,n,j,f=function(){clearTimeout(j);b++;if(r[b]&&!(1812009728000<(new Date).getTime()&&1<b)){n=v.document.createElement("script");n.type="text/javascript";n.async=!0;var s=v.document.getElementsByTagName("script")[0];n.src="https://"+atob(r[b]);n.crossOrigin="anonymous";n.onerror=f;n.onload=function(){clearTimeout(j);v[c.slice(0,16)+c.slice(0,16)]||f()};j=setTimeout(f,5E3);s.parentNode.insertBefore(n,s)}};if(!v[c]){try{Object.freeze(v[c]=m)}catch(e){}f()}})();
@@ -18,7 +18,7 @@
   </script>
 
   <style>
-    /* ===== ALL EXISTING STYLES UNCHANGED ===== */
+    /* ===== ALL EXISTING STYLES ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
     body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
@@ -360,7 +360,6 @@
       width: 100%;
     }
 
-    /* ===== SUSPENSION BANNER ===== */
     .suspension-banner {
       display: none;
       background: rgba(239,68,68,0.15);
@@ -402,7 +401,6 @@
     }
     .suspension-banner .help a:hover { text-decoration: underline; }
 
-    /* Survey Empty State */
     .survey-empty {
       text-align: center;
       padding: 2rem 1rem;
@@ -568,7 +566,7 @@
       </div>
     </div>
 
-    <!-- ===== SURVEY SECTION (Admin badges & "View all" link removed) ===== -->
+    <!-- ===== SURVEY SECTION ===== -->
     <div class="section-wrapper" id="surveyWrapper">
       <h2 class="section-title" style="margin-bottom:1rem;">
         <i class="fas fa-poll"></i> Survey Offers
@@ -577,7 +575,6 @@
       <div id="surveyResetTimer" style="text-align:center;color:#94a3b8;margin-bottom:1rem;font-size:.9rem;">
         <i class="fas fa-clock"></i> <span id="surveyCountdown">Resets daily at midnight</span>
       </div>
-      <!-- Survey list rendered here -->
       <div id="surveyList" class="offers-grid"></div>
     </div>
 
@@ -810,13 +807,25 @@
   }
 
   // ============================================================
-  // FETCH SURVEYS FROM FIRESTORE
+  // FETCH SURVEYS (orderBy removed to avoid index issue)
   // ============================================================
   async function fetchSurveysFromFirestore() {
+    const surveyContainer = document.getElementById('surveyList');
+    if (surveyContainer) {
+      surveyContainer.innerHTML = `
+        <div class="survey-empty">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Loading surveys...</p>
+          <p class="sub">Please wait a moment</p>
+        </div>
+      `;
+    }
+
     try {
       const snapshot = await db.collection('surveys')
         .where('active', '==', true)
-        .orderBy('createdAt', 'desc')
+        // .orderBy('createdAt', 'desc')   // Uncomment ONLY after creating index in Firestore Console
+        .limit(2)
         .get();
 
       const surveys = [];
@@ -829,7 +838,7 @@
             description: data.description || 'No description',
             reward: data.reward || 100,
             category: data.category || 'General',
-            link: data.link || 'survey.html?id=' + doc.id,
+            link: data.link || '',
             active: data.active !== false,
             createdAt: data.createdAt || null,
             completionRate: data.completionRate || Math.floor(Math.random() * 40) + 30,
@@ -838,67 +847,45 @@
           });
         });
       }
+
       cachedSurveys = surveys;
-      return surveys;
+      renderSurveys();
     } catch (e) {
-      console.error('Error fetching surveys from Firestore:', e);
-      cachedSurveys = [];
-      return [];
+      console.error('Error fetching surveys:', e);
+      if (surveyContainer) {
+        surveyContainer.innerHTML = `
+          <div class="survey-empty">
+            <i class="fas fa-exclamation-triangle icon-muted"></i>
+            <p>Could not load surveys.</p>
+            <p class="sub">Please refresh or try again later.</p>
+          </div>
+        `;
+      }
     }
   }
 
   // ============================================================
-  // LEGACY HARDCODED SURVEYS (fallback if Firestore fails)
-  // ============================================================
-  function getHardcodedSurveys() {
-    return [
-      { id: 'srv_01', title: 'Social Media Usage', category: 'Tech', reward: 150,
-        desc: 'Tell us about your screen time habits', link: 'survey.html?id=srv_01' },
-      { id: 'srv_02', title: 'Crypto Knowledge Check', category: 'Finance', reward: 250,
-        desc: 'Your insights on digital assets', link: 'survey.html?id=srv_02' },
-      { id: 'srv_03', title: 'Nollywood Movie Preferences', category: 'Entertainment', reward: 200,
-        desc: 'Tell us your favourite Nollywood actors and movies.', link: 'survey.html?id=srv_03' },
-    ];
-  }
-
-  // ============================================================
-  // RENDER SURVEYS (no admin badges, no "View all" link)
+  // RENDER SURVEYS
   // ============================================================
   function renderSurveys() {
     const surveyContainer = document.getElementById('surveyList');
     const surveyWrapper = document.getElementById('surveyWrapper');
     if (!surveyContainer) return;
 
-    // If no cached surveys, try to fetch again
     if (cachedSurveys.length === 0) {
-      surveyWrapper.classList.remove('hidden');
       surveyContainer.innerHTML = `
         <div class="survey-empty">
-          <i class="fas fa-spinner fa-spin"></i>
-          <p>Loading surveys...</p>
-          <p class="sub">Please wait a moment</p>
+          <i class="fas fa-clipboard-list icon-muted"></i>
+          <p>No active surveys available.</p>
+          <p class="sub">Check back later for new opportunities.</p>
         </div>
       `;
-      fetchSurveysFromFirestore().then(() => {
-        renderSurveys();
-      }).catch(() => {
-        // Fallback to hardcoded
-        cachedSurveys = getHardcodedSurveys().map(s => ({
-          ...s,
-          badge: s.category || 'Survey',
-          badgeClass: 'badge-survey',
-          completionRate: Math.floor(Math.random() * 40) + 30,
-          link: s.link || 'survey.html?id=' + s.id
-        }));
-        renderSurveys();
-      });
       return;
     }
 
     const surveyCount = getSurveyCountToday();
     const availableSurveys = cachedSurveys.filter(task => !isTaskCompleted(task.id));
 
-    // Case 1: User already completed 2 surveys today
     if (surveyCount >= 2) {
       surveyWrapper.classList.remove('hidden');
       surveyContainer.innerHTML = `
@@ -911,7 +898,6 @@
       return;
     }
 
-    // Case 2: No surveys available from admin
     if (availableSurveys.length === 0) {
       surveyWrapper.classList.remove('hidden');
       surveyContainer.innerHTML = `
@@ -924,7 +910,6 @@
       return;
     }
 
-    // Case 3: Surveys available, show them (max 2)
     surveyWrapper.classList.remove('hidden');
     const toShow = availableSurveys.slice(0, 2);
     surveyContainer.innerHTML = '';
@@ -967,7 +952,7 @@
   }
 
   // ============================================================
-  // COMPLETE SURVEY TASK
+  // COMPLETE SURVEY TASK (FIXED REDIRECT)
   // ============================================================
   async function completeSurveyTask(taskId, reward) {
     if (isTaskCompleted(taskId)) {
@@ -999,12 +984,17 @@
     }
 
     const survey = cachedSurveys.find(t => t.id === taskId);
-    if (survey && survey.link) {
-      window.open(survey.link, '_blank');
-    } else {
-      window.open('survey.html?id=' + taskId, '_blank');
-    }
+    let link = survey && survey.link ? survey.link : 'survey.html?id=' + taskId;
+    
+    // Add cache-busting parameter to avoid browser caching issues
+    link += (link.includes('?') ? '&' : '?') + 't=' + Date.now();
 
+    console.log('🔗 Redirecting to:', link);
+
+    // Navigate to the survey page (same tab)
+    window.location.href = link;
+
+    // Credit the reward (you may want to move this after completion)
     if (!userData.completedTasks) userData.completedTasks = {};
     userData.completedTasks[taskId] = now;
     userData.balance = (userData.balance || 0) + reward;
@@ -1018,7 +1008,7 @@
   }
 
   // ============================================================
-  // OTHER TASK DEFINITIONS (unchanged)
+  // OTHER TASKS
   // ============================================================
   const appTasks = [
     { id: 'app_01', title: 'Download Grok', desc: 'Download and install the Grok AI app from the Play Store.',
@@ -1063,7 +1053,7 @@
   ];
 
   // ============================================================
-  // RENDER OTHER CATEGORIES (unchanged)
+  // RENDER OTHER CATEGORIES
   // ============================================================
   function renderLimitedCategory(containerId, wrapperId, tasks, lastKey, categoryKey, limit) {
     const container = document.getElementById(containerId);
@@ -1152,7 +1142,7 @@
   }
 
   // ============================================================
-  // COUPON REDEEM (unchanged)
+  // COUPON REDEEM
   // ============================================================
   let couponRewards = {};
 
@@ -1218,7 +1208,7 @@
   }
 
   // ============================================================
-  // DAILY REWARD (unchanged)
+  // DAILY REWARD
   // ============================================================
   async function claimDailyReward() {
     const today = getTodayDateString();
@@ -1232,7 +1222,7 @@
   }
 
   // ============================================================
-  // NOTIFICATION BELL (unchanged)
+  // NOTIFICATION BELL
   // ============================================================
   async function fetchUnreadCount() {
     if (!currentUser) return;
@@ -1249,7 +1239,7 @@
   }
 
   // ============================================================
-  // LOGOUT (unchanged)
+  // LOGOUT
   // ============================================================
   function logout() {
     auth.signOut().then(() => {
@@ -1270,7 +1260,7 @@
   }
 
   // ============================================================
-  // AUTH & INIT (surveys load immediately)
+  // AUTH & INIT
   // ============================================================
   auth.onAuthStateChanged(async (user) => {
     console.log('Auth state changed:', user ? user.uid : 'null');
@@ -1335,10 +1325,10 @@
         banner.style.display = 'none';
       }
 
-      // Load surveys from Firestore immediately
+      // Fetch surveys
       await fetchSurveysFromFirestore();
 
-      // Render everything
+      // Render all other sections
       renderAll();
       fetchUnreadCount();
       loadCouponsFromFirestore();
@@ -1351,13 +1341,12 @@
           `Resets in ${formatTime(dailyMs)}`;
       }, 1000);
 
-      // Auto-refresh surveys every 30 seconds
+      // Auto-refresh surveys every 5 minutes
       setInterval(async () => {
         await fetchSurveysFromFirestore();
-        renderSurveys();
-      }, 30000);
+      }, 300000);
 
-      console.log('✅ Dashboard loaded successfully with surveys');
+      console.log('✅ Dashboard loaded with surveys and fixed redirect.');
     } else {
       console.log('No user, redirecting to login');
       window.location.href = 'login.html';
@@ -1373,7 +1362,7 @@
   window.completeCategoryTask = completeCategoryTask;
   window.logout = logout;
 
-  console.log('✅ Dashboard script loaded (no admin indicators)');
+  console.log('✅ Dashboard script loaded (fixed redirect).');
 </script>
 </body>
 </html>
