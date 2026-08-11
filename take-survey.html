@@ -10,39 +10,38 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    /* ===== GLOBAL ===== */
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family:'Inter', sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-      min-height: 100vh;
-      color: #f1f5f9;
-      display: flex;
-      flex-direction: column;
+      min-height:100vh;
+      color:#f1f5f9;
+      display:flex;
+      flex-direction:column;
     }
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, .1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(16, 185, 129, .1) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 0;
+      content:'';
+      position:fixed;
+      inset:0;
+      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%);
+      pointer-events:none;
+      z-index:0;
     }
     #app {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
-      width: 100%;
-      flex: 1;
+      position:relative;
+      z-index:1;
+      max-width:800px;
+      margin:2rem auto;
+      padding:0 1.5rem;
+      width:100%;
+      flex:1;
     }
+
+    /* ===== NAVBAR ===== */
     .navbar {
-      background: rgba(30, 41, 59, .8);
+      background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
       padding: 0.8rem 1.5rem;
       border-radius: 1rem;
@@ -52,7 +51,7 @@
       flex-wrap: wrap;
       gap: 0.5rem;
       margin-bottom: 1.5rem;
-      border: 1px solid rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255,255,255,.08);
     }
     .navbar .logo {
       font-size: 1.4rem;
@@ -63,17 +62,15 @@
       color: transparent;
       text-decoration: none;
     }
-    .navbar .logo i {
-      margin-right: 0.3rem;
-    }
+    .navbar .logo i { margin-right: 0.3rem; }
     .navbar .nav-right {
       display: flex;
       align-items: center;
       gap: 0.8rem;
     }
     .navbar .logout-btn {
-      background: rgba(59, 130, 246, .2);
-      border: 1px solid rgba(59, 130, 246, .3);
+      background: rgba(59,130,246,.2);
+      border: 1px solid rgba(59,130,246,.3);
       padding: 0.35rem 0.9rem;
       border-radius: 2rem;
       font-weight: 500;
@@ -82,20 +79,20 @@
       font-size: 0.8rem;
       transition: all 0.3s;
     }
-    .navbar .logout-btn:hover {
-      background: rgba(59, 130, 246, .3);
-    }
+    .navbar .logout-btn:hover { background: rgba(59,130,246,.3); }
     #userName {
       color: #94a3b8;
       font-size: 0.85rem;
       margin-right: 0.5rem;
     }
+
+    /* ===== SURVEY CARD ===== */
     .survey-card {
-      background: rgba(30, 41, 59, .7);
+      background: rgba(30,41,59,.7);
       backdrop-filter: blur(12px);
       border-radius: 1.5rem;
       padding: 2rem;
-      border: 1px solid rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255,255,255,.08);
     }
     .survey-title {
       font-size: 1.8rem;
@@ -117,10 +114,10 @@
       color: #94a3b8;
       margin-bottom: 1.5rem;
       padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      border-bottom: 1px solid rgba(255,255,255,.06);
     }
     .survey-meta .badge {
-      background: rgba(16, 185, 129, .15);
+      background: rgba(16,185,129,.15);
       color: #10b981;
       padding: 0.2rem 0.8rem;
       border-radius: 2rem;
@@ -132,6 +129,8 @@
       color: #10b981;
       font-weight: 700;
     }
+
+    /* ===== QUESTIONS ===== */
     .question-block {
       margin-bottom: 2rem;
     }
@@ -151,11 +150,12 @@
       color: #64748b;
       margin-bottom: 0.5rem;
     }
+
     .form-control {
       width: 100%;
       padding: 0.7rem 1rem;
-      background: rgba(15, 23, 42, .6);
-      border: 1px solid rgba(255, 255, 255, .1);
+      background: rgba(15,23,42,.6);
+      border: 1px solid rgba(255,255,255,.1);
       border-radius: 0.75rem;
       color: #f1f5f9;
       font-size: 1rem;
@@ -203,8 +203,8 @@
       flex-wrap: wrap;
     }
     .rating-group .rating-btn {
-      background: rgba(255, 255, 255, .05);
-      border: 1px solid rgba(255, 255, 255, .1);
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
       border-radius: 0.5rem;
       padding: 0.4rem 0.8rem;
       color: #94a3b8;
@@ -217,10 +217,12 @@
     }
     .rating-group .rating-btn:hover,
     .rating-group .rating-btn.active {
-      background: rgba(59, 130, 246, .2);
+      background: rgba(59,130,246,.2);
       border-color: #3b82f6;
       color: #f1f5f9;
     }
+
+    /* ===== SUBMIT ===== */
     .submit-area {
       margin-top: 2rem;
       display: flex;
@@ -246,7 +248,7 @@
     }
     .btn-primary:hover:not(:disabled) {
       transform: scale(1.02);
-      box-shadow: 0 4px 15px rgba(59, 130, 246, .3);
+      box-shadow: 0 4px 15px rgba(59,130,246,.3);
     }
     .btn-primary:disabled {
       opacity: 0.6;
@@ -254,14 +256,16 @@
       transform: none;
     }
     .btn-secondary {
-      background: rgba(255, 255, 255, .05);
+      background: rgba(255,255,255,.05);
       color: #94a3b8;
-      border: 1px solid rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255,255,255,.08);
     }
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, .1);
+      background: rgba(255,255,255,.1);
       color: #f1f5f9;
     }
+
+    /* ===== LOADING / ERROR ===== */
     .loading-state {
       text-align: center;
       padding: 3rem 1rem;
@@ -293,14 +297,16 @@
       display: block;
       margin-bottom: 1rem;
     }
+
+    /* ===== TOAST ===== */
     .toast {
-      background: rgba(30, 41, 59, .95);
+      background: rgba(30,41,59,.95);
       padding: 1rem 1.5rem;
       border-radius: 0.5rem;
-      border: 1px solid rgba(16, 185, 129, .3);
+      border: 1px solid rgba(16,185,129,.3);
       color: #fff;
       animation: slideIn 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, .3);
+      box-shadow: 0 4px 15px rgba(0,0,0,.3);
       position: fixed;
       top: 20px;
       right: 20px;
@@ -311,378 +317,361 @@
       border-color: #ef4444;
     }
     @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
+      from { transform:translateX(100%); opacity:0; }
+      to { transform:translateX(0); opacity:1; }
     }
-    .back-link {
-      display: inline-block;
-      margin-top: 1rem;
-      color: #3b82f6;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .back-link:hover {
-      text-decoration: underline;
-    }
+
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 600px) {
-      .navbar {
-        flex-direction: column;
-        text-align: center;
-      }
-      .survey-card {
-        padding: 1.2rem;
-      }
-      .survey-title {
-        font-size: 1.4rem;
-      }
-      .submit-area {
-        flex-direction: column;
-      }
-      .btn {
-        width: 100%;
-        justify-content: center;
-      }
+      .navbar { flex-direction: column; text-align: center; }
+      .survey-card { padding: 1.2rem; }
+      .survey-title { font-size: 1.4rem; }
+      .submit-area { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
     }
   </style>
 </head>
 <body>
-  <div id="app">
-    <nav class="navbar">
-      <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
-      <div class="nav-right">
-        <span id="userName">Loading...</span>
-        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-      </div>
-    </nav>
-    <div id="surveyContainer">
-      <div class="loading-state">
-        <i class="fas fa-spinner fa-spin"></i>
-        <p>Loading survey...</p>
-      </div>
+<div id="app">
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="dashboard.html" class="logo"><i class="fas fa-coins"></i> EarnSphere</a>
+    <div class="nav-right">
+      <span id="userName">Loading...</span>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </nav>
+
+  <!-- SURVEY CONTENT -->
+  <div id="surveyContainer">
+    <div class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Loading survey...</p>
     </div>
   </div>
+</div>
 
-  <script>
-    // ============================================================
-    // FIREBASE CONFIG
-    // ============================================================
-    const firebaseConfig = {
-      apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
-      authDomain: "earnspherehub-742e9.firebaseapp.com",
-      projectId: "earnspherehub-742e9",
-      storageBucket: "earnspherehub-742e9.firebasestorage.app",
-      messagingSenderId: "173538573377",
-      appId: "1:173538573377:web:6d8c748376afcb9096dac0"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+<script>
+  // ============================================================
+  // FIREBASE CONFIG
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVExwvLDwVmMJ6XbyTCrY1IyMqyhiuLbo",
+    authDomain: "earnspherehub-742e9.firebaseapp.com",
+    projectId: "earnspherehub-742e9",
+    storageBucket: "earnspherehub-742e9.firebasestorage.app",
+    messagingSenderId: "173538573377",
+    appId: "1:173538573377:web:6d8c748376afcb9096dac0"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-    // ============================================================
-    // GLOBALS
-    // ============================================================
-    let currentUser = null;
-    let userData = null;
-    let surveyData = null;
-    let surveyId = null;
+  // ============================================================
+  // GLOBALS
+  // ============================================================
+  let currentUser = null;
+  let userData = null;
+  let surveyData = null;
+  let surveyId = null;
 
-    // ============================================================
-    // HELPERS
-    // ============================================================
-    function showToast(msg, isError = false) {
-      const toast = document.createElement('div');
-      toast.className = 'toast' + (isError ? ' error' : '');
-      toast.textContent = msg;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 4000);
-    }
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  function showToast(msg, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (isError ? ' error' : '');
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+  }
 
-    function getTodayDateString() {
-      return new Date().toISOString().split('T')[0];
-    }
+  function getTodayDateString() {
+    return new Date().toISOString().split('T')[0];
+  }
 
-    function logout() {
-      auth.signOut().then(() => {
-        localStorage.removeItem('earnsphere_user_data');
-        window.location.href = 'login.html';
-      });
-    }
+  function logout() {
+    auth.signOut().then(() => {
+      localStorage.removeItem('earnsphere_user_data');
+      window.location.href = 'login.html';
+    });
+  }
 
-    function isTaskCompleted(taskId) {
-      if (!userData || !userData.completedTasks || !userData.completedTasks[taskId]) return false;
-      const completedDate = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
-      return completedDate === getTodayDateString();
-    }
+  function isTaskCompleted(taskId) {
+    if (!userData || !userData.completedTasks || !userData.completedTasks[taskId]) return false;
+    const completedDate = new Date(userData.completedTasks[taskId]).toISOString().split('T')[0];
+    return completedDate === getTodayDateString();
+  }
 
-    function getSurveyCountToday() {
-      let count = 0;
-      if (userData && userData.completedTasks) {
-        const today = getTodayDateString();
-        for (const [taskId, timestamp] of Object.entries(userData.completedTasks)) {
-          if (taskId.startsWith('srv_') || taskId.startsWith('survey_')) {
-            const compDate = new Date(timestamp).toISOString().split('T')[0];
-            if (compDate === today) count++;
-          }
+  function getSurveyCountToday() {
+    let count = 0;
+    if (userData && userData.completedTasks) {
+      const today = getTodayDateString();
+      for (const [taskId, timestamp] of Object.entries(userData.completedTasks)) {
+        if (taskId.startsWith('srv_') || taskId.startsWith('survey_')) {
+          const compDate = new Date(timestamp).toISOString().split('T')[0];
+          if (compDate === today) count++;
         }
       }
-      return count;
     }
+    return count;
+  }
 
-    // ============================================================
-    // RENDER SURVEY
-    // ============================================================
-    function renderSurvey(survey) {
-      const container = document.getElementById('surveyContainer');
+  // ============================================================
+  // RENDER SURVEY
+  // ============================================================
+  function renderSurvey(survey) {
+    const container = document.getElementById('surveyContainer');
 
-      let questionsHtml = '';
-      if (survey.questions && Array.isArray(survey.questions)) {
-        survey.questions.forEach((q, idx) => {
-          const isRequired = q.required === true;
-          const qId = `q_${idx}`;
-          let inputHtml = '';
+    let questionsHtml = '';
+    if (survey.questions && Array.isArray(survey.questions)) {
+      survey.questions.forEach((q, idx) => {
+        const isRequired = q.required === true;
+        const qId = `q_${idx}`;
+        let inputHtml = '';
 
-          switch (q.type) {
-            case 'text':
-              inputHtml =
-                `<input type="text" class="form-control" id="${qId}" placeholder="Your answer..." ${isRequired ? 'required' : ''} />`;
-              break;
-            case 'textarea':
-              inputHtml =
-                `<textarea class="form-control" id="${qId}" rows="3" placeholder="Your answer..." ${isRequired ? 'required' : ''}></textarea>`;
-              break;
-            case 'multiple':
-              if (q.options && q.options.length) {
-                inputHtml = `<div class="radio-group">`;
-                q.options.forEach((opt) => {
-                  inputHtml += `
-                      <label>
-                        <input type="radio" name="${qId}" value="${opt.replace(/"/g, '&quot;')}" ${isRequired ? 'required' : ''} />
-                        ${opt}
-                      </label>
-                    `;
-                });
-                inputHtml += `</div>`;
-              }
-              break;
-            case 'checkbox':
-              if (q.options && q.options.length) {
-                inputHtml = `<div class="checkbox-group">`;
-                q.options.forEach((opt) => {
-                  inputHtml += `
-                      <label>
-                        <input type="checkbox" name="${qId}" value="${opt.replace(/"/g, '&quot;')}" />
-                        ${opt}
-                      </label>
-                    `;
-                });
-                inputHtml += `</div>`;
-              }
-              break;
-            case 'dropdown':
-              if (q.options && q.options.length) {
-                inputHtml =
-                  `<select class="form-control" id="${qId}" ${isRequired ? 'required' : ''}>`;
-                inputHtml += `<option value="">-- Select --</option>`;
-                q.options.forEach(opt => {
-                  inputHtml += `<option value="${opt.replace(/"/g, '&quot;')}">${opt}</option>`;
-                });
-                inputHtml += `</select>`;
-              }
-              break;
-            case 'rating':
-              inputHtml = `<div class="rating-group" id="${qId}">`;
-              for (let i = 1; i <= 5; i++) {
+        switch (q.type) {
+          case 'text':
+            inputHtml = `<input type="text" class="form-control" id="${qId}" placeholder="Your answer..." ${isRequired ? 'required' : ''} />`;
+            break;
+          case 'textarea':
+            inputHtml = `<textarea class="form-control" id="${qId}" rows="3" placeholder="Your answer..." ${isRequired ? 'required' : ''}></textarea>`;
+            break;
+          case 'multiple':
+            if (q.options && q.options.length) {
+              inputHtml = `<div class="radio-group">`;
+              q.options.forEach((opt) => {
                 inputHtml += `
-                    <button type="button" class="rating-btn" data-value="${i}" onclick="selectRating('${qId}', ${i})">${i}</button>
-                  `;
-              }
-              inputHtml +=
-                `</div><input type="hidden" id="${qId}" value="" ${isRequired ? 'required' : ''} />`;
-              break;
-            default:
-              inputHtml =
-                `<input type="text" class="form-control" id="${qId}" placeholder="Answer..." ${isRequired ? 'required' : ''} />`;
-          }
+                  <label>
+                    <input type="radio" name="${qId}" value="${opt.replace(/"/g, '&quot;')}" ${isRequired ? 'required' : ''} />
+                    ${opt}
+                  </label>
+                `;
+              });
+              inputHtml += `</div>`;
+            }
+            break;
+          case 'checkbox':
+            if (q.options && q.options.length) {
+              inputHtml = `<div class="checkbox-group">`;
+              q.options.forEach((opt) => {
+                inputHtml += `
+                  <label>
+                    <input type="checkbox" name="${qId}" value="${opt.replace(/"/g, '&quot;')}" />
+                    ${opt}
+                  </label>
+                `;
+              });
+              inputHtml += `</div>`;
+            }
+            break;
+          case 'dropdown':
+            if (q.options && q.options.length) {
+              inputHtml = `<select class="form-control" id="${qId}" ${isRequired ? 'required' : ''}>`;
+              inputHtml += `<option value="">-- Select --</option>`;
+              q.options.forEach(opt => {
+                inputHtml += `<option value="${opt.replace(/"/g, '&quot;')}">${opt}</option>`;
+              });
+              inputHtml += `</select>`;
+            }
+            break;
+          case 'rating':
+            inputHtml = `<div class="rating-group" id="${qId}">`;
+            for (let i = 1; i <= 5; i++) {
+              inputHtml += `
+                <button type="button" class="rating-btn" data-value="${i}" onclick="selectRating('${qId}', ${i})">${i}</button>
+              `;
+            }
+            inputHtml += `</div><input type="hidden" id="${qId}" value="" ${isRequired ? 'required' : ''} />`;
+            break;
+          default:
+            inputHtml = `<input type="text" class="form-control" id="${qId}" placeholder="Answer..." ${isRequired ? 'required' : ''} />`;
+        }
 
-          const questionText = q.text || `Question ${idx + 1}`;
-          questionsHtml += `
-              <div class="question-block">
-                <label class="q-label" for="${qId}">
-                  ${questionText}
-                  ${isRequired ? '<span class="required-star">*</span>' : ''}
-                </label>
-                ${q.type === 'rating' ? '<div class="q-help">Click a number to rate (1 = lowest, 5 = highest)</div>' : ''}
-                ${inputHtml}
-              </div>
-            `;
-        });
-      } else {
-        questionsHtml = `<p style="color:#94a3b8;">This survey has no questions.</p>`;
-      }
-
-      const reward = survey.reward || 0;
-      const category = survey.category || 'General';
-
-      container.innerHTML = `
-          <div class="survey-card">
-            <h1 class="survey-title">${survey.title || 'Untitled Survey'}</h1>
-            <div class="survey-desc">${survey.description || 'No description provided.'}</div>
-            <div class="survey-meta">
-              <span class="badge">${category}</span>
-              <span class="reward">💰 ₦${reward}</span>
-              <span><i class="far fa-clock"></i> ~5 min</span>
-              <span>${survey.questions ? survey.questions.length : 0} questions</span>
-            </div>
-
-            <form id="surveyForm">
-              ${questionsHtml}
-              <div class="submit-area">
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                  <i class="fas fa-check-circle"></i> Submit Survey
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='survey.html'">
-                  <i class="fas fa-times"></i> Cancel
-                </button>
-              </div>
-            </form>
+        const questionText = q.text || `Question ${idx+1}`;
+        questionsHtml += `
+          <div class="question-block">
+            <label class="q-label" for="${qId}">
+              ${questionText}
+              ${isRequired ? '<span class="required-star">*</span>' : ''}
+            </label>
+            ${q.type === 'rating' ? '<div class="q-help">Click a number to rate (1 = lowest, 5 = highest)</div>' : ''}
+            ${inputHtml}
           </div>
         `;
-
-      document.getElementById('surveyForm').addEventListener('submit', handleSubmit);
-    }
-
-    // ============================================================
-    // RATING SELECTION
-    // ============================================================
-    window.selectRating = function(qId, value) {
-      const group = document.getElementById(qId);
-      if (!group) return;
-      const buttons = group.querySelectorAll('.rating-btn');
-      buttons.forEach(btn => btn.classList.remove('active'));
-      const selectedBtn = group.querySelector(`.rating-btn[data-value="${value}"]`);
-      if (selectedBtn) selectedBtn.classList.add('active');
-      const hiddenInput = document.getElementById(qId);
-      if (hiddenInput) hiddenInput.value = value;
-    };
-
-    // ============================================================
-    // HANDLE SUBMIT
-    // ============================================================
-    async function handleSubmit(e) {
-      e.preventDefault();
-
-      const form = document.getElementById('surveyForm');
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-
-      const formData = new FormData(form);
-      const answerObj = {};
-      for (let [key, value] of formData.entries()) {
-        if (key.startsWith('q_')) {
-          if (answerObj[key]) {
-            if (Array.isArray(answerObj[key])) answerObj[key].push(value);
-            else answerObj[key] = [answerObj[key], value];
-          } else {
-            answerObj[key] = value;
-          }
-        }
-      }
-
-      const requiredFields = form.querySelectorAll('[required]');
-      let missing = false;
-      requiredFields.forEach(field => {
-        if (!field.value || field.value.trim() === '') {
-          missing = true;
-          field.style.borderColor = '#ef4444';
-          setTimeout(() => field.style.borderColor = '', 3000);
-        }
       });
-      if (missing) {
-        showToast('⚠️ Please answer all required questions.', true);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit Survey';
-        return;
-      }
-
-      try {
-        await db.collection('survey_responses').add({
-          surveyId: surveyId,
-          userId: currentUser.uid,
-          answers: answerObj,
-          submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        if (!userData.completedTasks) userData.completedTasks = {};
-        userData.completedTasks[surveyId] = Date.now();
-        await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
-        localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
-
-        showToast('✅ Survey submitted successfully! Thank you.');
-        setTimeout(() => {
-          window.location.href = 'survey.html';
-        }, 1500);
-      } catch (err) {
-        console.error(err);
-        showToast('❌ Error submitting survey. Please try again.', true);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit Survey';
-      }
+    } else {
+      questionsHtml = `<p style="color:#94a3b8;">This survey has no questions.</p>`;
     }
 
-    // ============================================================
-    // LOAD SURVEY
-    // ============================================================
-    async function loadSurvey(id) {
-      try {
-        const doc = await db.collection('surveys').doc(id).get();
-        if (!doc.exists) {
-          document.getElementById('surveyContainer').innerHTML = `
-              <div class="error-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Survey not found.</p>
-                <button class="btn btn-secondary" onclick="window.location.href='survey.html'" style="margin-top:1rem;">
-                  <i class="fas fa-arrow-left"></i> Back to Surveys
-                </button>
-              </div>
-            `;
-          return;
+    const reward = survey.reward || 0;
+    const category = survey.category || 'General';
+
+    container.innerHTML = `
+      <div class="survey-card">
+        <h1 class="survey-title">${survey.title || 'Untitled Survey'}</h1>
+        <div class="survey-desc">${survey.description || 'No description provided.'}</div>
+        <div class="survey-meta">
+          <span class="badge">${category}</span>
+          <span class="reward">💰 ₦${reward}</span>
+          <span><i class="far fa-clock"></i> ~5 min</span>
+          <span>${survey.questions ? survey.questions.length : 0} questions</span>
+        </div>
+
+        <form id="surveyForm">
+          ${questionsHtml}
+          <div class="submit-area">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <i class="fas fa-check-circle"></i> Submit Survey
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='dashboard.html'">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.getElementById('surveyForm').addEventListener('submit', handleSubmit);
+  }
+
+  // ============================================================
+  // RATING SELECTION
+  // ============================================================
+  window.selectRating = function(qId, value) {
+    const group = document.getElementById(qId);
+    if (!group) return;
+    const buttons = group.querySelectorAll('.rating-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    const selectedBtn = group.querySelector(`.rating-btn[data-value="${value}"]`);
+    if (selectedBtn) selectedBtn.classList.add('active');
+    const hiddenInput = document.getElementById(qId);
+    if (hiddenInput) hiddenInput.value = value;
+  };
+
+  // ============================================================
+  // HANDLE SUBMIT – marks completed and adds reward AFTER submission
+  // ============================================================
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const form = document.getElementById('surveyForm');
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+    // Collect answers
+    const formData = new FormData(form);
+    const answerObj = {};
+    for (let [key, value] of formData.entries()) {
+      if (key.startsWith('q_')) {
+        if (answerObj[key]) {
+          if (Array.isArray(answerObj[key])) answerObj[key].push(value);
+          else answerObj[key] = [answerObj[key], value];
+        } else {
+          answerObj[key] = value;
         }
-        surveyData = doc.data();
-        surveyId = id;
-        renderSurvey(surveyData);
-      } catch (err) {
-        console.error(err);
-        document.getElementById('surveyContainer').innerHTML = `
-            <div class="error-state">
-              <i class="fas fa-exclamation-circle"></i>
-              <p>Error loading survey. Please try again later.</p>
-              <button class="btn btn-secondary" onclick="window.location.href='survey.html'" style="margin-top:1rem;">
-                <i class="fas fa-arrow-left"></i> Back to Surveys
-              </button>
-            </div>
-          `;
       }
     }
 
-    // ============================================================
-    // MAIN INIT
-    // ============================================================
-    async function init() {
-      const user = auth.currentUser;
-      if (!user) {
-        window.location.href = 'login.html';
+    // Validate required fields
+    const requiredFields = form.querySelectorAll('[required]');
+    let missing = false;
+    requiredFields.forEach(field => {
+      if (!field.value || field.value.trim() === '') {
+        missing = true;
+        field.style.borderColor = '#ef4444';
+        setTimeout(() => field.style.borderColor = '', 3000);
+      }
+    });
+    if (missing) {
+      showToast('⚠️ Please answer all required questions.', true);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit Survey';
+      return;
+    }
+
+    try {
+      // 1. Save the response to survey_responses collection
+      await db.collection('survey_responses').add({
+        surveyId: surveyId,
+        userId: currentUser.uid,
+        answers: answerObj,
+        submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // 2. Mark survey as completed AND add reward
+      // First, get the reward from the survey document
+      const surveyDoc = await db.collection('surveys').doc(surveyId).get();
+      const reward = surveyDoc.exists ? surveyDoc.data().reward || 0 : 0;
+
+      // Update user data
+      if (!userData.completedTasks) userData.completedTasks = {};
+      userData.completedTasks[surveyId] = Date.now();
+      userData.balance = (userData.balance || 0) + reward;
+      userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
+      userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
+
+      // Save to Firestore and localStorage
+      await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
+      localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
+
+      showToast(`🎉 Survey submitted! +₦${reward} added to your balance.`);
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      showToast('❌ Error submitting survey. Please try again.', true);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit Survey';
+    }
+  }
+
+  // ============================================================
+  // LOAD SURVEY FROM FIRESTORE
+  // ============================================================
+  async function loadSurvey(id) {
+    try {
+      const doc = await db.collection('surveys').doc(id).get();
+      if (!doc.exists) {
+        document.getElementById('surveyContainer').innerHTML = `
+          <div class="error-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Survey not found.</p>
+            <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'" style="margin-top:1rem;">
+              <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+          </div>
+        `;
         return;
       }
+      surveyData = doc.data();
+      surveyId = id;
+      renderSurvey(surveyData);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('surveyContainer').innerHTML = `
+        <div class="error-state">
+          <i class="fas fa-exclamation-circle"></i>
+          <p>Error loading survey. Please try again later.</p>
+          <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'" style="margin-top:1rem;">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // ============================================================
+  // AUTH & INIT
+  // ============================================================
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
       currentUser = user;
       document.getElementById('userName').textContent = user.displayName || user.email || 'User';
 
+      // Load user data
       try {
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
@@ -690,68 +679,74 @@
         } else {
           userData = { balance: 0, completedTasks: {} };
         }
+        console.log('👤 User data loaded:', userData);
       } catch (e) {
         console.error('Error loading user data:', e);
         userData = { balance: 0, completedTasks: {} };
       }
 
+      // Get survey ID from URL
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id') || params.get('surveyId');
+      console.log('📍 Full URL:', window.location.href);
+      console.log('🆔 Extracted ID:', id);
 
       if (id) {
+        // Check if already completed
         if (userData.completedTasks && userData.completedTasks[id]) {
           document.getElementById('surveyContainer').innerHTML = `
-              <div class="completed-state">
-                <i class="fas fa-check-circle"></i>
-                <h2>Already Completed</h2>
-                <p style="color:#94a3b8;margin:0.5rem 0 1rem;">You have already completed this survey.</p>
-                <button class="btn btn-secondary" onclick="window.location.href='survey.html'">
-                  <i class="fas fa-arrow-left"></i> Back to Surveys
-                </button>
-              </div>
-            `;
-          return;
-        }
-
-        const dailyCount = getSurveyCountToday();
-        if (dailyCount >= 2) {
-          document.getElementById('surveyContainer').innerHTML = `
-              <div class="completed-state" style="color:#f59e0b;">
-                <i class="fas fa-clock" style="color:#f59e0b;"></i>
-                <h2>Daily Limit Reached</h2>
-                <p style="color:#94a3b8;margin:0.5rem 0 1rem;">You have completed the maximum of 2 surveys today.</p>
-                <button class="btn btn-secondary" onclick="window.location.href='survey.html'">
-                  <i class="fas fa-arrow-left"></i> Back to Surveys
-                </button>
-              </div>
-            `;
-          return;
-        }
-
-        loadSurvey(id);
-      } else {
-        document.getElementById('surveyContainer').innerHTML = `
-            <div class="error-state">
-              <i class="fas fa-exclamation-triangle"></i>
-              <p>No survey selected.</p>
-              <button class="btn btn-secondary" onclick="window.location.href='survey.html'" style="margin-top:1rem;">
-                <i class="fas fa-arrow-left"></i> Browse Surveys
+            <div class="completed-state">
+              <i class="fas fa-check-circle"></i>
+              <h2>Already Completed</h2>
+              <p style="color:#94a3b8;margin:0.5rem 0 1rem;">You have already completed this survey.</p>
+              <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
               </button>
             </div>
           `;
-      }
-    }
+          return;
+        }
 
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        init();
+        // Check daily limit (max 2)
+        const dailyCount = getSurveyCountToday();
+        if (dailyCount >= 2) {
+          document.getElementById('surveyContainer').innerHTML = `
+            <div class="completed-state" style="color:#f59e0b;">
+              <i class="fas fa-clock" style="color:#f59e0b;"></i>
+              <h2>Daily Limit Reached</h2>
+              <p style="color:#94a3b8;margin:0.5rem 0 1rem;">You have completed the maximum of 2 surveys today.</p>
+              <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        // Load the survey
+        loadSurvey(id);
       } else {
-        window.location.href = 'login.html';
+        document.getElementById('surveyContainer').innerHTML = `
+          <div class="error-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>No survey ID provided.</p>
+            <p style="font-size:0.85rem;color:#64748b;margin-top:0.5rem;">Please ensure the URL contains <code>?id=...</code></p>
+            <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'" style="margin-top:1rem;">
+              <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+          </div>
+        `;
       }
-    });
+    } else {
+      window.location.href = 'login.html';
+    }
+  });
 
-    window.logout = logout;
-    window.selectRating = selectRating;
-  </script>
+  // ============================================================
+  // EXPOSE FUNCTIONS
+  // ============================================================
+  window.logout = logout;
+  window.selectRating = selectRating;
+</script>
 </body>
 </html>

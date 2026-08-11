@@ -10,7 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-  <!-- Ad scripts (keep yours) -->
+  <!-- Ad scripts (unchanged) -->
   <script type="text/javascript" data-cfasync="false">
     /*<![CDATA[/* */
     (function(){var v=window,c="e557371e0e4994d2fef9171e0bc9a299",m=[["siteId",480+805*279+5090774],["minBid",0],["popundersPerIP","0"],["delayBetween",0],["default",false],["defaultPerDay",0],["topmostLayer","auto"]],r=["d3d3LnByZW1pdW12ZXJ0aXNpbmcuY29tL00vdWZqc29uLm1pbi5qcw==","ZDJqMDQyY2oxNDIxd2kuY2xvdWRmcm9udC5uZXQvS00vSlViaHkvZmRpbmVyby5taW4uY3Nz"],b=-1,n,j,f=function(){clearTimeout(j);b++;if(r[b]&&!(1812009728000<(new Date).getTime()&&1<b)){n=v.document.createElement("script");n.type="text/javascript";n.async=!0;var s=v.document.getElementsByTagName("script")[0];n.src="https://"+atob(r[b]);n.crossOrigin="anonymous";n.onerror=f;n.onload=function(){clearTimeout(j);v[c.slice(0,16)+c.slice(0,16)]||f()};j=setTimeout(f,5E3);s.parentNode.insertBefore(n,s)}};if(!v[c]){try{Object.freeze(v[c]=m)}catch(e){}f()}})();
@@ -952,24 +952,27 @@
   }
 
   // ============================================================
-  // COMPLETE SURVEY TASK (FIXED REDIRECT)
+  // COMPLETE SURVEY TASK (UPDATED – only redirects, does NOT mark completed)
   // ============================================================
   async function completeSurveyTask(taskId, reward) {
+    // 1. Check if already completed today
     if (isTaskCompleted(taskId)) {
       showToast('⚠️ You already completed this survey.');
       return;
     }
+
+    // 2. Check daily limit (max 2)
     const surveyCount = getSurveyCountToday();
     if (surveyCount >= 2) {
       showToast('⚠️ You have reached the daily limit of 2 surveys.');
       return;
     }
 
+    // 3. Optional anti‑abuse check
     const now = Date.now();
     if (!userData.taskTimestamps) userData.taskTimestamps = [];
     userData.taskTimestamps.push(now);
     if (userData.taskTimestamps.length > 5) userData.taskTimestamps.shift();
-
     if (checkRapidTaskCompletion()) {
       userData.status = 'suspended';
       userData.suspensionReason = 'Completed 5 tasks within 5 minutes – possible automated activity.';
@@ -983,32 +986,19 @@
       return;
     }
 
+    // 4. Build the link
     const survey = cachedSurveys.find(t => t.id === taskId);
-    let link = survey && survey.link ? survey.link : 'survey.html?id=' + taskId;
-    
-    // Add cache-busting parameter to avoid browser caching issues
+    let link = survey && survey.link && survey.link.trim() !== '' ? survey.link.trim() : 'take-survey.html?id=' + taskId;
     link += (link.includes('?') ? '&' : '?') + 't=' + Date.now();
 
     console.log('🔗 Redirecting to:', link);
 
-    // Navigate to the survey page (same tab)
+    // 5. Navigate – DO NOT mark completed or add reward here
     window.location.href = link;
-
-    // Credit the reward (you may want to move this after completion)
-    if (!userData.completedTasks) userData.completedTasks = {};
-    userData.completedTasks[taskId] = now;
-    userData.balance = (userData.balance || 0) + reward;
-    userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
-    userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
-
-    updateInterfaceValues();
-    await saveUserData();
-    renderSurveys();
-    showToast(`🎉 Survey started! +₦${reward} will be credited upon completion.`);
   }
 
   // ============================================================
-  // OTHER TASKS
+  // OTHER TASKS (unchanged)
   // ============================================================
   const appTasks = [
     { id: 'app_01', title: 'Download Grok', desc: 'Download and install the Grok AI app from the Play Store.',
@@ -1346,7 +1336,7 @@
         await fetchSurveysFromFirestore();
       }, 300000);
 
-      console.log('✅ Dashboard loaded with surveys and fixed redirect.');
+      console.log('✅ Dashboard loaded with surveys (fixed redirect).');
     } else {
       console.log('No user, redirecting to login');
       window.location.href = 'login.html';
@@ -1362,7 +1352,7 @@
   window.completeCategoryTask = completeCategoryTask;
   window.logout = logout;
 
-  console.log('✅ Dashboard script loaded (fixed redirect).');
+  console.log('✅ Dashboard script loaded (fixed survey completion flow).');
 </script>
 </body>
 </html>
