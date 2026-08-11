@@ -343,7 +343,6 @@
             border: 1px solid rgba(255, 255, 255, .08);
         }
 
-        /* -- Header / Settings -- */
         .gf-header {
             padding: 1.5rem 2rem;
             background: rgba(15, 23, 42, .4);
@@ -424,7 +423,6 @@
             background: #1e293b;
         }
 
-        /* -- Questions Container -- */
         .gf-questions {
             padding: 1.5rem 2rem;
             display: flex;
@@ -432,7 +430,6 @@
             gap: 1rem;
         }
 
-        /* -- Question Card -- */
         .gf-question {
             background: rgba(15, 23, 42, .5);
             border-radius: 0.75rem;
@@ -533,7 +530,6 @@
             background: rgba(59, 130, 246, .15);
         }
 
-        /* -- Options -- */
         .gf-question .q-options {
             margin-top: 0.6rem;
             padding-left: 0.5rem;
@@ -599,7 +595,6 @@
             border-radius: 0.3rem;
         }
 
-        /* -- Required toggle -- */
         .gf-question .q-required {
             display: flex;
             align-items: center;
@@ -619,7 +614,6 @@
             user-select: none;
         }
 
-        /* -- Add question button -- */
         .gf-add-btn-wrap {
             padding: 0.5rem 2rem 1.5rem 2rem;
             display: flex;
@@ -649,7 +643,6 @@
             transform: scale(1.01);
         }
 
-        /* -- Save / Cancel bar -- */
         .gf-actions {
             padding: 1rem 2rem 1.5rem 2rem;
             display: flex;
@@ -662,7 +655,6 @@
             flex: 1;
         }
 
-        /* -- Stats inline -- */
         .gf-stats {
             display: flex;
             gap: 1.5rem;
@@ -821,6 +813,82 @@
             cursor: not-allowed;
         }
 
+        /* ===== RESPONSES MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .7);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-box {
+            background: #1e293b;
+            border-radius: 1.5rem;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, .1);
+            position: relative;
+        }
+        .modal-box .modal-close {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+            z-index: 10;
+        }
+        .modal-box .modal-close:hover {
+            color: #f1f5f9;
+        }
+        .modal-box .modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            padding-right: 2.5rem;
+        }
+        .modal-box .modal-sub {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            padding-bottom: 0.8rem;
+        }
+        .modal-box .qa-item {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+        }
+        .modal-box .qa-item .q {
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+        }
+        .modal-box .qa-item .a {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 0.15rem;
+            padding-left: 0.5rem;
+            border-left: 2px solid #3b82f6;
+            padding-left: 0.8rem;
+        }
+        .modal-box .qa-item .a .multi-opt {
+            display: block;
+            padding: 0.1rem 0;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .navbar {
@@ -878,6 +946,10 @@
             .gf-question .q-options .opt-row {
                 flex-wrap: wrap;
             }
+            .modal-box {
+                padding: 1.2rem;
+                margin: 0.5rem;
+            }
         }
         @media (max-width: 480px) {
             #app {
@@ -928,23 +1000,21 @@
             <button class="tab-btn" data-tab="notifications"><i class="fas fa-bell"></i> Notifications</button>
             <button class="tab-btn" data-tab="achievements"><i class="fas fa-trophy"></i> Achievements</button>
             <button class="tab-btn" data-tab="suspensions"><i class="fas fa-ban"></i> Suspensions</button>
+            <!-- NEW RESPONSES TAB -->
+            <button class="tab-btn" data-tab="responses"><i class="fas fa-reply-all"></i> Responses</button>
         </div>
 
         <!-- ============================================================ -->
-        <!-- TAB: SURVEYS – Google Forms style                            -->
+        <!-- TAB: SURVEYS (unchanged) -->
         <!-- ============================================================ -->
         <div class="tab-content active" id="tab-surveys">
-
-            <!-- Stats -->
             <div class="stats-grid" id="surveyStats">
                 <div class="stat-card"><div class="stat-number" id="totalSurveys">0</div><div class="stat-label">Total</div></div>
                 <div class="stat-card"><div class="stat-number" id="activeSurveys">0</div><div class="stat-label">Active</div></div>
                 <div class="stat-card"><div class="stat-number" id="inactiveSurveys">0</div><div class="stat-label">Inactive</div></div>
             </div>
 
-            <!-- ===== GOOGLE FORMS BUILDER ===== -->
             <div class="gf-builder" id="gfBuilder">
-                <!-- Header -->
                 <div class="gf-header">
                     <input type="text" class="gf-title-input" id="gfTitle" placeholder="Survey title" />
                     <input type="text" class="gf-desc-input" id="gfDesc" placeholder="Survey description (optional)" />
@@ -977,35 +1047,27 @@
                                 <option value="inactive">Inactive</option>
                             </select>
                         </div>
-                        <!-- ===== NEW LINK FIELD ===== -->
                         <div class="gf-setting" style="flex:2 1 250px;">
                             <label>Link</label>
                             <input type="url" id="gfLink" placeholder="https://example.com/survey (optional)" style="min-width:200px;" />
                         </div>
-                        <!-- ===== END NEW LINK FIELD ===== -->
                     </div>
                 </div>
 
-                <!-- Questions -->
-                <div class="gf-questions" id="gfQuestionsContainer">
-                    <!-- Rendered by JS -->
-                </div>
+                <div class="gf-questions" id="gfQuestionsContainer"></div>
 
-                <!-- Add question -->
                 <div class="gf-add-btn-wrap">
                     <button class="gf-add-btn" id="gfAddQuestionBtn">
                         <i class="fas fa-plus-circle"></i> Add question
                     </button>
                 </div>
 
-                <!-- Stats line -->
                 <div class="gf-stats">
                     <span>Questions: <span class="num" id="gfQuestionCount">0</span></span>
                     <span>•</span>
                     <span id="gfEditIndicator" style="color:#f59e0b;display:none;"><i class="fas fa-edit"></i> Editing: <span id="gfEditId"></span></span>
                 </div>
 
-                <!-- Actions -->
                 <div class="gf-actions">
                     <button class="btn btn-success" id="gfSaveBtn"><i class="fas fa-save"></i> <span id="gfSaveText">Save Survey</span></button>
                     <button class="btn btn-warning" id="gfCancelBtn" style="display:none;"><i class="fas fa-times"></i> Cancel</button>
@@ -1015,7 +1077,6 @@
                 </div>
             </div>
 
-            <!-- Survey List -->
             <h3 style="margin-top:2rem;margin-bottom:0.5rem;color:#94a3b8;font-size:1rem;font-weight:600;">
                 <i class="fas fa-list"></i> Saved Surveys
             </h3>
@@ -1028,7 +1089,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- TAB: COUPONS                                                -->
+        <!-- TAB: COUPONS (unchanged) -->
         <!-- ============================================================ -->
         <div class="tab-content" id="tab-coupons">
             <h2><i class="fas fa-ticket-alt"></i> Manage Coupons</h2>
@@ -1043,7 +1104,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- TAB: TASKS                                                  -->
+        <!-- TAB: TASKS (unchanged) -->
         <!-- ============================================================ -->
         <div class="tab-content" id="tab-tasks">
             <h2><i class="fas fa-tasks"></i> Manage Tasks</h2>
@@ -1073,7 +1134,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- TAB: USERS                                                  -->
+        <!-- TAB: USERS (unchanged) -->
         <!-- ============================================================ -->
         <div class="tab-content" id="tab-users">
             <h2><i class="fas fa-users"></i> Manage Users</h2>
@@ -1106,7 +1167,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- TAB: PAYOUTS                                                -->
+        <!-- TAB: PAYOUTS (unchanged) -->
         <!-- ============================================================ -->
         <div class="tab-content" id="tab-payouts">
             <h2><i class="fas fa-credit-card"></i> Payout Requests</h2>
@@ -1117,7 +1178,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- TAB: NOTIFICATIONS                                          -->
+        <!-- TAB: NOTIFICATIONS (unchanged) -->
         <!-- ============================================================ -->
         <div class="tab-content" id="tab-notifications">
             <h2><i class="fas fa-bullhorn"></i> Send Notification</h2>
@@ -1139,7 +1200,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- TAB: ACHIEVEMENTS                                           -->
+        <!-- TAB: ACHIEVEMENTS (unchanged) -->
         <!-- ============================================================ -->
         <div class="tab-content" id="tab-achievements">
             <h2><i class="fas fa-trophy"></i> User Achievements</h2>
@@ -1150,13 +1211,41 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- TAB: SUSPENSIONS                                            -->
+        <!-- TAB: SUSPENSIONS (unchanged) -->
         <!-- ============================================================ -->
         <div class="tab-content" id="tab-suspensions">
             <h2><i class="fas fa-ban"></i> Manage Suspensions</h2>
             <p style="color:#94a3b8;margin-bottom:1rem;">Users suspended for inactivity or policy violations. Reactivate or delete permanently.</p>
             <div class="table-wrapper">
                 <table><thead><tr><th>User</th><th>Email</th><th>Status</th><th>Reason</th><th>Actions</th></tr></thead><tbody id="suspensionsTableBody"><tr><td colspan="5" style="text-align:center;color:#64748b;">Loading...</td></tr></tbody></table>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- TAB: RESPONSES (NEW) -->
+        <!-- ============================================================ -->
+        <div class="tab-content" id="tab-responses">
+            <h2><i class="fas fa-reply-all"></i> Survey Responses</h2>
+            <div style="margin-bottom:1rem;font-size:0.9rem;color:#94a3b8;">
+                All submitted survey answers from users.
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>User</th><th>Survey</th><th>Submitted</th><th style="min-width:120px;">Actions</th></tr></thead>
+                    <tbody id="responsesTableBody"><tr><td colspan="4" style="text-align:center;color:#64748b;">Loading responses...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- RESPONSES MODAL -->
+        <!-- ============================================================ -->
+        <div class="modal-overlay" id="responseModal">
+            <div class="modal-box">
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                <div class="modal-title" id="modalTitle">Answers</div>
+                <div class="modal-sub" id="modalSub">User: <span id="modalUser"></span> • Survey: <span id="modalSurveyTitle"></span></div>
+                <div id="modalAnswers"></div>
             </div>
         </div>
 
@@ -1202,13 +1291,16 @@
                 this.classList.add('active');
                 document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
                 document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+                // Load responses when tab is clicked
+                if (this.dataset.tab === 'responses') {
+                    loadResponses();
+                }
             });
         });
 
         // ============================================================
-        // GOOGLE FORMS STYLE SURVEY BUILDER
+        // GOOGLE FORMS STYLE SURVEY BUILDER (unchanged)
         // ============================================================
-
         function defaultGFQuestion() {
             return {
                 id: generateId(),
@@ -1222,7 +1314,8 @@
         function renderGFQuestions() {
             const container = document.getElementById('gfQuestionsContainer');
             if (gfQuestions.length === 0) {
-                container.innerHTML = `
+                container.innerHTML =
+                    `
                     <div style="text-align:center;padding:2rem 0;color:#64748b;font-size:0.95rem;border:2px dashed rgba(255,255,255,.04);border-radius:0.75rem;">
                         <i class="fas fa-question-circle" style="font-size:2rem;display:block;margin-bottom:0.5rem;color:#475569;"></i>
                         No questions yet. Click <strong>"Add question"</strong> to start building your survey.
@@ -1294,13 +1387,11 @@
             container.innerHTML = html;
         }
 
-        // ---- GF Question CRUD ----
         window.addGFQuestion = function() {
             gfQuestions.push(defaultGFQuestion());
             renderGFQuestions();
             showToast('Question added!', true);
         };
-
         window.removeGFQuestion = function(idx) {
             if (gfQuestions.length <= 1) {
                 if (!confirm('Remove the only question?')) return;
@@ -1308,7 +1399,6 @@
             gfQuestions.splice(idx, 1);
             renderGFQuestions();
         };
-
         window.duplicateGFQuestion = function(idx) {
             const q = gfQuestions[idx];
             const newQ = JSON.parse(JSON.stringify(q));
@@ -1317,19 +1407,16 @@
             renderGFQuestions();
             showToast('Question duplicated!', true);
         };
-
         window.moveGFQuestion = function(idx, dir) {
             const newIdx = idx + dir;
             if (newIdx < 0 || newIdx >= gfQuestions.length) return;
             [gfQuestions[idx], gfQuestions[newIdx]] = [gfQuestions[newIdx], gfQuestions[idx]];
             renderGFQuestions();
         };
-
         window.updateGFQuestionText = function(el) {
             const idx = parseInt(el.dataset.idx);
             gfQuestions[idx].text = el.value;
         };
-
         window.updateGFQuestionType = function(el) {
             const idx = parseInt(el.dataset.idx);
             const val = el.value;
@@ -1339,23 +1426,19 @@
             }
             renderGFQuestions();
         };
-
         window.updateGFRequired = function(el) {
             const idx = parseInt(el.dataset.idx);
             gfQuestions[idx].required = el.checked;
         };
-
         window.updateGFOption = function(el) {
             const idx = parseInt(el.dataset.qidx);
             const oidx = parseInt(el.dataset.oidx);
             gfQuestions[idx].options[oidx] = el.value;
         };
-
         window.addGFOption = function(idx) {
             gfQuestions[idx].options.push(`Option ${gfQuestions[idx].options.length + 1}`);
             renderGFQuestions();
         };
-
         window.removeGFOption = function(idx, oidx) {
             if (gfQuestions[idx].options.length <= 1) {
                 showToast('Must have at least one option.');
@@ -1365,7 +1448,6 @@
             renderGFQuestions();
         };
 
-        // ---- GF Save / Reset ----
         function resetGFBuilder() {
             editingSurveyId = null;
             document.getElementById('gfTitle').value = '';
@@ -1374,7 +1456,7 @@
             document.getElementById('gfReward').value = '';
             document.getElementById('gfMaxPerDay').value = '2';
             document.getElementById('gfStatus').value = 'active';
-            document.getElementById('gfLink').value = '';   // Reset link field
+            document.getElementById('gfLink').value = '';
             gfQuestions = [];
             renderGFQuestions();
             document.getElementById('gfSaveText').textContent = 'Save Survey';
@@ -1391,15 +1473,12 @@
             resetGFBuilder();
             showToast('Form reset', true);
         });
-
         document.getElementById('gfCancelBtn').addEventListener('click', function() {
             resetGFBuilder();
             showToast('Editing cancelled', true);
         });
-
         document.getElementById('gfAddQuestionBtn').addEventListener('click', window.addGFQuestion);
 
-        // ---- Save Survey ----
         document.getElementById('gfSaveBtn').addEventListener('click', async function() {
             const title = document.getElementById('gfTitle').value.trim();
             const desc = document.getElementById('gfDesc').value.trim();
@@ -1407,7 +1486,7 @@
             const reward = parseInt(document.getElementById('gfReward').value);
             const maxPerDay = parseInt(document.getElementById('gfMaxPerDay').value) || 2;
             const status = document.getElementById('gfStatus').value;
-            const link = document.getElementById('gfLink').value.trim();   // Get link
+            const link = document.getElementById('gfLink').value.trim();
 
             if (!title) { showToast('Please enter a survey title.'); return; }
             if (isNaN(reward) || reward < 0) { showToast('Please enter a valid reward.'); return; }
@@ -1421,7 +1500,7 @@
                 maxPerDay,
                 active: status === 'active',
                 questions: gfQuestions,
-                link: link || '',          // Store link (empty string if not provided)
+                link: link || '',
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
@@ -1449,7 +1528,6 @@
             }
         });
 
-        // ---- Edit Survey ----
         async function openGFForEdit(id) {
             try {
                 const doc = await db.collection('surveys').doc(id).get();
@@ -1462,7 +1540,7 @@
                 document.getElementById('gfReward').value = data.reward || '';
                 document.getElementById('gfMaxPerDay').value = data.maxPerDay || 2;
                 document.getElementById('gfStatus').value = data.active !== false ? 'active' : 'inactive';
-                document.getElementById('gfLink').value = data.link || '';   // Load link
+                document.getElementById('gfLink').value = data.link || '';
                 gfQuestions = (data.questions && Array.isArray(data.questions)) ? data.questions : [];
                 renderGFQuestions();
 
@@ -1479,7 +1557,6 @@
             }
         }
 
-        // ---- Load Surveys ----
         async function loadSurveys() {
             const tbody = document.getElementById('surveyTableBody');
             try {
@@ -1502,8 +1579,9 @@
                     if (isActive) active++;
                     else inactive++;
                     const qCount = (data.questions && Array.isArray(data.questions)) ? data.questions.length : 0;
-                    const created = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString('en-NG', { day: 'numeric',
-                        month: 'short', year: 'numeric' }) : '—';
+                    const created = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString(
+                        'en-NG', { day: 'numeric',
+                            month: 'short', year: 'numeric' }) : '—';
                     html += `<tr>
                         <td><strong>${data.title || 'Untitled'}</strong></td>
                         <td><span class="badge badge-survey">${data.category || 'General'}</span></td>
@@ -1523,7 +1601,8 @@
                 document.getElementById('activeSurveys').textContent = active;
                 document.getElementById('inactiveSurveys').textContent = inactive;
 
-                tbody.querySelectorAll('.edit-survey-btn').forEach(btn => btn.addEventListener('click', () => openGFForEdit(btn
+                tbody.querySelectorAll('.edit-survey-btn').forEach(btn => btn.addEventListener('click', () => openGFForEdit(
+                    btn
                     .dataset.id)));
                 tbody.querySelectorAll('.toggle-survey-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -1539,7 +1618,8 @@
                 });
             } catch (e) {
                 console.error(e);
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;">Error loading surveys.</td></tr>';
+                tbody.innerHTML =
+                '<tr><td colspan="7" style="text-align:center;color:#ef4444;">Error loading surveys.</td></tr>';
             }
         }
 
@@ -1562,18 +1642,20 @@
         }
 
         // ============================================================
-        // COUPONS
+        // COUPONS (unchanged)
         // ============================================================
         async function loadCoupons() {
             const tbody = document.getElementById('couponTableBody');
             try {
                 const snap = await db.collection('coupons').orderBy('code').get();
-                if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No coupons.</td></tr>'; return; }
+                if (snap.empty) { tbody.innerHTML =
+                        '<tr><td colspan="4" style="text-align:center;color:#64748b;">No coupons.</td></tr>'; return; }
                 let html = '';
                 snap.forEach(doc => {
                     const data = doc.data();
                     const active = data.active !== false;
-                    html += `<tr><td><strong>${data.code || doc.id}</strong></td><td>₦${data.reward || 0}</td><td><span class="badge ${active ? 'badge-active' : 'badge-inactive'}">${active ? 'Active' : 'Inactive'}</span></td><td>
+                    html +=
+                        `<tr><td><strong>${data.code || doc.id}</strong></td><td>₦${data.reward || 0}</td><td><span class="badge ${active ? 'badge-active' : 'badge-inactive'}">${active ? 'Active' : 'Inactive'}</span></td><td>
                         <button class="btn btn-primary btn-sm edit-coupon" data-id="${doc.id}" data-reward="${data.reward||0}"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-warning btn-sm toggle-coupon" data-id="${doc.id}" data-active="${active}"><i class="fas fa-${active ? 'pause' : 'play'}"></i></button>
                         <button class="btn btn-danger btn-sm delete-coupon" data-id="${doc.id}"><i class="fas fa-trash-alt"></i></button>
@@ -1603,7 +1685,8 @@
                     });
                 });
             } catch (e) { console.error(e);
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ef4444;">Error loading coupons.</td></tr>'; }
+                tbody.innerHTML =
+                '<tr><td colspan="4" style="text-align:center;color:#ef4444;">Error loading coupons.</td></tr>'; }
         }
 
         async function updateCoupon(id, data) {
@@ -1631,14 +1714,15 @@
         });
 
         // ============================================================
-        // TASKS
+        // TASKS (unchanged)
         // ============================================================
         async function loadTasks() {
             const tbody = document.getElementById('taskTableBody');
             try {
                 const snap = await db.collection('tasks').orderBy('name').get();
                 if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;">No tasks defined.</td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="6" style="text-align:center;color:#64748b;">No tasks defined.</td></tr>';
                     document.getElementById('totalTasks').textContent = '0';
                     document.getElementById('activeTasks').textContent = '0';
                     document.getElementById('taskTypes').textContent = '0';
@@ -1709,7 +1793,8 @@
                     });
                 });
             } catch (e) { console.error(e);
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error loading tasks.</td></tr>'; }
+                tbody.innerHTML =
+                '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error loading tasks.</td></tr>'; }
         }
 
         document.getElementById('addTaskBtn').addEventListener('click', async () => {
@@ -1730,7 +1815,7 @@
         });
 
         // ============================================================
-        // USERS
+        // USERS (unchanged)
         // ============================================================
         let allUsers = [],
             filteredUsers = [],
@@ -1760,7 +1845,8 @@
                 else document.getElementById('userDemoBanner').style.display = 'none';
                 applyFilterAndRender();
             } catch (e) { console.error(e);
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading users.</td></tr>'; }
+                tbody.innerHTML =
+                '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading users.</td></tr>'; }
         }
 
         function applyFilterAndRender() {
@@ -1777,7 +1863,8 @@
             const start = (currentPage - 1) * pageSize;
             const end = Math.min(start + pageSize, filteredUsers.length);
             const pageUsers = filteredUsers.slice(start, end);
-            if (pageUsers.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">No users found.</td></tr>'; } else {
+            if (pageUsers.length === 0) { tbody.innerHTML =
+                    '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">No users found.</td></tr>'; } else {
                 tbody.innerHTML = pageUsers.map(u => `
                         <tr class="clickable-row" data-uid="${u.uid}" style="cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(59,130,246,.1)'" onmouseout="this.style.background='transparent'">
                             <td>${u.name}</td><td>${u.email}</td><td>₦${u.balance.toLocaleString('en-US', {minimumFractionDigits:2})}</td><td>${u.tasks}</td>
@@ -1791,13 +1878,16 @@
             const pagination = document.getElementById('paginationControls');
             let pagHtml = '';
             if (totalPages > 1) {
-                pagHtml += `<button onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+                pagHtml +=
+                    `<button onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
                 const startPage = Math.max(1, currentPage - 2),
                     endPage = Math.min(totalPages, currentPage + 2);
                 for (let i = startPage; i <= endPage; i++) {
-                    pagHtml += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                    pagHtml +=
+                        `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
                 }
-                pagHtml += `<button onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+                pagHtml +=
+                    `<button onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
             }
             pagination.innerHTML = pagHtml;
         }
@@ -1815,7 +1905,8 @@
             selectedUserUid = uid;
             document.getElementById('detailName').textContent = user.name;
             document.getElementById('detailEmail').textContent = user.email;
-            document.getElementById('detailBalance').textContent = `₦${user.balance.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+            document.getElementById('detailBalance').textContent =
+                `₦${user.balance.toLocaleString('en-US', {minimumFractionDigits:2})}`;
             document.getElementById('detailTasks').textContent = user.tasks;
             document.getElementById('detailUid').textContent = uid;
             document.getElementById('userDetail').style.display = 'block';
@@ -1875,7 +1966,7 @@
         });
 
         // ============================================================
-        // PAYOUTS
+        // PAYOUTS (unchanged)
         // ============================================================
         async function loadPayouts() {
             const tbody = document.getElementById('payoutTableBody');
@@ -1884,7 +1975,8 @@
             try {
                 const snap = await db.collection('payouts').orderBy('requestedAt', 'desc').get();
                 if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;">No payout requests.</td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="8" style="text-align:center;color:#64748b;">No payout requests.</td></tr>';
                     demoBanner.style.display = 'flex';
                     return;
                 }
@@ -1907,7 +1999,8 @@
                     const status = data.status || 'pending';
                     const badgeMap = { pending: 'badge-pending', approved: 'badge-approved', paid: 'badge-paid',
                         rejected: 'badge-rejected' };
-                    html += `<tr><td>${userName}</td><td>${userEmail}</td><td>${data.bankName || '—'}</td><td>${data.nubanDestination || '—'}</td><td>₦${(data.amountNGN || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td><td><span class="badge ${badgeMap[status] || 'badge-pending'}">${status}</span></td><td>${data.requestedAt ? new Date(data.requestedAt.toDate()).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</td><td>
+                    html +=
+                        `<tr><td>${userName}</td><td>${userEmail}</td><td>${data.bankName || '—'}</td><td>${data.nubanDestination || '—'}</td><td>₦${(data.amountNGN || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td><td><span class="badge ${badgeMap[status] || 'badge-pending'}">${status}</span></td><td>${data.requestedAt ? new Date(data.requestedAt.toDate()).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</td><td>
                             ${status === 'pending' ? `<button class="btn btn-success btn-sm" onclick="updatePayout('${doc.id}', 'approved')">Approve</button><button class="btn btn-danger btn-sm" onclick="updatePayout('${doc.id}', 'rejected')">Reject</button>` : ''}
                             ${status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="updatePayout('${doc.id}', 'paid')">Mark Paid</button>` : ''}
                             ${status === 'paid' ? '✅ Done' : ''}
@@ -1916,7 +2009,8 @@
                 }
                 tbody.innerHTML = html;
             } catch (e) { console.error(e);
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;">Error loading payouts.</td></tr>'; }
+                tbody.innerHTML =
+                '<tr><td colspan="8" style="text-align:center;color:#ef4444;">Error loading payouts.</td></tr>'; }
         }
 
         async function updatePayout(docId, status) {
@@ -1929,7 +2023,7 @@
         }
 
         // ============================================================
-        // ACHIEVEMENTS
+        // ACHIEVEMENTS (unchanged)
         // ============================================================
         async function loadAchievements() {
             const tbody = document.getElementById('achievementsTableBody');
@@ -1971,11 +2065,12 @@
                 });
                 tbody.innerHTML = html;
             } catch (e) { console.error(e);
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error loading achievements.</td></tr>'; }
+                tbody.innerHTML =
+                '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error loading achievements.</td></tr>'; }
         }
 
         // ============================================================
-        // SUSPENSIONS
+        // SUSPENSIONS (unchanged)
         // ============================================================
         async function loadSuspensions() {
             const tbody = document.getElementById('suspensionsTableBody');
@@ -1983,7 +2078,8 @@
             try {
                 const snap = await db.collection('users').where('status', 'in', ['suspended', 'banned']).get();
                 if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;">No suspended or banned users.</td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="5" style="text-align:center;color:#64748b;">No suspended or banned users.</td></tr>';
                     return;
                 }
                 let html = '';
@@ -2008,7 +2104,8 @@
                 });
                 tbody.innerHTML = html;
             } catch (e) { console.error(e);
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading suspensions.</td></tr>'; }
+                tbody.innerHTML =
+                '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading suspensions.</td></tr>'; }
         }
 
         async function reactivateUser(uid) {
@@ -2031,7 +2128,7 @@
         }
 
         // ============================================================
-        // NOTIFICATIONS
+        // NOTIFICATIONS (unchanged)
         // ============================================================
         document.getElementById('notifAudience').addEventListener('change', function() {
             document.getElementById('specificUserGroup').style.display = this.value === 'specific' ? 'block' : 'none';
@@ -2118,6 +2215,159 @@
         });
 
         // ============================================================
+        // RESPONSES (NEW)
+        // ============================================================
+        async function loadResponses() {
+            const tbody = document.getElementById('responsesTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">Loading responses...</td></tr>';
+
+            try {
+                // Fetch all surveys to map question texts
+                const surveysSnap = await db.collection('surveys').get();
+                const surveyMap = {};
+                surveysSnap.forEach(doc => {
+                    surveyMap[doc.id] = doc.data();
+                });
+
+                // Fetch all users to map names
+                const usersSnap = await db.collection('users').get();
+                const userMap = {};
+                usersSnap.forEach(doc => {
+                    const data = doc.data();
+                    userMap[doc.id] = {
+                        name: data.displayName || data.name || 'Unknown',
+                        email: data.email || ''
+                    };
+                });
+
+                // Fetch responses
+                const responsesSnap = await db.collection('survey_responses')
+                    .orderBy('submittedAt', 'desc')
+                    .limit(100)
+                    .get();
+
+                if (responsesSnap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No responses yet.</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                responsesSnap.forEach(doc => {
+                    const data = doc.data();
+                    const surveyId = data.surveyId || '';
+                    const userId = data.userId || '';
+                    const user = userMap[userId] || { name: 'Unknown', email: '' };
+                    const survey = surveyMap[surveyId] || { title: 'Deleted Survey' };
+
+                    const submittedAt = data.submittedAt ? new Date(data.submittedAt.toDate()).toLocaleString(
+                        'en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit',
+                            minute: '2-digit' }) : '—';
+
+                    html += `
+                        <tr>
+                            <td><strong>${user.name}</strong><br><span style="font-size:0.8rem;color:#94a3b8;">${user.email}</span></td>
+                            <td>${survey.title || 'Unknown Survey'}</td>
+                            <td>${submittedAt}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm view-answers-btn" data-id="${doc.id}" data-surveyid="${surveyId}" data-userid="${userId}">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+
+                // Attach view listeners
+                tbody.querySelectorAll('.view-answers-btn').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        const docId = this.dataset.id;
+                        const surveyId = this.dataset.surveyid;
+                        const userId = this.dataset.userid;
+
+                        // Fetch the full response
+                        const responseDoc = await db.collection('survey_responses').doc(docId).get();
+                        if (!responseDoc.exists) {
+                            showToast('Response not found.', true);
+                            return;
+                        }
+                        const responseData = responseDoc.data();
+                        const answers = responseData.answers || {};
+
+                        // Fetch survey questions
+                        const surveyDoc = await db.collection('surveys').doc(surveyId).get();
+                        let questions = [];
+                        if (surveyDoc.exists) {
+                            const surveyData = surveyDoc.data();
+                            questions = surveyData.questions || [];
+                        }
+
+                        // Fetch user
+                        const userDoc = await db.collection('users').doc(userId).get();
+                        let userName = 'Unknown';
+                        if (userDoc.exists) {
+                            userName = userDoc.data().displayName || userDoc.data().name || 'Unknown';
+                        }
+
+                        // Build modal content
+                        const modalTitle = surveyDoc.exists ? surveyDoc.data().title || 'Survey' : 'Survey';
+                        const modal = document.getElementById('responseModal');
+                        document.getElementById('modalTitle').textContent = 'Survey Answers';
+                        document.getElementById('modalUser').textContent = userName;
+                        document.getElementById('modalSurveyTitle').textContent = modalTitle;
+
+                        const answersContainer = document.getElementById('modalAnswers');
+                        let answersHtml = '';
+
+                        if (Object.keys(answers).length === 0) {
+                            answersHtml = '<p style="color:#94a3b8;">No answers provided.</p>';
+                        } else {
+                            // Map answers to questions
+                            const answerKeys = Object.keys(answers);
+                            answerKeys.forEach((key, idx) => {
+                                // Extract question index from q_0, q_1, etc.
+                                const qIndex = parseInt(key.replace('q_', ''));
+                                const question = questions[qIndex] || { text: `Question ${qIndex + 1}` };
+                                let answerValue = answers[key];
+                                if (Array.isArray(answerValue)) {
+                                    answerValue = answerValue.map(v =>
+                                        `<span class="multi-opt">• ${v}</span>`
+                                    ).join('');
+                                } else {
+                                    answerValue = answerValue || '—';
+                                }
+
+                                answersHtml += `
+                                    <div class="qa-item">
+                                        <div class="q">${idx+1}. ${question.text}</div>
+                                        <div class="a">${answerValue}</div>
+                                    </div>
+                                `;
+                            });
+                        }
+
+                        answersContainer.innerHTML = answersHtml;
+                        modal.classList.add('open');
+                    });
+                });
+
+            } catch (e) {
+                console.error('Error loading responses:', e);
+                tbody.innerHTML =
+                '<tr><td colspan="4" style="text-align:center;color:#ef4444;">Error loading responses.</td></tr>';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('responseModal').classList.remove('open');
+        }
+        // Close modal on overlay click
+        document.getElementById('responseModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ============================================================
         // AUTH
         // ============================================================
         auth.onAuthStateChanged(async (user) => {
@@ -2145,6 +2395,10 @@
                     loadAchievements(),
                     loadSuspensions()
                 ]);
+                // Load responses if the tab is active
+                if (document.getElementById('tab-responses').classList.contains('active')) {
+                    loadResponses();
+                }
                 showToast('✅ Admin panel ready.', true);
             } catch (e) {
                 console.error(e);
@@ -2171,7 +2425,10 @@
         window.logout = logout;
         window.goToPage = goToPage;
         window.selectUser = selectUser;
-        console.log('✅ Admin panel loaded with Google Forms style survey builder and link field.');
+        window.closeModal = closeModal;
+        window.loadResponses = loadResponses;
+
+        console.log('✅ Admin panel loaded with Responses tab.');
     </script>
 </body>
 </html>
