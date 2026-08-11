@@ -224,7 +224,6 @@
       text-decoration: underline;
     }
     
-    /* Verification Banner */
     .verification-banner {
       display: none;
       background: rgba(245,158,11,0.15);
@@ -504,8 +503,7 @@
       projectId: "earnspherehub-742e9",
       storageBucket: "earnspherehub-742e9.firebasestorage.app",
       messagingSenderId: "173538573377",
-      appId: "1:173538573377:web:6d8c748376afcb9096dac0",
-      measurementId: "G-3ZXY33620J"
+      appId: "1:173538573377:web:6d8c748376afcb9096dac0"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -572,10 +570,13 @@
     }
 
     // ============================================
-    // CREDIT REFERRER (unchanged)
+    // CREDIT REFERRER – FIXED (robust)
     // ============================================
     async function creditReferrer(refCode) {
-      if (!refCode) return;
+      if (!refCode) {
+        debugInfo.innerHTML += `<br>ℹ️ No referral code to credit`;
+        return false;
+      }
 
       try {
         const usersRef = db.collection('users');
@@ -585,21 +586,28 @@
           const referrerDoc = querySnapshot.docs[0];
           const referrerRef = usersRef.doc(referrerDoc.id);
           
+          // If the referrer document exists but is missing a referralCode (shouldn't happen, but just in case)
+          // we can generate one on the fly (but we already found it, so it's fine)
+          
+          // Use FieldValue.increment for atomic updates
           await referrerRef.update({
             totalReferrals: firebase.firestore.FieldValue.increment(1),
             pendingBonus: firebase.firestore.FieldValue.increment(300),
             totalEarned: firebase.firestore.FieldValue.increment(300)
           });
 
-          debugInfo.innerHTML += `<br>✅ Referrer credited with ₦300!`;
+          debugInfo.innerHTML += `<br>✅ Referrer credited: +1 referral, +₦300 pending bonus!`;
           showToast('🎉 Your friend will receive ₦300 bonus!', 'success');
           return true;
         } else {
-          debugInfo.innerHTML = `❌ No user found with referral code: <strong style="color:#ef4444;">${refCode}</strong>`;
+          debugInfo.innerHTML += `<br>❌ No user found with referral code: <strong style="color:#ef4444;">${refCode}</strong>`;
+          debugInfo.innerHTML += `<br>💡 Make sure the referrer has a 'referralCode' field in their user document.`;
+          // Optionally, we could try to find by email or something, but we'll just log.
           return false;
         }
       } catch (refError) {
         console.error('Referral credit error:', refError);
+        debugInfo.innerHTML += `<br>❌ Referral error: ${refError.message}`;
         return false;
       }
     }
@@ -616,13 +624,13 @@
         displayName: fullName || user.displayName || 'User',
         referralCode: newReferralCode,
         referredBy: refCode || null,
-        balance: 950,                    // 🎉 Welcome bonus
-        lifetimeTotal: 950,              // also track lifetime
-        welcomeBonusClaimed: true,       // flag to avoid double bonus
+        balance: 950,
+        lifetimeTotal: 950,
+        welcomeBonusClaimed: true,
         successfulTaskCount: 0,
         completedTaskIds: [],
         totalReferrals: 0,
-        totalEarned: 950,                // for reporting
+        totalEarned: 950,
         pendingBonus: 0,
         wallet: 950,
         emailVerified: user.emailVerified || false,
@@ -633,6 +641,7 @@
       debugInfo.innerHTML += `<br>✅ Your referral code: <strong style="color:#4ade80;">${newReferralCode}</strong>`;
       debugInfo.innerHTML += `<br>🎉 Welcome bonus: <strong style="color:#f59e0b;">+₦950</strong> added to your balance!`;
       
+      // Credit referrer AFTER new user is saved
       if (refCode) {
         await creditReferrer(refCode);
       }
@@ -641,7 +650,7 @@
     }
 
     // ============================================
-    // EMAIL VERIFICATION FUNCTIONS (unchanged)
+    // EMAIL VERIFICATION FUNCTIONS
     // ============================================
     function showVerificationBanner(email) {
       console.log('📧 Showing verification banner for:', email);
@@ -721,10 +730,10 @@
           const userRef = db.collection('users').doc(user.uid);
           await userRef.update({ emailVerified: true });
           
-          showToast('✅ Email verified! Redirecting to onboarding...', 'success');
+          showToast('✅ Email verified! Redirecting to dashboard...', 'success');
           hideVerificationBanner();
           setTimeout(() => {
-            window.location.href = 'onboarding.html';
+            window.location.href = 'dashboard.html';
           }, 1500);
         } else {
           showToast('❌ Email not verified yet. Please check your inbox and click the verification link.', 'warning');
@@ -750,7 +759,7 @@
     }
 
     // ============================================
-    // FORGOT PASSWORD (unchanged)
+    // FORGOT PASSWORD
     // ============================================
     function openForgotPassword() {
       if (verificationBanner.classList.contains('show')) {
@@ -835,7 +844,7 @@
         await user.sendEmailVerification();
         console.log('📧 Verification email sent to:', email);
         
-        // Save user to Firestore with ₦950 bonus
+        // Save user to Firestore with ₦950 bonus AND credit referrer
         await saveUserToFirestore(user, fullName, storedReferralCode);
         showToast('🎉 Welcome! +₦950 bonus added to your balance!', 'success');
         
@@ -964,7 +973,7 @@
         
         showToast('✅ Phone verified and account created!', 'success');
         setTimeout(() => { 
-          window.location.href = 'onboarding.html';
+          window.location.href = 'dashboard.html';
         }, 2000);
         
       } catch (err) {
@@ -1005,7 +1014,7 @@
         }
         
         setTimeout(() => { 
-          window.location.href = 'onboarding.html';
+          window.location.href = 'dashboard.html';
         }, 1500);
         
       } catch (err) {
@@ -1026,12 +1035,12 @@
             const userRef = db.collection('users').doc(user.uid);
             await userRef.update({ emailVerified: true });
           } catch (e) {}
-          window.location.href = 'onboarding.html';
+          window.location.href = 'dashboard.html';
         } else if (user.email && !user.emailVerified) {
           showVerificationBanner(user.email);
         } else {
           // Phone or Google user – already verified
-          window.location.href = 'onboarding.html';
+          window.location.href = 'dashboard.html';
         }
       } else {
         console.log('👤 No user logged in');
