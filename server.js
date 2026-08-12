@@ -1,11 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const OpenAI = require('openai'); // CHANGED: Use OpenAI SDK
+const path = require('path');
+const OpenAI = require('openai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ============================================================
+// CORS
+// ============================================================
 const allowedOrigins = [
   'https://earnspherehub.name.ng',
   'http://localhost:3000'
@@ -25,11 +29,19 @@ app.use(cors({
 
 app.use(express.json({ limit: '50mb' }));
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY; // CHANGED
+// ============================================================
+// STATIC FILES (Serve website from /public)
+// ============================================================
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ============================================================
+// ENV VARIABLES
+// ============================================================
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET;
 const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
 
-if (!OPENAI_API_KEY) { // CHANGED
+if (!OPENAI_API_KEY) {
   console.error('❌ OPENAI_API_KEY is missing!');
   process.exit(1);
 }
@@ -40,9 +52,9 @@ if (!RUNWAY_API_KEY) {
   console.warn('⚠️ RUNWAY_API_KEY is missing. Video generation will not work.');
 }
 
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY }); // CHANGED
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const PAYSTACK_URL = 'https://api.paystack.co';
-const DEFAULT_MODEL = 'gpt-4o-mini'; // CHANGED: gpt-4o or gpt-4o-mini
+const DEFAULT_MODEL = 'gpt-4o-mini';
 
 // ============================================================
 // HEALTH CHECK
@@ -57,7 +69,7 @@ app.get('/health', (req, res) => {
 app.post('/api/grok', async (req, res) => {
   const { message, history, image, model } = req.body;
 
-  if (!message &&!image) {
+  if (!message && !image) {
     return res.status(400).json({ error: 'Message or image is required.' });
   }
 
@@ -65,9 +77,9 @@ app.post('/api/grok', async (req, res) => {
   const selectedModel = model || DEFAULT_MODEL;
 
   const historyMessages = (history || [])
-   .slice(-15)
-   .map(h => ({
-      role: h.role === 'user'? 'user' : 'assistant',
+    .slice(-15)
+    .map(h => ({
+      role: h.role === 'user' ? 'user' : 'assistant',
       content: h.text || ''
     }));
 
@@ -106,7 +118,7 @@ EarnSphere is a Nigerian rewards platform where users earn real money (₦) by c
 
   let payloadMessages = [
     { role: 'system', content: systemMessage },
-   ...historyMessages
+    ...historyMessages
   ];
 
   const hasImage = image && image.startsWith('data:image');
@@ -127,7 +139,7 @@ EarnSphere is a Nigerian rewards platform where users earn real money (₦) by c
   }
 
   try {
-    const response = await openai.chat.completions.create({ // CHANGED
+    const response = await openai.chat.completions.create({
       model: selectedModel,
       messages: payloadMessages,
       temperature: 0.8,
@@ -138,7 +150,7 @@ EarnSphere is a Nigerian rewards platform where users earn real money (₦) by c
     const reply = response.choices?.[0]?.message?.content || 'I no get response o, but I dey try!';
     res.json({ reply });
   } catch (error) {
-    console.error('OpenAI Error:', error); // CHANGED
+    console.error('OpenAI Error:', error);
     res.status(500).json({ error: error.message || 'AI service temporarily unavailable.' });
   }
 });
@@ -168,10 +180,10 @@ app.get('/api/banks', async (req, res) => {
 
 app.get('/api/resolve-account', async (req, res) => {
   const { account_number, bank_code } = req.query;
-  if (!account_number ||!bank_code) {
+  if (!account_number || !bank_code) {
     return res.status(400).json({ status: false, message: 'Account number and bank code are required' });
   }
-  if (account_number.length!== 10) {
+  if (account_number.length !== 10) {
     return res.status(400).json({ status: false, message: 'Account number must be 10 digits' });
   }
   if (!PAYSTACK_SECRET) {
@@ -198,7 +210,7 @@ app.get('/api/resolve-account', async (req, res) => {
 // ============================================================
 app.post('/api/generate-image', async (req, res) => {
   const { prompt } = req.body;
-  if (!prompt || typeof prompt!== 'string' || prompt.trim().length === 0) {
+  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
     return res.status(400).json({ error: 'Prompt is required.' });
   }
   const sanitisedPrompt = prompt.trim().slice(0, 500);
@@ -223,7 +235,7 @@ app.post('/api/generate-image', async (req, res) => {
 app.post('/api/generate-video', async (req, res) => {
   const { prompt } = req.body;
 
-  if (!prompt || typeof prompt!== 'string' || prompt.trim().length === 0) {
+  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
     return res.status(400).json({ error: 'Prompt is required.' });
   }
 
@@ -311,7 +323,7 @@ app.post('/api/generate-video', async (req, res) => {
 // ============================================================
 app.post('/api/fetch', async (req, res) => {
   const { url } = req.body;
-  if (!url || typeof url!== 'string') {
+  if (!url || typeof url !== 'string') {
     return res.status(400).json({ error: 'URL is required.' });
   }
 
@@ -376,4 +388,5 @@ app.listen(PORT, () => {
   console.log(`🖼️ Image gen: http://localhost:${PORT}/api/generate-image`);
   console.log(`🎬 Video gen: http://localhost:${PORT}/api/generate-video`);
   console.log(`🌐 Fetch: http://localhost:${PORT}/api/fetch`);
+  console.log(`📁 Static files served from /public`);
 });
