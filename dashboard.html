@@ -9,7 +9,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
   <!-- Ad scripts (unchanged) -->
   <script type="text/javascript" data-cfasync="false">
     /*<![CDATA[/* */
@@ -18,11 +17,30 @@
   </script>
 
   <style>
-    /* ===== ALL EXISTING STYLES ===== */
+    /* ===== GLOBAL ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height:100vh; color:#f1f5f9; display:flex; flex-direction:column; }
-    body::before { content:''; position:fixed; inset:0; background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%); pointer-events:none; z-index:0; }
-    #app { position:relative; z-index:1; flex:1; }
+    body {
+      font-family:'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height:100vh;
+      color:#f1f5f9;
+      display:flex;
+      flex-direction:column;
+    }
+    body::before {
+      content:'';
+      position:fixed;
+      inset:0;
+      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%);
+      pointer-events:none;
+      z-index:0;
+    }
+    #app {
+      position:relative;
+      z-index:1;
+      flex:1;
+    }
 
     .navbar {
       background: rgba(30,41,59,.8);
@@ -423,6 +441,41 @@
     .survey-empty .icon-success { color: #10b981; }
     .survey-empty .icon-muted { color: #64748b; }
 
+    /* ANNOUNCEMENT BANNER */
+    .announcement-banner {
+      display: none;
+      background: rgba(37,211,102,0.08);
+      border: 1px solid rgba(37,211,102,0.2);
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+    .announcement-banner .icon {
+      background: #25D366;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #fff;
+      font-size: 1.1rem;
+    }
+    .announcement-banner .content { flex: 1; }
+    .announcement-banner .content .message {
+      font-weight: 700;
+      color: #f1f5f9;
+      font-size: 1rem;
+    }
+    .announcement-banner .content .time {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-top: 0.2rem;
+    }
+
     @media (max-width: 768px) {
       .desktop-nav { display: none; }
       .hamburger { display: flex; }
@@ -501,6 +554,15 @@
       <span class="badge-item"><i class="fas fa-lock"></i> 256‑bit Encryption</span>
       <span class="badge-item"><i class="fas fa-star"></i> 4.8/5 User Rating</span>
       <span class="badge-item"><i class="fas fa-check-circle"></i> Verified Platform</span>
+    </div>
+
+    <!-- ===== ANNOUNCEMENT BANNER ===== -->
+    <div class="announcement-banner" id="announcementBanner">
+      <div class="icon"><i class="fab fa-whatsapp"></i></div>
+      <div class="content">
+        <div class="message" id="announcementMessage">Loading...</div>
+        <div class="time" id="announcementTime"></div>
+      </div>
     </div>
 
     <div class="timeline-notice">
@@ -807,7 +869,7 @@
   }
 
   // ============================================================
-  // FETCH SURVEYS (orderBy removed to avoid index issue)
+  // FETCH SURVEYS
   // ============================================================
   async function fetchSurveysFromFirestore() {
     const surveyContainer = document.getElementById('surveyList');
@@ -824,7 +886,7 @@
     try {
       const snapshot = await db.collection('surveys')
         .where('active', '==', true)
-        // .orderBy('createdAt', 'desc')   // Uncomment ONLY after creating index in Firestore Console
+        // .orderBy('createdAt', 'desc')   // Uncomment after creating index
         .limit(2)
         .get();
 
@@ -952,27 +1014,24 @@
   }
 
   // ============================================================
-  // COMPLETE SURVEY TASK (UPDATED – only redirects, does NOT mark completed)
+  // COMPLETE SURVEY TASK (redirect only)
   // ============================================================
   async function completeSurveyTask(taskId, reward) {
-    // 1. Check if already completed today
     if (isTaskCompleted(taskId)) {
       showToast('⚠️ You already completed this survey.');
       return;
     }
-
-    // 2. Check daily limit (max 2)
     const surveyCount = getSurveyCountToday();
     if (surveyCount >= 2) {
       showToast('⚠️ You have reached the daily limit of 2 surveys.');
       return;
     }
 
-    // 3. Optional anti‑abuse check
     const now = Date.now();
     if (!userData.taskTimestamps) userData.taskTimestamps = [];
     userData.taskTimestamps.push(now);
     if (userData.taskTimestamps.length > 5) userData.taskTimestamps.shift();
+
     if (checkRapidTaskCompletion()) {
       userData.status = 'suspended';
       userData.suspensionReason = 'Completed 5 tasks within 5 minutes – possible automated activity.';
@@ -986,14 +1045,11 @@
       return;
     }
 
-    // 4. Build the link
     const survey = cachedSurveys.find(t => t.id === taskId);
     let link = survey && survey.link && survey.link.trim() !== '' ? survey.link.trim() : 'take-survey.html?id=' + taskId;
     link += (link.includes('?') ? '&' : '?') + 't=' + Date.now();
 
     console.log('🔗 Redirecting to:', link);
-
-    // 5. Navigate – DO NOT mark completed or add reward here
     window.location.href = link;
   }
 
@@ -1042,9 +1098,6 @@
       badgeClass: 'badge-ad', page: 'ad.html' }
   ];
 
-  // ============================================================
-  // RENDER OTHER CATEGORIES
-  // ============================================================
   function renderLimitedCategory(containerId, wrapperId, tasks, lastKey, categoryKey, limit) {
     const container = document.getElementById(containerId);
     const wrapper = document.getElementById(wrapperId);
@@ -1229,6 +1282,38 @@
   }
 
   // ============================================================
+  // LOAD ANNOUNCEMENT
+  // ============================================================
+  async function loadAnnouncement() {
+    try {
+      const doc = await db.collection('settings').doc('announcement').get();
+      const banner = document.getElementById('announcementBanner');
+      const msgEl = document.getElementById('announcementMessage');
+      const timeEl = document.getElementById('announcementTime');
+
+      if (doc.exists) {
+        const data = doc.data();
+        if (data.message && data.message.trim() !== '') {
+          msgEl.textContent = data.message;
+          if (data.updatedAt) {
+            const date = data.updatedAt.toDate();
+            timeEl.textContent = `📅 ${date.toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' })} • ${date.toLocaleTimeString('en-NG', { hour:'2-digit', minute:'2-digit' })}`;
+          } else {
+            timeEl.textContent = '';
+          }
+          banner.style.display = 'flex';
+        } else {
+          banner.style.display = 'none';
+        }
+      } else {
+        banner.style.display = 'none';
+      }
+    } catch (e) {
+      console.error('Error loading announcement:', e);
+    }
+  }
+
+  // ============================================================
   // LOGOUT
   // ============================================================
   function logout() {
@@ -1239,7 +1324,7 @@
   }
 
   // ============================================================
-  // MAIN RENDER FUNCTION
+  // MAIN RENDER
   // ============================================================
   function renderAll() {
     renderSurveys();
@@ -1303,7 +1388,6 @@
         }
       } catch (err) { console.error('Error loading user data:', err); }
 
-      // Show/hide suspension banner
       const banner = document.getElementById('suspensionBanner');
       const reasonEl = document.getElementById('suspensionReason');
       if (userData.status === 'suspended' || userData.status === 'banned') {
@@ -1315,15 +1399,12 @@
         banner.style.display = 'none';
       }
 
-      // Fetch surveys
       await fetchSurveysFromFirestore();
-
-      // Render all other sections
       renderAll();
       fetchUnreadCount();
       loadCouponsFromFirestore();
+      loadAnnouncement();
 
-      // Countdown timer for survey reset
       setInterval(() => {
         const dailyMs = getTimeToMidnight();
         const surveyEl = document.getElementById('surveyCountdown');
@@ -1331,28 +1412,24 @@
           `Resets in ${formatTime(dailyMs)}`;
       }, 1000);
 
-      // Auto-refresh surveys every 5 minutes
       setInterval(async () => {
         await fetchSurveysFromFirestore();
       }, 300000);
 
-      console.log('✅ Dashboard loaded with surveys (fixed redirect).');
+      setInterval(loadAnnouncement, 300000);
+
+      console.log('✅ Dashboard loaded.');
     } else {
       console.log('No user, redirecting to login');
       window.location.href = 'login.html';
     }
   });
 
-  // ============================================================
-  // EXPOSE FUNCTIONS TO GLOBAL SCOPE
-  // ============================================================
   window.claimDailyReward = claimDailyReward;
   window.redeemCoupon = redeemCoupon;
   window.completeSurveyTask = completeSurveyTask;
   window.completeCategoryTask = completeCategoryTask;
   window.logout = logout;
-
-  console.log('✅ Dashboard script loaded (fixed survey completion flow).');
 </script>
 </body>
 </html>
