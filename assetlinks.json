@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "ng.name.earnspherehub.twa",
+        "sha256_cert_fingerprints": ["A1:95:76:01:B9:EE:D2:ED:CB:23:1A:F4:B2:78:8F:9C:9A:5D:C4:5F:F0:A3:8A:5A:C2:34:BF:ED:22:20:F9:3A"]
+      }
+    }]
