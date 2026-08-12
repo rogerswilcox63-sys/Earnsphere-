@@ -347,5 +347,12 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
     function showSuccess(message) { successBox.textContent = message; successBox.style.display = 'block'; errorBox.style.display = 'none'; }
     function clearError() { errorBox.style.display = 'none'; successBox.style.display = 'none'; }
 </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW registered:', reg))
+      .catch(err => console.error('SW registration failed:', err));
+  }
+</script>
 </body>
 </html>
