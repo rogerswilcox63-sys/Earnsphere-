@@ -518,7 +518,7 @@
           <span>${survey.questions ? survey.questions.length : 0} questions</span>
         </div>
 
-        <form id="surveyForm">
+        <form id="surveyForm" novalidate>
           ${questionsHtml}
           <div class="submit-area">
             <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -550,13 +550,24 @@
   };
 
   // ============================================================
-  // HANDLE SUBMIT – marks completed and adds reward AFTER submission
+  // HANDLE SUBMIT – FIXED VALIDATION
   // ============================================================
   async function handleSubmit(e) {
     e.preventDefault();
 
     const form = document.getElementById('surveyForm');
     const submitBtn = document.getElementById('submitBtn');
+
+    // 1. Use browser's built-in validation (respects required attributes)
+    if (!form.checkValidity()) {
+      // Show a toast with a generic message and let the browser highlight the invalid fields
+      showToast('⚠️ Please answer all required questions.', true);
+      // Optionally, trigger the browser's native validation UI
+      form.reportValidity();
+      return;
+    }
+
+    // Disable submit button to prevent double-submission
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
@@ -574,25 +585,8 @@
       }
     }
 
-    // Validate required fields
-    const requiredFields = form.querySelectorAll('[required]');
-    let missing = false;
-    requiredFields.forEach(field => {
-      if (!field.value || field.value.trim() === '') {
-        missing = true;
-        field.style.borderColor = '#ef4444';
-        setTimeout(() => field.style.borderColor = '', 3000);
-      }
-    });
-    if (missing) {
-      showToast('⚠️ Please answer all required questions.', true);
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit Survey';
-      return;
-    }
-
     try {
-      // 1. Save the response to survey_responses collection
+      // 1. Save the response
       await db.collection('survey_responses').add({
         surveyId: surveyId,
         userId: currentUser.uid,
@@ -600,19 +594,16 @@
         submittedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // 2. Mark survey as completed AND add reward
-      // First, get the reward from the survey document
+      // 2. Mark survey as completed and add reward
       const surveyDoc = await db.collection('surveys').doc(surveyId).get();
       const reward = surveyDoc.exists ? surveyDoc.data().reward || 0 : 0;
 
-      // Update user data
       if (!userData.completedTasks) userData.completedTasks = {};
       userData.completedTasks[surveyId] = Date.now();
       userData.balance = (userData.balance || 0) + reward;
       userData.lifetimeTotal = (userData.lifetimeTotal || 0) + reward;
       userData.successfulTaskCount = (userData.successfulTaskCount || 0) + 1;
 
-      // Save to Firestore and localStorage
       await db.collection('users').doc(currentUser.uid).set(userData, { merge: true });
       localStorage.setItem('earnsphere_user_data', JSON.stringify(userData));
 
@@ -629,7 +620,7 @@
   }
 
   // ============================================================
-  // LOAD SURVEY FROM FIRESTORE
+  // LOAD SURVEY
   // ============================================================
   async function loadSurvey(id) {
     try {
@@ -671,7 +662,6 @@
       currentUser = user;
       document.getElementById('userName').textContent = user.displayName || user.email || 'User';
 
-      // Load user data
       try {
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
@@ -685,14 +675,12 @@
         userData = { balance: 0, completedTasks: {} };
       }
 
-      // Get survey ID from URL
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id') || params.get('surveyId');
       console.log('📍 Full URL:', window.location.href);
       console.log('🆔 Extracted ID:', id);
 
       if (id) {
-        // Check if already completed
         if (userData.completedTasks && userData.completedTasks[id]) {
           document.getElementById('surveyContainer').innerHTML = `
             <div class="completed-state">
@@ -707,7 +695,6 @@
           return;
         }
 
-        // Check daily limit (max 2)
         const dailyCount = getSurveyCountToday();
         if (dailyCount >= 2) {
           document.getElementById('surveyContainer').innerHTML = `
@@ -723,7 +710,6 @@
           return;
         }
 
-        // Load the survey
         loadSurvey(id);
       } else {
         document.getElementById('surveyContainer').innerHTML = `
