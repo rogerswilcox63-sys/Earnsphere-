@@ -41,7 +41,6 @@
       flex-direction: column;
     }
 
-    /* ===== NAVBAR ===== */
     .navbar {
       background: rgba(30,41,59,.8);
       backdrop-filter: blur(12px);
@@ -92,7 +91,6 @@
     }
     .navbar .back-link:hover { color: #f1f5f9; }
 
-    /* ===== CONTENT ===== */
     .page-title {
       font-size: 1.6rem;
       font-weight: 700;
@@ -177,7 +175,6 @@
     .notif-item .notif-body {
       flex: 1;
     }
-    /* -------- HTML RENDER SUPPORT -------- */
     .notif-item .notif-body .notif-message {
       font-size: 0.95rem;
       line-height: 1.6;
@@ -196,22 +193,6 @@
     }
     .notif-item .notif-body .notif-message a:hover {
       text-decoration: underline;
-    }
-    .notif-item .notif-body .notif-message .claim-btn-inline {
-      display: inline-block;
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #fff;
-      padding: 0.3rem 0.8rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.8rem;
-      text-decoration: none;
-      margin-top: 0.2rem;
-      transition: all 0.3s;
-    }
-    .notif-item .notif-body .notif-message .claim-btn-inline:hover {
-      transform: scale(1.02);
-      box-shadow: 0 4px 15px rgba(16,185,129,0.3);
     }
     .notif-item .notif-body .notif-time {
       font-size: 0.7rem;
@@ -245,7 +226,6 @@
       border: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* ===== MODAL ===== */
     .notif-modal {
       display: none;
       position: fixed;
@@ -301,7 +281,6 @@
       align-items: center;
       gap: 0.4rem;
     }
-    /* -------- MODAL HTML RENDER -------- */
     .notif-modal-content .modal-message {
       font-size: 1rem;
       line-height: 1.8;
@@ -318,24 +297,6 @@
     }
     .notif-modal-content .modal-message a:hover {
       text-decoration: underline;
-    }
-    .notif-modal-content .modal-message .claim-btn-modal {
-      display: inline-block;
-      width: 100%;
-      text-align: center;
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #fff;
-      padding: 0.8rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      text-decoration: none;
-      margin: 1rem 0 0.5rem;
-      transition: all 0.3s;
-    }
-    .notif-modal-content .modal-message .claim-btn-modal:hover {
-      transform: scale(1.02);
-      box-shadow: 0 4px 20px rgba(16,185,129,0.4);
     }
     .notif-modal-content .modal-image {
       width: 100%;
@@ -378,6 +339,23 @@
     }
     .empty-state p {
       font-size: 0.95rem;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: #94a3b8;
+    }
+    .loading-state i {
+      font-size: 2.5rem;
+      color: #3b82f6;
+      display: block;
+      margin-bottom: 0.5rem;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .toast {
@@ -440,7 +418,11 @@
 
   <!-- NOTIFICATION LIST -->
   <div class="notif-list" id="notifList">
-    <!-- dynamically filled -->
+    <!-- loading spinner shown initially -->
+    <div class="loading-state">
+      <i class="fas fa-spinner"></i>
+      <p>Loading notifications...</p>
+    </div>
   </div>
 
   <!-- MODAL -->
@@ -450,7 +432,7 @@
       <div class="modal-icon" id="modalIcon"><i class="fas fa-bell"></i></div>
       <div class="modal-title" id="modalTitle">Notification</div>
       <div class="modal-time" id="modalTime"><i class="fas fa-clock"></i> Just now</div>
-      <div class="modal-message" id="modalMessage">Message goes here...</div>
+      <div class="modal-message" id="modalMessage">Loading...</div>
       <img class="modal-image" id="modalImage" style="display:none;" alt="Attachment" />
       <div style="margin-top:1rem;">
         <span class="modal-status-badge" id="modalStatus">Unread</span>
@@ -482,7 +464,8 @@
   // ============================================================
   let currentUser = null;
   let notifications = [];
-  let currentModalNotif = null;
+  let currentModalNotifId = null;
+  let unsubscribe = null;
 
   const notifList = document.getElementById('notifList');
   const unreadCountEl = document.getElementById('unreadCount');
@@ -513,54 +496,27 @@
   }
 
   // ============================================================
-  // FETCH NOTIFICATIONS
+  // HELPERS
   // ============================================================
-  async function fetchNotifications() {
-    if (!currentUser) return;
-    try {
-      const snapshot = await db.collection('notifications')
-        .where('userId', '==', currentUser.uid)
-        .orderBy('timestamp', 'desc')
-        .get();
+  function formatTime(date) {
+    if (!date) return 'Just now';
+    const now = new Date();
+    const diff = (now - date) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return date.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) +
+           ' at ' + date.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
+  }
 
-      notifications = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        notifications.push({
-          id: doc.id,
-          ...data,
-          timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
-        });
-      });
-
-      renderNotifications();
-    } catch (err) {
-      console.error('Error fetching notifications:', err);
-      // Fallback: fetch without orderBy
-      try {
-        const fallbackSnap = await db.collection('notifications')
-          .where('userId', '==', currentUser.uid)
-          .get();
-        notifications = [];
-        fallbackSnap.forEach(doc => {
-          const data = doc.data();
-          notifications.push({
-            id: doc.id,
-            ...data,
-            timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
-          });
-        });
-        notifications.sort((a, b) => b.timestamp - a.timestamp);
-        renderNotifications();
-        showToast('⚠️ Sorted locally (index missing)', 'info');
-      } catch (e2) {
-        showToast('❌ Could not load notifications.', 'error');
-      }
-    }
+  function getTimestamp(data) {
+    if (data.timestamp) return data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+    if (data.createdAt) return data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+    return new Date();
   }
 
   // ============================================================
-  // RENDER NOTIFICATIONS (HTML SUPPORT)
+  // RENDER NOTIFICATIONS
   // ============================================================
   function renderNotifications() {
     if (!notifications.length) {
@@ -578,20 +534,18 @@
     unreadCountEl.textContent = unread;
 
     let html = '';
-    notifications.forEach((notif, index) => {
+    notifications.forEach((notif) => {
       const isUnread = !notif.read;
-      const timeStr = notif.timestamp.toLocaleString('en-NG', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      });
+      const timeStr = formatTime(notif._timestamp);
       const imageThumb = notif.imageUrl ? `<img src="${notif.imageUrl}" class="notif-image-thumb" alt="attachment" />` : '';
+      const messageDisplay = notif.message || '<span style="color:#64748b;">No message content</span>';
       html += `
-        <div class="notif-item ${isUnread ? 'unread' : ''}" data-index="${index}" onclick="openModal(${index})">
+        <div class="notif-item ${isUnread ? 'unread' : ''}" data-id="${notif.id}" onclick="openModal('${notif.id}')">
           <div class="notif-icon">
             <i class="fas fa-${notif.icon || 'bell'}"></i>
           </div>
           <div class="notif-body">
-            <div class="notif-message">${notif.message}</div> <!-- HTML rendered here -->
+            <div class="notif-message">${messageDisplay}</div>
             ${imageThumb}
             <div class="notif-time">
               <i class="fas fa-clock"></i> ${timeStr}
@@ -607,17 +561,29 @@
   }
 
   // ============================================================
-  // MODAL (HTML SUPPORT)
+  // MODAL
   // ============================================================
-  function openModal(index) {
-    const notif = notifications[index];
-    if (!notif) return;
-    currentModalNotif = notif;
+  function openModal(notifId) {
+    console.log('🔔 Opening modal for notification ID:', notifId);
+
+    const notif = notifications.find(n => n.id === notifId);
+    if (!notif) {
+      console.error('❌ Notification not found in array:', notifId);
+      showToast('Notification not found.', 'error');
+      return;
+    }
+
+    console.log('📦 Notification data:', notif);
+    console.log('📝 Message content:', notif.message);
+
+    currentModalNotifId = notif.id;
 
     document.getElementById('modalIcon').innerHTML = `<i class="fas fa-${notif.icon || 'bell'}"></i>`;
     document.getElementById('modalTitle').textContent = 'Notification';
-    document.getElementById('modalTime').innerHTML = `<i class="fas fa-clock"></i> ${notif.timestamp.toLocaleString('en-NG', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
-    document.getElementById('modalMessage').innerHTML = notif.message; // HTML rendered here
+    document.getElementById('modalTime').innerHTML = `<i class="fas fa-clock"></i> ${formatTime(notif._timestamp)}`;
+
+    const messageContent = notif.message || '<span style="color:#64748b;">This notification has no content.</span>';
+    document.getElementById('modalMessage').innerHTML = messageContent;
 
     const img = document.getElementById('modalImage');
     if (notif.imageUrl) {
@@ -639,7 +605,6 @@
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // Mark as read if unread
     if (!notif.read) {
       markAsRead(notif.id);
     }
@@ -648,7 +613,7 @@
   function closeModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
-    currentModalNotif = null;
+    currentModalNotifId = null;
   }
 
   // ============================================================
@@ -700,12 +665,70 @@
   }
 
   // ============================================================
+  // REAL-TIME LISTENER – OPTIMISED WITH LIMIT & INDEX
+  // ============================================================
+  function startListening() {
+    if (!currentUser) return;
+
+    if (unsubscribe) {
+      unsubscribe();
+      unsubscribe = null;
+    }
+
+    // Use orderBy and limit for speed – REQUIRES COMPOSITE INDEX
+    const query = db.collection('notifications')
+      .where('userId', '==', currentUser.uid)
+      .orderBy('timestamp', 'desc')
+      .limit(50);
+
+    unsubscribe = query.onSnapshot((snapshot) => {
+      const newNotifs = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        newNotifs.push({
+          id: doc.id,
+          ...data,
+          _timestamp: getTimestamp(data)
+        });
+      });
+      notifications = newNotifs;
+      renderNotifications();
+    }, (err) => {
+      console.warn('OrderBy failed (likely missing index). Falling back to simple query with local sort:', err);
+      // If index missing, fallback to no orderBy (slower but works)
+      if (unsubscribe) unsubscribe();
+      unsubscribe = db.collection('notifications')
+        .where('userId', '==', currentUser.uid)
+        .limit(50)
+        .onSnapshot((snap) => {
+          const notifs = [];
+          snap.forEach(doc => {
+            const data = doc.data();
+            notifs.push({
+              id: doc.id,
+              ...data,
+              _timestamp: getTimestamp(data)
+            });
+          });
+          // Sort locally
+          notifs.sort((a, b) => b._timestamp - a._timestamp);
+          notifications = notifs;
+          renderNotifications();
+          if (!window._fallbackToastShown) {
+            window._fallbackToastShown = true;
+            showToast('⚠️ Notifications sorted locally. Please create index for faster loading.', 'info');
+          }
+        });
+    });
+  }
+
+  // ============================================================
   // AUTH STATE
   // ============================================================
   auth.onAuthStateChanged((user) => {
     if (user) {
       currentUser = user;
-      fetchNotifications();
+      startListening();
     } else {
       window.location.href = 'login.html';
     }
