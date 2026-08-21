@@ -81,7 +81,7 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
 
         <div class="withdrawal-notice">
             <i class="fas fa-calendar-alt"></i>
-            <span>Withdrawals are available from <strong>August 20, 2026</strong></span>
+            <span>Withdrawals are available from <strong>September 20, 2026</strong></span>
         </div>
 
         <div id="error-box"></div>
@@ -158,7 +158,7 @@ button[type="submit"]:disabled { background: #24324f; color: var(--text-muted); 
     const db = getFirestore(app);
 
     const BACKEND_URL = 'https://earnsphere-ai.onrender.com'; 
-    const WITHDRAWAL_DATE = new Date('2026-08-20T00:00:00Z');
+    const WITHDRAWAL_DATE = new Date('2026-09-20T00:00:00Z');
 
     const balanceEl = document.getElementById('user-balance');
     const withdrawForm = document.getElementById('withdrawal-form');
